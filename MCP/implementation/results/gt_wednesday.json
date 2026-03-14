@@ -1,0 +1,626 @@
+[
+  {
+    "epoch": 0,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 1392095,
+    "total_bytes": 1708049695
+  },
+  {
+    "epoch": 1,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 538659,
+    "total_bytes": 648640660
+  },
+  {
+    "epoch": 2,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 784698,
+    "total_bytes": 953467309
+  },
+  {
+    "epoch": 3,
+    "attack_active": true,
+    "attack_types": [
+      "DoS slowloris"
+    ],
+    "attack_flows": 1,
+    "benign_flows": 1665,
+    "total_packets": 984236,
+    "total_bytes": 1207225443
+  },
+  {
+    "epoch": 4,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 1078365,
+    "total_bytes": 1324319585
+  },
+  {
+    "epoch": 5,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 301644,
+    "total_bytes": 416377415
+  },
+  {
+    "epoch": 6,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 24813,
+    "total_bytes": 12344177
+  },
+  {
+    "epoch": 7,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 386680,
+    "total_bytes": 657757497
+  },
+  {
+    "epoch": 8,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 44966,
+    "total_bytes": 30486174
+  },
+  {
+    "epoch": 9,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 29530,
+    "total_bytes": 16717912
+  },
+  {
+    "epoch": 10,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 36602,
+    "total_bytes": 21330008
+  },
+  {
+    "epoch": 11,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 41492,
+    "total_bytes": 26249004
+  },
+  {
+    "epoch": 12,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 30909,
+    "total_bytes": 18404061
+  },
+  {
+    "epoch": 13,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 31602,
+    "total_bytes": 20267306
+  },
+  {
+    "epoch": 14,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 32093,
+    "total_bytes": 16856487
+  },
+  {
+    "epoch": 15,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 23748,
+    "total_bytes": 8571767
+  },
+  {
+    "epoch": 16,
+    "attack_active": true,
+    "attack_types": [
+      "DoS slowloris"
+    ],
+    "attack_flows": 156,
+    "benign_flows": 1510,
+    "total_packets": 30063,
+    "total_bytes": 17024377
+  },
+  {
+    "epoch": 17,
+    "attack_active": true,
+    "attack_types": [
+      "DoS slowloris"
+    ],
+    "attack_flows": 276,
+    "benign_flows": 1390,
+    "total_packets": 44355,
+    "total_bytes": 32331068
+  },
+  {
+    "epoch": 18,
+    "attack_active": true,
+    "attack_types": [
+      "DoS slowloris"
+    ],
+    "attack_flows": 138,
+    "benign_flows": 1528,
+    "total_packets": 27769,
+    "total_bytes": 13263155
+  },
+  {
+    "epoch": 19,
+    "attack_active": true,
+    "attack_types": [
+      "DoS slowloris"
+    ],
+    "attack_flows": 186,
+    "benign_flows": 1480,
+    "total_packets": 35261,
+    "total_bytes": 22817700
+  },
+  {
+    "epoch": 20,
+    "attack_active": true,
+    "attack_types": [
+      "DoS slowloris"
+    ],
+    "attack_flows": 318,
+    "benign_flows": 1348,
+    "total_packets": 31914,
+    "total_bytes": 16612931
+  },
+  {
+    "epoch": 21,
+    "attack_active": true,
+    "attack_types": [
+      "DoS slowloris"
+    ],
+    "attack_flows": 163,
+    "benign_flows": 1503,
+    "total_packets": 18266,
+    "total_bytes": 6636605
+  },
+  {
+    "epoch": 22,
+    "attack_active": true,
+    "attack_types": [
+      "DoS slowloris"
+    ],
+    "attack_flows": 133,
+    "benign_flows": 1533,
+    "total_packets": 47092,
+    "total_bytes": 31475347
+  },
+  {
+    "epoch": 23,
+    "attack_active": true,
+    "attack_types": [
+      "DoS slowloris"
+    ],
+    "attack_flows": 296,
+    "benign_flows": 1370,
+    "total_packets": 47100,
+    "total_bytes": 29871745
+  },
+  {
+    "epoch": 24,
+    "attack_active": true,
+    "attack_types": [
+      "DoS slowloris"
+    ],
+    "attack_flows": 164,
+    "benign_flows": 1502,
+    "total_packets": 30536,
+    "total_bytes": 22148132
+  },
+  {
+    "epoch": 25,
+    "attack_active": true,
+    "attack_types": [
+      "DoS slowloris"
+    ],
+    "attack_flows": 659,
+    "benign_flows": 1007,
+    "total_packets": 17247,
+    "total_bytes": 5740674
+  },
+  {
+    "epoch": 26,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 26532,
+    "total_bytes": 15370412
+  },
+  {
+    "epoch": 27,
+    "attack_active": true,
+    "attack_types": [
+      "DoS slowloris"
+    ],
+    "attack_flows": 11,
+    "benign_flows": 1655,
+    "total_packets": 19971,
+    "total_bytes": 10597099
+  },
+  {
+    "epoch": 28,
+    "attack_active": true,
+    "attack_types": [
+      "DoS slowloris"
+    ],
+    "attack_flows": 53,
+    "benign_flows": 1613,
+    "total_packets": 37815,
+    "total_bytes": 26613423
+  },
+  {
+    "epoch": 29,
+    "attack_active": true,
+    "attack_types": [
+      "DoS slowloris"
+    ],
+    "attack_flows": 106,
+    "benign_flows": 1560,
+    "total_packets": 45863,
+    "total_bytes": 28980401
+  },
+  {
+    "epoch": 30,
+    "attack_active": true,
+    "attack_types": [
+      "DoS slowloris"
+    ],
+    "attack_flows": 604,
+    "benign_flows": 1062,
+    "total_packets": 17500,
+    "total_bytes": 5772151
+  },
+  {
+    "epoch": 31,
+    "attack_active": true,
+    "attack_types": [
+      "DoS slowloris"
+    ],
+    "attack_flows": 38,
+    "benign_flows": 1628,
+    "total_packets": 32643,
+    "total_bytes": 20447953
+  },
+  {
+    "epoch": 32,
+    "attack_active": true,
+    "attack_types": [
+      "DoS slowloris"
+    ],
+    "attack_flows": 169,
+    "benign_flows": 1497,
+    "total_packets": 22874,
+    "total_bytes": 10735112
+  },
+  {
+    "epoch": 33,
+    "attack_active": true,
+    "attack_types": [
+      "DoS slowloris"
+    ],
+    "attack_flows": 590,
+    "benign_flows": 1076,
+    "total_packets": 25551,
+    "total_bytes": 11358829
+  },
+  {
+    "epoch": 34,
+    "attack_active": true,
+    "attack_types": [
+      "DoS slowloris"
+    ],
+    "attack_flows": 101,
+    "benign_flows": 1565,
+    "total_packets": 17991,
+    "total_bytes": 6805019
+  },
+  {
+    "epoch": 35,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 26646,
+    "total_bytes": 10667745
+  },
+  {
+    "epoch": 36,
+    "attack_active": true,
+    "attack_types": [
+      "DoS slowloris"
+    ],
+    "attack_flows": 331,
+    "benign_flows": 1335,
+    "total_packets": 17922,
+    "total_bytes": 5213476
+  },
+  {
+    "epoch": 37,
+    "attack_active": true,
+    "attack_types": [
+      "DoS slowloris"
+    ],
+    "attack_flows": 228,
+    "benign_flows": 1438,
+    "total_packets": 22842,
+    "total_bytes": 11906827
+  },
+  {
+    "epoch": 38,
+    "attack_active": true,
+    "attack_types": [
+      "DoS slowloris"
+    ],
+    "attack_flows": 252,
+    "benign_flows": 1414,
+    "total_packets": 23754,
+    "total_bytes": 12245502
+  },
+  {
+    "epoch": 39,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 31400,
+    "total_bytes": 15807570
+  },
+  {
+    "epoch": 40,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 22437,
+    "total_bytes": 11585119
+  },
+  {
+    "epoch": 41,
+    "attack_active": true,
+    "attack_types": [
+      "DoS Slowhttptest",
+      "DoS slowloris"
+    ],
+    "attack_flows": 1509,
+    "benign_flows": 157,
+    "total_packets": 16945,
+    "total_bytes": 5572919
+  },
+  {
+    "epoch": 42,
+    "attack_active": true,
+    "attack_types": [
+      "DoS Slowhttptest"
+    ],
+    "attack_flows": 1660,
+    "benign_flows": 6,
+    "total_packets": 11256,
+    "total_bytes": 887636
+  },
+  {
+    "epoch": 43,
+    "attack_active": true,
+    "attack_types": [
+      "DoS Slowhttptest"
+    ],
+    "attack_flows": 1606,
+    "benign_flows": 60,
+    "total_packets": 12416,
+    "total_bytes": 1764382
+  },
+  {
+    "epoch": 44,
+    "attack_active": true,
+    "attack_types": [
+      "DoS Slowhttptest",
+      "DoS Hulk"
+    ],
+    "attack_flows": 1657,
+    "benign_flows": 9,
+    "total_packets": 10861,
+    "total_bytes": 2261181
+  },
+  {
+    "epoch": 45,
+    "attack_active": true,
+    "attack_types": [
+      "DoS Hulk"
+    ],
+    "attack_flows": 1658,
+    "benign_flows": 8,
+    "total_packets": 15699,
+    "total_bytes": 17545216
+  },
+  {
+    "epoch": 46,
+    "attack_active": true,
+    "attack_types": [
+      "DoS Hulk"
+    ],
+    "attack_flows": 1657,
+    "benign_flows": 9,
+    "total_packets": 14429,
+    "total_bytes": 15263260
+  },
+  {
+    "epoch": 47,
+    "attack_active": true,
+    "attack_types": [
+      "DoS Hulk"
+    ],
+    "attack_flows": 1621,
+    "benign_flows": 45,
+    "total_packets": 17905,
+    "total_bytes": 16760911
+  },
+  {
+    "epoch": 48,
+    "attack_active": true,
+    "attack_types": [
+      "DoS Hulk"
+    ],
+    "attack_flows": 1629,
+    "benign_flows": 37,
+    "total_packets": 16494,
+    "total_bytes": 16682005
+  },
+  {
+    "epoch": 49,
+    "attack_active": true,
+    "attack_types": [
+      "DoS Hulk"
+    ],
+    "attack_flows": 1640,
+    "benign_flows": 26,
+    "total_packets": 15996,
+    "total_bytes": 16695239
+  },
+  {
+    "epoch": 50,
+    "attack_active": true,
+    "attack_types": [
+      "DoS Hulk"
+    ],
+    "attack_flows": 1564,
+    "benign_flows": 102,
+    "total_packets": 20083,
+    "total_bytes": 18596614
+  },
+  {
+    "epoch": 51,
+    "attack_active": true,
+    "attack_types": [
+      "DoS Hulk"
+    ],
+    "attack_flows": 1653,
+    "benign_flows": 13,
+    "total_packets": 15996,
+    "total_bytes": 15891022
+  },
+  {
+    "epoch": 52,
+    "attack_active": true,
+    "attack_types": [
+      "DoS Hulk"
+    ],
+    "attack_flows": 1612,
+    "benign_flows": 54,
+    "total_packets": 14822,
+    "total_bytes": 15192263
+  },
+  {
+    "epoch": 53,
+    "attack_active": true,
+    "attack_types": [
+      "DoS Hulk"
+    ],
+    "attack_flows": 1645,
+    "benign_flows": 21,
+    "total_packets": 16845,
+    "total_bytes": 17608146
+  },
+  {
+    "epoch": 54,
+    "attack_active": true,
+    "attack_types": [
+      "DoS Hulk"
+    ],
+    "attack_flows": 1635,
+    "benign_flows": 31,
+    "total_packets": 14484,
+    "total_bytes": 15930835
+  },
+  {
+    "epoch": 55,
+    "attack_active": true,
+    "attack_types": [
+      "DoS Hulk"
+    ],
+    "attack_flows": 1575,
+    "benign_flows": 91,
+    "total_packets": 19851,
+    "total_bytes": 18276051
+  },
+  {
+    "epoch": 56,
+    "attack_active": true,
+    "attack_types": [
+      "DoS Hulk"
+    ],
+    "attack_flows": 1635,
+    "benign_flows": 31,
+    "total_packets": 13753,
+    "total_bytes": 15636853
+  },
+  {
+    "epoch": 57,
+    "attack_active": true,
+    "attack_types": [
+      "DoS Hulk"
+    ],
+    "attack_flows": 1541,
+    "benign_flows": 125,
+    "total_packets": 17178,
+    "total_bytes": 16205003
+  },
+  {
+    "epoch": 58,
+    "attack_active": true,
+    "attack_types": [
+      "DoS Hulk"
+    ],
+    "attack_flows": 1634,
+    "benign_flows": 32,
+    "total_packets": 16952,
+    "total_bytes": 16574300
+  },
+  {
+    "epoch": 59,
+    "attack_active": true,
+    "attack_types": [
+      "DoS Hulk"
+    ],
+    "attack_flows": 1555,
+    "benign_flows": 151,
+    "total_packets": 18039,
+    "total_bytes": 16093442
+  }
+]
