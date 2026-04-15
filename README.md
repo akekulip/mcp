@@ -1,7 +1,6 @@
 # MCP — Measurement Control Plane
 
-**Paper**: *"Where Should the Network Look Next? Multi-Objective Measurement Control for Programmable Network Monitoring"* (NSDI Frontiers Track)
-
+MCP is to answer the questions: *"Where Should the Network Look Next? Multi-Objective Measurement Control for Programmable Network Monitoring"
 A control-plane subsystem that decides — every epoch — which measurement tasks (sketches, sampling, watchlists, polling) should run on which P4 switches, under hard resource budgets, using a constrained contextual bandit with shadow prices.
 
 ---
