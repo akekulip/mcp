@@ -1,7 +1,7 @@
 # Step 7 — CSIG-style "worst hop so far" tag (egress compare-and-replace)
 
 Design reference: `docs/P4-DESIGN-SPACE.md` §5.5. Source hash after this step:
-`sha256(mcp_fabric.p4) = a0dee21f285630af…`. Wire format inside the fabric is now
+`sha256(mcp_fabric.p4) = 1a8fc6104b03bcdf…`. Wire format inside the fabric is now
 `eth | fabric_h 8B | csig_h 14B | ipv4 …`.
 
 ## What was added / changed

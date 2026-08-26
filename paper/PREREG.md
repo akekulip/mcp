@@ -734,7 +734,7 @@ Every reported number is traceable to (config, seed, commit). The following are 
 | 2026-08-25 | §9.2, §12, §13 | rxe-under-spraying pre-test (NAK/retx floor, all-reduce completion) made a prerequisite for any NIC-evidence claim from hardware (HURDLES H20) | PRE-REVIEW R2 |
 | 2026-08-25 | §11 | Run counts updated for the added arms and blocks (≈ 18,400 runs) | consequence of the above |
 | 2026-08-26 | §10 (v1.2) | Gate as run: ATLAHS MoE8x8B-64 trace, 1024-NIC htsim fat tree, 100 ms epoch / one-iteration horizon, budget 4 % after 2 % was TOO HARD, faulty uplink randomized per seed, TTL_obs from first observable drop (H27), probe evidence window and transport RTO stated | see Amendment v1.2 below |
-| 2026-08-26 | §7.4 (v1.3) | In-switch attention update rule FROZEN (H22): per-path {attn, clean} SALU word, exceedance bump by k_up while attn < bump_cap, decay by 1 every n_clean clean samples down to a_min, probabilistic gate attn/65536 quantized to attn[15:8]/256 via a 256-row TCAM table (a gateway cannot compare two runtime fields); exceedance sources = NIC evidence (loss_q/rtt_q thresholds) and previous-hop CSIG worst_qdepth threshold; P4 source sha256 584599f469250760 (p4/reports/step5.md) | see Amendment v1.3 below |
+| 2026-08-26 | §7.4 (v1.3) | In-switch attention update rule FROZEN (H22): per-path {attn, clean} SALU word, saturating exceedance bump by k_up (a_max = 65535), decay by 1 every n_clean clean samples down to a_min, probabilistic gate attn/65536 quantized to attn[15:8]/256 via a 256-row TCAM table (a gateway cannot compare two runtime fields); exceedance sources = NIC evidence (loss_q/rtt_q thresholds) and previous-hop CSIG worst_qdepth threshold; P4 source sha256 1a8fc6104b03bcdf (p4/reports/step5.md) | see Amendment v1.3 below |
 
 Amendments are appended only. An amendment after the corresponding block has started running
 is flagged "post-hoc" in the paper.
@@ -767,22 +767,24 @@ oracle 11 [10, 12] epochs, random 27 [17, 29] (33 % censored), uniform 20 [19, 2
 ### Amendment v1.3 — 2026-08-26 — §7.4 in-switch attention update rule, frozen (closes HURDLES H22)
 
 The candidate rule of §7.4 is fixed as follows and implemented in `p4/mcp_fabric.p4` step 5
-(source sha256 `584599f469250760…`, compiled 0 errors on SDE 9.13.1 and on the switch's 9.13.2,
+(source sha256 `1a8fc6104b03bcdf…`, compiled 0 errors on SDE 9.13.1 and on the switch's 9.13.2,
 8 ingress stages; `p4/reports/step5.md`). Per path $p$ (index = path id, 256 slots) one 32-bit
 SALU word holds `attn[p]` (16 bit) and `clean[p]` (16 bit). Exactly one update runs per packet:
 
 - **Exceedance packet** for $p$ (a NIC evidence packet whose `loss_q` or `rtt_q` is in the
   controller-installed exceedance range, or a data packet whose previous-hop CSIG tag carries
-  `worst_qdepth` in the exceedance range): `if (attn < bump_cap) attn += k_up; clean = 0`, so
-  $A_{max} = $ `bump_cap + k_up − 1` by construction.
+  `worst_qdepth` in the exceedance range): `attn = attn |+| k_up` (saturating add), `clean = 0`,
+  so $A_{max} = 65535$ is fixed by construction (a register's actions share four parameter
+  slots; a separate cap parameter did not fit).
 - **Clean sample** (every other packet on $p$): `if (clean >= n_clean−1 && attn > a_min)
   {clean = 0; attn −= 1} else if (clean >= n_clean−1) {clean = 0} else {clean += 1}`.
 - **Gate:** measure the packet iff `rnd_attn < attn`, evaluated as a 256-row TCAM table on
   `attn[15:8]` (bf-p4c does not allow a gateway compare of two runtime fields), i.e. with
   probability $\lfloor attn/256 \rfloor / 256$.
 - **Controller-set constants** (`RegisterParam`s, written once per epoch at most): `k_up` = the
-  attention-gain tuning knob of §3.2; `bump_cap`, `a_min`, `n_clean` fixed for the study at
-  64512, 256, 4096 unless the tuning block (§3.2) says otherwise, and the two exceedance ranges.
+  attention-gain tuning knob of §3.2; `a_min`, `n_clean` fixed for the study at 256, 4096 unless
+  the tuning block (§3.2) says otherwise, and the two exceedance ranges. (Corrected the same day,
+  before any run: an earlier wording of this amendment named a `bump_cap` parameter.)
   Initial `attn` per path is seeded by the controller (`A0`, §5.7).
 - **Evidence packets are ungated** (open decision iv): they update attention and are dropped at
   the switch; they never enter the fabric.

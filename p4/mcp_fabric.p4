@@ -529,7 +529,7 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
      * RegisterAction executes per packet, selected by tbl_attn on md.exceed:
      *
      *   exceedance packet (md.exceed == 1):
-     *       if (attn < bump_cap) attn = attn + k_up   [a_max = bump_cap + k_up - 1]
+     *       attn = attn |+| k_up   (saturating: a_max = 65535, fixed)
      *       clean = 0
      *   clean sample (every other packet on the path):
      *       if (clean >= n_clean - 1) { clean = 0; if (attn > a_min) attn = attn - 1; }
@@ -554,8 +554,8 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
     Random<bit<16>>() rng_attn;
 
     /* bf-p4c: a register's actions may use at most 4 parameter slots (RegisterParams +
-     * large constants) in total.  So there is no separate a_max: a bump happens only
-     * while attn < bump_cap, hence attn <= bump_cap + k_up - 1 =: a_max by construction. */
+     * large constants) in total.  So there is no a_max parameter: the bump is a
+     * saturating add and a_max = 65535 is fixed (PREREG v1.3). */
     RegisterParam<bit<16>>(16w1024)  p_k_up;       // attention gain (§3.2 tuning knob)
     RegisterParam<bit<16>>(16w256)   p_a_min;      // decay floor
     RegisterParam<bit<16>>(16w4095)  p_n_clean_m1; // n_clean - 1
