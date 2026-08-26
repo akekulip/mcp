@@ -139,6 +139,27 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   **4 leaves x 2 spines** (P4 design §12 Q5) -> update P4-DESIGN-SPACE §5/§12 and the vlink map.
   Q4: decps is NOT in the docker group on the switch (needs sudo usermod). Q1/Q2 (dp9 host, dp65
   Agilio leg) still need a live bf_switchd to read link state.
+- 2026-08-26 ~21:45 Philip: sudo on switch OK, never REBOOT the switch; bf_switchd/controllers fine.
+  bf_kdrv was not loaded after the reboot -> `sudo bf_kdrv_mod_load $SDE_INSTALL`; bf_switchd now runs
+  mcp_fabric (launch_mcp_switchd.sh, /tmp/mcp_switchd.log). bfshell usage: feed stdin with sleeps
+  (`ucli` lands in pm context; bfshell only flushes on exit). Docker NOT installed on switch (Q4).
+  WIRING (10G sweep of all 132 lanes, 2026-08-26): UP = 15/1 (dp9, 25G RS AN) = **Vision
+  enp59s0f0np0** (carrier flips with 15/1 -> Q1 = Vision); 33/2+33/3 (dp66/67, 10G, symmetric RX)
+  ; 5/0-3 + 6/0-3 (dp164-167, 172-175, 10G, 0 frames) -> patched DAC between cages 5 and 6.
+  DOWN with module present (RDY): 15/0, 15/2, 15/3 (4x25G breakout, other legs unplugged).
+  **Hulk enp59s0f0np0 is NOT connected to the switch** (no link at 25G or 10G on any lane; its
+  i40e now reports 10GbaseT-only link modes, AN off). dp65 (33/1) RDY=NO -> Agilio leg gone (Q2);
+  Vision Agilio np0 cage EMPTY (no module), np1 = direct 10G link to Hulk enp59s0f1np1.
+  PAIR TEST: dis 6/0,6/2 -> 5/0,5/2 drop => cages 5<->6 are one 4-lane DAC, lane-for-lane
+  (5/k <-> 6/k, k=0..3): 4 physical loopback links available to mcp_fabric. dis 33/3 leaves 33/2 UP
+  => 33/2 and 33/3 go to separate external devices (probably the DNP3 rig; leave alone).
+  5/0-3 <-> 6/0-3 link at **25G RS-FEC** (dp164-167 <-> dp172-175): 4 x 25G loops = 100 Gb/s for
+  the 4-leaf x 2-spine virtual fabric (§5.4 bandwidth table: recompute with these, not dp65).
+  Ports left configured on the chip: 15/0 (10G, no link), 15/1 25G (Vision), 5/x+6/x 25G, 33/x 10G,
+  and ~120 sweep-added RDY=NO lanes (harmless; port-del if `show` gets noisy).
+  HUMAN ACTION NEEDED: plug Hulk enp59s0f0np0's DAC into the switch (cage 15 lanes 0/2/3 have the
+  breakout legs; today no lane links) — until then Hulk reaches the fabric only via Vision's
+  direct 10G link (enp59s0f1np1 <-> enp175s0np1s0).
 
 ## Next action
 1. Vision/Hulk: check Netronome SDK, rxe, kernel, perftest, DPDK availability (M4 prep).
