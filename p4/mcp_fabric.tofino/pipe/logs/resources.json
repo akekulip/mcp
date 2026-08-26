@@ -1,8 +1,8 @@
 {
-  "build_date": "Wed Aug 26 19:21:54 2026",
+  "build_date": "Wed Aug 26 19:22:39 2026",
   "compiler_version": "9.13.1",
   "program_name": "mcp_fabric.p4",
-  "run_id": "9154718c2dc948bb",
+  "run_id": "c2d5ccb9675d4b99",
   "schema_version": "2.4.2",
   "resources": {
     "deparser": [
@@ -158,13 +158,13 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 160
+                  "phv_container": 162
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 160
+                  "phv_container": 162
                 }
               }
             ]
@@ -177,25 +177,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 161
+                  "phv_container": 163
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 161
+                  "phv_container": 163
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 162
+                  "phv_container": 164
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 162
+                  "phv_container": 164
                 }
               }
             ]
@@ -251,13 +251,13 @@
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 141
+                  "phv_container": 143
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 141
+                  "phv_container": 143
                 }
               }
             ]
@@ -270,25 +270,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 164
+                  "phv_container": 166
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 164
+                  "phv_container": 166
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 0
+                  "phv_container": 2
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 0
+                  "phv_container": 2
                 }
               }
             ]
@@ -301,25 +301,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 0
+                  "phv_container": 2
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 0
+                  "phv_container": 2
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 3
+                  "phv_container": 5
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 3
+                  "phv_container": 5
                 }
               }
             ]
@@ -332,13 +332,13 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 3
+                  "phv_container": 5
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 3
+                  "phv_container": 5
                 }
               },
               {
@@ -363,13 +363,13 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 163
+                  "phv_container": 165
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 163
+                  "phv_container": 165
                 }
               }
             ]
@@ -475,25 +475,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 2
+                  "phv_container": 4
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 2
+                  "phv_container": 4
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 2
+                  "phv_container": 4
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 2
+                  "phv_container": 4
                 }
               }
             ]
@@ -506,25 +506,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 1
+                  "phv_container": 3
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 1
+                  "phv_container": 3
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 1
+                  "phv_container": 3
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 1
+                  "phv_container": 3
                 }
               }
             ]
@@ -704,13 +704,13 @@
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 142
+                  "phv_container": 160
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 142
+                  "phv_container": 160
                 }
               }
             ]
@@ -718,7 +718,7 @@
         ],
         "mirror_table": {
           "nTables": 2,
-          "maxBytes": 12,
+          "maxBytes": 14,
           "index_phv": 64,
           "table_phv": [
             {
@@ -739,31 +739,31 @@
                 },
                 {
                   "byte_number": 1,
-                  "phv_container": 166
-                },
-                {
-                  "byte_number": 2,
-                  "phv_container": 4
-                },
-                {
-                  "byte_number": 3,
-                  "phv_container": 167
-                },
-                {
-                  "byte_number": 4,
-                  "phv_container": 5
-                },
-                {
-                  "byte_number": 5,
                   "phv_container": 169
                 },
                 {
+                  "byte_number": 2,
+                  "phv_container": 6
+                },
+                {
+                  "byte_number": 3,
+                  "phv_container": 170
+                },
+                {
+                  "byte_number": 4,
+                  "phv_container": 7
+                },
+                {
+                  "byte_number": 5,
+                  "phv_container": 171
+                },
+                {
                   "byte_number": 6,
-                  "phv_container": 162
+                  "phv_container": 164
                 },
                 {
                   "byte_number": 7,
-                  "phv_container": 165
+                  "phv_container": 167
                 },
                 {
                   "byte_number": 8,
@@ -775,11 +775,19 @@
                 },
                 {
                   "byte_number": 10,
-                  "phv_container": 143
+                  "phv_container": 161
                 },
                 {
                   "byte_number": 11,
                   "phv_container": 140
+                },
+                {
+                  "byte_number": 12,
+                  "phv_container": 142
+                },
+                {
+                  "byte_number": 13,
+                  "phv_container": 1
                 }
               ]
             }
@@ -843,25 +851,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 338
+                  "phv_container": 341
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 338
+                  "phv_container": 341
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 259
+                  "phv_container": 323
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 259
+                  "phv_container": 323
                 }
               }
             ]
@@ -874,25 +882,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 259
+                  "phv_container": 322
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 259
+                  "phv_container": 322
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 300
+                  "phv_container": 340
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 291
+                  "phv_container": 340
                 }
               }
             ]
@@ -905,25 +913,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 258
+                  "phv_container": 259
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 258
+                  "phv_container": 259
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 258
+                  "phv_container": 259
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 258
+                  "phv_container": 259
                 }
               }
             ]
@@ -936,13 +944,13 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 257
+                  "phv_container": 339
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 257
+                  "phv_container": 339
                 }
               },
               {
@@ -967,25 +975,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 321
+                  "phv_container": 257
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 321
+                  "phv_container": 257
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 320
+                  "phv_container": 321
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 320
+                  "phv_container": 321
                 }
               }
             ]
@@ -998,13 +1006,13 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 256
+                  "phv_container": 320
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 256
+                  "phv_container": 320
                 }
               },
               {
@@ -1023,62 +1031,50 @@
           },
           {
             "entry": 6,
-            "pov_bit": 1,
-            "pov_name": "hdr.ethernet.$valid",
+            "pov_bit": 0,
+            "pov_name": "hdr.mirror.$valid",
             "chunks": [
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 301
+                  "phv_container": 256
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 300
+                  "phv_container": 256
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 259
+                  "phv_container": 258
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 259
+                  "phv_container": 258
                 }
               }
             ]
           },
           {
             "entry": 7,
-            "pov_bit": 1,
-            "pov_name": "hdr.ethernet.$valid",
+            "pov_bit": 0,
+            "pov_name": "hdr.mirror.$valid",
             "chunks": [
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 259
+                  "phv_container": 258
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 259
-                }
-              },
-              {
-                "chunk_number": 2,
-                "chunk": {
-                  "phv_container": 338
-                }
-              },
-              {
-                "chunk_number": 3,
-                "chunk": {
-                  "phv_container": 338
+                  "phv_container": 258
                 }
               }
             ]
@@ -1091,6 +1087,68 @@
               {
                 "chunk_number": 0,
                 "chunk": {
+                  "phv_container": 323
+                }
+              },
+              {
+                "chunk_number": 1,
+                "chunk": {
+                  "phv_container": 323
+                }
+              },
+              {
+                "chunk_number": 2,
+                "chunk": {
+                  "phv_container": 259
+                }
+              },
+              {
+                "chunk_number": 3,
+                "chunk": {
+                  "phv_container": 259
+                }
+              }
+            ]
+          },
+          {
+            "entry": 9,
+            "pov_bit": 1,
+            "pov_name": "hdr.ethernet.$valid",
+            "chunks": [
+              {
+                "chunk_number": 0,
+                "chunk": {
+                  "phv_container": 259
+                }
+              },
+              {
+                "chunk_number": 1,
+                "chunk": {
+                  "phv_container": 259
+                }
+              },
+              {
+                "chunk_number": 2,
+                "chunk": {
+                  "phv_container": 322
+                }
+              },
+              {
+                "chunk_number": 3,
+                "chunk": {
+                  "phv_container": 322
+                }
+              }
+            ]
+          },
+          {
+            "entry": 10,
+            "pov_bit": 1,
+            "pov_name": "hdr.ethernet.$valid",
+            "chunks": [
+              {
+                "chunk_number": 0,
+                "chunk": {
                   "phv_container": 258
                 }
               },
@@ -1115,7 +1173,7 @@
             ]
           },
           {
-            "entry": 9,
+            "entry": 11,
             "pov_bit": 1,
             "pov_name": "hdr.ethernet.$valid",
             "chunks": [
@@ -1134,68 +1192,6 @@
             ]
           },
           {
-            "entry": 10,
-            "pov_bit": 2,
-            "pov_name": "hdr.fabric.$valid",
-            "chunks": [
-              {
-                "chunk_number": 0,
-                "chunk": {
-                  "phv_container": 320
-                }
-              },
-              {
-                "chunk_number": 1,
-                "chunk": {
-                  "phv_container": 320
-                }
-              },
-              {
-                "chunk_number": 2,
-                "chunk": {
-                  "phv_container": 151
-                }
-              },
-              {
-                "chunk_number": 3,
-                "chunk": {
-                  "phv_container": 151
-                }
-              }
-            ]
-          },
-          {
-            "entry": 11,
-            "pov_bit": 2,
-            "pov_name": "hdr.fabric.$valid",
-            "chunks": [
-              {
-                "chunk_number": 0,
-                "chunk": {
-                  "phv_container": 257
-                }
-              },
-              {
-                "chunk_number": 1,
-                "chunk": {
-                  "phv_container": 257
-                }
-              },
-              {
-                "chunk_number": 2,
-                "chunk": {
-                  "phv_container": 257
-                }
-              },
-              {
-                "chunk_number": 3,
-                "chunk": {
-                  "phv_container": 257
-                }
-              }
-            ]
-          },
-          {
             "entry": 12,
             "pov_bit": 2,
             "pov_name": "hdr.fabric.$valid",
@@ -1203,62 +1199,124 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 256
+                  "phv_container": 320
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 256
+                  "phv_container": 320
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 256
+                  "phv_container": 151
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 256
+                  "phv_container": 151
                 }
               }
             ]
           },
           {
             "entry": 13,
-            "pov_bit": 3,
-            "pov_name": "hdr.csig.$valid",
+            "pov_bit": 2,
+            "pov_name": "hdr.fabric.$valid",
             "chunks": [
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 152
+                  "phv_container": 257
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 152
+                  "phv_container": 257
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 149
+                  "phv_container": 257
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 149
+                  "phv_container": 257
                 }
               }
             ]
           },
           {
             "entry": 14,
+            "pov_bit": 2,
+            "pov_name": "hdr.fabric.$valid",
+            "chunks": [
+              {
+                "chunk_number": 0,
+                "chunk": {
+                  "phv_container": 256
+                }
+              },
+              {
+                "chunk_number": 1,
+                "chunk": {
+                  "phv_container": 256
+                }
+              },
+              {
+                "chunk_number": 2,
+                "chunk": {
+                  "phv_container": 256
+                }
+              },
+              {
+                "chunk_number": 3,
+                "chunk": {
+                  "phv_container": 256
+                }
+              }
+            ]
+          },
+          {
+            "entry": 15,
+            "pov_bit": 3,
+            "pov_name": "hdr.csig.$valid",
+            "chunks": [
+              {
+                "chunk_number": 0,
+                "chunk": {
+                  "phv_container": 152
+                }
+              },
+              {
+                "chunk_number": 1,
+                "chunk": {
+                  "phv_container": 152
+                }
+              },
+              {
+                "chunk_number": 2,
+                "chunk": {
+                  "phv_container": 149
+                }
+              },
+              {
+                "chunk_number": 3,
+                "chunk": {
+                  "phv_container": 149
+                }
+              }
+            ]
+          },
+          {
+            "entry": 16,
             "pov_bit": 3,
             "pov_name": "hdr.csig.$valid",
             "chunks": [
@@ -1289,7 +1347,7 @@
             ]
           },
           {
-            "entry": 15,
+            "entry": 17,
             "pov_bit": 3,
             "pov_name": "hdr.csig.$valid",
             "chunks": [
@@ -1320,7 +1378,7 @@
             ]
           },
           {
-            "entry": 16,
+            "entry": 18,
             "pov_bit": 3,
             "pov_name": "hdr.csig.$valid",
             "chunks": [
@@ -1339,7 +1397,7 @@
             ]
           },
           {
-            "entry": 17,
+            "entry": 19,
             "pov_bit": 10,
             "pov_name": " ",
             "chunks": [
@@ -1352,137 +1410,75 @@
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 339
+                  "phv_container": 342
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 339
-                }
-              },
-              {
-                "chunk_number": 3,
-                "chunk": {
-                  "phv_container": 325
-                }
-              }
-            ]
-          },
-          {
-            "entry": 18,
-            "pov_bit": 10,
-            "pov_name": " ",
-            "chunks": [
-              {
-                "chunk_number": 0,
-                "chunk": {
-                  "phv_container": 325
-                }
-              },
-              {
-                "chunk_number": 1,
-                "chunk": {
-                  "phv_container": 324
-                }
-              },
-              {
-                "chunk_number": 2,
-                "chunk": {
-                  "phv_container": 324
-                }
-              },
-              {
-                "chunk_number": 3,
-                "chunk": {
-                  "phv_container": 323
-                }
-              }
-            ]
-          },
-          {
-            "entry": 19,
-            "pov_bit": 10,
-            "pov_name": " ",
-            "chunks": [
-              {
-                "chunk_number": 0,
-                "chunk": {
-                  "phv_container": 323
-                }
-              },
-              {
-                "chunk_number": 1,
-                "chunk": {
-                  "phv_container": 322
-                }
-              },
-              {
-                "chunk_number": 2,
-                "chunk": {
-                  "phv_container": 322
-                }
-              }
-            ]
-          },
-          {
-            "entry": 20,
-            "pov_bit": 9,
-            "pov_name": " ",
-            "chunks": [
-              {
-                "chunk_number": 0,
-                "chunk": {
-                  "phv_container": 289
-                }
-              },
-              {
-                "chunk_number": 1,
-                "chunk": {
-                  "phv_container": 340
-                }
-              },
-              {
-                "chunk_number": 2,
-                "chunk": {
-                  "phv_container": 340
-                }
-              },
-              {
-                "chunk_number": 3,
-                "chunk": {
-                  "phv_container": 269
-                }
-              }
-            ]
-          },
-          {
-            "entry": 21,
-            "pov_bit": 9,
-            "pov_name": " ",
-            "chunks": [
-              {
-                "chunk_number": 0,
-                "chunk": {
-                  "phv_container": 269
-                }
-              },
-              {
-                "chunk_number": 1,
-                "chunk": {
-                  "phv_container": 269
-                }
-              },
-              {
-                "chunk_number": 2,
-                "chunk": {
-                  "phv_container": 269
+                  "phv_container": 342
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
                   "phv_container": 268
+                }
+              }
+            ]
+          },
+          {
+            "entry": 20,
+            "pov_bit": 10,
+            "pov_name": " ",
+            "chunks": [
+              {
+                "chunk_number": 0,
+                "chunk": {
+                  "phv_container": 268
+                }
+              },
+              {
+                "chunk_number": 1,
+                "chunk": {
+                  "phv_container": 268
+                }
+              },
+              {
+                "chunk_number": 2,
+                "chunk": {
+                  "phv_container": 268
+                }
+              },
+              {
+                "chunk_number": 3,
+                "chunk": {
+                  "phv_container": 325
+                }
+              }
+            ]
+          },
+          {
+            "entry": 21,
+            "pov_bit": 10,
+            "pov_name": " ",
+            "chunks": [
+              {
+                "chunk_number": 0,
+                "chunk": {
+                  "phv_container": 325
+                }
+              },
+              {
+                "chunk_number": 1,
+                "chunk": {
+                  "phv_container": 324
+                }
+              },
+              {
+                "chunk_number": 2,
+                "chunk": {
+                  "phv_container": 324
                 }
               }
             ]
@@ -1495,25 +1491,87 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 268
+                  "phv_container": 289
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 268
+                  "phv_container": 343
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 268
+                  "phv_container": 343
+                }
+              },
+              {
+                "chunk_number": 3,
+                "chunk": {
+                  "phv_container": 270
                 }
               }
             ]
           },
           {
             "entry": 23,
+            "pov_bit": 9,
+            "pov_name": " ",
+            "chunks": [
+              {
+                "chunk_number": 0,
+                "chunk": {
+                  "phv_container": 270
+                }
+              },
+              {
+                "chunk_number": 1,
+                "chunk": {
+                  "phv_container": 270
+                }
+              },
+              {
+                "chunk_number": 2,
+                "chunk": {
+                  "phv_container": 270
+                }
+              },
+              {
+                "chunk_number": 3,
+                "chunk": {
+                  "phv_container": 269
+                }
+              }
+            ]
+          },
+          {
+            "entry": 24,
+            "pov_bit": 9,
+            "pov_name": " ",
+            "chunks": [
+              {
+                "chunk_number": 0,
+                "chunk": {
+                  "phv_container": 269
+                }
+              },
+              {
+                "chunk_number": 1,
+                "chunk": {
+                  "phv_container": 269
+                }
+              },
+              {
+                "chunk_number": 2,
+                "chunk": {
+                  "phv_container": 269
+                }
+              }
+            ]
+          },
+          {
+            "entry": 25,
             "pov_bit": 8,
             "pov_name": "hdr.min_parse_depth_padding_0$2.$valid",
             "chunks": [
@@ -1526,50 +1584,50 @@
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 341
+                  "phv_container": 302
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 341
+                  "phv_container": 301
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 271
+                  "phv_container": 300
                 }
               }
             ]
           },
           {
-            "entry": 24,
+            "entry": 26,
             "pov_bit": 8,
             "pov_name": "hdr.min_parse_depth_padding_0$2.$valid",
             "chunks": [
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 271
+                  "phv_container": 291
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 271
+                  "phv_container": 338
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 271
+                  "phv_container": 338
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 270
+                  "phv_container": 271
                 }
               }
             ]
@@ -2609,25 +2667,25 @@
               {
                 "byte_number": 96,
                 "used_by_tables": [
-                  "tbl_mcp_fabric769"
+                  "tbl_mcp_fabric774"
                 ]
               },
               {
                 "byte_number": 97,
                 "used_by_tables": [
-                  "tbl_mcp_fabric769"
+                  "tbl_mcp_fabric774"
                 ]
               },
               {
                 "byte_number": 98,
                 "used_by_tables": [
-                  "tbl_mcp_fabric769"
+                  "tbl_mcp_fabric774"
                 ]
               },
               {
                 "byte_number": 99,
                 "used_by_tables": [
-                  "tbl_mcp_fabric769"
+                  "tbl_mcp_fabric774"
                 ]
               },
               {
@@ -2657,37 +2715,37 @@
               {
                 "byte_number": 64,
                 "used_by_tables": [
-                  "tbl_mcp_fabric775"
+                  "tbl_mcp_fabric780"
                 ]
               },
               {
                 "byte_number": 65,
                 "used_by_tables": [
-                  "tbl_mcp_fabric775"
+                  "tbl_mcp_fabric780"
                 ]
               },
               {
                 "byte_number": 66,
                 "used_by_tables": [
-                  "tbl_mcp_fabric775"
+                  "tbl_mcp_fabric780"
                 ]
               },
               {
                 "byte_number": 67,
                 "used_by_tables": [
-                  "tbl_mcp_fabric775"
+                  "tbl_mcp_fabric780"
                 ]
               },
               {
                 "byte_number": 32,
                 "used_by_tables": [
-                  "tbl_mcp_fabric779"
+                  "tbl_mcp_fabric784"
                 ]
               },
               {
                 "byte_number": 33,
                 "used_by_tables": [
-                  "tbl_mcp_fabric779"
+                  "tbl_mcp_fabric784"
                 ]
               }
             ],
@@ -2716,7 +2774,7 @@
                 "id": 0,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric775",
+                    "used_by": "tbl_mcp_fabric780",
                     "used_for": "match_entry_ram"
                   }
                 ]
@@ -2725,7 +2783,7 @@
                 "id": 1,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric769",
+                    "used_by": "tbl_mcp_fabric774",
                     "used_for": "match_entry_ram"
                   }
                 ]
@@ -2734,7 +2792,7 @@
                 "id": 2,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric779",
+                    "used_by": "tbl_mcp_fabric784",
                     "used_for": "match_entry_ram"
                   }
                 ]
@@ -2761,7 +2819,7 @@
                     "used_for": "gateway"
                   },
                   {
-                    "used_by": "tbl_mcp_fabric779-gateway",
+                    "used_by": "tbl_mcp_fabric784-gateway",
                     "used_for": "gateway"
                   }
                 ]
@@ -2809,7 +2867,7 @@
                 "unit_id": 1,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric779-gateway",
+                    "used_by": "tbl_mcp_fabric784-gateway",
                     "used_for": "gateway"
                   }
                 ]
@@ -3309,7 +3367,7 @@
                     "value": 0
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric775",
+                "used_by_table": "tbl_mcp_fabric780",
                 "used_for": "immediate hi"
               },
               {
@@ -3321,7 +3379,7 @@
                     "value": 1
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric775",
+                "used_by_table": "tbl_mcp_fabric780",
                 "used_for": "immediate hi"
               },
               {
@@ -3333,7 +3391,7 @@
                     "value": 2
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric775",
+                "used_by_table": "tbl_mcp_fabric780",
                 "used_for": "immediate hi"
               },
               {
@@ -3345,7 +3403,7 @@
                     "value": 3
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric775",
+                "used_by_table": "tbl_mcp_fabric780",
                 "used_for": "immediate hi"
               },
               {
@@ -3357,7 +3415,7 @@
                     "value": 4
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric775",
+                "used_by_table": "tbl_mcp_fabric780",
                 "used_for": "immediate hi"
               },
               {
@@ -3369,7 +3427,7 @@
                     "value": 5
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric775",
+                "used_by_table": "tbl_mcp_fabric780",
                 "used_for": "immediate hi"
               },
               {
@@ -3381,7 +3439,7 @@
                     "value": 6
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric775",
+                "used_by_table": "tbl_mcp_fabric780",
                 "used_for": "immediate hi"
               },
               {
@@ -3393,7 +3451,7 @@
                     "value": 7
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric775",
+                "used_by_table": "tbl_mcp_fabric780",
                 "used_for": "immediate hi"
               },
               {
@@ -3405,7 +3463,7 @@
                     "value": 8
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric775",
+                "used_by_table": "tbl_mcp_fabric780",
                 "used_for": "immediate hi"
               },
               {
@@ -3417,7 +3475,7 @@
                     "value": 9
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric775",
+                "used_by_table": "tbl_mcp_fabric780",
                 "used_for": "immediate hi"
               },
               {
@@ -3429,7 +3487,7 @@
                     "value": 10
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric775",
+                "used_by_table": "tbl_mcp_fabric780",
                 "used_for": "immediate hi"
               },
               {
@@ -3441,7 +3499,7 @@
                     "value": 11
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric775",
+                "used_by_table": "tbl_mcp_fabric780",
                 "used_for": "immediate hi"
               },
               {
@@ -3453,7 +3511,7 @@
                     "value": 12
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric775",
+                "used_by_table": "tbl_mcp_fabric780",
                 "used_for": "immediate hi"
               },
               {
@@ -3465,7 +3523,7 @@
                     "value": 13
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric775",
+                "used_by_table": "tbl_mcp_fabric780",
                 "used_for": "immediate hi"
               },
               {
@@ -3477,7 +3535,7 @@
                     "value": 14
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric775",
+                "used_by_table": "tbl_mcp_fabric780",
                 "used_for": "immediate hi"
               },
               {
@@ -3489,7 +3547,7 @@
                     "value": 15
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric775",
+                "used_by_table": "tbl_mcp_fabric780",
                 "used_for": "immediate hi"
               },
               {
@@ -3501,7 +3559,7 @@
                     "value": 0
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric779",
+                "used_by_table": "tbl_mcp_fabric784",
                 "used_for": "meter address"
               },
               {
@@ -3513,7 +3571,7 @@
                     "value": 1
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric779",
+                "used_by_table": "tbl_mcp_fabric784",
                 "used_for": "meter address"
               },
               {
@@ -3525,7 +3583,7 @@
                     "value": 2
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric779",
+                "used_by_table": "tbl_mcp_fabric784",
                 "used_for": "meter address"
               },
               {
@@ -3537,7 +3595,7 @@
                     "value": 3
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric779",
+                "used_by_table": "tbl_mcp_fabric784",
                 "used_for": "meter address"
               },
               {
@@ -3549,7 +3607,7 @@
                     "value": 4
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric779",
+                "used_by_table": "tbl_mcp_fabric784",
                 "used_for": "meter address"
               },
               {
@@ -3561,7 +3619,7 @@
                     "value": 5
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric779",
+                "used_by_table": "tbl_mcp_fabric784",
                 "used_for": "meter address"
               },
               {
@@ -3573,7 +3631,7 @@
                     "value": 6
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric779",
+                "used_by_table": "tbl_mcp_fabric784",
                 "used_for": "meter address"
               },
               {
@@ -3585,7 +3643,7 @@
                     "value": 7
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric779",
+                "used_by_table": "tbl_mcp_fabric784",
                 "used_for": "meter address"
               },
               {
@@ -3597,7 +3655,7 @@
                     "value": 8
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric779",
+                "used_by_table": "tbl_mcp_fabric784",
                 "used_for": "meter address"
               },
               {
@@ -3609,7 +3667,7 @@
                     "value": 9
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric779",
+                "used_by_table": "tbl_mcp_fabric784",
                 "used_for": "meter address"
               },
               {
@@ -3621,7 +3679,7 @@
                     "value": 10
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric779",
+                "used_by_table": "tbl_mcp_fabric784",
                 "used_for": "meter address"
               },
               {
@@ -3633,7 +3691,7 @@
                     "value": 11
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric779",
+                "used_by_table": "tbl_mcp_fabric784",
                 "used_for": "meter address"
               },
               {
@@ -3645,7 +3703,7 @@
                     "value": 12
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric779",
+                "used_by_table": "tbl_mcp_fabric784",
                 "used_for": "meter address"
               },
               {
@@ -3657,7 +3715,7 @@
                     "value": 13
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric779",
+                "used_by_table": "tbl_mcp_fabric784",
                 "used_for": "meter address"
               },
               {
@@ -3669,7 +3727,7 @@
                     "value": 14
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric779",
+                "used_by_table": "tbl_mcp_fabric784",
                 "used_for": "meter address"
               },
               {
@@ -3681,7 +3739,7 @@
                     "value": 15
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric779",
+                "used_by_table": "tbl_mcp_fabric784",
                 "used_for": "meter address"
               }
             ],
@@ -3697,7 +3755,7 @@
                 "unit_id": 0,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric775",
+                    "used_by": "tbl_mcp_fabric780",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -3707,7 +3765,7 @@
                 "unit_id": 1,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric779",
+                    "used_by": "tbl_mcp_fabric784",
                     "used_for": "meter address"
                   }
                 ]
@@ -3718,11 +3776,11 @@
             "ids": [
               {
                 "id": 0,
-                "table_name": "tbl_mcp_fabric769"
+                "table_name": "tbl_mcp_fabric774"
               },
               {
                 "id": 5,
-                "table_name": "tbl_mcp_fabric761"
+                "table_name": "tbl_mcp_fabric766"
               },
               {
                 "id": 1,
@@ -3730,11 +3788,11 @@
               },
               {
                 "id": 2,
-                "table_name": "tbl_mcp_fabric775"
+                "table_name": "tbl_mcp_fabric780"
               },
               {
                 "id": 3,
-                "table_name": "tbl_mcp_fabric779"
+                "table_name": "tbl_mcp_fabric784"
               },
               {
                 "id": 4,
@@ -3903,7 +3961,7 @@
                 "id": 2,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric761",
+                    "used_by": "tbl_mcp_fabric766",
                     "used_for": "ternary_indirection_ram"
                   }
                 ]
@@ -3930,9 +3988,9 @@
                     "usages": [
                       {
                         "action_names": [
-                          "mcp_fabric769"
+                          "mcp_fabric774"
                         ],
-                        "used_by": "tbl_mcp_fabric769"
+                        "used_by": "tbl_mcp_fabric774"
                       }
                     ]
                   },
@@ -3959,9 +4017,9 @@
                     "usages": [
                       {
                         "action_names": [
-                          "mcp_fabric761"
+                          "mcp_fabric766"
                         ],
-                        "used_by": "tbl_mcp_fabric761"
+                        "used_by": "tbl_mcp_fabric766"
                       }
                     ]
                   },
@@ -3971,9 +4029,9 @@
                     "usages": [
                       {
                         "action_names": [
-                          "mcp_fabric779"
+                          "mcp_fabric784"
                         ],
-                        "used_by": "tbl_mcp_fabric779"
+                        "used_by": "tbl_mcp_fabric784"
                       }
                     ]
                   }
@@ -4000,9 +4058,9 @@
                     "usages": [
                       {
                         "action_names": [
-                          "mcp_fabric775"
+                          "mcp_fabric780"
                         ],
-                        "used_by": "tbl_mcp_fabric775"
+                        "used_by": "tbl_mcp_fabric780"
                       }
                     ]
                   }
@@ -4189,7 +4247,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric775",
+                    "used_by": "tbl_mcp_fabric780",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -4207,7 +4265,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric775",
+                    "used_by": "tbl_mcp_fabric780",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -4225,7 +4283,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric775",
+                    "used_by": "tbl_mcp_fabric780",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -4243,7 +4301,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric775",
+                    "used_by": "tbl_mcp_fabric780",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -4261,7 +4319,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric775",
+                    "used_by": "tbl_mcp_fabric780",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -4279,7 +4337,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric775",
+                    "used_by": "tbl_mcp_fabric780",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -4297,7 +4355,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric775",
+                    "used_by": "tbl_mcp_fabric780",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -4315,7 +4373,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric775",
+                    "used_by": "tbl_mcp_fabric780",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -4333,7 +4391,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric775",
+                    "used_by": "tbl_mcp_fabric780",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -4351,7 +4409,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric775",
+                    "used_by": "tbl_mcp_fabric780",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -4369,7 +4427,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric779",
+                    "used_by": "tbl_mcp_fabric784",
                     "used_for": "meter address"
                   }
                 ]
@@ -4387,7 +4445,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric779",
+                    "used_by": "tbl_mcp_fabric784",
                     "used_for": "meter address"
                   }
                 ]
@@ -5523,25 +5581,25 @@
               {
                 "byte_number": 96,
                 "used_by_tables": [
-                  "tbl_mcp_fabric768"
+                  "tbl_mcp_fabric773"
                 ]
               },
               {
                 "byte_number": 97,
                 "used_by_tables": [
-                  "tbl_mcp_fabric768"
+                  "tbl_mcp_fabric773"
                 ]
               },
               {
                 "byte_number": 98,
                 "used_by_tables": [
-                  "tbl_mcp_fabric768"
+                  "tbl_mcp_fabric773"
                 ]
               },
               {
                 "byte_number": 99,
                 "used_by_tables": [
-                  "tbl_mcp_fabric768"
+                  "tbl_mcp_fabric773"
                 ]
               }
             ],
@@ -5570,7 +5628,7 @@
                 "id": 0,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric768",
+                    "used_by": "tbl_mcp_fabric773",
                     "used_for": "match_entry_ram"
                   }
                 ]
@@ -5597,7 +5655,7 @@
                     "used_for": "gateway"
                   },
                   {
-                    "used_by": "tbl_mcp_fabric768-gateway",
+                    "used_by": "tbl_mcp_fabric773-gateway",
                     "used_for": "gateway"
                   }
                 ]
@@ -5645,7 +5703,7 @@
                 "unit_id": 1,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric768-gateway",
+                    "used_by": "tbl_mcp_fabric773-gateway",
                     "used_for": "gateway"
                   }
                 ]
@@ -6161,7 +6219,7 @@
               },
               {
                 "id": 3,
-                "table_name": "tbl_mcp_fabric768"
+                "table_name": "tbl_mcp_fabric773"
               }
             ],
             "size": 16
@@ -6467,9 +6525,9 @@
                     "usages": [
                       {
                         "action_names": [
-                          "mcp_fabric768"
+                          "mcp_fabric773"
                         ],
-                        "used_by": "tbl_mcp_fabric768"
+                        "used_by": "tbl_mcp_fabric773"
                       }
                     ]
                   }
@@ -11049,62 +11107,56 @@
               "extracts": [
                 {
                   "bit_width": 16,
-                  "dest_container": 338,
+                  "dest_container": 341,
                   "extractor_id": 0,
                   "buffer_offset": 0
+                },
+                {
+                  "bit_width": 16,
+                  "dest_container": 323,
+                  "extractor_id": 1,
+                  "buffer_offset": 2
+                },
+                {
+                  "bit_width": 16,
+                  "dest_container": 322,
+                  "extractor_id": 2,
+                  "buffer_offset": 4
+                },
+                {
+                  "bit_width": 16,
+                  "dest_container": 340,
+                  "extractor_id": 3,
+                  "buffer_offset": 6
                 },
                 {
                   "bit_width": 32,
                   "dest_container": 259,
                   "extractor_id": 0,
-                  "buffer_offset": 2
-                },
-                {
-                  "bit_width": 8,
-                  "dest_container": 300,
-                  "extractor_id": 0,
-                  "buffer_offset": 6
-                },
-                {
-                  "bit_width": 8,
-                  "dest_container": 291,
-                  "extractor_id": 1,
-                  "buffer_offset": 7
-                },
-                {
-                  "bit_width": 32,
-                  "dest_container": 258,
-                  "extractor_id": 1,
                   "buffer_offset": 8
                 },
                 {
                   "bit_width": 32,
                   "dest_container": 257,
-                  "extractor_id": 2,
-                  "buffer_offset": 12
-                },
-                {
-                  "bit_width": 16,
-                  "dest_container": 321,
                   "extractor_id": 1,
-                  "buffer_offset": 16
-                },
-                {
-                  "bit_width": 16,
-                  "dest_container": 320,
-                  "extractor_id": 2,
-                  "buffer_offset": 18
+                  "buffer_offset": 14
                 },
                 {
                   "bit_width": 32,
                   "dest_container": 256,
+                  "extractor_id": 2,
+                  "buffer_offset": 22
+                },
+                {
+                  "bit_width": 32,
+                  "dest_container": 258,
                   "extractor_id": 3,
-                  "buffer_offset": 20
+                  "buffer_offset": 26
                 },
                 {
                   "bit_width": 8,
                   "dest_container": 81,
-                  "extractor_id": 2,
+                  "extractor_id": 0,
                   "constant_value": 1
                 }
               ],
@@ -11117,9 +11169,9 @@
                 }
               ],
               "next_state_id": 13,
-              "next_state_name": "min_parse_depth_accept_initial",
+              "next_state_name": "parse_mirror.$split_0",
               "previous_state_id": 1,
-              "shifts": 24,
+              "shifts": 12,
               "tcam_row": 254,
               "previous_state_name": "$entry_point.start"
             },
@@ -11149,6 +11201,36 @@
             {
               "extracts": [
                 {
+                  "bit_width": 16,
+                  "dest_container": 339,
+                  "extractor_id": 0,
+                  "buffer_offset": 0
+                },
+                {
+                  "bit_width": 16,
+                  "dest_container": 321,
+                  "extractor_id": 1,
+                  "buffer_offset": 6
+                },
+                {
+                  "bit_width": 16,
+                  "dest_container": 320,
+                  "extractor_id": 2,
+                  "buffer_offset": 8
+                }
+              ],
+              "has_counter": false,
+              "matchesOn": [],
+              "next_state_id": 15,
+              "next_state_name": "min_parse_depth_accept_initial",
+              "previous_state_id": 13,
+              "shifts": 18,
+              "tcam_row": 252,
+              "previous_state_name": "parse_mirror.$split_0"
+            },
+            {
+              "extracts": [
+                {
                   "bit_width": 8,
                   "dest_container": 288,
                   "extractor_id": 0,
@@ -11156,27 +11238,27 @@
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 339,
+                  "dest_container": 342,
                   "extractor_id": 0,
                   "buffer_offset": 1
+                },
+                {
+                  "bit_width": 32,
+                  "dest_container": 268,
+                  "extractor_id": 0,
+                  "buffer_offset": 3
                 },
                 {
                   "bit_width": 16,
                   "dest_container": 325,
                   "extractor_id": 1,
-                  "buffer_offset": 3
+                  "buffer_offset": 7
                 },
                 {
                   "bit_width": 16,
                   "dest_container": 324,
                   "extractor_id": 2,
-                  "buffer_offset": 5
-                },
-                {
-                  "bit_width": 16,
-                  "dest_container": 323,
-                  "extractor_id": 3,
-                  "buffer_offset": 7
+                  "buffer_offset": 9
                 },
                 {
                   "bit_width": 8,
@@ -11187,11 +11269,11 @@
               ],
               "has_counter": true,
               "matchesOn": [],
-              "next_state_id": 15,
+              "next_state_id": 16,
               "next_state_name": "min_parse_depth_accept_loop.$split_0",
-              "previous_state_id": 13,
-              "shifts": 9,
-              "tcam_row": 252,
+              "previous_state_id": 15,
+              "shifts": 11,
+              "tcam_row": 251,
               "previous_state_name": "min_parse_depth_accept_initial"
             },
             {
@@ -11200,42 +11282,36 @@
               "matchesOn": [],
               "next_state_id": 6,
               "next_state_name": "END",
-              "previous_state_id": 13,
+              "previous_state_id": 15,
               "shifts": 0,
-              "tcam_row": 251,
+              "tcam_row": 250,
               "previous_state_name": "min_parse_depth_accept_initial"
             },
             {
               "extracts": [
                 {
-                  "bit_width": 16,
-                  "dest_container": 322,
+                  "bit_width": 8,
+                  "dest_container": 289,
                   "extractor_id": 0,
                   "buffer_offset": 0
                 },
                 {
-                  "bit_width": 8,
-                  "dest_container": 289,
+                  "bit_width": 16,
+                  "dest_container": 343,
                   "extractor_id": 0,
-                  "buffer_offset": 2
+                  "buffer_offset": 1
                 },
                 {
-                  "bit_width": 16,
-                  "dest_container": 340,
-                  "extractor_id": 1,
+                  "bit_width": 32,
+                  "dest_container": 270,
+                  "extractor_id": 0,
                   "buffer_offset": 3
                 },
                 {
                   "bit_width": 32,
                   "dest_container": 269,
-                  "extractor_id": 0,
-                  "buffer_offset": 5
-                },
-                {
-                  "bit_width": 32,
-                  "dest_container": 268,
                   "extractor_id": 1,
-                  "buffer_offset": 9
+                  "buffer_offset": 7
                 },
                 {
                   "bit_width": 8,
@@ -11246,29 +11322,22 @@
               ],
               "has_counter": true,
               "matchesOn": [],
-              "next_state_id": 16,
+              "next_state_id": 17,
               "next_state_name": "min_parse_depth_accept_loop.$it1.$split_0",
-              "previous_state_id": 15,
-              "shifts": 13,
-              "tcam_row": 250,
+              "previous_state_id": 16,
+              "shifts": 11,
+              "tcam_row": 249,
               "previous_state_name": "min_parse_depth_accept_loop.$split_0"
             },
             {
-              "extracts": [
-                {
-                  "bit_width": 16,
-                  "dest_container": 322,
-                  "extractor_id": 0,
-                  "buffer_offset": 0
-                }
-              ],
+              "extracts": [],
               "has_counter": false,
               "matchesOn": [],
               "next_state_id": 6,
               "next_state_name": "END",
-              "previous_state_id": 15,
-              "shifts": 2,
-              "tcam_row": 249,
+              "previous_state_id": 16,
+              "shifts": 0,
+              "tcam_row": 248,
               "previous_state_name": "min_parse_depth_accept_loop.$split_0"
             },
             {
@@ -11280,37 +11349,43 @@
                   "buffer_offset": 0
                 },
                 {
-                  "bit_width": 16,
-                  "dest_container": 341,
-                  "extractor_id": 0,
+                  "bit_width": 8,
+                  "dest_container": 302,
+                  "extractor_id": 1,
                   "buffer_offset": 1
+                },
+                {
+                  "bit_width": 8,
+                  "dest_container": 301,
+                  "extractor_id": 2,
+                  "buffer_offset": 2
+                },
+                {
+                  "bit_width": 8,
+                  "dest_container": 300,
+                  "extractor_id": 3,
+                  "buffer_offset": 3
+                },
+                {
+                  "bit_width": 16,
+                  "dest_container": 338,
+                  "extractor_id": 0,
+                  "buffer_offset": 5
                 },
                 {
                   "bit_width": 32,
                   "dest_container": 271,
                   "extractor_id": 0,
-                  "buffer_offset": 3
-                },
-                {
-                  "bit_width": 32,
-                  "dest_container": 270,
-                  "extractor_id": 1,
                   "buffer_offset": 7
-                },
-                {
-                  "bit_width": 8,
-                  "dest_container": 80,
-                  "extractor_id": 1,
-                  "constant_value": 1
                 }
               ],
               "has_counter": true,
               "matchesOn": [],
-              "next_state_id": 6,
-              "next_state_name": "END",
-              "previous_state_id": 16,
-              "shifts": 11,
-              "tcam_row": 248,
+              "next_state_id": 18,
+              "next_state_name": "min_parse_depth_accept_loop.$it2.$split_0",
+              "previous_state_id": 17,
+              "shifts": 4,
+              "tcam_row": 247,
               "previous_state_name": "min_parse_depth_accept_loop.$it1.$split_0"
             },
             {
@@ -11319,24 +11394,66 @@
               "matchesOn": [],
               "next_state_id": 6,
               "next_state_name": "END",
-              "previous_state_id": 16,
+              "previous_state_id": 17,
               "shifts": 0,
-              "tcam_row": 247,
+              "tcam_row": 246,
               "previous_state_name": "min_parse_depth_accept_loop.$it1.$split_0"
             },
             {
               "extracts": [
                 {
                   "bit_width": 8,
-                  "dest_container": 301,
+                  "dest_container": 291,
                   "extractor_id": 0,
                   "buffer_offset": 0
                 },
                 {
                   "bit_width": 8,
-                  "dest_container": 300,
+                  "dest_container": 80,
                   "extractor_id": 1,
-                  "buffer_offset": 1
+                  "constant_value": 1
+                }
+              ],
+              "has_counter": false,
+              "matchesOn": [],
+              "next_state_id": 6,
+              "next_state_name": "END",
+              "previous_state_id": 18,
+              "shifts": 7,
+              "tcam_row": 245,
+              "previous_state_name": "min_parse_depth_accept_loop.$it2.$split_0"
+            },
+            {
+              "extracts": [
+                {
+                  "bit_width": 8,
+                  "dest_container": 291,
+                  "extractor_id": 0,
+                  "buffer_offset": 0
+                },
+                {
+                  "bit_width": 8,
+                  "dest_container": 80,
+                  "extractor_id": 1,
+                  "constant_value": 1
+                }
+              ],
+              "has_counter": false,
+              "matchesOn": [],
+              "next_state_id": 6,
+              "next_state_name": "END",
+              "previous_state_id": 18,
+              "shifts": 7,
+              "tcam_row": 244,
+              "previous_state_name": "min_parse_depth_accept_loop.$it2.$split_0"
+            },
+            {
+              "extracts": [
+                {
+                  "bit_width": 16,
+                  "dest_container": 323,
+                  "extractor_id": 0,
+                  "buffer_offset": 0
                 },
                 {
                   "bit_width": 32,
@@ -11346,8 +11463,8 @@
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 338,
-                  "extractor_id": 0,
+                  "dest_container": 322,
+                  "extractor_id": 1,
                   "buffer_offset": 6
                 },
                 {
@@ -11359,13 +11476,13 @@
                 {
                   "bit_width": 16,
                   "dest_container": 321,
-                  "extractor_id": 1,
+                  "extractor_id": 2,
                   "buffer_offset": 12
                 },
                 {
                   "bit_width": 8,
                   "dest_container": 81,
-                  "extractor_id": 2,
+                  "extractor_id": 0,
                   "constant_value": 2
                 }
               ],
@@ -11381,7 +11498,7 @@
               "next_state_name": "parse_fabric",
               "previous_state_id": 14,
               "shifts": 14,
-              "tcam_row": 246,
+              "tcam_row": 243,
               "previous_state_name": "parse_ethernet",
               "savesTo": [
                 {
@@ -11393,16 +11510,10 @@
             {
               "extracts": [
                 {
-                  "bit_width": 8,
-                  "dest_container": 301,
+                  "bit_width": 16,
+                  "dest_container": 323,
                   "extractor_id": 0,
                   "buffer_offset": 0
-                },
-                {
-                  "bit_width": 8,
-                  "dest_container": 300,
-                  "extractor_id": 1,
-                  "buffer_offset": 1
                 },
                 {
                   "bit_width": 32,
@@ -11412,8 +11523,8 @@
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 338,
-                  "extractor_id": 0,
+                  "dest_container": 322,
+                  "extractor_id": 1,
                   "buffer_offset": 6
                 },
                 {
@@ -11425,13 +11536,13 @@
                 {
                   "bit_width": 16,
                   "dest_container": 321,
-                  "extractor_id": 1,
+                  "extractor_id": 2,
                   "buffer_offset": 12
                 },
                 {
                   "bit_width": 8,
                   "dest_container": 81,
-                  "extractor_id": 2,
+                  "extractor_id": 0,
                   "constant_value": 2
                 }
               ],
@@ -11443,11 +11554,11 @@
                   "value": "0x****"
                 }
               ],
-              "next_state_id": 13,
+              "next_state_id": 15,
               "next_state_name": "min_parse_depth_accept_initial",
               "previous_state_id": 14,
               "shifts": 14,
-              "tcam_row": 245,
+              "tcam_row": 242,
               "previous_state_name": "parse_ethernet"
             },
             {
@@ -11495,7 +11606,7 @@
               "next_state_name": "parse_csig",
               "previous_state_id": 4,
               "shifts": 12,
-              "tcam_row": 244,
+              "tcam_row": 241,
               "previous_state_name": "parse_fabric"
             },
             {
@@ -11539,11 +11650,11 @@
                   "value": "0x**"
                 }
               ],
-              "next_state_id": 13,
+              "next_state_id": 15,
               "next_state_name": "min_parse_depth_accept_initial",
               "previous_state_id": 4,
               "shifts": 12,
-              "tcam_row": 243,
+              "tcam_row": 240,
               "previous_state_name": "parse_fabric"
             },
             {
@@ -11599,11 +11710,11 @@
               ],
               "has_counter": true,
               "matchesOn": [],
-              "next_state_id": 17,
+              "next_state_id": 19,
               "next_state_name": "parse_csig.$split_0",
               "previous_state_id": 8,
               "shifts": 14,
-              "tcam_row": 242,
+              "tcam_row": 239,
               "previous_state_name": "parse_csig"
             },
             {
@@ -11619,9 +11730,9 @@
               "matchesOn": [],
               "next_state_id": 6,
               "next_state_name": "END",
-              "previous_state_id": 17,
+              "previous_state_id": 19,
               "shifts": 0,
-              "tcam_row": 241,
+              "tcam_row": 238,
               "previous_state_name": "parse_csig.$split_0"
             }
           ]
@@ -11641,26 +11752,32 @@
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 333,
+                  "dest_container": 141,
                   "extractor_id": 1,
+                  "buffer_offset": 2
+                },
+                {
+                  "bit_width": 32,
+                  "dest_container": 0,
+                  "extractor_id": 0,
+                  "buffer_offset": 4
+                },
+                {
+                  "bit_width": 16,
+                  "dest_container": 333,
+                  "extractor_id": 2,
                   "buffer_offset": 16
                 },
                 {
                   "bit_width": 16,
                   "dest_container": 331,
-                  "extractor_id": 2,
+                  "extractor_id": 3,
                   "buffer_offset": 18
                 },
                 {
-                  "bit_width": 16,
-                  "dest_container": 330,
-                  "extractor_id": 3,
-                  "buffer_offset": 20
-                },
-                {
                   "bit_width": 32,
-                  "dest_container": 4,
-                  "extractor_id": 0,
+                  "dest_container": 6,
+                  "extractor_id": 1,
                   "constant_value": -1515870811
                 }
               ],
@@ -11669,7 +11786,7 @@
               "next_state_id": 0,
               "next_state_name": "$entry_point.start.$split_0",
               "previous_state_id": 1,
-              "shifts": 22,
+              "shifts": 20,
               "tcam_row": 255,
               "previous_state_name": "$entry_point.start"
             },
@@ -11677,37 +11794,37 @@
               "extracts": [
                 {
                   "bit_width": 16,
-                  "dest_container": 332,
+                  "dest_container": 330,
                   "extractor_id": 0,
                   "buffer_offset": 0
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 329,
+                  "dest_container": 332,
                   "extractor_id": 1,
                   "buffer_offset": 2
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 328,
+                  "dest_container": 329,
                   "extractor_id": 2,
                   "buffer_offset": 4
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 160,
+                  "dest_container": 328,
                   "extractor_id": 3,
                   "buffer_offset": 6
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 166,
+                  "dest_container": 169,
                   "extractor_id": 4,
                   "constant_value": 42405
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 167,
+                  "dest_container": 170,
                   "extractor_id": 5,
                   "constant_value": 512
                 }
@@ -11719,19 +11836,19 @@
               "previous_state_id": 0,
               "shifts": 8,
               "tcam_row": 254,
-              "previous_state_name": "$entry_point.start.$split_0",
-              "savesTo": [
-                {
-                  "buffer_offset": 6,
-                  "hardware_id": 0
-                }
-              ]
+              "previous_state_name": "$entry_point.start.$split_0"
             },
             {
               "extracts": [
                 {
+                  "bit_width": 16,
+                  "dest_container": 162,
+                  "extractor_id": 0,
+                  "buffer_offset": 0
+                },
+                {
                   "bit_width": 32,
-                  "dest_container": 5,
+                  "dest_container": 7,
                   "extractor_id": 0,
                   "constant_value": 19779
                 }
@@ -11741,15 +11858,21 @@
               "next_state_id": 3,
               "next_state_name": "$entry_point.start.$split_2",
               "previous_state_id": 2,
-              "shifts": 0,
+              "shifts": 2,
               "tcam_row": 253,
-              "previous_state_name": "$entry_point.start.$split_1"
+              "previous_state_name": "$entry_point.start.$split_1",
+              "savesTo": [
+                {
+                  "buffer_offset": 0,
+                  "hardware_id": 0
+                }
+              ]
             },
             {
               "extracts": [
                 {
                   "bit_width": 16,
-                  "dest_container": 169,
+                  "dest_container": 171,
                   "extractor_id": 0,
                   "constant_value": 35057
                 },
@@ -11779,7 +11902,7 @@
               "extracts": [
                 {
                   "bit_width": 16,
-                  "dest_container": 169,
+                  "dest_container": 171,
                   "extractor_id": 0,
                   "constant_value": 35057
                 },
@@ -11809,7 +11932,7 @@
               "extracts": [
                 {
                   "bit_width": 16,
-                  "dest_container": 169,
+                  "dest_container": 171,
                   "extractor_id": 0,
                   "constant_value": 35057
                 },
@@ -11839,19 +11962,19 @@
               "extracts": [
                 {
                   "bit_width": 16,
-                  "dest_container": 161,
+                  "dest_container": 163,
                   "extractor_id": 0,
                   "buffer_offset": 0
                 },
                 {
                   "bit_width": 32,
-                  "dest_container": 6,
+                  "dest_container": 8,
                   "extractor_id": 0,
                   "buffer_offset": 0
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 162,
+                  "dest_container": 164,
                   "extractor_id": 1,
                   "buffer_offset": 2
                 },
@@ -11917,7 +12040,7 @@
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 141,
+                  "dest_container": 143,
                   "extractor_id": 1,
                   "buffer_offset": 2
                 },
@@ -11953,7 +12076,7 @@
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 141,
+                  "dest_container": 143,
                   "extractor_id": 1,
                   "buffer_offset": 2
                 },
@@ -11983,19 +12106,19 @@
               "extracts": [
                 {
                   "bit_width": 16,
-                  "dest_container": 164,
+                  "dest_container": 166,
                   "extractor_id": 0,
                   "buffer_offset": 0
                 },
                 {
                   "bit_width": 32,
-                  "dest_container": 0,
+                  "dest_container": 2,
                   "extractor_id": 0,
                   "buffer_offset": 2
                 },
                 {
                   "bit_width": 32,
-                  "dest_container": 3,
+                  "dest_container": 5,
                   "extractor_id": 1,
                   "buffer_offset": 6
                 },
@@ -12013,7 +12136,7 @@
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 163,
+                  "dest_container": 165,
                   "extractor_id": 1,
                   "buffer_offset": 12
                 },
@@ -12055,7 +12178,7 @@
                 },
                 {
                   "bit_width": 32,
-                  "dest_container": 2,
+                  "dest_container": 4,
                   "extractor_id": 3,
                   "buffer_offset": 12
                 },
@@ -12085,7 +12208,7 @@
               "extracts": [
                 {
                   "bit_width": 32,
-                  "dest_container": 1,
+                  "dest_container": 3,
                   "extractor_id": 0,
                   "buffer_offset": 0
                 },
@@ -12145,7 +12268,7 @@
               "extracts": [
                 {
                   "bit_width": 32,
-                  "dest_container": 1,
+                  "dest_container": 3,
                   "extractor_id": 0,
                   "buffer_offset": 0
                 }
@@ -12235,7 +12358,7 @@
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 142,
+                  "dest_container": 160,
                   "extractor_id": 0,
                   "buffer_offset": 2
                 },

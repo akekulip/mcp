@@ -1,11 +1,11 @@
 {
     "program_name": "mcp_fabric.p4", 
-    "build_date": "Wed Aug 26 19:21:54 2026", 
-    "run_id": "9154718c2dc948bb", 
+    "build_date": "Wed Aug 26 19:22:39 2026", 
+    "run_id": "c2d5ccb9675d4b99", 
     "compiler_version": "9.13.1", 
     "schema_version": "1.1.0", 
     "target": "tofino", 
-    "compilation_time": "4.903473615646362", 
+    "compilation_time": "4.818777561187744", 
     "phv": {
         "normal": [
             {
@@ -16,29 +16,29 @@
             }, 
             {
                 "bit_width": 16, 
-                "containers_occupied": 36, 
-                "bits_occupied": 550, 
+                "containers_occupied": 38, 
+                "bits_occupied": 582, 
                 "bits_overlaid": 9
             }, 
             {
                 "bit_width": 32, 
-                "containers_occupied": 14, 
-                "bits_occupied": 391, 
+                "containers_occupied": 16, 
+                "bits_occupied": 455, 
                 "bits_overlaid": 0
             }
         ], 
         "tagalong": [
             {
                 "bit_width": 8, 
-                "containers_occupied": 10, 
-                "bits_occupied": 80, 
-                "bits_overlaid": 48
+                "containers_occupied": 11, 
+                "bits_occupied": 88, 
+                "bits_overlaid": 40
             }, 
             {
                 "bit_width": 16, 
-                "containers_occupied": 18, 
-                "bits_occupied": 288, 
-                "bits_overlaid": 48
+                "containers_occupied": 20, 
+                "bits_occupied": 320, 
+                "bits_overlaid": 64
             }, 
             {
                 "bit_width": 32, 
@@ -53,7 +53,7 @@
             "tcam_rows": 17
         }, 
         "egress": {
-            "tcam_rows": 15
+            "tcam_rows": 18
         }
     }, 
     "mau": {
@@ -92,7 +92,7 @@
         }, 
         "egress": {
             "pov_bits": 5, 
-            "fde_entries": 25
+            "fde_entries": 27
         }
     }, 
     "clots": {

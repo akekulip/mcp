@@ -144,7 +144,7 @@ header bth_h {
  * PREVIOUS pass, p4/reports/step5-7-silicon.md).  So the copy carries this pass's
  * verdict in a header prepended by the mirror engine, laid out as a complete Ethernet
  * frame so the collector sees eth(dst A5:A5:…, etype 0x88F1) | mirror_meta | the
- * original frame.  24 bytes.  The egress parser recognises the 0xA5A5 prefix and
+ * original frame.  30 bytes.  The egress parser recognises the 0xA5A5 prefix and
  * leaves copies alone (no CSIG on copies). */
 header mirror_h {
     bit<48> dmac;
@@ -158,6 +158,8 @@ header mirror_h {
     bit<16> path_id;
     bit<16> attn;      // attention weight read for this path on this pass
     bit<16> flags;     // bit0 measured, bit1 dropped, bit2 corrupted
+    bit<48> tstamp;    // ig_intr_md.ingress_mac_tstamp of the mirrored packet (ns): the
+                       // switch's own clock, for PREREG H7 tau_fast without host clocks
 }
 
 /* §6 D1 — NIC-side evidence. */
@@ -225,7 +227,8 @@ struct ig_md_t {
     bit<16> fault;       // 0 none, 2 dropped, 4 corrupted (bit0 is reserved for "measured")
     bit<16> flags_out;   // fabric_h.flags to write: fault | measured
     MirrorId_t mirror_sid;   // bit<10>: Mirror.emit() wants a plain field, no cast/slice
-    bit<48> mir_dmac;        // mirror header constants, from tbl_mirror_hdr action data
+    bit<48> tstamp;          // ig_intr_md.ingress_mac_tstamp copied by set_role (MAU-written = emit-safe)
+    bit<48> mir_dmac;        // mirror header constants, from the parser start state
     bit<48> mir_smac;
     bit<16> mir_etype;
 }
@@ -274,6 +277,7 @@ parser IgParser(packet_in pkt, out headers_t hdr, out ig_md_t md,
         md.mirror_sid = 0;
         /* Mirror header Ethernet fields: constants are free in the parser, forbidden in
          * the emit field list, and expensive as MAU action data (112 immediate bits). */
+        md.tstamp     = 0;
         md.mir_dmac   = 48w0xA5A5A5A5A5A5;
         md.mir_smac   = 48w0x020000004D43;
         md.mir_etype  = ETYPE_MCP_MIRROR;
@@ -361,6 +365,7 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
     action set_role(bit<16> role, bit<16> src_leaf) {
         md.role     = role;
         md.src_leaf = src_leaf;
+        md.tstamp   = ig_intr_md.ingress_mac_tstamp;   // for mirror_h.tstamp (H7 tau_fast)
     }
 
     table tbl_port_role {
@@ -827,7 +832,8 @@ control IgDeparser(packet_out pkt, inout headers_t hdr, in ig_md_t md,
              * that can mirror (act_enter sets it at hop 0). */
             mcp_mirror.emit<mirror_h>(md.mirror_sid,
                 { md.mir_dmac, md.mir_smac, md.mir_etype,
-                  hdr.fabric.hop, md.vlink_id, hdr.fabric.path_id, md.attn, md.flags_out });
+                  hdr.fabric.hop, md.vlink_id, hdr.fabric.path_id, md.attn, md.flags_out,
+                  md.tstamp });
         }
         pkt.emit(hdr);
     }
