@@ -1,0 +1,903 @@
+{
+    "schema_version": "1.0.0",
+    "symbols": [
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 302,
+                    "column": 8
+                }
+            ],
+            "symbol_name": "pipe",
+            "declaration": {
+                "file": "",
+                "line": 301,
+                "column": 83
+            },
+            "symbol_type": "Declaration_Instance_Type_Specialized"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 298,
+                    "column": 22
+                }
+            ],
+            "symbol_name": "EgDeparser.hdr.csig",
+            "declaration": {
+                "file": "",
+                "line": 296,
+                "column": 55
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 298,
+                    "column": 22
+                }
+            ],
+            "symbol_name": "EgDeparser.hdr.ethernet",
+            "declaration": {
+                "file": "",
+                "line": 296,
+                "column": 55
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 298,
+                    "column": 22
+                }
+            ],
+            "symbol_name": "EgDeparser.hdr.fabric",
+            "declaration": {
+                "file": "",
+                "line": 296,
+                "column": 55
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 298,
+                    "column": 13
+                }
+            ],
+            "symbol_name": "EgDeparser.pkt",
+            "declaration": {
+                "file": "",
+                "line": 296,
+                "column": 31
+            },
+            "symbol_type": "Parameter_Type_Extern"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 261,
+                    "column": 21
+                }
+            ],
+            "symbol_name": "EgParser.eg_intr_md",
+            "declaration": {
+                "file": "",
+                "line": 258,
+                "column": 49
+            },
+            "symbol_type": "Parameter_Type_Header"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 283,
+                    "column": 21
+                }
+            ],
+            "symbol_name": "EgParser.hdr.csig",
+            "declaration": {
+                "file": "",
+                "line": 257,
+                "column": 49
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 267,
+                    "column": 21
+                }
+            ],
+            "symbol_name": "EgParser.hdr.ethernet",
+            "declaration": {
+                "file": "",
+                "line": 257,
+                "column": 49
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 268,
+                    "column": 27
+                }
+            ],
+            "symbol_name": "EgParser.hdr.ethernet.ether_type",
+            "declaration": {
+                "file": "",
+                "line": 257,
+                "column": 49
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 275,
+                    "column": 21
+                }
+            ],
+            "symbol_name": "EgParser.hdr.fabric",
+            "declaration": {
+                "file": "",
+                "line": 257,
+                "column": 49
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 276,
+                    "column": 27
+                }
+            ],
+            "symbol_name": "EgParser.hdr.fabric.nxt",
+            "declaration": {
+                "file": "",
+                "line": 257,
+                "column": 49
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 262,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "EgParser.md.pad",
+            "declaration": {
+                "file": "",
+                "line": 257,
+                "column": 66
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 261,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 267,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 275,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 283,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "EgParser.pkt",
+            "declaration": {
+                "file": "",
+                "line": 257,
+                "column": 27
+            },
+            "symbol_type": "Parameter_Type_Extern"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 252,
+                    "column": 22
+                }
+            ],
+            "symbol_name": "IgDeparser.hdr.bth",
+            "declaration": {
+                "file": "",
+                "line": 250,
+                "column": 52
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 252,
+                    "column": 22
+                }
+            ],
+            "symbol_name": "IgDeparser.hdr.csig",
+            "declaration": {
+                "file": "",
+                "line": 250,
+                "column": 52
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 252,
+                    "column": 22
+                }
+            ],
+            "symbol_name": "IgDeparser.hdr.ethernet",
+            "declaration": {
+                "file": "",
+                "line": 250,
+                "column": 52
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 252,
+                    "column": 22
+                }
+            ],
+            "symbol_name": "IgDeparser.hdr.evid",
+            "declaration": {
+                "file": "",
+                "line": 250,
+                "column": 52
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 252,
+                    "column": 22
+                }
+            ],
+            "symbol_name": "IgDeparser.hdr.fabric",
+            "declaration": {
+                "file": "",
+                "line": 250,
+                "column": 52
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 252,
+                    "column": 22
+                }
+            ],
+            "symbol_name": "IgDeparser.hdr.ipv4",
+            "declaration": {
+                "file": "",
+                "line": 250,
+                "column": 52
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 252,
+                    "column": 22
+                }
+            ],
+            "symbol_name": "IgDeparser.hdr.udp",
+            "declaration": {
+                "file": "",
+                "line": 250,
+                "column": 52
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [],
+            "symbol_name": "IgDeparser.ig_dprsr_md.mirror_type",
+            "declaration": {
+                "file": "",
+                "line": 251,
+                "column": 65
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 252,
+                    "column": 13
+                }
+            ],
+            "symbol_name": "IgDeparser.pkt",
+            "declaration": {
+                "file": "",
+                "line": 250,
+                "column": 31
+            },
+            "symbol_type": "Parameter_Type_Extern"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 230,
+                    "column": 21
+                }
+            ],
+            "symbol_name": "IgParser.hdr.bth",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 46
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 208,
+                    "column": 21
+                }
+            ],
+            "symbol_name": "IgParser.hdr.csig",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 46
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 191,
+                    "column": 21
+                }
+            ],
+            "symbol_name": "IgParser.hdr.ethernet",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 46
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 192,
+                    "column": 27
+                }
+            ],
+            "symbol_name": "IgParser.hdr.ethernet.ether_type",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 46
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 235,
+                    "column": 21
+                }
+            ],
+            "symbol_name": "IgParser.hdr.evid",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 46
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 200,
+                    "column": 21
+                }
+            ],
+            "symbol_name": "IgParser.hdr.fabric",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 46
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 201,
+                    "column": 27
+                }
+            ],
+            "symbol_name": "IgParser.hdr.fabric.nxt",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 46
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 213,
+                    "column": 21
+                }
+            ],
+            "symbol_name": "IgParser.hdr.ipv4",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 46
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 214,
+                    "column": 27
+                }
+            ],
+            "symbol_name": "IgParser.hdr.ipv4.protocol",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 46
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 221,
+                    "column": 21
+                }
+            ],
+            "symbol_name": "IgParser.hdr.udp",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 46
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 222,
+                    "column": 27
+                }
+            ],
+            "symbol_name": "IgParser.hdr.udp.dst_port",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 46
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 167,
+                    "column": 21
+                }
+            ],
+            "symbol_name": "IgParser.ig_intr_md",
+            "declaration": {
+                "file": "",
+                "line": 164,
+                "column": 50
+            },
+            "symbol_type": "Parameter_Type_Header"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 183,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.attn",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 184,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.do_measure",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 171,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.dst_leaf",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 185,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.fault",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 172,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.hop",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 186,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.mirror_sid",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 174,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.next_vsw",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 175,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.path_id",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 182,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.rnd_attn",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 181,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.rnd_fail",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 169,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.role",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 178,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.spray_hash",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 176,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.spray_idx",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 177,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.spray_rand",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 179,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.spray_rr",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 170,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.src_leaf",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 180,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.vlink_id",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 173,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.vsw_id",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 167,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 168,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 191,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 200,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 208,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 213,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 221,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 230,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 235,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.pkt",
+            "declaration": {
+                "file": "",
+                "line": 163,
+                "column": 27
+            },
+            "symbol_type": "Parameter_Type_Extern"
+        }
+    ],
+    "source_root": "mcp_fabric.p4"
+}

@@ -1,0 +1,565 @@
+version:
+  version: 1.0.1
+  run_id: "ea303d583d7b44a3"
+  target: Tofino
+error_mode: propagate_and_disable
+phv ingress:
+  hdr.ethernet.dst_addr.0-31: TW11
+  hdr.ethernet.dst_addr.32-47: TH27
+  hdr.ethernet.src_addr.0-31: TW10
+  hdr.ethernet.src_addr.32-47: TH26
+  hdr.ethernet.ether_type: TH25
+  hdr.fabric.vsw_id: TH24(8..15)
+  hdr.fabric.hop: TH24(0..7)
+  hdr.fabric.spray: TW4(24..31)
+  hdr.fabric.loops: TW4(16..23)
+  hdr.fabric.flags: TW4(8..15)
+  hdr.fabric.nxt: TW4(0..7)
+  hdr.csig.worst_hop: TW7(24..31)
+  hdr.csig.worst_vlink: TW7(16..23)
+  hdr.csig.worst_qdepth: TW7(0..15)
+  hdr.csig.worst_tdelta.0-15: TH12
+  hdr.csig.worst_tdelta.16-31: TH13
+  hdr.csig.path_id.0-7: TB6
+  hdr.csig.path_id.8-15: TB7
+  hdr.csig.epoch.0-7: TB4
+  hdr.csig.epoch.8-15: TB5
+  hdr.ipv4.version: TW5(28..31)
+  hdr.ipv4.ihl: TW5(24..27)
+  hdr.ipv4.diffserv: TW5(16..23)
+  hdr.ipv4.total_len: TW5(0..15)
+  hdr.ipv4.identification: TH9
+  hdr.ipv4.flags: TH8(13..15)
+  hdr.ipv4.frag_offset: TH8(0..12)
+  hdr.ipv4.ttl: TH7(8..15)
+  hdr.ipv4.protocol: TH7(0..7)
+  hdr.ipv4.hdr_checksum: TH6
+  hdr.ipv4.src_addr.0-15: TH16
+  hdr.ipv4.src_addr.16-31: TH17
+  hdr.ipv4.dst_addr.0-15: TH14
+  hdr.ipv4.dst_addr.16-31: TH15
+  hdr.udp.src_port: TW9(16..31)
+  hdr.udp.dst_port: TW9(0..15)
+  hdr.udp.len: TW8(16..31)
+  hdr.udp.checksum: TW8(0..15)
+  hdr.bth.w0.0-7: TB8
+  hdr.bth.w0.8-15: TB9
+  hdr.bth.w0.16-23: TB10
+  hdr.bth.w0.24-31: TB11
+  hdr.bth.w1.0-15: TH10
+  hdr.bth.w1.16-31: TH11
+  hdr.bth.w2: TW6
+  hdr.evid.magic: TW6(24..31)
+  hdr.evid.path_id: TW6(16..23)
+  hdr.evid.rtt_q: TW6(8..15)
+  hdr.evid.loss_q: TW6(0..7)
+  hdr.evid.ecn_q: TH11(8..15)
+  hdr.evid.flags: TH11(0..7)
+  hdr.evid.seq: TH10
+  ig_intr_md_for_dprsr.mirror_type: {  stage 12: B0(0..2) } 
+  $tmp2: {  stage 12: H0(0..9) } 
+  hdr.ethernet.$valid: B1(0)
+  hdr.fabric.$valid: B1(1)
+  hdr.csig.$valid: B1(2)
+  hdr.ipv4.$valid: B1(3)
+  hdr.udp.$valid: B1(4)
+  hdr.bth.$valid: B1(5)
+  hdr.evid.$valid: B1(6)
+  context_json:
+    B0:
+    - { name : ig_intr_md_for_dprsr.mirror_type, live_start : deparser, live_end : deparser, mutually_exclusive_with: [  ] }
+    B1:
+    - { name : hdr.ethernet.$valid, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
+    - { name : hdr.fabric.$valid, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
+    - { name : hdr.csig.$valid, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
+    - { name : hdr.ipv4.$valid, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
+    - { name : hdr.udp.$valid, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
+    - { name : hdr.bth.$valid, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
+    - { name : hdr.evid.$valid, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
+    H0:
+    - { name : $tmp2, live_start : deparser, live_end : deparser, mutually_exclusive_with: [  ] }
+phv egress:
+  eg_intr_md.egress_port: H16(0..8)
+  hdr.ethernet.dst_addr.0-15: TH0
+  hdr.ethernet.dst_addr.16-31: TH1
+  hdr.ethernet.dst_addr.32-47: TH23
+  hdr.ethernet.src_addr.0-31: TW3
+  hdr.ethernet.src_addr.32-47: TH22
+  hdr.ethernet.ether_type: TH21
+  hdr.fabric.vsw_id: TH20(8..15)
+  hdr.fabric.hop: TH20(0..7)
+  hdr.fabric.spray: TW0(24..31)
+  hdr.fabric.loops: TW0(16..23)
+  hdr.fabric.flags: TW0(8..15)
+  hdr.fabric.nxt: TW0(0..7)
+  hdr.csig.worst_hop: TW1(24..31)
+  hdr.csig.worst_vlink: TW1(16..23)
+  hdr.csig.worst_qdepth: TW1(0..15)
+  hdr.csig.worst_tdelta.0-15: TH2
+  hdr.csig.worst_tdelta.16-31: TH3
+  hdr.csig.path_id: TW2(16..31)
+  hdr.csig.epoch: TW2(0..15)
+  hdr.min_parse_depth_padding_0$0.packet_payload.0-15: TH4
+  hdr.min_parse_depth_padding_0$0.packet_payload.16-31: TH5
+  hdr.min_parse_depth_padding_0$0.packet_payload.32-63: TW12
+  hdr.min_parse_depth_padding_0$0.packet_payload.64-71: TB3
+  hdr.min_parse_depth_padding_0$0.packet_payload.72-79: TB12
+  hdr.min_parse_depth_padding_0$0.packet_payload.80-87: TB0
+  hdr.min_parse_depth_padding_0$1.packet_payload.0-31: TW13
+  hdr.min_parse_depth_padding_0$1.packet_payload.32-63: TW14
+  hdr.min_parse_depth_padding_0$1.packet_payload.64-71: TB13
+  hdr.min_parse_depth_padding_0$1.packet_payload.72-79: TB14
+  hdr.min_parse_depth_padding_0$1.packet_payload.80-87: TB1
+  hdr.min_parse_depth_padding_0$2.packet_payload.0-31: TW15
+  hdr.min_parse_depth_padding_0$2.packet_payload.32-47: TH18
+  hdr.min_parse_depth_padding_0$2.packet_payload.48-63: TH19
+  hdr.min_parse_depth_padding_0$2.packet_payload.64-79: TH30
+  hdr.min_parse_depth_padding_0$2.packet_payload.80-87: TB2
+  hdr.ethernet.$valid: B17(0)
+  hdr.fabric.$valid: B17(1)
+  hdr.csig.$valid: B17(2)
+  hdr.min_parse_depth_padding_0.$stkvalid: B16(0..2)
+  hdr.min_parse_depth_padding_0$0.$valid: {  stage 12: B16(2) } 
+  hdr.min_parse_depth_padding_0$1.$valid: {  stage 12: B16(1) } 
+  hdr.min_parse_depth_padding_0$2.$valid: B16(0)
+  context_json:
+    B16:
+    - { name : hdr.min_parse_depth_padding_0$2.$valid, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
+    - { name : hdr.min_parse_depth_padding_0.$stkvalid, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
+    - { name : hdr.min_parse_depth_padding_0$0.$valid, live_start : deparser, live_end : deparser, mutually_exclusive_with: [  ] }
+    - { name : hdr.min_parse_depth_padding_0$1.$valid, live_start : deparser, live_end : deparser, mutually_exclusive_with: [  ] }
+    B17:
+    - { name : hdr.ethernet.$valid, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
+    - { name : hdr.fabric.$valid, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
+    - { name : hdr.csig.$valid, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
+    H16:
+    - { name : eg_intr_md.egress_port, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
+parser ingress:
+  start: $init_match
+  init_zero: [ B0, H0, B1 ]
+  bitwise_or: [ B1 ]
+  hdr_len_adj: 16
+  states:
+    $init_match:
+      *:
+        16..17: TH27  # ingress::hdr.ethernet.dst_addr[47:32].32-47
+        18..21: TW11  # ingress::hdr.ethernet.dst_addr[31:0].0-31
+        22..23: TH26  # ingress::hdr.ethernet.src_addr[47:32].32-47
+        24..27: TW10  # ingress::hdr.ethernet.src_addr[31:0].0-31
+        28..29: TH25  # ingress::hdr.ethernet.ether_type
+        B1: 1  # value 1 -> B1 bit[0]: ingress::hdr.ethernet.$valid
+        load: { half : 28..29 }
+        shift: 30
+        buf_req: 30
+        next: $entry_point.start
+    $entry_point.start:
+      match: [ half ]
+      0x88f0:
+        0..1: TH24
+            # - bit[0..7] -> TH24 bit[15..8]: ingress::hdr.fabric.vsw_id
+            # - bit[8..15] -> TH24 bit[7..0]: ingress::hdr.fabric.hop
+        2..5: TW4
+            # - bit[16..23] -> TW4 bit[31..24]: ingress::hdr.fabric.spray
+            # - bit[24..31] -> TW4 bit[23..16]: ingress::hdr.fabric.loops
+            # - bit[32..39] -> TW4 bit[15..8]: ingress::hdr.fabric.flags
+            # - bit[40..47] -> TW4 bit[7..0]: ingress::hdr.fabric.nxt
+        B1: 2  # value 1 -> B1 bit[1]: ingress::hdr.fabric.$valid
+        load: { byte1 : 5 }
+        shift: 6
+        buf_req: 6
+        next: parse_fabric
+      0x0800:
+        0..3: TW5
+            # - bit[0..3] -> TW5 bit[31..28]: ingress::hdr.ipv4.version
+            # - bit[4..7] -> TW5 bit[27..24]: ingress::hdr.ipv4.ihl
+            # - bit[8..15] -> TW5 bit[23..16]: ingress::hdr.ipv4.diffserv
+            # - bit[16..31] -> TW5 bit[15..0]: ingress::hdr.ipv4.total_len
+        4..5: TH9  # ingress::hdr.ipv4.identification
+        6..7: TH8
+            # - bit[48..50] -> TH8 bit[15..13]: ingress::hdr.ipv4.flags
+            # - bit[51..63] -> TH8 bit[12..0]: ingress::hdr.ipv4.frag_offset
+        8..9: TH7
+            # - bit[64..71] -> TH7 bit[15..8]: ingress::hdr.ipv4.ttl
+            # - bit[72..79] -> TH7 bit[7..0]: ingress::hdr.ipv4.protocol
+        10..11: TH6  # ingress::hdr.ipv4.hdr_checksum
+        B1: 8  # value 1 -> B1 bit[3]: ingress::hdr.ipv4.$valid
+        load: { byte1 : 9 }
+        shift: 12
+        buf_req: 12
+        next: parse_ipv4.$split_0
+      0x****:
+        buf_req: 0
+        next: end
+    parse_fabric:
+      match: [ byte1 ]
+      0x01:
+        0..3: TW7
+            # - bit[0..7] -> TW7 bit[31..24]: ingress::hdr.csig.worst_hop
+            # - bit[8..15] -> TW7 bit[23..16]: ingress::hdr.csig.worst_vlink
+            # - bit[16..31] -> TW7 bit[15..0]: ingress::hdr.csig.worst_qdepth
+        4..5: TH13  # ingress::hdr.csig.worst_tdelta[31:16].16-31
+        6..7: TH12  # ingress::hdr.csig.worst_tdelta[15:0].0-15
+        8: TB7  # ingress::hdr.csig.path_id[15:8].8-15
+        9: TB6  # ingress::hdr.csig.path_id[7:0].0-7
+        10: TB5  # ingress::hdr.csig.epoch[15:8].8-15
+        11: TB4  # ingress::hdr.csig.epoch[7:0].0-7
+        shift: 12
+        buf_req: 12
+        next: parse_csig.$split_0
+      0x**:
+        0..3: TW5
+            # - bit[0..3] -> TW5 bit[31..28]: ingress::hdr.ipv4.version
+            # - bit[4..7] -> TW5 bit[27..24]: ingress::hdr.ipv4.ihl
+            # - bit[8..15] -> TW5 bit[23..16]: ingress::hdr.ipv4.diffserv
+            # - bit[16..31] -> TW5 bit[15..0]: ingress::hdr.ipv4.total_len
+        4..5: TH9  # ingress::hdr.ipv4.identification
+        6..7: TH8
+            # - bit[48..50] -> TH8 bit[15..13]: ingress::hdr.ipv4.flags
+            # - bit[51..63] -> TH8 bit[12..0]: ingress::hdr.ipv4.frag_offset
+        8..9: TH7
+            # - bit[64..71] -> TH7 bit[15..8]: ingress::hdr.ipv4.ttl
+            # - bit[72..79] -> TH7 bit[7..0]: ingress::hdr.ipv4.protocol
+        10..11: TH6  # ingress::hdr.ipv4.hdr_checksum
+        B1: 8  # value 1 -> B1 bit[3]: ingress::hdr.ipv4.$valid
+        load: { byte1 : 9 }
+        shift: 12
+        buf_req: 12
+        next: parse_ipv4.$split_0
+    parse_csig.$split_0:
+      *:
+        B1: 4  # value 1 -> B1 bit[2]: ingress::hdr.csig.$valid
+        buf_req: 0
+        next: parse_ipv4
+    parse_ipv4:
+      *:
+        0..3: TW5
+            # - bit[0..3] -> TW5 bit[31..28]: ingress::hdr.ipv4.version
+            # - bit[4..7] -> TW5 bit[27..24]: ingress::hdr.ipv4.ihl
+            # - bit[8..15] -> TW5 bit[23..16]: ingress::hdr.ipv4.diffserv
+            # - bit[16..31] -> TW5 bit[15..0]: ingress::hdr.ipv4.total_len
+        4..5: TH9  # ingress::hdr.ipv4.identification
+        6..7: TH8
+            # - bit[48..50] -> TH8 bit[15..13]: ingress::hdr.ipv4.flags
+            # - bit[51..63] -> TH8 bit[12..0]: ingress::hdr.ipv4.frag_offset
+        8..9: TH7
+            # - bit[64..71] -> TH7 bit[15..8]: ingress::hdr.ipv4.ttl
+            # - bit[72..79] -> TH7 bit[7..0]: ingress::hdr.ipv4.protocol
+        10..11: TH6  # ingress::hdr.ipv4.hdr_checksum
+        B1: 8  # value 1 -> B1 bit[3]: ingress::hdr.ipv4.$valid
+        load: { byte1 : 9 }
+        shift: 12
+        buf_req: 12
+        next: parse_ipv4.$split_0
+    parse_ipv4.$split_0:
+      match: [ byte1 ]
+      0x11:
+        0..1: TH17  # ingress::hdr.ipv4.src_addr[31:16].16-31
+        2..3: TH16  # ingress::hdr.ipv4.src_addr[15:0].0-15
+        4..5: TH15  # ingress::hdr.ipv4.dst_addr[31:16].16-31
+        6..7: TH14  # ingress::hdr.ipv4.dst_addr[15:0].0-15
+        8..11: TW9
+            # - bit[0..15] -> TW9 bit[31..16]: ingress::hdr.udp.src_port
+            # - bit[16..31] -> TW9 bit[15..0]: ingress::hdr.udp.dst_port
+        12..15: TW8
+            # - bit[32..47] -> TW8 bit[31..16]: ingress::hdr.udp.len
+            # - bit[48..63] -> TW8 bit[15..0]: ingress::hdr.udp.checksum
+        B1: 16  # value 1 -> B1 bit[4]: ingress::hdr.udp.$valid
+        load: { half : 10..11 }
+        shift: 16
+        buf_req: 16
+        next: parse_udp
+      0x**:
+        0..1: TH17  # ingress::hdr.ipv4.src_addr[31:16].16-31
+        2..3: TH16  # ingress::hdr.ipv4.src_addr[15:0].0-15
+        4..5: TH15  # ingress::hdr.ipv4.dst_addr[31:16].16-31
+        6..7: TH14  # ingress::hdr.ipv4.dst_addr[15:0].0-15
+        shift: 8
+        buf_req: 8
+        next: end
+    parse_udp:
+      match: [ half ]
+      0x12b7:
+        0: TB11  # ingress::hdr.bth.w0[31:24].24-31
+        1: TB10  # ingress::hdr.bth.w0[23:16].16-23
+        2: TB9  # ingress::hdr.bth.w0[15:8].8-15
+        3: TB8  # ingress::hdr.bth.w0[7:0].0-7
+        4..5: TH11  # ingress::hdr.bth.w1[31:16].16-31
+        6..7: TH10  # ingress::hdr.bth.w1[15:0].0-15
+        8..11: TW6  # ingress::hdr.bth.w2
+        shift: 12
+        buf_req: 12
+        next: parse_bth.$split_0
+      0xe5e5:
+        0..3: TW6
+            # - bit[0..7] -> TW6 bit[31..24]: ingress::hdr.evid.magic
+            # - bit[8..15] -> TW6 bit[23..16]: ingress::hdr.evid.path_id
+            # - bit[16..23] -> TW6 bit[15..8]: ingress::hdr.evid.rtt_q
+            # - bit[24..31] -> TW6 bit[7..0]: ingress::hdr.evid.loss_q
+        4..5: TH11
+            # - bit[32..39] -> TH11 bit[15..8]: ingress::hdr.evid.ecn_q
+            # - bit[40..47] -> TH11 bit[7..0]: ingress::hdr.evid.flags
+        6..7: TH10  # ingress::hdr.evid.seq
+        B1: 64  # value 1 -> B1 bit[6]: ingress::hdr.evid.$valid
+        shift: 8
+        buf_req: 8
+        next: end
+      0x****:
+        buf_req: 0
+        next: end
+    parse_bth.$split_0:
+      *:
+        B1: 32  # value 1 -> B1 bit[5]: ingress::hdr.bth.$valid
+        buf_req: 0
+        next: end
+deparser ingress:
+  dictionary:
+    TH27: B1(0)  # ingress::hdr.ethernet.dst_addr.32-47 if ingress::hdr.ethernet.$valid
+    TW11: B1(0)  # ingress::hdr.ethernet.dst_addr.0-31 if ingress::hdr.ethernet.$valid
+    TH26: B1(0)  # ingress::hdr.ethernet.src_addr.32-47 if ingress::hdr.ethernet.$valid
+    TW10: B1(0)  # ingress::hdr.ethernet.src_addr.0-31 if ingress::hdr.ethernet.$valid
+    TH25: B1(0)  # ingress::hdr.ethernet.ether_type if ingress::hdr.ethernet.$valid
+    TH24: B1(1)
+        # - bit[15..8]: ingress::hdr.fabric.vsw_id if ingress::hdr.fabric.$valid
+        # - bit[7..0]: ingress::hdr.fabric.hop if ingress::hdr.fabric.$valid
+    TW4: B1(1)
+        # - bit[31..24]: ingress::hdr.fabric.spray if ingress::hdr.fabric.$valid
+        # - bit[23..16]: ingress::hdr.fabric.loops if ingress::hdr.fabric.$valid
+        # - bit[15..8]: ingress::hdr.fabric.flags if ingress::hdr.fabric.$valid
+        # - bit[7..0]: ingress::hdr.fabric.nxt if ingress::hdr.fabric.$valid
+    TW7: B1(2)
+        # - bit[31..24]: ingress::hdr.csig.worst_hop if ingress::hdr.csig.$valid
+        # - bit[23..16]: ingress::hdr.csig.worst_vlink if ingress::hdr.csig.$valid
+        # - bit[15..0]: ingress::hdr.csig.worst_qdepth if ingress::hdr.csig.$valid
+    TH13: B1(2)  # ingress::hdr.csig.worst_tdelta.16-31 if ingress::hdr.csig.$valid
+    TH12: B1(2)  # ingress::hdr.csig.worst_tdelta.0-15 if ingress::hdr.csig.$valid
+    TB7: B1(2)  # ingress::hdr.csig.path_id.8-15 if ingress::hdr.csig.$valid
+    TB6: B1(2)  # ingress::hdr.csig.path_id.0-7 if ingress::hdr.csig.$valid
+    TB5: B1(2)  # ingress::hdr.csig.epoch.8-15 if ingress::hdr.csig.$valid
+    TB4: B1(2)  # ingress::hdr.csig.epoch.0-7 if ingress::hdr.csig.$valid
+    TW5: B1(3)
+        # - bit[31..28]: ingress::hdr.ipv4.version if ingress::hdr.ipv4.$valid
+        # - bit[27..24]: ingress::hdr.ipv4.ihl if ingress::hdr.ipv4.$valid
+        # - bit[23..16]: ingress::hdr.ipv4.diffserv if ingress::hdr.ipv4.$valid
+        # - bit[15..0]: ingress::hdr.ipv4.total_len if ingress::hdr.ipv4.$valid
+    TH9: B1(3)  # ingress::hdr.ipv4.identification if ingress::hdr.ipv4.$valid
+    TH8: B1(3)
+        # - bit[15..13]: ingress::hdr.ipv4.flags if ingress::hdr.ipv4.$valid
+        # - bit[12..0]: ingress::hdr.ipv4.frag_offset if ingress::hdr.ipv4.$valid
+    TH7: B1(3)
+        # - bit[15..8]: ingress::hdr.ipv4.ttl if ingress::hdr.ipv4.$valid
+        # - bit[7..0]: ingress::hdr.ipv4.protocol if ingress::hdr.ipv4.$valid
+    TH6: B1(3)  # ingress::hdr.ipv4.hdr_checksum if ingress::hdr.ipv4.$valid
+    TH17: B1(3)  # ingress::hdr.ipv4.src_addr.16-31 if ingress::hdr.ipv4.$valid
+    TH16: B1(3)  # ingress::hdr.ipv4.src_addr.0-15 if ingress::hdr.ipv4.$valid
+    TH15: B1(3)  # ingress::hdr.ipv4.dst_addr.16-31 if ingress::hdr.ipv4.$valid
+    TH14: B1(3)  # ingress::hdr.ipv4.dst_addr.0-15 if ingress::hdr.ipv4.$valid
+    TW9: B1(4)
+        # - bit[31..16]: ingress::hdr.udp.src_port if ingress::hdr.udp.$valid
+        # - bit[15..0]: ingress::hdr.udp.dst_port if ingress::hdr.udp.$valid
+    TW8: B1(4)
+        # - bit[31..16]: ingress::hdr.udp.len if ingress::hdr.udp.$valid
+        # - bit[15..0]: ingress::hdr.udp.checksum if ingress::hdr.udp.$valid
+    TB11: B1(5)  # ingress::hdr.bth.w0.24-31 if ingress::hdr.bth.$valid
+    TB10: B1(5)  # ingress::hdr.bth.w0.16-23 if ingress::hdr.bth.$valid
+    TB9: B1(5)  # ingress::hdr.bth.w0.8-15 if ingress::hdr.bth.$valid
+    TB8: B1(5)  # ingress::hdr.bth.w0.0-7 if ingress::hdr.bth.$valid
+    TH11: B1(5)  # ingress::hdr.bth.w1.16-31 if ingress::hdr.bth.$valid
+    TH10: B1(5)  # ingress::hdr.bth.w1.0-15 if ingress::hdr.bth.$valid
+    TW6: B1(5)  # ingress::hdr.bth.w2 if ingress::hdr.bth.$valid
+    TW6: B1(6)
+        # - bit[31..24]: ingress::hdr.evid.magic if ingress::hdr.evid.$valid
+        # - bit[23..16]: ingress::hdr.evid.path_id if ingress::hdr.evid.$valid
+        # - bit[15..8]: ingress::hdr.evid.rtt_q if ingress::hdr.evid.$valid
+        # - bit[7..0]: ingress::hdr.evid.loss_q if ingress::hdr.evid.$valid
+    TH11: B1(6)
+        # - bit[15..8]: ingress::hdr.evid.ecn_q if ingress::hdr.evid.$valid
+        # - bit[7..0]: ingress::hdr.evid.flags if ingress::hdr.evid.$valid
+    TH10: B1(6)  # ingress::hdr.evid.seq if ingress::hdr.evid.$valid
+  mirror:
+    select: B0(0..2)  # bit[2..0]: ingress::ig_intr_md_for_dprsr.mirror_type
+    0:
+      - H0(0..9)  # bit[9..0]: ingress::$tmp2
+parser egress:
+  start: $entry_point.start
+  init_zero: [ B17, B16 ]
+  bitwise_or: [ B16, B17 ]
+  hdr_len_adj: 27
+  meta_opt: 8191
+  states:
+    $entry_point.start:
+      *:
+        counter:
+          imm: 24
+        0..1: H16  # bit[7..15] -> H16 bit[8..0]: egress::eg_intr_md.egress_port
+        27..28: TH23  # egress::hdr.ethernet.dst_addr[47:32].32-47
+        29..30: TH1  # egress::hdr.ethernet.dst_addr[31:16].16-31
+        B17: 1  # value 1 -> B17 bit[0]: egress::hdr.ethernet.$valid
+        intr_md: 9
+        shift: 31
+        buf_req: 31
+        next: $entry_point.start.$oob_stall_1
+    $entry_point.start.$oob_stall_1:
+      *:
+        load: { half : 8..9 }
+        buf_req: 10
+        next: $entry_point.start.$split_0
+    $entry_point.start.$split_0:
+      match: [ half ]
+      0x88f0:
+        counter: dec 6
+        0..1: TH0  # egress::hdr.ethernet.dst_addr[15:0].0-15
+        2..3: TH22  # egress::hdr.ethernet.src_addr[47:32].32-47
+        4..7: TW3  # egress::hdr.ethernet.src_addr[31:0].0-31
+        8..9: TH21  # egress::hdr.ethernet.ether_type
+        10..11: TH20
+            # - bit[0..7] -> TH20 bit[15..8]: egress::hdr.fabric.vsw_id
+            # - bit[8..15] -> TH20 bit[7..0]: egress::hdr.fabric.hop
+        12..15: TW0
+            # - bit[16..23] -> TW0 bit[31..24]: egress::hdr.fabric.spray
+            # - bit[24..31] -> TW0 bit[23..16]: egress::hdr.fabric.loops
+            # - bit[32..39] -> TW0 bit[15..8]: egress::hdr.fabric.flags
+            # - bit[40..47] -> TW0 bit[7..0]: egress::hdr.fabric.nxt
+        B17: 2  # value 1 -> B17 bit[1]: egress::hdr.fabric.$valid
+        load: { byte1 : 15 }
+        shift: 16
+        buf_req: 16
+        next: parse_fabric
+      0x****:
+        0..1: TH0  # egress::hdr.ethernet.dst_addr[15:0].0-15
+        2..3: TH22  # egress::hdr.ethernet.src_addr[47:32].32-47
+        4..7: TW3  # egress::hdr.ethernet.src_addr[31:0].0-31
+        8..9: TH21  # egress::hdr.ethernet.ether_type
+        shift: 10
+        buf_req: 10
+        next: min_parse_depth_accept_initial
+    parse_fabric:
+      match: [ byte1 ]
+      0x01:
+        counter: dec 12
+        0..3: TW1
+            # - bit[0..7] -> TW1 bit[31..24]: egress::hdr.csig.worst_hop
+            # - bit[8..15] -> TW1 bit[23..16]: egress::hdr.csig.worst_vlink
+            # - bit[16..31] -> TW1 bit[15..0]: egress::hdr.csig.worst_qdepth
+        4..5: TH3  # egress::hdr.csig.worst_tdelta[31:16].16-31
+        6..7: TH2  # egress::hdr.csig.worst_tdelta[15:0].0-15
+        8..11: TW2
+            # - bit[64..79] -> TW2 bit[31..16]: egress::hdr.csig.path_id
+            # - bit[80..95] -> TW2 bit[15..0]: egress::hdr.csig.epoch
+        B17: 4  # value 1 -> B17 bit[2]: egress::hdr.csig.$valid
+        shift: 12
+        buf_req: 12
+        next: min_parse_depth_accept_initial
+      0x**:
+        buf_req: 0
+        next: min_parse_depth_accept_initial
+    min_parse_depth_accept_initial:
+      match: [ ctr_neg, ctr_zero ]
+      0x0:
+        counter: dec 11
+        0: TB0  # egress::hdr.min_parse_depth_padding_0[0].packet_payload[87:80].80-87
+        1: TB12  # egress::hdr.min_parse_depth_padding_0[0].packet_payload[79:72].72-79
+        2: TB3  # egress::hdr.min_parse_depth_padding_0[0].packet_payload[71:64].64-71
+        3..6: TW12  # egress::hdr.min_parse_depth_padding_0[0].packet_payload[63:32].32-63
+        7..8: TH5  # egress::hdr.min_parse_depth_padding_0[0].packet_payload[31:16].16-31
+        9..10: TH4  # egress::hdr.min_parse_depth_padding_0[0].packet_payload[15:0].0-15
+        B16: 4  # value 4 -> B16 bit[2..0]: egress::hdr.min_parse_depth_padding_0.$stkvalid
+        shift: 11
+        buf_req: 11
+        next: min_parse_depth_accept_loop.$split_0
+      0b**:
+        buf_req: 0
+        next: end
+    min_parse_depth_accept_loop.$split_0:
+      match: [ ctr_neg, ctr_zero ]
+      0x0:
+        counter: dec 11
+        0: TB1  # egress::hdr.min_parse_depth_padding_0[1].packet_payload[87:80].80-87
+        1: TB14  # egress::hdr.min_parse_depth_padding_0[1].packet_payload[79:72].72-79
+        2: TB13  # egress::hdr.min_parse_depth_padding_0[1].packet_payload[71:64].64-71
+        3..6: TW14  # egress::hdr.min_parse_depth_padding_0[1].packet_payload[63:32].32-63
+        7..10: TW13  # egress::hdr.min_parse_depth_padding_0[1].packet_payload[31:0].0-31
+        B16: 2  # value 2 -> B16 bit[2..0]: egress::hdr.min_parse_depth_padding_0.$stkvalid
+        shift: 11
+        buf_req: 11
+        next: min_parse_depth_accept_loop.$it1.$split_0
+      0b**:
+        buf_req: 0
+        next: end
+    min_parse_depth_accept_loop.$it1.$split_0:
+      match: [ ctr_neg, ctr_zero ]
+      0x0:
+        counter: dec 11
+        0: TB2  # egress::hdr.min_parse_depth_padding_0[2].packet_payload[87:80].80-87
+        1..2: TH30  # egress::hdr.min_parse_depth_padding_0[2].packet_payload[79:64].64-79
+        3..4: TH19  # egress::hdr.min_parse_depth_padding_0[2].packet_payload[63:48].48-63
+        5..6: TH18  # egress::hdr.min_parse_depth_padding_0[2].packet_payload[47:32].32-47
+        7..10: TW15  # egress::hdr.min_parse_depth_padding_0[2].packet_payload[31:0].0-31
+        B16: 1  # value 1 -> B16 bit[2..0]: egress::hdr.min_parse_depth_padding_0.$stkvalid
+        shift: 11
+        buf_req: 11
+        next: end
+      0b**:
+        buf_req: 0
+        next: end
+deparser egress:
+  dictionary:
+    TH23: B17(0)  # egress::hdr.ethernet.dst_addr.32-47 if egress::hdr.ethernet.$valid
+    TH1: B17(0)  # egress::hdr.ethernet.dst_addr.16-31 if egress::hdr.ethernet.$valid
+    TH0: B17(0)  # egress::hdr.ethernet.dst_addr.0-15 if egress::hdr.ethernet.$valid
+    TH22: B17(0)  # egress::hdr.ethernet.src_addr.32-47 if egress::hdr.ethernet.$valid
+    TW3: B17(0)  # egress::hdr.ethernet.src_addr.0-31 if egress::hdr.ethernet.$valid
+    TH21: B17(0)  # egress::hdr.ethernet.ether_type if egress::hdr.ethernet.$valid
+    TH20: B17(1)
+        # - bit[15..8]: egress::hdr.fabric.vsw_id if egress::hdr.fabric.$valid
+        # - bit[7..0]: egress::hdr.fabric.hop if egress::hdr.fabric.$valid
+    TW0: B17(1)
+        # - bit[31..24]: egress::hdr.fabric.spray if egress::hdr.fabric.$valid
+        # - bit[23..16]: egress::hdr.fabric.loops if egress::hdr.fabric.$valid
+        # - bit[15..8]: egress::hdr.fabric.flags if egress::hdr.fabric.$valid
+        # - bit[7..0]: egress::hdr.fabric.nxt if egress::hdr.fabric.$valid
+    TW1: B17(2)
+        # - bit[31..24]: egress::hdr.csig.worst_hop if egress::hdr.csig.$valid
+        # - bit[23..16]: egress::hdr.csig.worst_vlink if egress::hdr.csig.$valid
+        # - bit[15..0]: egress::hdr.csig.worst_qdepth if egress::hdr.csig.$valid
+    TH3: B17(2)  # egress::hdr.csig.worst_tdelta.16-31 if egress::hdr.csig.$valid
+    TH2: B17(2)  # egress::hdr.csig.worst_tdelta.0-15 if egress::hdr.csig.$valid
+    TW2: B17(2)
+        # - bit[31..16]: egress::hdr.csig.path_id if egress::hdr.csig.$valid
+        # - bit[15..0]: egress::hdr.csig.epoch if egress::hdr.csig.$valid
+    TB0: B16(2)  # egress::hdr.min_parse_depth_padding_0[0].packet_payload.80-87 if egress::hdr.min_parse_depth_padding_0[0].$valid
+    TB12: B16(2)  # egress::hdr.min_parse_depth_padding_0[0].packet_payload.72-79 if egress::hdr.min_parse_depth_padding_0[0].$valid
+    TB3: B16(2)  # egress::hdr.min_parse_depth_padding_0[0].packet_payload.64-71 if egress::hdr.min_parse_depth_padding_0[0].$valid
+    TW12: B16(2)  # egress::hdr.min_parse_depth_padding_0[0].packet_payload.32-63 if egress::hdr.min_parse_depth_padding_0[0].$valid
+    TH5: B16(2)  # egress::hdr.min_parse_depth_padding_0[0].packet_payload.16-31 if egress::hdr.min_parse_depth_padding_0[0].$valid
+    TH4: B16(2)  # egress::hdr.min_parse_depth_padding_0[0].packet_payload.0-15 if egress::hdr.min_parse_depth_padding_0[0].$valid
+    TB1: B16(1)  # egress::hdr.min_parse_depth_padding_0[1].packet_payload.80-87 if egress::hdr.min_parse_depth_padding_0[1].$valid
+    TB14: B16(1)  # egress::hdr.min_parse_depth_padding_0[1].packet_payload.72-79 if egress::hdr.min_parse_depth_padding_0[1].$valid
+    TB13: B16(1)  # egress::hdr.min_parse_depth_padding_0[1].packet_payload.64-71 if egress::hdr.min_parse_depth_padding_0[1].$valid
+    TW14: B16(1)  # egress::hdr.min_parse_depth_padding_0[1].packet_payload.32-63 if egress::hdr.min_parse_depth_padding_0[1].$valid
+    TW13: B16(1)  # egress::hdr.min_parse_depth_padding_0[1].packet_payload.0-31 if egress::hdr.min_parse_depth_padding_0[1].$valid
+    TB2: B16(0)  # egress::hdr.min_parse_depth_padding_0[2].packet_payload.80-87 if egress::hdr.min_parse_depth_padding_0[2].$valid
+    TH30: B16(0)  # egress::hdr.min_parse_depth_padding_0[2].packet_payload.64-79 if egress::hdr.min_parse_depth_padding_0[2].$valid
+    TH19: B16(0)  # egress::hdr.min_parse_depth_padding_0[2].packet_payload.48-63 if egress::hdr.min_parse_depth_padding_0[2].$valid
+    TH18: B16(0)  # egress::hdr.min_parse_depth_padding_0[2].packet_payload.32-47 if egress::hdr.min_parse_depth_padding_0[2].$valid
+    TW15: B16(0)  # egress::hdr.min_parse_depth_padding_0[2].packet_payload.0-31 if egress::hdr.min_parse_depth_padding_0[2].$valid
+  egress_unicast_port: H16(0..8)  # bit[8..0]: egress::eg_intr_md.egress_port
+stage 0 ingress:
+  phase0_match IgParser.$PORT_METADATA:
+    p4:
+      name: IgParser.$PORT_METADATA
+      size: 288
+      preferred_match_type: exact
+      match_type: exact
+    size: 288
+    p4_param_order:
+      ig_intr_md.ingress_port: { type: exact, size: 9 }
+    format: {ig_intr_md: 0..63}
+    constant_value: 0
+    actions:
+      set_port_metadata:
+      - handle: 0x20000000
+      - p4_param_order: { ig_intr_md: 64 } 
+
+
+primitives: "mcp_fabric.prim.json"
+dynhash: "mcp_fabric.dynhash.json"

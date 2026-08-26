@@ -1,0 +1,77 @@
+{
+    "build_date": "Tue Aug 25 22:06:19 2026", 
+    "program_name": "mcp_fabric", 
+    "run_id": "ea303d583d7b44a3", 
+    "compiler_version": "9.13.1 (e558d01)", 
+    "schema_version": "1.0.0", 
+    "tables": [
+        {
+            "name": "IgParser.$PORT_METADATA", 
+            "gress": "ingress", 
+            "lookup_types": [
+                "exact"
+            ], 
+            "entries_requested": 288, 
+            "entries_allocated": 288, 
+            "match_fields": [
+                {
+                    "name": "ig_intr_md.ingress_port", 
+                    "start_bit": 0, 
+                    "bit_width": 9, 
+                    "lookup_type": "exact"
+                }
+            ], 
+            "action_parameters": [
+                {
+                    "action_name": "set_port_metadata", 
+                    "parameters": [
+                        {
+                            "name": "ig_intr_md", 
+                            "bit_width": 64
+                        }
+                    ]
+                }
+            ], 
+            "stage_allocation": [
+                {
+                    "stage_number": -1, 
+                    "memories": [
+                        {
+                            "memory_type": "buf", 
+                            "table_word_width": 64, 
+                            "memory_word_width": 64, 
+                            "entries_per_table_word": 1, 
+                            "table_type": "match", 
+                            "num_memories": 1, 
+                            "entries_requested": 288, 
+                            "entries_allocated": 288, 
+                            "imm_bit_width_in_overhead_requested": 64, 
+                            "imm_bit_width_in_overhead_allocated": 0, 
+                            "entry_bit_width_requested": 9, 
+                            "entry_bit_width_allocated": 64, 
+                            "ideal_entries_per_table_word": 1, 
+                            "ideal_table_word_bit_width": 128
+                        }
+                    ], 
+                    "overhead_fields": [], 
+                    "match_format": {
+                        "entries": [
+                            {
+                                "entry_number": 0, 
+                                "fields": [
+                                    {
+                                        "name": "ig_intr_md", 
+                                        "bit_width": 64, 
+                                        "start_bit": 0, 
+                                        "memory_start_bit": 0
+                                    }
+                                ]
+                            }
+                        ]
+                    }, 
+                    "action_formats": []
+                }
+            ]
+        }
+    ]
+}
