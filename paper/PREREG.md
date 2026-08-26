@@ -734,7 +734,7 @@ Every reported number is traceable to (config, seed, commit). The following are 
 | 2026-08-25 | §9.2, §12, §13 | rxe-under-spraying pre-test (NAK/retx floor, all-reduce completion) made a prerequisite for any NIC-evidence claim from hardware (HURDLES H20) | PRE-REVIEW R2 |
 | 2026-08-25 | §11 | Run counts updated for the added arms and blocks (≈ 18,400 runs) | consequence of the above |
 | 2026-08-26 | §10 (v1.2) | Gate as run: ATLAHS MoE8x8B-64 trace, 1024-NIC htsim fat tree, 100 ms epoch / one-iteration horizon, budget 4 % after 2 % was TOO HARD, faulty uplink randomized per seed, TTL_obs from first observable drop (H27), probe evidence window and transport RTO stated | see Amendment v1.2 below |
-| 2026-08-26 | §7.4 (v1.3) | In-switch attention update rule FROZEN (H22): per-path {attn, clean} SALU word, saturating exceedance bump by k_up (a_max = 65535), decay by 1 every n_clean clean samples down to a_min, probabilistic gate attn/65536 quantized to attn[15:8]/256 via a 256-row TCAM table (a gateway cannot compare two runtime fields); exceedance sources = NIC evidence (loss_q/rtt_q thresholds) and previous-hop CSIG worst_qdepth threshold; P4 source sha256 1a8fc6104b03bcdf (p4/reports/step5.md) | see Amendment v1.3 below |
+| 2026-08-26 | §7.4 (v1.3) | In-switch attention update rule FROZEN (H22): per-path {attn, clean} SALU word, saturating exceedance bump by k_up (a_max = 65535), decay by 1 every n_clean clean samples down to a_min, probabilistic gate attn/65536 quantized to attn[15:8]/256 via a 256-row TCAM table (a gateway cannot compare two runtime fields); exceedance sources = NIC evidence (loss_q/rtt_q thresholds) and previous-hop CSIG worst_qdepth threshold; P4 source sha256 232b7355fe58c67c (p4/reports/step5.md) | see Amendment v1.3 below |
 
 Amendments are appended only. An amendment after the corresponding block has started running
 is flagged "post-hoc" in the paper.
@@ -767,7 +767,7 @@ oracle 11 [10, 12] epochs, random 27 [17, 29] (33 % censored), uniform 20 [19, 2
 ### Amendment v1.3 — 2026-08-26 — §7.4 in-switch attention update rule, frozen (closes HURDLES H22)
 
 The candidate rule of §7.4 is fixed as follows and implemented in `p4/mcp_fabric.p4` step 5
-(source sha256 `1a8fc6104b03bcdf…`, compiled 0 errors on SDE 9.13.1 and on the switch's 9.13.2,
+(source sha256 `232b7355fe58c67c…`, compiled 0 errors on SDE 9.13.1 and on the switch's 9.13.2,
 8 ingress stages; `p4/reports/step5.md`). Per path $p$ (index = path id, 256 slots) one 32-bit
 SALU word holds `attn[p]` (16 bit) and `clean[p]` (16 bit). Exactly one update runs per packet:
 

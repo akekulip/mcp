@@ -1,7 +1,7 @@
 # Step 5 — In-switch attention register, §7.4 update rule, measurement gate
 
 Design reference: `docs/P4-DESIGN-SPACE.md` §5.3, §5.7, §6 D1; PREREG §7.4 (frozen as amendment
-v1.3, 2026-08-26). Source hash after this step: `sha256(mcp_fabric.p4) = 1a8fc6104b03bcdf…`.
+v1.3, 2026-08-26). Source hash after this step: `sha256(mcp_fabric.p4) = 232b7355fe58c67c…`.
 
 ## What was added
 

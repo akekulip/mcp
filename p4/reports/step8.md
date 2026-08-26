@@ -7,5 +7,5 @@ the second RegisterAction on `reg_attn` — executed for exceedance packets. Evi
 update attention and are dropped at the switch; they never enter the fabric. Nothing further to
 compile. The NIC-side producer of evidence packets (§6 D1, `nic/`) is host-side work.
 
-All eight §9.2 steps are therefore implemented: `sha256(mcp_fabric.p4) = 1a8fc6104b03bcdf…`,
+All eight §9.2 steps are therefore implemented: `sha256(mcp_fabric.p4) = 232b7355fe58c67c…`,
 ingress 9 stages, egress 3, 0 errors on SDE 9.13.1 and 9.13.2.
