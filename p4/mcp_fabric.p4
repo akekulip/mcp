@@ -21,7 +21,7 @@
  *
  * Wire format inside the fabric (§3, alternative A2):
  *
- *   eth(etype=0x88F0) | fabric_h 8B | [csig_h 14B] | ipv4 | udp | [bth 12B | evid 8B]
+ *   eth(etype=0x88F0) | fabric_h 12B | [csig_h 14B] | ipv4 | udp | [bth 12B | evid 8B]
  *
  * LOAD-BEARING (§3 recommendation, carriage detail 1): the fabric shim and the CSIG
  * tag are L2 shims — they sit BETWEEN the Ethernet header and the original L3 header.
@@ -72,17 +72,21 @@ header ethernet_h {
     bit<16> ether_type;
 }
 
-/* §3 A2.  6 bytes, laid out as three 16-bit-friendly pairs (§8.3/N12). */
+/* §3 A2.  12 bytes.  Every field the PARSER lifts into 16-bit metadata is itself 16 bits:
+ * on silicon (2026-08-26, p4/reports/step4-silicon.md) `md.hop = (bit<16>)hdr.fabric.hop`
+ * with an 8-bit hop did NOT zero-extend — the high byte held the neighbouring shim byte
+ * (md.hop == vsw_id<<8 | hop).  Same-width parser copies are clean container moves. */
 header fabric_h {
-    bit<8> vsw_id;   // which virtual switch handles this pass
-    bit<8> hop;      // 0 = fresh from host; incremented per pass
-    bit<8> spray;    // spray index chosen at the source leaf (§4) — the substitute
-                     // for a Random<> seed: the path is recoverable from a capture
-    bit<8> loops;    // remaining extra latency loops (§7.4 L1)
-    bit<8> flags;    // bit0 measured, bit1 mirrored, bit2 fault-injected
-    bit<8> nxt;      // NXT_IPV4 | NXT_CSIG  (design called this rsvd; see README)
-    bit<16> path_id; // (dst_leaf, spray) path id, written at the source leaf; egress
-                     // stamps it into the CSIG tag and every pass indexes reg_attn by it
+    bit<16> vsw_id;   // which virtual switch handles this pass
+    bit<16> hop;      // 0 = fresh from host; incremented per pass
+    bit<16> spray;    // spray index chosen at the source leaf (§4) — the substitute
+                      // for a Random<> seed: the path is recoverable from a capture
+    bit<16> path_id;  // (dst_leaf, spray) path id, written at the source leaf; egress
+                      // stamps it into the CSIG tag and every pass indexes reg_attn by it
+    bit<8>  loops;    // remaining extra latency loops (§7.4 L1)
+    bit<8>  flags;    // bit0 measured, bit1 dropped, bit2 corrupted (never parsed into md)
+    bit<8>  nxt;      // NXT_IPV4 | NXT_CSIG — parser select only
+    bit<8>  pad;
 }
 
 /* §5.5.  Fixed-size "worst hop so far" tag, not a growing INT stack.  14 bytes, all
@@ -257,14 +261,14 @@ parser IgParser(packet_in pkt, out headers_t hdr, out ig_md_t md,
          * gateway: the parser is free, and an `if (hdr.fabric.isValid())` block in the
          * MAU would become its own logical table (§8.4/N10).  Re-assigning md fields
          * that the start state already zeroed is legal on bf-p4c 9.13.1. */
-        md.hop    = (bit<16>)hdr.fabric.hop;
-        md.vsw_id = (bit<16>)hdr.fabric.vsw_id;
+        md.hop    = hdr.fabric.hop;
+        md.vsw_id = hdr.fabric.vsw_id;
         /* The spray index is chosen ONCE, at the source leaf, and then carried on the
          * wire (§4, "determinism, stated honestly").  Later passes reuse it rather
          * than re-drawing, which is both correct — the spine a packet is on cannot
          * change mid-flight — and what makes a capture at the collector sufficient to
          * reconstruct the path even in the unseeded Random mode. */
-        md.spray_idx = (bit<16>)hdr.fabric.spray;
+        md.spray_idx = hdr.fabric.spray;
         md.attn_idx  = hdr.fabric.path_id;
         transition select(hdr.fabric.nxt) {
             NXT_CSIG : parse_csig;
@@ -645,14 +649,15 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
      * sources whatever the field widths, while ingress action data is unconstrained.
      * Egress then only compare-and-replaces the worst_* fields, first at this very
      * pass (worst_qdepth starts at 0, so hop 0's own queue depth is recorded). */
-    action act_enter(bit<8> next_hop, bit<16> epoch) {
+    action act_enter(bit<16> next_hop, bit<16> epoch) {
         hdr.fabric.setValid();
-        hdr.fabric.vsw_id = (bit<8>)md.next_vsw;
+        hdr.fabric.vsw_id = md.next_vsw;
         hdr.fabric.hop    = next_hop;
-        hdr.fabric.spray  = (bit<8>)md.spray_idx;
+        hdr.fabric.spray  = md.spray_idx;
         hdr.fabric.loops  = 0;
         hdr.fabric.flags  = (bit<8>)md.flags_out;
         hdr.fabric.nxt    = NXT_CSIG;
+        hdr.fabric.pad    = 0;
         hdr.fabric.path_id = md.attn_idx;
         hdr.ethernet.ether_type = ETYPE_MCP_FABRIC;
         hdr.csig.setValid();
@@ -664,8 +669,8 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
         hdr.csig.epoch        = epoch;
     }
 
-    action act_transit(bit<8> next_hop) {
-        hdr.fabric.vsw_id = (bit<8>)md.next_vsw;
+    action act_transit(bit<16> next_hop) {
+        hdr.fabric.vsw_id = md.next_vsw;
         hdr.fabric.hop    = next_hop;
         hdr.fabric.flags  = (bit<8>)md.flags_out;
     }
@@ -822,7 +827,7 @@ control Egress(inout eg_headers_t hdr, inout eg_md_t md,
     action set_eg_vlink(bit<16> vlink) {
         md.vlink  = vlink;
         md.this_q = eg_intr_md.deq_qdepth[15:0];
-        md.hop    = (bit<16>)hdr.fabric.hop;
+        md.hop    = hdr.fabric.hop;
         md.tdelta = (bit<32>)eg_intr_md.deq_timedelta;
     }
 
