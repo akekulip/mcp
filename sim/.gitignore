@@ -4,7 +4,12 @@ htsim-broadcom/
 atlahs/
 chakra/
 .venv/
-traces/
+traces/*
+!traces/*/
+traces/*/*
+!traces/*/SHA256
+!traces/*/SOURCE
+gate/output_metrics/
 runs/*/*/output_metrics/
 runs/*/*/logout.dat
 runs/*/*/idmap.txt
