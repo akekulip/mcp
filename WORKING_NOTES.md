@@ -185,6 +185,12 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   ether 0x88F0 copies while `fail <vlink> 50 drop`; (c) attention: `attn` dump before/after sending
   evidence packets (UDP dst 0xE5E5, evid_h path_id/loss_q) — attn[path] += 1024 per packet;
   (d) CSIG: captured mirrored samples carry csig_h with worst_qdepth/worst_vlink set.
+- 08-27 ~00:45 DEPLOYED: step-4 silicon smoke PASSED (agent; p4/reports/step4-silicon.md) and found
+  the parser cast aliasing (md.hop == vsw_id<<8|hop) -> fixed by widening fabric_h to 16-bit fields
+  (12 B; ingress back to 8 stages; sha 232b7355). bf_switchd restarted on the final build;
+  setup_skeleton up + setup_attention up succeeded (bind_pipeline_config needed per client).
+  Agent now validating steps 5-7 on silicon (gate sampling, fault mirrors, evidence bump, decay,
+  CSIG). Skill testbed.md updated with the deployment landmines.
 
 ## Next action
 1. Vision/Hulk: check Netronome SDK, rxe, kernel, perftest, DPDK availability (M4 prep).

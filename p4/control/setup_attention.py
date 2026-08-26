@@ -80,6 +80,10 @@ def connect():
     import bfrt_grpc.client as gc
     iface = gc.ClientInterface(GRPC_ADDR, client_id=CLIENT_ID, device_id=DEV)
     bfrt = iface.bfrt_info_get(PROG)
+    # Every client must BIND to the program before any read/write ("Unable to get
+    # bound_program" otherwise).  Binding is per-client and does not warm-init; the
+    # "only client 0" rule of §5.7 concerns VERIFY_AND_WARM_INIT, not this.
+    iface.bind_pipeline_config(PROG)
     tgt = gc.Target(device_id=DEV, pipe_id=0xFFFF)
     return gc, iface, bfrt, tgt
 
