@@ -174,6 +174,17 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   bin 1461583 B, sha a0dee21f. Constraint classes 12-13 added to the tofino-p4 skill (mid-word
   intrinsic slices; egress one-source-per-container). Not yet loaded on the chip: the switch still
   runs the step-4 build while the agent smoke-tests it; reload after that.
+- ~00:20 (08-27) ALL 8 §9.2 STEPS COMPILED: final sha 1a8fc6104b03bcdf, bin 1461583 B on both SDEs
+  (also built at ~/mcp/p4 on the switch, not loaded). p4/control/setup_attention.py = steps 5-7
+  control plane (client_id 2, no bind): params k_up/a_min/n_clean_m1, reg_attn seed, 255 tbl_gate
+  rows, tbl_eg_vlink 16 rows, exceed thresholds, mirror sids 1/3 -> dp9. Rule shipped = saturating
+  bump (no bump_cap); PREREG v1.3 corrected same day. Commits 575f1ee..381c4e4.
+  TO DO once the step-4 silicon smoke finishes: pkill bf_switchd, relaunch (same launch script,
+  build already at ~/mcp/p4/mcp_fabric.tofino), setup_skeleton up + setup_attention up, then
+  silicon tests: (a) counters + hairpin delivery as in step 4; (b) mirrors: tcpdump on Vision for
+  ether 0x88F0 copies while `fail <vlink> 50 drop`; (c) attention: `attn` dump before/after sending
+  evidence packets (UDP dst 0xE5E5, evid_h path_id/loss_q) — attn[path] += 1024 per packet;
+  (d) CSIG: captured mirrored samples carry csig_h with worst_qdepth/worst_vlink set.
 
 ## Next action
 1. Vision/Hulk: check Netronome SDK, rxe, kernel, perftest, DPDK availability (M4 prep).
