@@ -1,0 +1,11 @@
+# sim/ local artefacts (clones, venv, downloaded traces, run outputs) — not for the repo
+htsim/
+htsim-broadcom/
+atlahs/
+chakra/
+.venv/
+traces/
+runs/*/*/output_metrics/
+runs/*/*/logout.dat
+runs/*/*/idmap.txt
+runs/*/*/*.bin

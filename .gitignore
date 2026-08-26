@@ -7,3 +7,9 @@ dist/
 build/
 *.log
 .env
+sim/atlahs/
+sim/chakra/
+sim/htsim/
+sim/htsim-broadcom/
+sim/.venv/
+sim/runs/

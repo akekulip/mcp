@@ -1,0 +1,962 @@
+[
+  {
+    "epoch": 1,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 0.0,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": false,
+    "tm_nrmse": 0.4094,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.5582,
+    "churn": 1.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 1,
+    "elapsed_ms": 1.8
+  },
+  {
+    "epoch": 2,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 0.0,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": false,
+    "tm_nrmse": 0.4198,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.5556,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 2,
+    "elapsed_ms": 0.2
+  },
+  {
+    "epoch": 3,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 0.0,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": false,
+    "tm_nrmse": 0.281,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.5903,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 3,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 4,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 0.0,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": false,
+    "tm_nrmse": 0.513,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.5323,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 4,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 5,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 0.0,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": false,
+    "tm_nrmse": 0.5971,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.5113,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 5,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 6,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 0.0,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": false,
+    "tm_nrmse": 0.4855,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.5392,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 6,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 7,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 0.0,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": false,
+    "tm_nrmse": 0.5468,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.5239,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 7,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 8,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 0.392,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": false,
+    "tm_nrmse": 0.5316,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.5277,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 8,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 9,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 1.125,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": false,
+    "tm_nrmse": 0.5709,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.5178,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 9,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 10,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": true,
+    "ddos_anomaly_score": 61.42,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": true,
+    "tm_nrmse": 0.8119,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.5676,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 10,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 11,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": true,
+    "ddos_anomaly_score": 5.465,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": true,
+    "tm_nrmse": 0.727,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.5344,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 11,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 12,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 1.122,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": true,
+    "tm_nrmse": 0.7195,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.2206,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 12,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 13,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 1.685,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": true,
+    "tm_nrmse": 0.6627,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.2498,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 13,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 14,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 2.271,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": true,
+    "tm_nrmse": 0.6789,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.2614,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 14,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 15,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 1.728,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": true,
+    "tm_nrmse": 0.6718,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.2487,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 15,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 16,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 0.976,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": false,
+    "tm_nrmse": 0.5127,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.5324,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 16,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 17,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 0.884,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": false,
+    "tm_nrmse": 0.5663,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.519,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 17,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 18,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 1.017,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": false,
+    "tm_nrmse": 0.3832,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.5647,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 18,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 19,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 0.675,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": false,
+    "tm_nrmse": 0.5073,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.5337,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 19,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 20,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 0.759,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": false,
+    "tm_nrmse": 0.4908,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.5378,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 20,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 21,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 0.587,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": false,
+    "tm_nrmse": 0.4533,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.5472,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 21,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 22,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 0.629,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": false,
+    "tm_nrmse": 0.5888,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.5134,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 22,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 23,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 0.561,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": false,
+    "tm_nrmse": 0.4649,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.5443,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 23,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 24,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 0.737,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": false,
+    "tm_nrmse": 0.5724,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.5175,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 24,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 25,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 0.597,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": false,
+    "tm_nrmse": 0.6499,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.4981,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 25,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 26,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 0.381,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": false,
+    "tm_nrmse": 0.4464,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.549,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 26,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 27,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 0.628,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": false,
+    "tm_nrmse": 0.526,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.529,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 27,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 28,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 0.552,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": false,
+    "tm_nrmse": 0.5425,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.5249,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 28,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 29,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 0.313,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": false,
+    "tm_nrmse": 0.5601,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.5205,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 29,
+    "elapsed_ms": 0.1
+  },
+  {
+    "epoch": 30,
+    "selector": "fixed_polling",
+    "actions_deployed": 4,
+    "action_types": [
+      "poll"
+    ],
+    "task_breakdown": {
+      "traffic_est": 4
+    },
+    "hh_detected": 0,
+    "ddos_detected": false,
+    "ddos_anomaly_score": 0.394,
+    "ddos_false_positive": false,
+    "sketch_corroboration": 0.0,
+    "attack_active": false,
+    "tm_nrmse": 0.5039,
+    "tm_switches_polled": 4,
+    "hh_sketch_occupancy": 0.0,
+    "reward": 0.5346,
+    "churn": 0.0,
+    "shadow_prices": {},
+    "budget_usage": {
+      "tcam": 0,
+      "reg": 0,
+      "bw": 60,
+      "cpu": 2.0
+    },
+    "mitigations_active": 0,
+    "plan_version": 30,
+    "elapsed_ms": 0.1
+  }
+]

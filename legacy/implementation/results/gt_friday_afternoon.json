@@ -1,0 +1,574 @@
+[
+  {
+    "epoch": 0,
+    "attack_active": true,
+    "attack_types": [
+      "PortScan"
+    ],
+    "attack_flows": 7,
+    "benign_flows": 1659,
+    "total_packets": 19115,
+    "total_bytes": 7843765
+  },
+  {
+    "epoch": 1,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 29011,
+    "total_bytes": 16328443
+  },
+  {
+    "epoch": 2,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 20273,
+    "total_bytes": 10387098
+  },
+  {
+    "epoch": 3,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 22975,
+    "total_bytes": 12474413
+  },
+  {
+    "epoch": 4,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 17541,
+    "total_bytes": 6262619
+  },
+  {
+    "epoch": 5,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 23150,
+    "total_bytes": 12847830
+  },
+  {
+    "epoch": 6,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 29326,
+    "total_bytes": 17037192
+  },
+  {
+    "epoch": 7,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 24079,
+    "total_bytes": 12277308
+  },
+  {
+    "epoch": 8,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 29151,
+    "total_bytes": 17683203
+  },
+  {
+    "epoch": 9,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 35645,
+    "total_bytes": 26190906
+  },
+  {
+    "epoch": 10,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 18750,
+    "total_bytes": 6312404
+  },
+  {
+    "epoch": 11,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 17515,
+    "total_bytes": 6022146
+  },
+  {
+    "epoch": 12,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 35651,
+    "total_bytes": 28579991
+  },
+  {
+    "epoch": 13,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 17205,
+    "total_bytes": 8012544
+  },
+  {
+    "epoch": 14,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 15880,
+    "total_bytes": 5060239
+  },
+  {
+    "epoch": 15,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 15507,
+    "total_bytes": 5647575
+  },
+  {
+    "epoch": 16,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 21699,
+    "total_bytes": 10630601
+  },
+  {
+    "epoch": 17,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 17289,
+    "total_bytes": 6890111
+  },
+  {
+    "epoch": 18,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 15279,
+    "total_bytes": 5116242
+  },
+  {
+    "epoch": 19,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 21990,
+    "total_bytes": 13337943
+  },
+  {
+    "epoch": 20,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 30038,
+    "total_bytes": 19969618
+  },
+  {
+    "epoch": 21,
+    "attack_active": true,
+    "attack_types": [
+      "PortScan"
+    ],
+    "attack_flows": 1,
+    "benign_flows": 1665,
+    "total_packets": 23936,
+    "total_bytes": 12132625
+  },
+  {
+    "epoch": 22,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 24033,
+    "total_bytes": 10887890
+  },
+  {
+    "epoch": 23,
+    "attack_active": true,
+    "attack_types": [
+      "PortScan"
+    ],
+    "attack_flows": 70,
+    "benign_flows": 1596,
+    "total_packets": 17681,
+    "total_bytes": 6004779
+  },
+  {
+    "epoch": 24,
+    "attack_active": true,
+    "attack_types": [
+      "PortScan"
+    ],
+    "attack_flows": 34,
+    "benign_flows": 1632,
+    "total_packets": 17019,
+    "total_bytes": 6210032
+  },
+  {
+    "epoch": 25,
+    "attack_active": true,
+    "attack_types": [
+      "PortScan"
+    ],
+    "attack_flows": 106,
+    "benign_flows": 1560,
+    "total_packets": 23763,
+    "total_bytes": 12383155
+  },
+  {
+    "epoch": 26,
+    "attack_active": true,
+    "attack_types": [
+      "PortScan"
+    ],
+    "attack_flows": 16,
+    "benign_flows": 1650,
+    "total_packets": 20937,
+    "total_bytes": 10385256
+  },
+  {
+    "epoch": 27,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 19958,
+    "total_bytes": 8324396
+  },
+  {
+    "epoch": 28,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 27973,
+    "total_bytes": 17044787
+  },
+  {
+    "epoch": 29,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 19850,
+    "total_bytes": 7832938
+  },
+  {
+    "epoch": 30,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 16571,
+    "total_bytes": 7036380
+  },
+  {
+    "epoch": 31,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 19824,
+    "total_bytes": 9052133
+  },
+  {
+    "epoch": 32,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 18331,
+    "total_bytes": 7116876
+  },
+  {
+    "epoch": 33,
+    "attack_active": true,
+    "attack_types": [
+      "PortScan"
+    ],
+    "attack_flows": 112,
+    "benign_flows": 1554,
+    "total_packets": 16203,
+    "total_bytes": 7017798
+  },
+  {
+    "epoch": 34,
+    "attack_active": true,
+    "attack_types": [
+      "PortScan"
+    ],
+    "attack_flows": 26,
+    "benign_flows": 1640,
+    "total_packets": 15333,
+    "total_bytes": 4301553
+  },
+  {
+    "epoch": 35,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 29337,
+    "total_bytes": 15713492
+  },
+  {
+    "epoch": 36,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 17251,
+    "total_bytes": 7593652
+  },
+  {
+    "epoch": 37,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 24006,
+    "total_bytes": 13135405
+  },
+  {
+    "epoch": 38,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 25520,
+    "total_bytes": 14434946
+  },
+  {
+    "epoch": 39,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 18113,
+    "total_bytes": 8039701
+  },
+  {
+    "epoch": 40,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 18333,
+    "total_bytes": 7606377
+  },
+  {
+    "epoch": 41,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 16869,
+    "total_bytes": 6102414
+  },
+  {
+    "epoch": 42,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 24142,
+    "total_bytes": 13499112
+  },
+  {
+    "epoch": 43,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 21046,
+    "total_bytes": 9930899
+  },
+  {
+    "epoch": 44,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 24278,
+    "total_bytes": 13609198
+  },
+  {
+    "epoch": 45,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 20319,
+    "total_bytes": 8171135
+  },
+  {
+    "epoch": 46,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 22841,
+    "total_bytes": 11813547
+  },
+  {
+    "epoch": 47,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 30055,
+    "total_bytes": 20100100
+  },
+  {
+    "epoch": 48,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 18630,
+    "total_bytes": 7993958
+  },
+  {
+    "epoch": 49,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 21345,
+    "total_bytes": 10777031
+  },
+  {
+    "epoch": 50,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 18452,
+    "total_bytes": 7094224
+  },
+  {
+    "epoch": 51,
+    "attack_active": false,
+    "attack_types": [],
+    "attack_flows": 0,
+    "benign_flows": 1666,
+    "total_packets": 22114,
+    "total_bytes": 13141018
+  },
+  {
+    "epoch": 52,
+    "attack_active": true,
+    "attack_types": [
+      "PortScan"
+    ],
+    "attack_flows": 508,
+    "benign_flows": 1158,
+    "total_packets": 22590,
+    "total_bytes": 13803833
+  },
+  {
+    "epoch": 53,
+    "attack_active": true,
+    "attack_types": [
+      "PortScan"
+    ],
+    "attack_flows": 1634,
+    "benign_flows": 32,
+    "total_packets": 3576,
+    "total_bytes": 83081
+  },
+  {
+    "epoch": 54,
+    "attack_active": true,
+    "attack_types": [
+      "PortScan"
+    ],
+    "attack_flows": 1656,
+    "benign_flows": 10,
+    "total_packets": 3348,
+    "total_bytes": 14382
+  },
+  {
+    "epoch": 55,
+    "attack_active": true,
+    "attack_types": [
+      "PortScan"
+    ],
+    "attack_flows": 1657,
+    "benign_flows": 9,
+    "total_packets": 3343,
+    "total_bytes": 13596
+  },
+  {
+    "epoch": 56,
+    "attack_active": true,
+    "attack_types": [
+      "PortScan"
+    ],
+    "attack_flows": 1659,
+    "benign_flows": 7,
+    "total_packets": 3341,
+    "total_bytes": 13426
+  },
+  {
+    "epoch": 57,
+    "attack_active": true,
+    "attack_types": [
+      "PortScan"
+    ],
+    "attack_flows": 1655,
+    "benign_flows": 11,
+    "total_packets": 3341,
+    "total_bytes": 13350
+  },
+  {
+    "epoch": 58,
+    "attack_active": true,
+    "attack_types": [
+      "PortScan"
+    ],
+    "attack_flows": 1651,
+    "benign_flows": 15,
+    "total_packets": 3353,
+    "total_bytes": 15518
+  },
+  {
+    "epoch": 59,
+    "attack_active": true,
+    "attack_types": [
+      "PortScan"
+    ],
+    "attack_flows": 1696,
+    "benign_flows": 10,
+    "total_packets": 3421,
+    "total_bytes": 13666
+  }
+]
