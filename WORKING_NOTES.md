@@ -207,6 +207,11 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   next_hop (renamed); CSIG exceedance only in the loop pipe by construction (design errata 8).
   H4, H5 closed. Chip state: build 789b5b27 loaded, both control planes up, attn seeded 4096.
   NEXT on hardware: H7 timing (tau_fast vs tau_slow), rxe pre-test (H20) needs Hulk cabled.
+- 08-27 ~01:30 H7 (F6) TIMING RUN STARTED: build f0b66793 (mirror_h + 48-bit ingress_mac_tstamp,
+  30 B) loaded 23:23 switch time; agent measuring tau_fast = first attn>4096 copy - first
+  csig.worst_qdepth>=4096 copy (switch clock), tau_slow = full 256-slot reg read + counter sync +
+  256-slot write from the switch's control plane, >=10 reps, specificity across healthy paths.
+  F1 (loss) cannot be timed until the NIC evidence producer (nic/) exists -> needs Hulk + rxe.
 
 ## Next action
 1. Vision/Hulk: check Netronome SDK, rxe, kernel, perftest, DPDK availability (M4 prep).
