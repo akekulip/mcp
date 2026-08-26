@@ -1,44 +1,44 @@
 {
     "program_name": "mcp_fabric.p4", 
-    "build_date": "Tue Aug 25 22:16:50 2026", 
-    "run_id": "54887098b56e4e28", 
+    "build_date": "Wed Aug 26 18:08:29 2026", 
+    "run_id": "c7e9b0ec1b4946b4", 
     "compiler_version": "9.13.1", 
     "schema_version": "1.1.0", 
     "target": "tofino", 
-    "compilation_time": "4.028042793273926", 
+    "compilation_time": "4.308000802993774", 
     "phv": {
         "normal": [
             {
                 "bit_width": 8, 
-                "containers_occupied": 7, 
-                "bits_occupied": 41, 
+                "containers_occupied": 10, 
+                "bits_occupied": 65, 
                 "bits_overlaid": 3
             }, 
             {
                 "bit_width": 16, 
-                "containers_occupied": 17, 
-                "bits_occupied": 251, 
+                "containers_occupied": 18, 
+                "bits_occupied": 267, 
                 "bits_overlaid": 9
             }, 
             {
                 "bit_width": 32, 
-                "containers_occupied": 4, 
-                "bits_occupied": 128, 
+                "containers_occupied": 6, 
+                "bits_occupied": 192, 
                 "bits_overlaid": 0
             }
         ], 
         "tagalong": [
             {
                 "bit_width": 8, 
-                "containers_occupied": 11, 
-                "bits_occupied": 88, 
+                "containers_occupied": 10, 
+                "bits_occupied": 80, 
                 "bits_overlaid": 0
             }, 
             {
                 "bit_width": 16, 
                 "containers_occupied": 21, 
                 "bits_occupied": 336, 
-                "bits_overlaid": 32
+                "bits_overlaid": 0
             }, 
             {
                 "bit_width": 32, 
@@ -57,17 +57,17 @@
         }
     }, 
     "mau": {
-        "srams": 35, 
-        "tcams": 2, 
-        "map_rams": 11, 
-        "logical_tables": 11, 
-        "action_bus_bytes": 33, 
-        "exact_crossbar_bytes": 47, 
-        "ternary_crossbar_bytes": 6, 
+        "srams": 44, 
+        "tcams": 9, 
+        "map_rams": 13, 
+        "logical_tables": 17, 
+        "action_bus_bytes": 47, 
+        "exact_crossbar_bytes": 54, 
+        "ternary_crossbar_bytes": 19, 
         "latency": [
             {
                 "gress": "ingress", 
-                "cycles": 149
+                "cycles": 156
             }, 
             {
                 "gress": "egress", 
@@ -77,7 +77,7 @@
         "power": [
             {
                 "gress": "ingress", 
-                "estimate": "3.59826599532"
+                "estimate": "5.40274812638"
             }, 
             {
                 "gress": "egress", 

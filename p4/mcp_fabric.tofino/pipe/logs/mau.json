@@ -1,7 +1,7 @@
 {
-    "build_date": "Tue Aug 25 22:16:50 2026", 
+    "build_date": "Wed Aug 26 18:08:29 2026", 
     "program_name": "mcp_fabric", 
-    "run_id": "54887098b56e4e28", 
+    "run_id": "c7e9b0ec1b4946b4", 
     "compiler_version": "9.13.1 (e558d01)", 
     "schema_version": "1.0.0", 
     "tables": [
@@ -74,6 +74,219 @@
             ]
         }, 
         {
+            "name": "Ingress.tbl_attn", 
+            "gress": "ingress", 
+            "lookup_types": [
+                "exact"
+            ], 
+            "entries_requested": 2, 
+            "entries_allocated": 16384, 
+            "match_fields": [
+                {
+                    "name": "md.exceed", 
+                    "start_bit": 0, 
+                    "bit_width": 16, 
+                    "lookup_type": "exact"
+                }
+            ], 
+            "action_parameters": [
+                {
+                    "action_name": "NoAction", 
+                    "parameters": []
+                }, 
+                {
+                    "action_name": "Ingress.act_attn_exceed", 
+                    "parameters": []
+                }, 
+                {
+                    "action_name": "Ingress.act_attn_clean", 
+                    "parameters": []
+                }
+            ], 
+            "stage_allocation": [
+                {
+                    "stage_number": 5, 
+                    "memories": [
+                        {
+                            "memory_type": "sram", 
+                            "table_word_width": 128, 
+                            "memory_word_width": 128, 
+                            "entries_per_table_word": 4, 
+                            "table_type": "match", 
+                            "num_memories": 4, 
+                            "entries_requested": 2, 
+                            "entries_allocated": 16384, 
+                            "imm_bit_width_in_overhead_requested": 0, 
+                            "imm_bit_width_in_overhead_allocated": 0, 
+                            "entry_bit_width_requested": 20, 
+                            "entry_bit_width_allocated": 24, 
+                            "ideal_entries_per_table_word": 5, 
+                            "ideal_table_word_bit_width": 128
+                        }, 
+                        {
+                            "memory_type": "sram", 
+                            "table_word_width": 128, 
+                            "memory_word_width": 128, 
+                            "entries_per_table_word": 4, 
+                            "table_type": "stateful", 
+                            "num_memories": 2
+                        }
+                    ], 
+                    "overhead_fields": [
+                        {
+                            "name": "version/valid", 
+                            "bit_width": 4
+                        }
+                    ], 
+                    "match_format": {
+                        "entries": [
+                            {
+                                "entry_number": 3, 
+                                "fields": [
+                                    {
+                                        "name": "action", 
+                                        "bit_width": 1, 
+                                        "start_bit": 0, 
+                                        "memory_start_bit": 3
+                                    }, 
+                                    {
+                                        "name": "version", 
+                                        "bit_width": 4, 
+                                        "start_bit": 0, 
+                                        "memory_start_bit": 124
+                                    }, 
+                                    {
+                                        "name": "meter_addr", 
+                                        "bit_width": 10, 
+                                        "start_bit": 5, 
+                                        "memory_start_bit": 43
+                                    }, 
+                                    {
+                                        "name": "meter_type", 
+                                        "bit_width": 3, 
+                                        "start_bit": 24, 
+                                        "memory_start_bit": 53
+                                    }, 
+                                    {
+                                        "name": "md.exceed", 
+                                        "bit_width": 6, 
+                                        "start_bit": 10, 
+                                        "memory_start_bit": 82
+                                    }
+                                ]
+                            }, 
+                            {
+                                "entry_number": 2, 
+                                "fields": [
+                                    {
+                                        "name": "action", 
+                                        "bit_width": 1, 
+                                        "start_bit": 0, 
+                                        "memory_start_bit": 2
+                                    }, 
+                                    {
+                                        "name": "version", 
+                                        "bit_width": 4, 
+                                        "start_bit": 0, 
+                                        "memory_start_bit": 120
+                                    }, 
+                                    {
+                                        "name": "meter_addr", 
+                                        "bit_width": 10, 
+                                        "start_bit": 5, 
+                                        "memory_start_bit": 30
+                                    }, 
+                                    {
+                                        "name": "meter_type", 
+                                        "bit_width": 3, 
+                                        "start_bit": 24, 
+                                        "memory_start_bit": 40
+                                    }, 
+                                    {
+                                        "name": "md.exceed", 
+                                        "bit_width": 6, 
+                                        "start_bit": 10, 
+                                        "memory_start_bit": 74
+                                    }
+                                ]
+                            }, 
+                            {
+                                "entry_number": 1, 
+                                "fields": [
+                                    {
+                                        "name": "action", 
+                                        "bit_width": 1, 
+                                        "start_bit": 0, 
+                                        "memory_start_bit": 1
+                                    }, 
+                                    {
+                                        "name": "version", 
+                                        "bit_width": 4, 
+                                        "start_bit": 0, 
+                                        "memory_start_bit": 116
+                                    }, 
+                                    {
+                                        "name": "meter_addr", 
+                                        "bit_width": 10, 
+                                        "start_bit": 5, 
+                                        "memory_start_bit": 17
+                                    }, 
+                                    {
+                                        "name": "meter_type", 
+                                        "bit_width": 3, 
+                                        "start_bit": 24, 
+                                        "memory_start_bit": 27
+                                    }, 
+                                    {
+                                        "name": "md.exceed", 
+                                        "bit_width": 6, 
+                                        "start_bit": 10, 
+                                        "memory_start_bit": 66
+                                    }
+                                ]
+                            }, 
+                            {
+                                "entry_number": 0, 
+                                "fields": [
+                                    {
+                                        "name": "action", 
+                                        "bit_width": 1, 
+                                        "start_bit": 0, 
+                                        "memory_start_bit": 0
+                                    }, 
+                                    {
+                                        "name": "version", 
+                                        "bit_width": 4, 
+                                        "start_bit": 0, 
+                                        "memory_start_bit": 112
+                                    }, 
+                                    {
+                                        "name": "meter_addr", 
+                                        "bit_width": 10, 
+                                        "start_bit": 5, 
+                                        "memory_start_bit": 4
+                                    }, 
+                                    {
+                                        "name": "meter_type", 
+                                        "bit_width": 3, 
+                                        "start_bit": 24, 
+                                        "memory_start_bit": 14
+                                    }, 
+                                    {
+                                        "name": "md.exceed", 
+                                        "bit_width": 6, 
+                                        "start_bit": 10, 
+                                        "memory_start_bit": 58
+                                    }
+                                ]
+                            }
+                        ]
+                    }, 
+                    "action_formats": []
+                }
+            ]
+        }, 
+        {
             "name": "Ingress.tbl_dst_leaf", 
             "gress": "ingress", 
             "lookup_types": [
@@ -106,7 +319,7 @@
             ], 
             "stage_allocation": [
                 {
-                    "stage_number": 3, 
+                    "stage_number": 1, 
                     "memories": [
                         {
                             "memory_type": "sram", 
@@ -214,6 +427,262 @@
             ]
         }, 
         {
+            "name": "Ingress.tbl_exceed_csig", 
+            "gress": "ingress", 
+            "lookup_types": [
+                "range"
+            ], 
+            "entries_requested": 4, 
+            "entries_allocated": 512, 
+            "match_fields": [
+                {
+                    "name": "hdr.csig.worst_qdepth", 
+                    "start_bit": 0, 
+                    "bit_width": 16, 
+                    "lookup_type": "range"
+                }
+            ], 
+            "action_parameters": [
+                {
+                    "action_name": "NoAction", 
+                    "parameters": []
+                }, 
+                {
+                    "action_name": "Ingress.set_exceed", 
+                    "parameters": []
+                }
+            ], 
+            "stage_allocation": [
+                {
+                    "stage_number": 3, 
+                    "memories": [
+                        {
+                            "memory_type": "tcam", 
+                            "table_word_width": 44, 
+                            "memory_word_width": 44, 
+                            "entries_per_table_word": 1, 
+                            "table_type": "match", 
+                            "num_memories": 1, 
+                            "entries_requested": 4, 
+                            "entries_allocated": 512, 
+                            "imm_bit_width_in_overhead_requested": 0, 
+                            "imm_bit_width_in_overhead_allocated": 0, 
+                            "entry_bit_width_requested": 20, 
+                            "entry_bit_width_allocated": 44, 
+                            "ideal_entries_per_table_word": 1, 
+                            "ideal_table_word_bit_width": 44
+                        }, 
+                        {
+                            "memory_type": "sram", 
+                            "table_word_width": 128, 
+                            "memory_word_width": 128, 
+                            "entries_per_table_word": 32, 
+                            "table_type": "tind", 
+                            "num_memories": 1, 
+                            "entry_bit_width_requested": 0, 
+                            "entry_bit_width_allocated": 4
+                        }
+                    ], 
+                    "overhead_fields": [], 
+                    "match_format": {
+                        "entries": [
+                            {
+                                "entry_number": 0, 
+                                "fields": [
+                                    {
+                                        "name": "--version--", 
+                                        "bit_width": 2, 
+                                        "start_bit": 0, 
+                                        "memory_start_bit": 42
+                                    }, 
+                                    {
+                                        "name": "hdr.csig.worst_qdepth", 
+                                        "bit_width": 4, 
+                                        "start_bit": 8, 
+                                        "memory_start_bit": 0
+                                    }, 
+                                    {
+                                        "name": "hdr.csig.worst_qdepth", 
+                                        "bit_width": 4, 
+                                        "start_bit": 8, 
+                                        "memory_start_bit": 4
+                                    }, 
+                                    {
+                                        "name": "hdr.csig.worst_qdepth", 
+                                        "bit_width": 4, 
+                                        "start_bit": 0, 
+                                        "memory_start_bit": 8
+                                    }, 
+                                    {
+                                        "name": "hdr.csig.worst_qdepth", 
+                                        "bit_width": 4, 
+                                        "start_bit": 0, 
+                                        "memory_start_bit": 12
+                                    }, 
+                                    {
+                                        "name": "hdr.csig.worst_qdepth", 
+                                        "bit_width": 4, 
+                                        "start_bit": 12, 
+                                        "memory_start_bit": 16
+                                    }, 
+                                    {
+                                        "name": "hdr.csig.worst_qdepth", 
+                                        "bit_width": 4, 
+                                        "start_bit": 12, 
+                                        "memory_start_bit": 20
+                                    }, 
+                                    {
+                                        "name": "hdr.csig.worst_qdepth", 
+                                        "bit_width": 4, 
+                                        "start_bit": 4, 
+                                        "memory_start_bit": 24
+                                    }, 
+                                    {
+                                        "name": "hdr.csig.worst_qdepth", 
+                                        "bit_width": 4, 
+                                        "start_bit": 4, 
+                                        "memory_start_bit": 28
+                                    }
+                                ]
+                            }
+                        ]
+                    }, 
+                    "action_formats": []
+                }
+            ]
+        }, 
+        {
+            "name": "Ingress.tbl_exceed_evid", 
+            "gress": "ingress", 
+            "lookup_types": [
+                "range"
+            ], 
+            "entries_requested": 8, 
+            "entries_allocated": 512, 
+            "match_fields": [
+                {
+                    "name": "hdr.evid.loss_q", 
+                    "start_bit": 0, 
+                    "bit_width": 8, 
+                    "lookup_type": "range"
+                }, 
+                {
+                    "name": "hdr.evid.rtt_q", 
+                    "start_bit": 0, 
+                    "bit_width": 8, 
+                    "lookup_type": "range"
+                }
+            ], 
+            "action_parameters": [
+                {
+                    "action_name": "Ingress.evid_clean", 
+                    "parameters": []
+                }, 
+                {
+                    "action_name": "Ingress.evid_exceed", 
+                    "parameters": []
+                }
+            ], 
+            "stage_allocation": [
+                {
+                    "stage_number": 3, 
+                    "memories": [
+                        {
+                            "memory_type": "tcam", 
+                            "table_word_width": 88, 
+                            "memory_word_width": 44, 
+                            "entries_per_table_word": 1, 
+                            "table_type": "match", 
+                            "num_memories": 2, 
+                            "entries_requested": 8, 
+                            "entries_allocated": 512, 
+                            "imm_bit_width_in_overhead_requested": 0, 
+                            "imm_bit_width_in_overhead_allocated": 0, 
+                            "entry_bit_width_requested": 20, 
+                            "entry_bit_width_allocated": 88, 
+                            "ideal_entries_per_table_word": 1, 
+                            "ideal_table_word_bit_width": 44
+                        }, 
+                        {
+                            "memory_type": "sram", 
+                            "table_word_width": 128, 
+                            "memory_word_width": 128, 
+                            "entries_per_table_word": 32, 
+                            "table_type": "tind", 
+                            "num_memories": 1, 
+                            "entry_bit_width_requested": 0, 
+                            "entry_bit_width_allocated": 4
+                        }
+                    ], 
+                    "overhead_fields": [], 
+                    "match_format": {
+                        "entries": [
+                            {
+                                "entry_number": 0, 
+                                "fields": [
+                                    {
+                                        "name": "--version--", 
+                                        "bit_width": 2, 
+                                        "start_bit": 0, 
+                                        "memory_start_bit": 86
+                                    }, 
+                                    {
+                                        "name": "hdr.evid.loss_q", 
+                                        "bit_width": 4, 
+                                        "start_bit": 0, 
+                                        "memory_start_bit": 0
+                                    }, 
+                                    {
+                                        "name": "hdr.evid.loss_q", 
+                                        "bit_width": 4, 
+                                        "start_bit": 0, 
+                                        "memory_start_bit": 4
+                                    }, 
+                                    {
+                                        "name": "hdr.evid.loss_q", 
+                                        "bit_width": 4, 
+                                        "start_bit": 4, 
+                                        "memory_start_bit": 16
+                                    }, 
+                                    {
+                                        "name": "hdr.evid.loss_q", 
+                                        "bit_width": 4, 
+                                        "start_bit": 4, 
+                                        "memory_start_bit": 20
+                                    }, 
+                                    {
+                                        "name": "hdr.evid.rtt_q", 
+                                        "bit_width": 4, 
+                                        "start_bit": 0, 
+                                        "memory_start_bit": 52
+                                    }, 
+                                    {
+                                        "name": "hdr.evid.rtt_q", 
+                                        "bit_width": 4, 
+                                        "start_bit": 0, 
+                                        "memory_start_bit": 56
+                                    }, 
+                                    {
+                                        "name": "hdr.evid.rtt_q", 
+                                        "bit_width": 4, 
+                                        "start_bit": 4, 
+                                        "memory_start_bit": 68
+                                    }, 
+                                    {
+                                        "name": "hdr.evid.rtt_q", 
+                                        "bit_width": 4, 
+                                        "start_bit": 4, 
+                                        "memory_start_bit": 72
+                                    }
+                                ]
+                            }
+                        ]
+                    }, 
+                    "action_formats": []
+                }
+            ]
+        }, 
+        {
             "name": "Ingress.tbl_fail", 
             "gress": "ingress", 
             "lookup_types": [
@@ -304,62 +773,56 @@
                                     {
                                         "name": "md.rnd_fail", 
                                         "bit_width": 4, 
-                                        "start_bit": 12, 
-                                        "memory_start_bit": 68
-                                    }, 
-                                    {
-                                        "name": "md.rnd_fail", 
-                                        "bit_width": 4, 
-                                        "start_bit": 12, 
-                                        "memory_start_bit": 72
+                                        "start_bit": 0, 
+                                        "memory_start_bit": 44
                                     }, 
                                     {
                                         "name": "md.rnd_fail", 
                                         "bit_width": 4, 
                                         "start_bit": 0, 
+                                        "memory_start_bit": 48
+                                    }, 
+                                    {
+                                        "name": "md.rnd_fail", 
+                                        "bit_width": 4, 
+                                        "start_bit": 8, 
+                                        "memory_start_bit": 52
+                                    }, 
+                                    {
+                                        "name": "md.rnd_fail", 
+                                        "bit_width": 4, 
+                                        "start_bit": 8, 
+                                        "memory_start_bit": 56
+                                    }, 
+                                    {
+                                        "name": "md.rnd_fail", 
+                                        "bit_width": 4, 
+                                        "start_bit": 4, 
+                                        "memory_start_bit": 76
+                                    }, 
+                                    {
+                                        "name": "md.rnd_fail", 
+                                        "bit_width": 4, 
+                                        "start_bit": 4, 
+                                        "memory_start_bit": 80
+                                    }, 
+                                    {
+                                        "name": "md.rnd_fail", 
+                                        "bit_width": 4, 
+                                        "start_bit": 12, 
                                         "memory_start_bit": 0
                                     }, 
                                     {
                                         "name": "md.rnd_fail", 
                                         "bit_width": 4, 
-                                        "start_bit": 0, 
+                                        "start_bit": 12, 
                                         "memory_start_bit": 4
                                     }, 
                                     {
-                                        "name": "md.rnd_fail", 
-                                        "bit_width": 4, 
-                                        "start_bit": 8, 
-                                        "memory_start_bit": 8
-                                    }, 
-                                    {
-                                        "name": "md.rnd_fail", 
-                                        "bit_width": 4, 
-                                        "start_bit": 8, 
-                                        "memory_start_bit": 12
-                                    }, 
-                                    {
                                         "name": "md.vlink_id", 
-                                        "bit_width": 8, 
+                                        "bit_width": 16, 
                                         "start_bit": 0, 
-                                        "memory_start_bit": 16
-                                    }, 
-                                    {
-                                        "name": "md.vlink_id", 
-                                        "bit_width": 8, 
-                                        "start_bit": 8, 
                                         "memory_start_bit": 24
-                                    }, 
-                                    {
-                                        "name": "md.rnd_fail", 
-                                        "bit_width": 4, 
-                                        "start_bit": 4, 
-                                        "memory_start_bit": 32
-                                    }, 
-                                    {
-                                        "name": "md.rnd_fail", 
-                                        "bit_width": 4, 
-                                        "start_bit": 4, 
-                                        "memory_start_bit": 36
                                     }
                                 ]
                             }
@@ -432,7 +895,7 @@
             ], 
             "stage_allocation": [
                 {
-                    "stage_number": 6, 
+                    "stage_number": 7, 
                     "memories": [
                         {
                             "memory_type": "sram", 
@@ -485,19 +948,19 @@
                                         "memory_start_bit": 112
                                     }, 
                                     {
-                                        "name": "md.hop", 
+                                        "name": "md.role", 
                                         "bit_width": 6, 
                                         "start_bit": 10, 
                                         "memory_start_bit": 66
                                     }, 
                                     {
-                                        "name": "md.role", 
+                                        "name": "md.hop", 
                                         "bit_width": 8, 
                                         "start_bit": 0, 
                                         "memory_start_bit": 32
                                     }, 
                                     {
-                                        "name": "md.role", 
+                                        "name": "md.hop", 
                                         "bit_width": 8, 
                                         "start_bit": 8, 
                                         "memory_start_bit": 40
@@ -519,6 +982,387 @@
                         ]
                     }, 
                     "action_formats": []
+                }
+            ]
+        }, 
+        {
+            "name": "Ingress.tbl_gate", 
+            "gress": "ingress", 
+            "lookup_types": [
+                "range", 
+                "exact"
+            ], 
+            "entries_requested": 256, 
+            "entries_allocated": 1024, 
+            "match_fields": [
+                {
+                    "name": "md.attn", 
+                    "start_bit": 8, 
+                    "bit_width": 8, 
+                    "lookup_type": "exact"
+                }, 
+                {
+                    "name": "md.rnd_attn", 
+                    "start_bit": 0, 
+                    "bit_width": 16, 
+                    "lookup_type": "range"
+                }
+            ], 
+            "action_parameters": [
+                {
+                    "action_name": "NoAction", 
+                    "parameters": []
+                }, 
+                {
+                    "action_name": "Ingress.set_measure", 
+                    "parameters": []
+                }
+            ], 
+            "stage_allocation": [
+                {
+                    "stage_number": 6, 
+                    "memories": [
+                        {
+                            "memory_type": "tcam", 
+                            "table_word_width": 88, 
+                            "memory_word_width": 44, 
+                            "entries_per_table_word": 1, 
+                            "table_type": "match", 
+                            "num_memories": 4, 
+                            "entries_requested": 256, 
+                            "entries_allocated": 1024, 
+                            "imm_bit_width_in_overhead_requested": 0, 
+                            "imm_bit_width_in_overhead_allocated": 0, 
+                            "entry_bit_width_requested": 28, 
+                            "entry_bit_width_allocated": 88, 
+                            "ideal_entries_per_table_word": 1, 
+                            "ideal_table_word_bit_width": 44
+                        }, 
+                        {
+                            "memory_type": "sram", 
+                            "table_word_width": 128, 
+                            "memory_word_width": 128, 
+                            "entries_per_table_word": 8, 
+                            "table_type": "action", 
+                            "num_memories": 1, 
+                            "entry_bit_width_requested": 0, 
+                            "entry_bit_width_allocated": 16, 
+                            "ideal_entries_per_table_word": 1, 
+                            "ideal_table_word_bit_width": 128
+                        }
+                    ], 
+                    "overhead_fields": [], 
+                    "match_format": {
+                        "entries": [
+                            {
+                                "entry_number": 0, 
+                                "fields": [
+                                    {
+                                        "name": "--version--", 
+                                        "bit_width": 2, 
+                                        "start_bit": 0, 
+                                        "memory_start_bit": 86
+                                    }, 
+                                    {
+                                        "name": "md.rnd_attn", 
+                                        "bit_width": 4, 
+                                        "start_bit": 12, 
+                                        "memory_start_bit": 68
+                                    }, 
+                                    {
+                                        "name": "md.rnd_attn", 
+                                        "bit_width": 4, 
+                                        "start_bit": 12, 
+                                        "memory_start_bit": 72
+                                    }, 
+                                    {
+                                        "name": "md.rnd_attn", 
+                                        "bit_width": 4, 
+                                        "start_bit": 0, 
+                                        "memory_start_bit": 0
+                                    }, 
+                                    {
+                                        "name": "md.rnd_attn", 
+                                        "bit_width": 4, 
+                                        "start_bit": 0, 
+                                        "memory_start_bit": 4
+                                    }, 
+                                    {
+                                        "name": "md.rnd_attn", 
+                                        "bit_width": 4, 
+                                        "start_bit": 8, 
+                                        "memory_start_bit": 8
+                                    }, 
+                                    {
+                                        "name": "md.rnd_attn", 
+                                        "bit_width": 4, 
+                                        "start_bit": 8, 
+                                        "memory_start_bit": 12
+                                    }, 
+                                    {
+                                        "name": "md.attn", 
+                                        "bit_width": 8, 
+                                        "start_bit": 8, 
+                                        "memory_start_bit": 16
+                                    }, 
+                                    {
+                                        "name": "md.rnd_attn", 
+                                        "bit_width": 4, 
+                                        "start_bit": 4, 
+                                        "memory_start_bit": 32
+                                    }, 
+                                    {
+                                        "name": "md.rnd_attn", 
+                                        "bit_width": 4, 
+                                        "start_bit": 4, 
+                                        "memory_start_bit": 36
+                                    }
+                                ]
+                            }
+                        ]
+                    }, 
+                    "action_formats": [
+                        {
+                            "name": "Ingress.set_measure", 
+                            "action_format": {
+                                "entries": [
+                                    {
+                                        "entry_number": 7, 
+                                        "fields": [
+                                            {
+                                                "name": "$constant0", 
+                                                "bit_width": 8, 
+                                                "start_bit": 0, 
+                                                "memory_start_bit": 120
+                                            }, 
+                                            {
+                                                "name": "--padding_0_7--", 
+                                                "bit_width": 8, 
+                                                "start_bit": 0, 
+                                                "memory_start_bit": 112
+                                            }
+                                        ]
+                                    }, 
+                                    {
+                                        "entry_number": 6, 
+                                        "fields": [
+                                            {
+                                                "name": "$constant0", 
+                                                "bit_width": 8, 
+                                                "start_bit": 0, 
+                                                "memory_start_bit": 104
+                                            }, 
+                                            {
+                                                "name": "--padding_0_7--", 
+                                                "bit_width": 8, 
+                                                "start_bit": 0, 
+                                                "memory_start_bit": 96
+                                            }
+                                        ]
+                                    }, 
+                                    {
+                                        "entry_number": 5, 
+                                        "fields": [
+                                            {
+                                                "name": "$constant0", 
+                                                "bit_width": 8, 
+                                                "start_bit": 0, 
+                                                "memory_start_bit": 88
+                                            }, 
+                                            {
+                                                "name": "--padding_0_7--", 
+                                                "bit_width": 8, 
+                                                "start_bit": 0, 
+                                                "memory_start_bit": 80
+                                            }
+                                        ]
+                                    }, 
+                                    {
+                                        "entry_number": 4, 
+                                        "fields": [
+                                            {
+                                                "name": "$constant0", 
+                                                "bit_width": 8, 
+                                                "start_bit": 0, 
+                                                "memory_start_bit": 72
+                                            }, 
+                                            {
+                                                "name": "--padding_0_7--", 
+                                                "bit_width": 8, 
+                                                "start_bit": 0, 
+                                                "memory_start_bit": 64
+                                            }
+                                        ]
+                                    }, 
+                                    {
+                                        "entry_number": 3, 
+                                        "fields": [
+                                            {
+                                                "name": "$constant0", 
+                                                "bit_width": 8, 
+                                                "start_bit": 0, 
+                                                "memory_start_bit": 56
+                                            }, 
+                                            {
+                                                "name": "--padding_0_7--", 
+                                                "bit_width": 8, 
+                                                "start_bit": 0, 
+                                                "memory_start_bit": 48
+                                            }
+                                        ]
+                                    }, 
+                                    {
+                                        "entry_number": 2, 
+                                        "fields": [
+                                            {
+                                                "name": "$constant0", 
+                                                "bit_width": 8, 
+                                                "start_bit": 0, 
+                                                "memory_start_bit": 40
+                                            }, 
+                                            {
+                                                "name": "--padding_0_7--", 
+                                                "bit_width": 8, 
+                                                "start_bit": 0, 
+                                                "memory_start_bit": 32
+                                            }
+                                        ]
+                                    }, 
+                                    {
+                                        "entry_number": 1, 
+                                        "fields": [
+                                            {
+                                                "name": "$constant0", 
+                                                "bit_width": 8, 
+                                                "start_bit": 0, 
+                                                "memory_start_bit": 24
+                                            }, 
+                                            {
+                                                "name": "--padding_0_7--", 
+                                                "bit_width": 8, 
+                                                "start_bit": 0, 
+                                                "memory_start_bit": 16
+                                            }
+                                        ]
+                                    }, 
+                                    {
+                                        "entry_number": 0, 
+                                        "fields": [
+                                            {
+                                                "name": "$constant0", 
+                                                "bit_width": 8, 
+                                                "start_bit": 0, 
+                                                "memory_start_bit": 8
+                                            }, 
+                                            {
+                                                "name": "--padding_0_7--", 
+                                                "bit_width": 8, 
+                                                "start_bit": 0, 
+                                                "memory_start_bit": 0
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }, 
+                            "parameter_map": []
+                        }, 
+                        {
+                            "name": "NoAction", 
+                            "action_format": {
+                                "entries": [
+                                    {
+                                        "entry_number": 7, 
+                                        "fields": [
+                                            {
+                                                "name": "--padding_0_15--", 
+                                                "bit_width": 16, 
+                                                "start_bit": 0, 
+                                                "memory_start_bit": 112
+                                            }
+                                        ]
+                                    }, 
+                                    {
+                                        "entry_number": 6, 
+                                        "fields": [
+                                            {
+                                                "name": "--padding_0_15--", 
+                                                "bit_width": 16, 
+                                                "start_bit": 0, 
+                                                "memory_start_bit": 96
+                                            }
+                                        ]
+                                    }, 
+                                    {
+                                        "entry_number": 5, 
+                                        "fields": [
+                                            {
+                                                "name": "--padding_0_15--", 
+                                                "bit_width": 16, 
+                                                "start_bit": 0, 
+                                                "memory_start_bit": 80
+                                            }
+                                        ]
+                                    }, 
+                                    {
+                                        "entry_number": 4, 
+                                        "fields": [
+                                            {
+                                                "name": "--padding_0_15--", 
+                                                "bit_width": 16, 
+                                                "start_bit": 0, 
+                                                "memory_start_bit": 64
+                                            }
+                                        ]
+                                    }, 
+                                    {
+                                        "entry_number": 3, 
+                                        "fields": [
+                                            {
+                                                "name": "--padding_0_15--", 
+                                                "bit_width": 16, 
+                                                "start_bit": 0, 
+                                                "memory_start_bit": 48
+                                            }
+                                        ]
+                                    }, 
+                                    {
+                                        "entry_number": 2, 
+                                        "fields": [
+                                            {
+                                                "name": "--padding_0_15--", 
+                                                "bit_width": 16, 
+                                                "start_bit": 0, 
+                                                "memory_start_bit": 32
+                                            }
+                                        ]
+                                    }, 
+                                    {
+                                        "entry_number": 1, 
+                                        "fields": [
+                                            {
+                                                "name": "--padding_0_15--", 
+                                                "bit_width": 16, 
+                                                "start_bit": 0, 
+                                                "memory_start_bit": 16
+                                            }
+                                        ]
+                                    }, 
+                                    {
+                                        "entry_number": 0, 
+                                        "fields": [
+                                            {
+                                                "name": "--padding_0_15--", 
+                                                "bit_width": 16, 
+                                                "start_bit": 0, 
+                                                "memory_start_bit": 0
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }, 
+                            "parameter_map": []
+                        }
+                    ]
                 }
             ]
         }, 
@@ -728,19 +1572,19 @@
                                         "memory_start_bit": 116
                                     }, 
                                     {
-                                        "name": "md.hop", 
+                                        "name": "md.role", 
                                         "bit_width": 6, 
                                         "start_bit": 10, 
                                         "memory_start_bit": 82
                                     }, 
                                     {
-                                        "name": "md.role", 
+                                        "name": "md.hop", 
                                         "bit_width": 8, 
                                         "start_bit": 0, 
                                         "memory_start_bit": 64
                                     }, 
                                     {
-                                        "name": "md.role", 
+                                        "name": "md.hop", 
                                         "bit_width": 8, 
                                         "start_bit": 8, 
                                         "memory_start_bit": 72
@@ -769,19 +1613,19 @@
                                         "memory_start_bit": 112
                                     }, 
                                     {
-                                        "name": "md.hop", 
+                                        "name": "md.role", 
                                         "bit_width": 6, 
                                         "start_bit": 10, 
                                         "memory_start_bit": 58
                                     }, 
                                     {
-                                        "name": "md.role", 
+                                        "name": "md.hop", 
                                         "bit_width": 8, 
                                         "start_bit": 0, 
                                         "memory_start_bit": 40
                                     }, 
                                     {
-                                        "name": "md.role", 
+                                        "name": "md.hop", 
                                         "bit_width": 8, 
                                         "start_bit": 8, 
                                         "memory_start_bit": 48
@@ -1202,6 +2046,10 @@
                         {
                             "name": "next_vsw", 
                             "bit_width": 16
+                        }, 
+                        {
+                            "name": "path_id", 
+                            "bit_width": 16
                         }
                     ]
                 }, 
@@ -1224,9 +2072,9 @@
                             "entries_requested": 256, 
                             "entries_allocated": 4096, 
                             "imm_bit_width_in_overhead_requested": 30, 
-                            "imm_bit_width_in_overhead_allocated": 32, 
-                            "entry_bit_width_requested": 116, 
-                            "entry_bit_width_allocated": 108, 
+                            "imm_bit_width_in_overhead_allocated": 30, 
+                            "entry_bit_width_requested": 114, 
+                            "entry_bit_width_allocated": 106, 
                             "ideal_entries_per_table_word": 8, 
                             "ideal_table_word_bit_width": 896
                         }, 
@@ -1234,11 +2082,11 @@
                             "memory_type": "sram", 
                             "table_word_width": 128, 
                             "memory_word_width": 128, 
-                            "entries_per_table_word": 8, 
+                            "entries_per_table_word": 4, 
                             "table_type": "action", 
                             "num_memories": 1, 
-                            "entry_bit_width_requested": 14, 
-                            "entry_bit_width_allocated": 16, 
+                            "entry_bit_width_requested": 32, 
+                            "entry_bit_width_allocated": 32, 
                             "ideal_entries_per_table_word": 2, 
                             "ideal_table_word_bit_width": 128
                         }, 
@@ -1254,7 +2102,7 @@
                     "overhead_fields": [
                         {
                             "name": "immediate", 
-                            "bit_width": 32
+                            "bit_width": 30
                         }, 
                         {
                             "name": "version/valid", 
@@ -1274,7 +2122,7 @@
                                     }, 
                                     {
                                         "name": "immediate", 
-                                        "bit_width": 32, 
+                                        "bit_width": 30, 
                                         "start_bit": 0, 
                                         "memory_start_bit": 2
                                     }, 
@@ -1288,55 +2136,55 @@
                                         "name": "md.spray_idx", 
                                         "bit_width": 6, 
                                         "start_bit": 10, 
-                                        "memory_start_bit": 34
+                                        "memory_start_bit": 98
                                     }, 
                                     {
-                                        "name": "md.hop", 
+                                        "name": "md.role", 
                                         "bit_width": 8, 
                                         "start_bit": 0, 
+                                        "memory_start_bit": 32
+                                    }, 
+                                    {
+                                        "name": "md.role", 
+                                        "bit_width": 8, 
+                                        "start_bit": 8, 
                                         "memory_start_bit": 40
                                     }, 
                                     {
                                         "name": "md.hop", 
                                         "bit_width": 8, 
-                                        "start_bit": 8, 
+                                        "start_bit": 0, 
                                         "memory_start_bit": 48
                                     }, 
                                     {
-                                        "name": "md.role", 
+                                        "name": "md.hop", 
                                         "bit_width": 8, 
-                                        "start_bit": 0, 
+                                        "start_bit": 8, 
                                         "memory_start_bit": 56
                                     }, 
                                     {
-                                        "name": "md.role", 
+                                        "name": "md.src_leaf", 
                                         "bit_width": 8, 
-                                        "start_bit": 8, 
+                                        "start_bit": 0, 
                                         "memory_start_bit": 64
                                     }, 
                                     {
                                         "name": "md.src_leaf", 
                                         "bit_width": 8, 
-                                        "start_bit": 0, 
+                                        "start_bit": 8, 
                                         "memory_start_bit": 72
                                     }, 
                                     {
-                                        "name": "md.src_leaf", 
+                                        "name": "md.dst_leaf", 
                                         "bit_width": 8, 
-                                        "start_bit": 8, 
+                                        "start_bit": 0, 
                                         "memory_start_bit": 80
                                     }, 
                                     {
                                         "name": "md.dst_leaf", 
                                         "bit_width": 8, 
-                                        "start_bit": 0, 
-                                        "memory_start_bit": 88
-                                    }, 
-                                    {
-                                        "name": "md.dst_leaf", 
-                                        "bit_width": 8, 
                                         "start_bit": 8, 
-                                        "memory_start_bit": 96
+                                        "memory_start_bit": 88
                                     }
                                 ]
                             }
@@ -1348,57 +2196,13 @@
                             "action_format": {
                                 "entries": [
                                     {
-                                        "entry_number": 7, 
-                                        "fields": [
-                                            {
-                                                "name": "--padding_0_15--", 
-                                                "bit_width": 16, 
-                                                "start_bit": 0, 
-                                                "memory_start_bit": 112
-                                            }
-                                        ]
-                                    }, 
-                                    {
-                                        "entry_number": 6, 
-                                        "fields": [
-                                            {
-                                                "name": "--padding_0_15--", 
-                                                "bit_width": 16, 
-                                                "start_bit": 0, 
-                                                "memory_start_bit": 96
-                                            }
-                                        ]
-                                    }, 
-                                    {
-                                        "entry_number": 5, 
-                                        "fields": [
-                                            {
-                                                "name": "--padding_0_15--", 
-                                                "bit_width": 16, 
-                                                "start_bit": 0, 
-                                                "memory_start_bit": 80
-                                            }
-                                        ]
-                                    }, 
-                                    {
-                                        "entry_number": 4, 
-                                        "fields": [
-                                            {
-                                                "name": "--padding_0_15--", 
-                                                "bit_width": 16, 
-                                                "start_bit": 0, 
-                                                "memory_start_bit": 64
-                                            }
-                                        ]
-                                    }, 
-                                    {
                                         "entry_number": 3, 
                                         "fields": [
                                             {
-                                                "name": "--padding_0_15--", 
-                                                "bit_width": 16, 
+                                                "name": "--padding_0_31--", 
+                                                "bit_width": 32, 
                                                 "start_bit": 0, 
-                                                "memory_start_bit": 48
+                                                "memory_start_bit": 96
                                             }
                                         ]
                                     }, 
@@ -1406,10 +2210,10 @@
                                         "entry_number": 2, 
                                         "fields": [
                                             {
-                                                "name": "--padding_0_15--", 
-                                                "bit_width": 16, 
+                                                "name": "--padding_0_31--", 
+                                                "bit_width": 32, 
                                                 "start_bit": 0, 
-                                                "memory_start_bit": 32
+                                                "memory_start_bit": 64
                                             }
                                         ]
                                     }, 
@@ -1417,10 +2221,10 @@
                                         "entry_number": 1, 
                                         "fields": [
                                             {
-                                                "name": "--padding_0_15--", 
-                                                "bit_width": 16, 
+                                                "name": "--padding_0_31--", 
+                                                "bit_width": 32, 
                                                 "start_bit": 0, 
-                                                "memory_start_bit": 16
+                                                "memory_start_bit": 32
                                             }
                                         ]
                                     }, 
@@ -1428,8 +2232,8 @@
                                         "entry_number": 0, 
                                         "fields": [
                                             {
-                                                "name": "--padding_0_15--", 
-                                                "bit_width": 16, 
+                                                "name": "--padding_0_31--", 
+                                                "bit_width": 32, 
                                                 "start_bit": 0, 
                                                 "memory_start_bit": 0
                                             }
@@ -1444,87 +2248,31 @@
                             "action_format": {
                                 "entries": [
                                     {
-                                        "entry_number": 7, 
-                                        "fields": [
-                                            {
-                                                "name": "next_vsw", 
-                                                "bit_width": 8, 
-                                                "start_bit": 0, 
-                                                "memory_start_bit": 120
-                                            }, 
-                                            {
-                                                "name": "vlink_id", 
-                                                "bit_width": 8, 
-                                                "start_bit": 0, 
-                                                "memory_start_bit": 112
-                                            }
-                                        ]
-                                    }, 
-                                    {
-                                        "entry_number": 6, 
-                                        "fields": [
-                                            {
-                                                "name": "next_vsw", 
-                                                "bit_width": 8, 
-                                                "start_bit": 0, 
-                                                "memory_start_bit": 104
-                                            }, 
-                                            {
-                                                "name": "vlink_id", 
-                                                "bit_width": 8, 
-                                                "start_bit": 0, 
-                                                "memory_start_bit": 96
-                                            }
-                                        ]
-                                    }, 
-                                    {
-                                        "entry_number": 5, 
-                                        "fields": [
-                                            {
-                                                "name": "next_vsw", 
-                                                "bit_width": 8, 
-                                                "start_bit": 0, 
-                                                "memory_start_bit": 88
-                                            }, 
-                                            {
-                                                "name": "vlink_id", 
-                                                "bit_width": 8, 
-                                                "start_bit": 0, 
-                                                "memory_start_bit": 80
-                                            }
-                                        ]
-                                    }, 
-                                    {
-                                        "entry_number": 4, 
-                                        "fields": [
-                                            {
-                                                "name": "next_vsw", 
-                                                "bit_width": 8, 
-                                                "start_bit": 0, 
-                                                "memory_start_bit": 72
-                                            }, 
-                                            {
-                                                "name": "vlink_id", 
-                                                "bit_width": 8, 
-                                                "start_bit": 0, 
-                                                "memory_start_bit": 64
-                                            }
-                                        ]
-                                    }, 
-                                    {
                                         "entry_number": 3, 
                                         "fields": [
                                             {
                                                 "name": "next_vsw", 
                                                 "bit_width": 8, 
                                                 "start_bit": 0, 
-                                                "memory_start_bit": 56
+                                                "memory_start_bit": 96
                                             }, 
                                             {
-                                                "name": "vlink_id", 
+                                                "name": "path_id", 
                                                 "bit_width": 8, 
                                                 "start_bit": 0, 
-                                                "memory_start_bit": 48
+                                                "memory_start_bit": 104
+                                            }, 
+                                            {
+                                                "name": "path_id", 
+                                                "bit_width": 8, 
+                                                "start_bit": 8, 
+                                                "memory_start_bit": 112
+                                            }, 
+                                            {
+                                                "name": "next_vsw", 
+                                                "bit_width": 8, 
+                                                "start_bit": 8, 
+                                                "memory_start_bit": 120
                                             }
                                         ]
                                     }, 
@@ -1535,13 +2283,25 @@
                                                 "name": "next_vsw", 
                                                 "bit_width": 8, 
                                                 "start_bit": 0, 
-                                                "memory_start_bit": 40
+                                                "memory_start_bit": 64
                                             }, 
                                             {
-                                                "name": "vlink_id", 
+                                                "name": "path_id", 
                                                 "bit_width": 8, 
                                                 "start_bit": 0, 
-                                                "memory_start_bit": 32
+                                                "memory_start_bit": 72
+                                            }, 
+                                            {
+                                                "name": "path_id", 
+                                                "bit_width": 8, 
+                                                "start_bit": 8, 
+                                                "memory_start_bit": 80
+                                            }, 
+                                            {
+                                                "name": "next_vsw", 
+                                                "bit_width": 8, 
+                                                "start_bit": 8, 
+                                                "memory_start_bit": 88
                                             }
                                         ]
                                     }, 
@@ -1552,13 +2312,25 @@
                                                 "name": "next_vsw", 
                                                 "bit_width": 8, 
                                                 "start_bit": 0, 
-                                                "memory_start_bit": 24
+                                                "memory_start_bit": 32
                                             }, 
                                             {
-                                                "name": "vlink_id", 
+                                                "name": "path_id", 
                                                 "bit_width": 8, 
                                                 "start_bit": 0, 
-                                                "memory_start_bit": 16
+                                                "memory_start_bit": 40
+                                            }, 
+                                            {
+                                                "name": "path_id", 
+                                                "bit_width": 8, 
+                                                "start_bit": 8, 
+                                                "memory_start_bit": 48
+                                            }, 
+                                            {
+                                                "name": "next_vsw", 
+                                                "bit_width": 8, 
+                                                "start_bit": 8, 
+                                                "memory_start_bit": 56
                                             }
                                         ]
                                     }, 
@@ -1569,13 +2341,25 @@
                                                 "name": "next_vsw", 
                                                 "bit_width": 8, 
                                                 "start_bit": 0, 
+                                                "memory_start_bit": 0
+                                            }, 
+                                            {
+                                                "name": "path_id", 
+                                                "bit_width": 8, 
+                                                "start_bit": 0, 
                                                 "memory_start_bit": 8
                                             }, 
                                             {
-                                                "name": "vlink_id", 
+                                                "name": "path_id", 
                                                 "bit_width": 8, 
-                                                "start_bit": 0, 
-                                                "memory_start_bit": 0
+                                                "start_bit": 8, 
+                                                "memory_start_bit": 16
+                                            }, 
+                                            {
+                                                "name": "next_vsw", 
+                                                "bit_width": 8, 
+                                                "start_bit": 8, 
+                                                "memory_start_bit": 24
                                             }
                                         ]
                                     }
@@ -1588,7 +2372,7 @@
             ]
         }, 
         {
-            "name": "tbl_mcp_fabric533", 
+            "name": "tbl_mcp_fabric665", 
             "gress": "ingress", 
             "lookup_types": [], 
             "entries_requested": 0, 
@@ -1596,7 +2380,7 @@
             "match_fields": [], 
             "action_parameters": [
                 {
-                    "action_name": "mcp_fabric533", 
+                    "action_name": "mcp_fabric665", 
                     "parameters": []
                 }
             ], 
@@ -1635,7 +2419,7 @@
             ]
         }, 
         {
-            "name": "tbl_mcp_fabric540", 
+            "name": "tbl_mcp_fabric672", 
             "gress": "ingress", 
             "lookup_types": [], 
             "entries_requested": 1, 
@@ -1643,7 +2427,32 @@
             "match_fields": [], 
             "action_parameters": [
                 {
-                    "action_name": "mcp_fabric540", 
+                    "action_name": "mcp_fabric672", 
+                    "parameters": []
+                }
+            ], 
+            "stage_allocation": [
+                {
+                    "stage_number": 3, 
+                    "memories": [], 
+                    "overhead_fields": [], 
+                    "match_format": {
+                        "entries": []
+                    }, 
+                    "action_formats": []
+                }
+            ]
+        }, 
+        {
+            "name": "tbl_mcp_fabric673", 
+            "gress": "ingress", 
+            "lookup_types": [], 
+            "entries_requested": 1, 
+            "entries_allocated": 1, 
+            "match_fields": [], 
+            "action_parameters": [
+                {
+                    "action_name": "mcp_fabric673", 
                     "parameters": []
                 }
             ], 
@@ -1660,7 +2469,7 @@
             ]
         }, 
         {
-            "name": "tbl_mcp_fabric546", 
+            "name": "tbl_mcp_fabric679", 
             "gress": "ingress", 
             "lookup_types": [], 
             "entries_requested": 65536, 
@@ -1668,7 +2477,7 @@
             "match_fields": [], 
             "action_parameters": [
                 {
-                    "action_name": "mcp_fabric546", 
+                    "action_name": "mcp_fabric679", 
                     "parameters": []
                 }
             ], 
@@ -1685,7 +2494,7 @@
             ]
         }, 
         {
-            "name": "tbl_mcp_fabric550", 
+            "name": "tbl_mcp_fabric683", 
             "gress": "ingress", 
             "lookup_types": [], 
             "entries_requested": 65536, 
@@ -1693,7 +2502,7 @@
             "match_fields": [], 
             "action_parameters": [
                 {
-                    "action_name": "mcp_fabric550", 
+                    "action_name": "mcp_fabric683", 
                     "parameters": []
                 }
             ], 
@@ -1713,6 +2522,53 @@
                     "overhead_fields": [], 
                     "match_format": {
                         "entries": []
+                    }, 
+                    "action_formats": []
+                }
+            ]
+        }, 
+        {
+            "name": "tbl_mcp_fabric709", 
+            "gress": "ingress", 
+            "lookup_types": [], 
+            "entries_requested": 0, 
+            "entries_allocated": 0, 
+            "match_fields": [], 
+            "action_parameters": [
+                {
+                    "action_name": "mcp_fabric709", 
+                    "parameters": []
+                }
+            ], 
+            "stage_allocation": [
+                {
+                    "stage_number": 6, 
+                    "memories": [
+                        {
+                            "memory_type": "sram", 
+                            "table_word_width": 0, 
+                            "memory_word_width": 44, 
+                            "entries_per_table_word": 1, 
+                            "table_type": "match", 
+                            "num_memories": 0, 
+                            "entries_requested": 0, 
+                            "entries_allocated": 0, 
+                            "imm_bit_width_in_overhead_requested": 0, 
+                            "imm_bit_width_in_overhead_allocated": 0, 
+                            "entry_bit_width_requested": 0, 
+                            "entry_bit_width_allocated": 0, 
+                            "ideal_entries_per_table_word": 0, 
+                            "ideal_table_word_bit_width": 0
+                        }
+                    ], 
+                    "overhead_fields": [], 
+                    "match_format": {
+                        "entries": [
+                            {
+                                "entry_number": 0, 
+                                "fields": []
+                            }
+                        ]
                     }, 
                     "action_formats": []
                 }

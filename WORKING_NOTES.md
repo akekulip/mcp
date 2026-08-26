@@ -160,6 +160,13 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   HUMAN ACTION NEEDED: plug Hulk enp59s0f0np0's DAC into the switch (cage 15 lanes 0/2/3 have the
   breakout legs; today no lane links) — until then Hulk reaches the fabric only via Vision's
   direct 10G link (enp59s0f1np1 <-> enp175s0np1s0).
+- 2026-08-26 ~22:30 Philip: "P4 and the switch is yours". Fabric mapping for 4x2 on the real
+  loops: leaf l <-> pair 5/l<->6/l; uplink out 5/l qid s (re-enters 6/l = spine pass), downlink
+  out 6/l qid s (re-enters 5/l = dest-leaf pass); all leaves deliver to dp9 until Hulk is cabled.
+  p4-dataplane-engineer agent: setup_skeleton.py rewrite + silicon smoke of steps 1-4 (running).
+  STEP 5 DONE (me): attention register + §7.4 rule + TCAM gate; 0 errors both SDEs, 8 stages;
+  PREREG v1.3 freezes §7.4; H22 closed; 3 new bf-p4c constraint classes (9-11) in the tofino-p4
+  skill. Next: step 6 (mirror on inj_drop -> collector dp9), control-plane additions for step 5.
 
 ## Next action
 1. Vision/Hulk: check Netronome SDK, rxe, kernel, perftest, DPDK availability (M4 prep).

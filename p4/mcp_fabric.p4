@@ -1,9 +1,10 @@
 /* mcp_fabric.p4 — Tofino 1 (TNA) emulation of a packet-sprayed leaf-spine fabric.
  *
- * Implements docs/P4-DESIGN-SPACE.md.  STEPS 1-4 of the §9.2 offline compile
+ * Implements docs/P4-DESIGN-SPACE.md.  STEPS 1-5 of the §9.2 offline compile
  * sequence: headers/parser/deparser, forwarding + virtual-link resolve, spraying,
- * failure injection.  Steps 5-8 (measurement + attention registers, mirror, egress
- * CSIG, evidence) are NOT here yet — see p4/README.md.
+ * failure injection, and (step 5) the in-switch attention register with the PREREG
+ * §7.4 update rule + the probabilistic measurement gate.  Steps 6-8 (mirror, egress
+ * CSIG, evidence reflection) are NOT here yet — see p4/README.md.
  *
  * Fabric shape is entirely control-plane data.  The reference bring-up
  * (p4/control/setup_skeleton.py) programs 2 leaves x 4 spines = 16 virtual links
@@ -149,6 +150,12 @@ struct eg_headers_t {
     csig_h     csig;
 }
 
+/* Step 5 attention word: two 16-bit halves in one 32-bit SALU register (§7.4 ii). */
+struct attn_pair_t {
+    bit<16> attn;
+    bit<16> clean;
+}
+
 /* ======================= metadata ======================= */
 
 /* Every field is bit<16> even where one bit would do: constraint Class 3 (sub-byte
@@ -171,9 +178,12 @@ struct ig_md_t {
     bit<16> vlink_id;
     bit<16> rnd_fail;    // range key: exactly 16 bits = 4 of the 5 range nibbles (Class 2)
     bit<16> rnd_attn;
-    bit<16> attn;
+    bit<16> attn;        // attention weight of this packet's path, read by the SALU
+    bit<16> attn_idx;    // reg_attn index = path id (from tbl_vlink, csig or evid)
+    bit<16> exceed;      // 1 = this packet is threshold-exceedance evidence for attn_idx
     bit<16> do_measure;
-    bit<16> fault;
+    bit<16> fault;       // 0 none, 2 dropped, 4 corrupted (bit0 is reserved for "measured")
+    bit<16> flags_out;   // fabric_h.flags to write: fault | measured
     bit<16> mirror_sid;
 }
 
@@ -205,8 +215,13 @@ parser IgParser(packet_in pkt, out headers_t hdr, out ig_md_t md,
         md.rnd_fail   = 0;
         md.rnd_attn   = 0;
         md.attn       = 0;
+        /* md.attn_idx is deliberately NOT zeroed here: parse_csig / parse_evid assign it
+         * and a Tofino parser field may be written in only one state on a path. Hop-0
+         * data packets get it from tbl_vlink action data instead. */
+        md.exceed     = 0;
         md.do_measure = 0;
         md.fault      = 0;
+        md.flags_out  = 0;
         md.mirror_sid = 0;
         transition parse_ethernet;
     }
@@ -242,6 +257,9 @@ parser IgParser(packet_in pkt, out headers_t hdr, out ig_md_t md,
 
     state parse_csig {
         pkt.extract(hdr.csig);
+        /* The tag names the path it travelled; at the destination leaf (hop 2) no
+         * tbl_vlink row runs, so this is where the attention index comes from. */
+        md.attn_idx = hdr.csig.path_id;
         transition parse_ipv4;
     }
 
@@ -269,6 +287,8 @@ parser IgParser(packet_in pkt, out headers_t hdr, out ig_md_t md,
 
     state parse_evid {
         pkt.extract(hdr.evid);
+        /* attn_idx comes from tbl_exceed_evid's actions, not here: parse_csig is on the
+         * same parser path and a field may be assigned in only one state per path. */
         transition accept;
     }
 }
@@ -400,9 +420,11 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
      * the number of black-holed packets is exact ground truth (§7.6). */
     DirectCounter<bit<64>>(CounterType_t.PACKETS_AND_BYTES) vlink_ctr;
 
-    action to_loop(bit<16> vlink_id, bit<9> loop_port, bit<5> qid, bit<16> next_vsw) {
+    action to_loop(bit<16> vlink_id, bit<9> loop_port, bit<5> qid, bit<16> next_vsw,
+                   bit<16> path_id) {
         md.vlink_id                = vlink_id;
         md.next_vsw                = next_vsw;
+        md.attn_idx                = path_id;   // (dst_leaf, spray) -> path, control-plane data
         ig_tm_md.ucast_egress_port = loop_port;
         ig_tm_md.qid               = qid;
         vlink_ctr.count();
@@ -450,7 +472,8 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
 
     action inj_drop() {
         ig_dprsr_md.drop_ctl = 1;
-        md.fault             = 1;      // recorded into fabric_h.flags by tbl_final
+        md.fault             = 2;      // recorded into fabric_h.flags by tbl_final
+        md.flags_out         = 2;
         fail_ctr.count();
     }
 
@@ -460,7 +483,8 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
      * arithmetic, so it stays clear of Class 6. */
     action inj_corrupt() {
         hdr.udp.checksum = 16w0xBAD1;
-        md.fault         = 2;
+        md.fault         = 4;
+        md.flags_out     = 4;
         fail_ctr.count();
     }
 
@@ -479,6 +503,114 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
         const default_action = inj_none();
     }
 
+    /* ---- S5/S6: attention register + update rule + gate (step 5, PREREG §7.4) --
+     * ONE 32-bit SALU word per path: attn (low 16) | clean (high 16).  Exactly one
+     * RegisterAction executes per packet, selected by tbl_attn on md.exceed:
+     *
+     *   exceedance packet (md.exceed == 1):
+     *       if (attn < bump_cap) attn = attn + k_up   [a_max = bump_cap + k_up - 1]
+     *       clean = 0
+     *   clean sample (every other packet on the path):
+     *       if (clean >= n_clean - 1) { clean = 0; if (attn > a_min) attn = attn - 1; }
+     *       else                      { clean = clean + 1; }
+     *
+     * The controller sets only the constants (RegisterParams p_*) and may re-seed the
+     * array each epoch (§5.7); the switch moves attn[p] per packet on its own, which
+     * is what makes ablation A6 (fast loop only) and hypothesis H7 well defined.
+     * Gate: measure with probability attn/65536, quantized to attn[15:8]/256.  A
+     * gateway can only magnitude-compare against a CONSTANT ("one operand must be
+     * constant") — two runtime fields are rejected whatever their width — so the
+     * compare is a 256-row TCAM table instead: key attn[15:8] exact + rnd_attn range,
+     * row L matches rnd_attn in [0, L<<8).  Installed by the controller, no recompile.
+     * All fields are bit<16> (Class 3).
+     *
+     * Exceedance sources visible in INGRESS on Tofino 1 (queue depth is egress-only):
+     *   (a) a NIC evidence packet (§6 D1) whose loss_q / rtt_q exceeds its threshold —
+     *       two 8-bit range keys = 4 of 5 range nibbles (Class 2);
+     *   (b) the CSIG tag written by the PREVIOUS hop's egress (§5.5), whose
+     *       worst_qdepth exceeds q_thr — one 16-bit range key, its own table (Class 2).
+     * Thresholds are range bounds installed by the controller, no recompile. */
+    Random<bit<16>>() rng_attn;
+
+    /* bf-p4c: a register's actions may use at most 4 parameter slots (RegisterParams +
+     * large constants) in total.  So there is no separate a_max: a bump happens only
+     * while attn < bump_cap, hence attn <= bump_cap + k_up - 1 =: a_max by construction. */
+    RegisterParam<bit<16>>(16w1024)  p_k_up;       // attention gain (§3.2 tuning knob)
+    RegisterParam<bit<16>>(16w256)   p_a_min;      // decay floor
+    RegisterParam<bit<16>>(16w4095)  p_n_clean_m1; // n_clean - 1
+
+    Register<attn_pair_t, bit<16>>(256) reg_attn;
+
+    RegisterAction<attn_pair_t, bit<16>, bit<16>>(reg_attn) attn_on_exceed = {
+        void apply(inout attn_pair_t v, out bit<16> rv) {
+            v.attn  = v.attn |+| p_k_up.read();   // saturating: a_max = 65535, fixed
+            v.clean = 0;
+            rv = v.attn;
+        }
+    };
+
+    RegisterAction<attn_pair_t, bit<16>, bit<16>>(reg_attn) attn_on_clean = {
+        void apply(inout attn_pair_t v, out bit<16> rv) {
+            if (v.clean >= p_n_clean_m1.read() && v.attn > p_a_min.read()) {
+                v.clean = 0;
+                v.attn  = v.attn - 1;
+            } else if (v.clean >= p_n_clean_m1.read()) {
+                v.clean = 0;
+            } else {
+                v.clean = v.clean + 1;
+            }
+            rv = v.attn;
+        }
+    };
+
+    action set_exceed() { md.exceed = 1; }
+
+    /* §6 D1: the NIC names the path.  Both actions set the index so an evidence
+     * packet always addresses the right register slot. */
+    action evid_exceed() { md.exceed = 1; md.attn_idx = (bit<16>)hdr.evid.path_id; }
+    action evid_clean()  { md.attn_idx = (bit<16>)hdr.evid.path_id; }
+
+    table tbl_exceed_evid {
+        key = { hdr.evid.loss_q : range; hdr.evid.rtt_q : range; }
+        actions = { evid_exceed; @defaultonly evid_clean; }
+        size    = 8;
+        const default_action = evid_clean();
+    }
+
+    table tbl_exceed_csig {
+        key = { hdr.csig.worst_qdepth : range; }
+        actions = { set_exceed; @defaultonly NoAction; }
+        size    = 4;
+        const default_action = NoAction();
+    }
+
+    action act_attn_exceed() { md.attn = attn_on_exceed.execute(md.attn_idx); }
+    action act_attn_clean()  { md.attn = attn_on_clean.execute(md.attn_idx);  }
+
+    /* A stateful action with a computed index cannot be a table default ("requires
+     * the hash distribution unit"), hence const entries. */
+    table tbl_attn {
+        key     = { md.exceed : exact; }
+        actions = { act_attn_exceed; act_attn_clean; }
+        size    = 2;
+        const entries = {
+            16w0 : act_attn_clean();
+            16w1 : act_attn_exceed();
+        }
+    }
+
+    action set_measure() {
+        md.do_measure = 1;
+        md.flags_out  = md.flags_out | 1;
+    }
+
+    table tbl_gate {
+        key = { md.attn[15:8] : exact; md.rnd_attn : range; }
+        actions = { set_measure; @defaultonly NoAction; }
+        size    = 256;
+        const default_action = NoAction();
+    }
+
     /* ---- S8: final forward, shim write / strip -------------------------------
      * next_hop arrives as action data instead of being computed as md.hop + 1: hop
      * is already a key of this table, so the increment is free in the control plane
@@ -489,7 +621,7 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
         hdr.fabric.hop    = next_hop;
         hdr.fabric.spray  = (bit<8>)md.spray_idx;
         hdr.fabric.loops  = 0;
-        hdr.fabric.flags  = (bit<8>)md.fault;
+        hdr.fabric.flags  = (bit<8>)md.flags_out;
         hdr.fabric.nxt    = NXT_IPV4;      // egress sets NXT_CSIG when it inserts the tag
         hdr.ethernet.ether_type = ETYPE_MCP_FABRIC;
     }
@@ -497,7 +629,7 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
     action act_transit(bit<8> next_hop) {
         hdr.fabric.vsw_id = (bit<8>)md.next_vsw;
         hdr.fabric.hop    = next_hop;
-        hdr.fabric.flags  = (bit<8>)md.fault;
+        hdr.fabric.flags  = (bit<8>)md.flags_out;
     }
 
     action act_deliver(bit<9> port) {
@@ -538,6 +670,7 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
              * drawn here rather than next to tbl_fail so it co-places with the other
              * independent draws instead of serialising behind tbl_vlink. */
             md.rnd_fail = rng_fail.get();
+            md.rnd_attn = rng_attn.get();
 
             /* Spray only at the SOURCE leaf (hop 0).  Later passes reuse the index
              * the parser lifted out of the shim.  Gating the round-robin SALU here
@@ -554,12 +687,29 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
 
             /* The destination leaf delivers; it does not resolve another link, and a
              * link it is not on cannot fail it. */
-            if (md.hop != LAST_HOP) {
+            /* Step 5: is this packet threshold-exceedance evidence for its path? */
+            if (hdr.evid.isValid()) {
+                tbl_exceed_evid.apply();
+            } else if (hdr.csig.isValid()) {
+                tbl_exceed_csig.apply();
+            }
+
+            /* Evidence packets terminate here: they update attention and are never
+             * sprayed into the fabric (§7.4 open decision iv: the evidence path is
+             * itself ungated, so the loop cannot starve). */
+            if (md.hop != LAST_HOP && !hdr.evid.isValid()) {
                 tbl_vlink.apply();
                 tbl_fail.apply();
             }
 
-            tbl_final.apply();
+            tbl_attn.apply();
+            tbl_gate.apply();
+
+            if (hdr.evid.isValid()) {
+                ig_dprsr_md.drop_ctl = 1;
+            } else {
+                tbl_final.apply();
+            }
         }
     }
 }
