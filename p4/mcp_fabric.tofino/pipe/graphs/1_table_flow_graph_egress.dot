@@ -1,0 +1,53 @@
+digraph egress {
+cond_15 [ shape=record, style="filled", fillcolor=cornsilk, label="hdr.csig.$valid == 1\l\l
+ "];
+tbl_eg_vlink_0 [ shape=record, style="filled", fillcolor=cornsilk, label="tbl_eg_vlink_0\l\l
+M:\l
+ eg_intr_md.egress_port\l
+ eg_intr_md.egress_qid\l
+\lR:\l
+ eg_intr_md.deq_qdepth\l
+ hdr.fabric.hop\l
+ eg_intr_md.deq_timedelta\l
+\lW:\l
+ md.vlink\l
+ md.this_q\l
+ md.hop\l
+ md.tdelta\l
+ "];
+tbl_csig_diff_0 [ shape=record, style="filled", fillcolor=cornsilk, label="tbl_csig_diff_0\l\l
+R:\l
+ hdr.csig.worst_qdepth\l
+ md.this_q\l
+\lW:\l
+ md.diff\l
+ "];
+cond_16 [ shape=record, style="filled", fillcolor=cornsilk, label="md.diff == 0\l\l
+ "];
+tbl_csig_replace_a_0 [ shape=record, style="filled", fillcolor=cornsilk, label="tbl_csig_replace_a_0\l\l
+R:\l
+ md.hop\l
+ md.this_q\l
+\lW:\l
+ hdr.csig.worst_hop\l
+ hdr.csig.worst_qdepth\l
+ "];
+tbl_csig_replace_b_0 [ shape=record, style="filled", fillcolor=cornsilk, label="tbl_csig_replace_b_0\l\l
+R:\l
+ md.vlink\l
+ md.tdelta\l
+\lW:\l
+ hdr.csig.worst_vlink\l
+ hdr.csig.worst_tdelta\l
+ "];
+    PARSER -> cond_15
+    cond_15 -> tbl_eg_vlink_0
+    PARSER -> cond_15
+    cond_15 -> DEPARSER
+    tbl_eg_vlink_0 -> tbl_csig_diff_0
+    tbl_csig_diff_0 -> cond_16
+    cond_16 -> tbl_csig_replace_a_0
+    cond_16 -> DEPARSER
+    tbl_csig_replace_a_0 -> tbl_csig_replace_b_0
+    tbl_csig_replace_b_0 -> DEPARSER
+}

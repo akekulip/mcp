@@ -2,9 +2,12 @@
  *
  * Implements docs/P4-DESIGN-SPACE.md.  STEPS 1-5 of the §9.2 offline compile
  * sequence: headers/parser/deparser, forwarding + virtual-link resolve, spraying,
- * failure injection, and (step 5) the in-switch attention register with the PREREG
- * §7.4 update rule + the probabilistic measurement gate.  Steps 6-8 (mirror, egress
- * CSIG, evidence reflection) are NOT here yet — see p4/README.md.
+ * failure injection, (step 5) the in-switch attention register with the PREREG
+ * §7.4 update rule + the probabilistic measurement gate, and (step 6) truncated
+ * ingress mirrors: session 3 on every injected fault (§5.6 mirror-on-drop), session
+ * 1 on every gated sample (§5.4), and (step 7) the fixed 12-byte CSIG-style tag
+ * inserted / compare-and-replaced in EGRESS (§5.5).  Step 8 (evidence reflection)
+ * is NOT here yet — see p4/README.md.
  *
  * Fabric shape is entirely control-plane data.  The reference bring-up
  * (p4/control/setup_skeleton.py) programs 2 leaves x 4 spines = 16 virtual links
@@ -18,7 +21,7 @@
  *
  * Wire format inside the fabric (§3, alternative A2):
  *
- *   eth(etype=0x88F0) | fabric_h 6B | [csig_h 12B] | ipv4 | udp | [bth 12B | evid 8B]
+ *   eth(etype=0x88F0) | fabric_h 8B | [csig_h 14B] | ipv4 | udp | [bth 12B | evid 8B]
  *
  * LOAD-BEARING (§3 recommendation, carriage detail 1): the fabric shim and the CSIG
  * tag are L2 shims — they sit BETWEEN the Ethernet header and the original L3 header.
@@ -78,16 +81,23 @@ header fabric_h {
     bit<8> loops;    // remaining extra latency loops (§7.4 L1)
     bit<8> flags;    // bit0 measured, bit1 mirrored, bit2 fault-injected
     bit<8> nxt;      // NXT_IPV4 | NXT_CSIG  (design called this rsvd; see README)
+    bit<16> path_id; // (dst_leaf, spray) path id, written at the source leaf; egress
+                     // stamps it into the CSIG tag and every pass indexes reg_attn by it
 }
 
-/* §5.5.  Fixed-size "worst hop so far" tag, not a growing INT stack. */
+/* §5.5.  Fixed-size "worst hop so far" tag, not a growing INT stack.  14 bytes, all
+ * fields >= 16 bits.  bf-p4c packs adjacent header fields into one PHV container and an
+ * action may fill a container from at most 2 PHV sources and NO constant — so no 8-bit
+ * pairs, no pad written with a constant, and no zero-extending casts inside the
+ * insert/replace actions (a cast counts as a constant source); the egress metadata
+ * below is pre-widened in set_eg_vlink instead. */
 header csig_h {
-    bit<8>  worst_hop;
-    bit<8>  worst_vlink;
-    bit<16> worst_qdepth;   // eg_intr_md.deq_qdepth[18:3], 8-cell granularity
-    bit<32> worst_tdelta;   // eg_intr_md.deq_timedelta (ns)
-    bit<16> path_id;
-    bit<16> epoch;
+    bit<16> worst_hop;
+    bit<16> worst_vlink;
+    bit<16> worst_qdepth;   // eg_intr_md.deq_qdepth[15:0], 1-cell granularity (see Egress)
+    bit<32> worst_tdelta;   // eg_intr_md.deq_timedelta (18-bit on Tofino 1, widened)
+    bit<16> path_id;        // written in INGRESS at insertion (act_enter), never in egress
+    bit<16> epoch;          // idem (tbl_final action data): egress only touches worst_*
 }
 
 header ipv4_h {
@@ -184,11 +194,17 @@ struct ig_md_t {
     bit<16> do_measure;
     bit<16> fault;       // 0 none, 2 dropped, 4 corrupted (bit0 is reserved for "measured")
     bit<16> flags_out;   // fabric_h.flags to write: fault | measured
-    bit<16> mirror_sid;
+    MirrorId_t mirror_sid;   // bit<10>: Mirror.emit() wants a plain field, no cast/slice
 }
 
 struct eg_md_t {
-    bit<16> pad;
+    bit<16> this_q;     // eg_intr_md.deq_qdepth[15:0]: a LOW slice.  §5.5's [18:3] needs a
+                        // shift on intrinsic metadata and the egress PHV allocator then fails
+                        // ("Unable to slice ... eg_intr_md.*"); [15:0] = 64K cells, plenty
+    bit<16> diff;       // worst_qdepth |-| this_q : 0 <=> this hop is the worst so far
+    bit<16> vlink;      // this egress (port, qid) as a virtual-link id, from tbl_eg_vlink
+    bit<16> hop;        // hdr.fabric.hop widened here, not inside the tag actions
+    bit<32> tdelta;     // eg_intr_md.deq_timedelta (18-bit) widened here
 }
 
 /* ======================= ingress parser ======================= */
@@ -249,6 +265,7 @@ parser IgParser(packet_in pkt, out headers_t hdr, out ig_md_t md,
          * change mid-flight — and what makes a capture at the collector sufficient to
          * reconstruct the path even in the unseeded Random mode. */
         md.spray_idx = (bit<16>)hdr.fabric.spray;
+        md.attn_idx  = hdr.fabric.path_id;
         transition select(hdr.fabric.nxt) {
             NXT_CSIG : parse_csig;
             default  : parse_ipv4;
@@ -257,9 +274,6 @@ parser IgParser(packet_in pkt, out headers_t hdr, out ig_md_t md,
 
     state parse_csig {
         pkt.extract(hdr.csig);
-        /* The tag names the path it travelled; at the destination leaf (hop 2) no
-         * tbl_vlink row runs, so this is where the attention index comes from. */
-        md.attn_idx = hdr.csig.path_id;
         transition parse_ipv4;
     }
 
@@ -470,10 +484,15 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
     Random<bit<16>>() rng_fail;
     DirectCounter<bit<64>>(CounterType_t.PACKETS_AND_BYTES) fail_ctr;
 
+    /* §5.6: arm the fault-evidence mirror (sid 3, 64 B) BEFORE dropping.  The mirror
+     * is taken in the ingress deparser, so it still fires on a dropped packet
+     * (simple_l3_mirror.p4:456).  Session id in METADATA, never a literal (§5.4 #1). */
     action inj_drop() {
-        ig_dprsr_md.drop_ctl = 1;
-        md.fault             = 2;      // recorded into fabric_h.flags by tbl_final
-        md.flags_out         = 2;
+        ig_dprsr_md.drop_ctl    = 1;
+        ig_dprsr_md.mirror_type = 3w1;
+        md.mirror_sid           = 3;
+        md.fault                = 2;      // recorded into fabric_h.flags by tbl_final
+        md.flags_out            = 2;
         fail_ctr.count();
     }
 
@@ -482,9 +501,11 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
      * corrupted ICRC, for one 16-bit CONSTANT write.  A constant write, not carry
      * arithmetic, so it stays clear of Class 6. */
     action inj_corrupt() {
-        hdr.udp.checksum = 16w0xBAD1;
-        md.fault         = 4;
-        md.flags_out     = 4;
+        hdr.udp.checksum        = 16w0xBAD1;
+        ig_dprsr_md.mirror_type = 3w1;
+        md.mirror_sid           = 3;
+        md.fault                = 4;
+        md.flags_out            = 4;
         fail_ctr.count();
     }
 
@@ -599,9 +620,13 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
         }
     }
 
+    /* Gated sample -> mirror session 1 (§5.4).  Composed with OR so a packet that was
+     * also fault-injected keeps sid 3 (3 | 1 == 3): the fault evidence wins. */
     action set_measure() {
-        md.do_measure = 1;
-        md.flags_out  = md.flags_out | 1;
+        md.do_measure           = 1;
+        md.flags_out            = md.flags_out | 1;
+        ig_dprsr_md.mirror_type = 3w1;
+        md.mirror_sid           = md.mirror_sid | 1;
     }
 
     table tbl_gate {
@@ -615,15 +640,28 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
      * next_hop arrives as action data instead of being computed as md.hop + 1: hop
      * is already a key of this table, so the increment is free in the control plane
      * and costs no data-plane ALU op. */
-    action act_enter(bit<8> next_hop) {
+    /* Step 7: the CSIG tag is inserted and zeroed HERE (source leaf, ingress) — the
+     * egress allocator refuses to fill the (path_id|epoch) container from two
+     * sources whatever the field widths, while ingress action data is unconstrained.
+     * Egress then only compare-and-replaces the worst_* fields, first at this very
+     * pass (worst_qdepth starts at 0, so hop 0's own queue depth is recorded). */
+    action act_enter(bit<8> next_hop, bit<16> epoch) {
         hdr.fabric.setValid();
         hdr.fabric.vsw_id = (bit<8>)md.next_vsw;
         hdr.fabric.hop    = next_hop;
         hdr.fabric.spray  = (bit<8>)md.spray_idx;
         hdr.fabric.loops  = 0;
         hdr.fabric.flags  = (bit<8>)md.flags_out;
-        hdr.fabric.nxt    = NXT_IPV4;      // egress sets NXT_CSIG when it inserts the tag
+        hdr.fabric.nxt    = NXT_CSIG;
+        hdr.fabric.path_id = md.attn_idx;
         hdr.ethernet.ether_type = ETYPE_MCP_FABRIC;
+        hdr.csig.setValid();
+        hdr.csig.worst_hop    = 0;
+        hdr.csig.worst_vlink  = 0;
+        hdr.csig.worst_qdepth = 0;
+        hdr.csig.worst_tdelta = 0;
+        hdr.csig.path_id      = md.attn_idx;
+        hdr.csig.epoch        = epoch;
     }
 
     action act_transit(bit<8> next_hop) {
@@ -716,7 +754,14 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
 
 control IgDeparser(packet_out pkt, inout headers_t hdr, in ig_md_t md,
                    in ingress_intrinsic_metadata_for_deparser_t ig_dprsr_md) {
-    apply { pkt.emit(hdr); }
+    Mirror() mcp_mirror;   // no-arg constructor (§5.4 #2); emit() appends the whole
+                           // post-MAU frame, shim and all (§5.4 #3); $max_pkt_len truncates
+    apply {
+        if (ig_dprsr_md.mirror_type == 3w1) {
+            mcp_mirror.emit(md.mirror_sid);
+        }
+        pkt.emit(hdr);
+    }
 }
 
 /* ======================= egress ======================= */
@@ -726,7 +771,11 @@ parser EgParser(packet_in pkt, out eg_headers_t hdr, out eg_md_t md,
 
     state start {
         pkt.extract(eg_intr_md);
-        md.pad = 0;
+        md.this_q = 0;
+        md.diff   = 0;
+        md.vlink  = 0;
+        md.hop    = 0;
+        md.tdelta = 0;
         transition parse_ethernet;
     }
 
@@ -757,7 +806,64 @@ control Egress(inout eg_headers_t hdr, inout eg_md_t md,
                in    egress_intrinsic_metadata_from_parser_t     eg_prsr_md,
                inout egress_intrinsic_metadata_for_deparser_t    eg_dprsr_md,
                inout egress_intrinsic_metadata_for_output_port_t eg_oport_md) {
-    apply { }
+
+    /* ---- step 7: CSIG-style "worst hop so far" tag (§5.5) ------------------------
+     * Inserted (zeroed) by ingress act_enter at the source leaf, then compare-and-
+     * replaced at EVERY hop's egress including that first one.  Stripped in INGRESS
+     * by act_deliver together with the shim, so nothing here runs at delivery.
+     *
+     * No bridged metadata: hop comes from the shim, the virtual link from the egress
+     * (port, qid) via tbl_eg_vlink (control-plane data, same encoding as ingress), and
+     * path_id from the shim (written at the source leaf).
+     *
+     * Class 9: "this_q > worst_qdepth" is two runtime operands and cannot be a gateway
+     * predicate.  So: diff = worst |-| this_q (saturating, one ALU op); the gateway
+     * tests diff == 0 (equality with a constant), i.e. this_q >= worst. */
+    action set_eg_vlink(bit<16> vlink) {
+        md.vlink  = vlink;
+        md.this_q = eg_intr_md.deq_qdepth[15:0];
+        md.hop    = (bit<16>)hdr.fabric.hop;
+        md.tdelta = (bit<32>)eg_intr_md.deq_timedelta;
+    }
+
+    table tbl_eg_vlink {
+        key     = { eg_intr_md.egress_port : exact; eg_intr_md.egress_qid : exact; }
+        actions = { set_eg_vlink; }
+        size    = 64;
+        const default_action = set_eg_vlink(0);
+    }
+
+    /* Adjacent 16-bit tag fields share a 32-bit container and one action may fill a
+     * container from ONE source, so the (worst_hop|worst_vlink) pair is written by two
+     * actions in two tables. */
+
+    action csig_diff() {
+        md.diff = hdr.csig.worst_qdepth |-| md.this_q;
+    }
+
+    action csig_replace_a() {
+        hdr.csig.worst_hop    = md.hop;
+        hdr.csig.worst_qdepth = md.this_q;
+    }
+    action csig_replace_b() {
+        hdr.csig.worst_vlink  = md.vlink;
+        hdr.csig.worst_tdelta = md.tdelta;
+    }
+
+    table tbl_csig_diff      { actions = { csig_diff;      } const default_action = csig_diff();      size = 1; }
+    table tbl_csig_replace_a { actions = { csig_replace_a; } const default_action = csig_replace_a(); size = 1; }
+    table tbl_csig_replace_b { actions = { csig_replace_b; } const default_action = csig_replace_b(); size = 1; }
+
+    apply {
+        if (hdr.csig.isValid()) {
+            tbl_eg_vlink.apply();
+            tbl_csig_diff.apply();
+            if (md.diff == 0) {
+                tbl_csig_replace_a.apply();
+                tbl_csig_replace_b.apply();
+            }
+        }
+    }
 }
 
 control EgDeparser(packet_out pkt, inout eg_headers_t hdr, in eg_md_t md,

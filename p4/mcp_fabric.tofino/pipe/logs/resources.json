@@ -1,8 +1,8 @@
 {
-  "build_date": "Wed Aug 26 18:08:29 2026",
+  "build_date": "Wed Aug 26 18:24:45 2026",
   "compiler_version": "9.13.1",
   "program_name": "mcp_fabric.p4",
-  "run_id": "c7e9b0ec1b4946b4",
+  "run_id": "25ae4aaaef1a4f8b",
   "schema_version": "2.4.2",
   "resources": {
     "deparser": [
@@ -13,43 +13,43 @@
           "pov_bits": [
             {
               "pov_bit": 0,
-              "phv_container": 131,
+              "phv_container": 132,
               "phv_container_bit": 0,
               "pov_name": "hdr.ethernet.$valid"
             },
             {
               "pov_bit": 1,
-              "phv_container": 131,
+              "phv_container": 132,
               "phv_container_bit": 1,
               "pov_name": "hdr.fabric.$valid"
             },
             {
               "pov_bit": 2,
-              "phv_container": 131,
+              "phv_container": 132,
               "phv_container_bit": 2,
               "pov_name": "hdr.csig.$valid"
             },
             {
               "pov_bit": 3,
-              "phv_container": 131,
+              "phv_container": 132,
               "phv_container_bit": 3,
               "pov_name": "hdr.ipv4.$valid"
             },
             {
               "pov_bit": 4,
-              "phv_container": 131,
+              "phv_container": 132,
               "phv_container_bit": 4,
               "pov_name": "hdr.udp.$valid"
             },
             {
               "pov_bit": 5,
-              "phv_container": 131,
+              "phv_container": 132,
               "phv_container_bit": 5,
               "pov_name": "hdr.bth.$valid"
             },
             {
               "pov_bit": 6,
-              "phv_container": 131,
+              "phv_container": 132,
               "phv_container_bit": 6,
               "pov_name": "hdr.evid.$valid"
             }
@@ -77,13 +77,13 @@
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 264
+                  "phv_container": 331
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 264
+                  "phv_container": 331
                 }
               }
             ]
@@ -96,13 +96,13 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 264
+                  "phv_container": 330
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 264
+                  "phv_container": 330
                 }
               },
               {
@@ -127,25 +127,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 294
+                  "phv_container": 329
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 293
+                  "phv_container": 329
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 331
+                  "phv_container": 328
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 331
+                  "phv_container": 328
                 }
               }
             ]
@@ -158,13 +158,13 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 160
+                  "phv_container": 163
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 160
+                  "phv_container": 163
                 }
               }
             ]
@@ -177,25 +177,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 142
+                  "phv_container": 131
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 142
+                  "phv_container": 131
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 135
+                  "phv_container": 136
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 135
+                  "phv_container": 136
                 }
               }
             ]
@@ -208,13 +208,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 130
+                  "phv_container": 139
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 130
+                  "phv_container": 139
+                }
+              },
+              {
+                "chunk_number": 2,
+                "chunk": {
+                  "phv_container": 161
+                }
+              },
+              {
+                "chunk_number": 3,
+                "chunk": {
+                  "phv_container": 161
                 }
               }
             ]
@@ -227,25 +239,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 326
+                  "phv_container": 164
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 326
+                  "phv_container": 164
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 139
+                  "phv_container": 0
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 139
+                  "phv_container": 0
                 }
               }
             ]
@@ -258,25 +270,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 265
+                  "phv_container": 0
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 265
+                  "phv_container": 0
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 265
+                  "phv_container": 1
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 265
+                  "phv_container": 1
                 }
               }
             ]
@@ -289,56 +301,44 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 328
+                  "phv_container": 1
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 328
+                  "phv_container": 1
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 327
+                  "phv_container": 162
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 327
+                  "phv_container": 162
                 }
               }
             ]
           },
           {
             "entry": 9,
-            "pov_bit": 3,
-            "pov_name": "hdr.ipv4.$valid",
+            "pov_bit": 2,
+            "pov_name": "hdr.csig.$valid",
             "chunks": [
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 260
+                  "phv_container": 141
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 260
-                }
-              },
-              {
-                "chunk_number": 2,
-                "chunk": {
-                  "phv_container": 260
-                }
-              },
-              {
-                "chunk_number": 3,
-                "chunk": {
-                  "phv_container": 260
+                  "phv_container": 141
                 }
               }
             ]
@@ -351,25 +351,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 262
+                  "phv_container": 260
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 262
+                  "phv_container": 260
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 262
+                  "phv_container": 260
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 262
+                  "phv_container": 260
                 }
               }
             ]
@@ -382,25 +382,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 261
+                  "phv_container": 263
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 261
+                  "phv_container": 263
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 261
+                  "phv_container": 263
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 261
+                  "phv_container": 263
                 }
               }
             ]
@@ -413,25 +413,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 1
+                  "phv_container": 262
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 1
+                  "phv_container": 262
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 1
+                  "phv_container": 262
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 1
+                  "phv_container": 262
                 }
               }
             ]
@@ -444,56 +444,56 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 0
+                  "phv_container": 3
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 0
+                  "phv_container": 3
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 0
+                  "phv_container": 3
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 0
+                  "phv_container": 3
                 }
               }
             ]
           },
           {
             "entry": 14,
-            "pov_bit": 4,
-            "pov_name": "hdr.udp.$valid",
+            "pov_bit": 3,
+            "pov_name": "hdr.ipv4.$valid",
             "chunks": [
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 141
+                  "phv_container": 2
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 141
+                  "phv_container": 2
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 330
+                  "phv_container": 2
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 330
+                  "phv_container": 2
                 }
               }
             ]
@@ -506,56 +506,56 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 329
+                  "phv_container": 143
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 329
+                  "phv_container": 143
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 140
+                  "phv_container": 327
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 140
+                  "phv_container": 327
                 }
               }
             ]
           },
           {
             "entry": 16,
-            "pov_bit": 5,
-            "pov_name": "hdr.bth.$valid",
+            "pov_bit": 4,
+            "pov_name": "hdr.udp.$valid",
             "chunks": [
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 267
+                  "phv_container": 326
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 267
+                  "phv_container": 326
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 267
+                  "phv_container": 142
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 267
+                  "phv_container": 142
                 }
               }
             ]
@@ -568,25 +568,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 266
+                  "phv_container": 264
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 266
+                  "phv_container": 264
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 266
+                  "phv_container": 264
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 266
+                  "phv_container": 264
                 }
               }
             ]
@@ -599,31 +599,62 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 263
+                  "phv_container": 295
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 263
+                  "phv_container": 294
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 263
+                  "phv_container": 293
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 263
+                  "phv_container": 292
                 }
               }
             ]
           },
           {
             "entry": 19,
+            "pov_bit": 5,
+            "pov_name": "hdr.bth.$valid",
+            "chunks": [
+              {
+                "chunk_number": 0,
+                "chunk": {
+                  "phv_container": 261
+                }
+              },
+              {
+                "chunk_number": 1,
+                "chunk": {
+                  "phv_container": 261
+                }
+              },
+              {
+                "chunk_number": 2,
+                "chunk": {
+                  "phv_container": 261
+                }
+              },
+              {
+                "chunk_number": 3,
+                "chunk": {
+                  "phv_container": 261
+                }
+              }
+            ]
+          },
+          {
+            "entry": 20,
             "pov_bit": 6,
             "pov_name": "hdr.evid.$valid",
             "chunks": [
@@ -636,31 +667,40 @@
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 66
+                  "phv_container": 160
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 138
+                  "phv_container": 160
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 138
+                  "phv_container": 66
                 }
               }
             ]
           }
         ],
         "mirror_table": {
-          "nTables": 1,
+          "nTables": 2,
           "maxBytes": 1,
           "index_phv": 64,
           "table_phv": [
             {
               "table_id": 0,
+              "bytes": [
+                {
+                  "byte_number": 0,
+                  "phv_container": 130
+                }
+              ]
+            },
+            {
+              "table_id": 1,
               "bytes": [
                 {
                   "byte_number": 0,
@@ -688,19 +728,19 @@
           "pov_bits": [
             {
               "pov_bit": 0,
-              "phv_container": 81,
+              "phv_container": 86,
               "phv_container_bit": 0,
               "pov_name": "hdr.ethernet.$valid"
             },
             {
               "pov_bit": 1,
-              "phv_container": 81,
+              "phv_container": 86,
               "phv_container_bit": 1,
               "pov_name": "hdr.fabric.$valid"
             },
             {
               "pov_bit": 2,
-              "phv_container": 81,
+              "phv_container": 86,
               "phv_container_bit": 2,
               "pov_name": "hdr.csig.$valid"
             },
@@ -722,25 +762,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 343
+                  "phv_container": 339
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 343
+                  "phv_container": 339
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 321
+                  "phv_container": 259
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 321
+                  "phv_container": 259
                 }
               }
             ]
@@ -753,25 +793,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 320
+                  "phv_container": 259
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 320
+                  "phv_container": 259
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 342
+                  "phv_container": 338
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 342
+                  "phv_container": 338
                 }
               }
             ]
@@ -784,25 +824,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 259
+                  "phv_container": 258
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 259
+                  "phv_container": 258
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 259
+                  "phv_container": 258
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 259
+                  "phv_container": 258
                 }
               }
             ]
@@ -815,13 +855,13 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 341
+                  "phv_container": 325
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 341
+                  "phv_container": 325
                 }
               }
             ]
@@ -834,25 +874,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 340
+                  "phv_container": 291
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 340
+                  "phv_container": 81
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 256
+                  "phv_container": 320
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 256
+                  "phv_container": 320
                 }
               }
             ]
@@ -873,6 +913,18 @@
                 "chunk": {
                   "phv_container": 256
                 }
+              },
+              {
+                "chunk_number": 2,
+                "chunk": {
+                  "phv_container": 256
+                }
+              },
+              {
+                "chunk_number": 3,
+                "chunk": {
+                  "phv_container": 256
+                }
               }
             ]
           },
@@ -884,25 +936,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 257
+                  "phv_container": 84
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 257
+                  "phv_container": 82
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 257
+                  "phv_container": 149
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 257
+                  "phv_container": 149
                 }
               }
             ]
@@ -915,25 +967,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 323
+                  "phv_container": 145
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 323
+                  "phv_container": 145
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 322
+                  "phv_container": 17
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 322
+                  "phv_container": 17
                 }
               }
             ]
@@ -946,56 +998,44 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 258
+                  "phv_container": 17
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 258
+                  "phv_container": 17
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 258
+                  "phv_container": 257
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 258
+                  "phv_container": 257
                 }
               }
             ]
           },
           {
             "entry": 9,
-            "pov_bit": 10,
-            "pov_name": " ",
+            "pov_bit": 2,
+            "pov_name": "hdr.csig.$valid",
             "chunks": [
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 288
+                  "phv_container": 257
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 300
-                }
-              },
-              {
-                "chunk_number": 2,
-                "chunk": {
-                  "phv_container": 291
-                }
-              },
-              {
-                "chunk_number": 3,
-                "chunk": {
-                  "phv_container": 268
+                  "phv_container": 257
                 }
               }
             ]
@@ -1008,25 +1048,25 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 268
+                  "phv_container": 288
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 268
+                  "phv_container": 340
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 268
+                  "phv_container": 340
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
-                  "phv_container": 325
+                  "phv_container": 324
                 }
               }
             ]
@@ -1039,50 +1079,50 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 325
+                  "phv_container": 324
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 324
+                  "phv_container": 323
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 324
+                  "phv_container": 323
+                }
+              },
+              {
+                "chunk_number": 3,
+                "chunk": {
+                  "phv_container": 322
                 }
               }
             ]
           },
           {
             "entry": 12,
-            "pov_bit": 9,
+            "pov_bit": 10,
             "pov_name": " ",
             "chunks": [
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 289
+                  "phv_container": 322
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 302
+                  "phv_container": 321
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 301
-                }
-              },
-              {
-                "chunk_number": 3,
-                "chunk": {
-                  "phv_container": 270
+                  "phv_container": 321
                 }
               }
             ]
@@ -1095,19 +1135,19 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 270
+                  "phv_container": 289
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 270
+                  "phv_container": 341
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 270
+                  "phv_container": 341
                 }
               },
               {
@@ -1140,36 +1180,36 @@
                 "chunk": {
                   "phv_container": 269
                 }
+              },
+              {
+                "chunk_number": 3,
+                "chunk": {
+                  "phv_container": 268
+                }
               }
             ]
           },
           {
             "entry": 15,
-            "pov_bit": 8,
-            "pov_name": "hdr.min_parse_depth_padding_0$2.$valid",
+            "pov_bit": 9,
+            "pov_name": " ",
             "chunks": [
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 290
+                  "phv_container": 268
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 344
+                  "phv_container": 268
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 344
-                }
-              },
-              {
-                "chunk_number": 3,
-                "chunk": {
-                  "phv_container": 339
+                  "phv_container": 268
                 }
               }
             ]
@@ -1182,25 +1222,56 @@
               {
                 "chunk_number": 0,
                 "chunk": {
-                  "phv_container": 339
+                  "phv_container": 290
                 }
               },
               {
                 "chunk_number": 1,
                 "chunk": {
-                  "phv_container": 338
+                  "phv_container": 342
                 }
               },
               {
                 "chunk_number": 2,
                 "chunk": {
-                  "phv_container": 338
+                  "phv_container": 342
                 }
               },
               {
                 "chunk_number": 3,
                 "chunk": {
                   "phv_container": 271
+                }
+              }
+            ]
+          },
+          {
+            "entry": 17,
+            "pov_bit": 8,
+            "pov_name": "hdr.min_parse_depth_padding_0$2.$valid",
+            "chunks": [
+              {
+                "chunk_number": 0,
+                "chunk": {
+                  "phv_container": 271
+                }
+              },
+              {
+                "chunk_number": 1,
+                "chunk": {
+                  "phv_container": 271
+                }
+              },
+              {
+                "chunk_number": 2,
+                "chunk": {
+                  "phv_container": 271
+                }
+              },
+              {
+                "chunk_number": 3,
+                "chunk": {
+                  "phv_container": 270
                 }
               }
             ]
@@ -1229,6 +1300,18 @@
           "action_bus_bytes": {
             "bytes": [
               {
+                "byte_number": 32,
+                "used_by_tables": [
+                  "Ingress.tbl_port_role"
+                ]
+              },
+              {
+                "byte_number": 33,
+                "used_by_tables": [
+                  "Ingress.tbl_port_role"
+                ]
+              },
+              {
                 "byte_number": 96,
                 "used_by_tables": [
                   "Ingress.tbl_port_role"
@@ -1250,6 +1333,18 @@
                 "byte_number": 99,
                 "used_by_tables": [
                   "Ingress.tbl_port_role"
+                ]
+              },
+              {
+                "byte_number": 36,
+                "used_by_tables": [
+                  "Egress.tbl_eg_vlink"
+                ]
+              },
+              {
+                "byte_number": 37,
+                "used_by_tables": [
+                  "Egress.tbl_eg_vlink"
                 ]
               }
             ],
@@ -1282,6 +1377,15 @@
                     "used_for": "match_entry_ram"
                   }
                 ]
+              },
+              {
+                "id": 15,
+                "usages": [
+                  {
+                    "used_by": "Egress.tbl_eg_vlink",
+                    "used_for": "match_entry_ram"
+                  }
+                ]
               }
             ],
             "size": 16
@@ -1294,6 +1398,19 @@
                   {
                     "used_by": "Ingress.tbl_port_role",
                     "used_for": "match_entry_ram"
+                  },
+                  {
+                    "used_by": "cond-15",
+                    "used_for": "gateway"
+                  }
+                ]
+              },
+              {
+                "id": 15,
+                "usages": [
+                  {
+                    "used_by": "Egress.tbl_eg_vlink",
+                    "used_for": "match_entry_ram"
                   }
                 ]
               }
@@ -1301,7 +1418,18 @@
             "size": 16
           },
           "gateways": {
-            "gateways": [],
+            "gateways": [
+              {
+                "row": 7,
+                "unit_id": 0,
+                "usages": [
+                  {
+                    "used_by": "cond-15",
+                    "used_for": "gateway"
+                  }
+                ]
+              }
+            ],
             "nRows": 8,
             "nUnits": 2
           },
@@ -1426,6 +1554,486 @@
                 ],
                 "used_by_table": "Ingress.tbl_port_role",
                 "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 0,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 0
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 1,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 0
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 2,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 0
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 3,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 0
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 4,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 0
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 5,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 0
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 6,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 0
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 7,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 0
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 8,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 0
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 9,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 0
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 10,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 1
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 11,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 1
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 12,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 1
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 13,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 1
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 14,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 1
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 15,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 1
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 16,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 1
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 17,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 1
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 18,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 1
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 19,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 1
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 20,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 2
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 21,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 2
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 22,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 2
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 23,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 2
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 24,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 2
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 25,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 2
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 26,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 2
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 27,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 2
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 28,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 2
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 29,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 2
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 30,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 3
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 31,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 3
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 32,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 3
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 33,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 3
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 34,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 3
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 35,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 3
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 36,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 3
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 37,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 3
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 38,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 3
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
+              },
+              {
+                "hash_bit": 39,
+                "hash_function": 1,
+                "usages": [
+                  {
+                    "type": "way_line_select",
+                    "value": 3
+                  }
+                ],
+                "used_by_table": "Egress.tbl_eg_vlink",
+                "used_for": "exact_match"
               }
             ],
             "nBits": 52,
@@ -1441,6 +2049,10 @@
               {
                 "id": 0,
                 "table_name": "Ingress.tbl_port_role"
+              },
+              {
+                "id": 1,
+                "table_name": "Egress.tbl_eg_vlink"
               }
             ],
             "size": 16
@@ -1468,6 +2080,50 @@
                   }
                 ],
                 "way": 0
+              },
+              {
+                "column": 1,
+                "row": 7,
+                "usages": [
+                  {
+                    "used_by": "Egress.tbl_eg_vlink",
+                    "used_for": "match_entry_ram"
+                  }
+                ],
+                "way": 0
+              },
+              {
+                "column": 2,
+                "row": 7,
+                "usages": [
+                  {
+                    "used_by": "Egress.tbl_eg_vlink",
+                    "used_for": "match_entry_ram"
+                  }
+                ],
+                "way": 1
+              },
+              {
+                "column": 3,
+                "row": 7,
+                "usages": [
+                  {
+                    "used_by": "Egress.tbl_eg_vlink",
+                    "used_for": "match_entry_ram"
+                  }
+                ],
+                "way": 2
+              },
+              {
+                "column": 4,
+                "row": 7,
+                "usages": [
+                  {
+                    "used_by": "Egress.tbl_eg_vlink",
+                    "used_for": "match_entry_ram"
+                  }
+                ],
+                "way": 3
               }
             ]
           },
@@ -1482,6 +2138,16 @@
                 "usages": [
                   {
                     "used_by": "Ingress.tbl_port_role",
+                    "used_for": "match_entry_ram"
+                  }
+                ]
+              },
+              {
+                "row": 7,
+                "unit_id": 1,
+                "usages": [
+                  {
+                    "used_by": "Egress.tbl_eg_vlink",
                     "used_for": "match_entry_ram"
                   }
                 ]
@@ -1514,6 +2180,18 @@
                           "Ingress.set_role"
                         ],
                         "used_by": "Ingress.tbl_port_role"
+                      }
+                    ]
+                  },
+                  {
+                    "color": 1,
+                    "gress": "egress",
+                    "usages": [
+                      {
+                        "action_names": [
+                          "Egress.set_eg_vlink"
+                        ],
+                        "used_by": "Egress.tbl_eg_vlink"
                       }
                     ]
                   }
@@ -1560,6 +2238,78 @@
                     "used_for": "exact_match"
                   }
                 ]
+              },
+              {
+                "byte_number": 8,
+                "byte_type": "exact",
+                "usages": [
+                  {
+                    "slices": [
+                      {
+                        "field_name": "egress::eg_intr_md.egress_qid",
+                        "lsb": 0,
+                        "msb": 4,
+                        "offset": 0
+                      }
+                    ],
+                    "used_by": "Egress.tbl_eg_vlink",
+                    "used_for": "exact_match"
+                  }
+                ]
+              },
+              {
+                "byte_number": 9,
+                "byte_type": "exact",
+                "usages": [
+                  {
+                    "slices": [
+                      {
+                        "field_name": "egress::eg_intr_md.egress_port",
+                        "lsb": 8,
+                        "msb": 8,
+                        "offset": 0
+                      }
+                    ],
+                    "used_by": "Egress.tbl_eg_vlink",
+                    "used_for": "exact_match"
+                  }
+                ]
+              },
+              {
+                "byte_number": 10,
+                "byte_type": "exact",
+                "usages": [
+                  {
+                    "slices": [
+                      {
+                        "field_name": "egress::eg_intr_md.egress_port",
+                        "lsb": 0,
+                        "msb": 7,
+                        "offset": 0
+                      }
+                    ],
+                    "used_by": "Egress.tbl_eg_vlink",
+                    "used_for": "exact_match"
+                  }
+                ]
+              },
+              {
+                "byte_number": 2,
+                "byte_type": "exact",
+                "usages": [
+                  {
+                    "slices": [
+                      {
+                        "field_name": "egress::hdr.csig.$valid",
+                        "lsb": 0,
+                        "msb": 0,
+                        "offset": 2
+                      }
+                    ],
+                    "used_by": "cond-15",
+                    "used_for": "gateway"
+                  }
+                ]
               }
             ],
             "exact_size": 128,
@@ -1573,85 +2323,85 @@
               {
                 "byte_number": 96,
                 "used_by_tables": [
-                  "tbl_mcp_fabric673"
+                  "Ingress.tbl_dst_leaf"
                 ]
               },
               {
                 "byte_number": 97,
                 "used_by_tables": [
-                  "tbl_mcp_fabric673"
+                  "Ingress.tbl_dst_leaf"
                 ]
               },
               {
                 "byte_number": 98,
                 "used_by_tables": [
-                  "tbl_mcp_fabric673"
+                  "Ingress.tbl_dst_leaf"
                 ]
               },
               {
                 "byte_number": 99,
                 "used_by_tables": [
-                  "tbl_mcp_fabric673"
+                  "Ingress.tbl_dst_leaf"
                 ]
               },
               {
                 "byte_number": 100,
                 "used_by_tables": [
-                  "Ingress.tbl_dst_leaf"
+                  "tbl_mcp_fabric711"
                 ]
               },
               {
                 "byte_number": 101,
                 "used_by_tables": [
-                  "Ingress.tbl_dst_leaf"
+                  "tbl_mcp_fabric711"
                 ]
               },
               {
                 "byte_number": 102,
                 "used_by_tables": [
-                  "Ingress.tbl_dst_leaf"
+                  "tbl_mcp_fabric711"
                 ]
               },
               {
                 "byte_number": 103,
                 "used_by_tables": [
-                  "Ingress.tbl_dst_leaf"
+                  "tbl_mcp_fabric711"
                 ]
               },
               {
                 "byte_number": 64,
                 "used_by_tables": [
-                  "tbl_mcp_fabric679"
+                  "tbl_mcp_fabric717"
                 ]
               },
               {
                 "byte_number": 65,
                 "used_by_tables": [
-                  "tbl_mcp_fabric679"
+                  "tbl_mcp_fabric717"
                 ]
               },
               {
                 "byte_number": 66,
                 "used_by_tables": [
-                  "tbl_mcp_fabric679"
+                  "tbl_mcp_fabric717"
                 ]
               },
               {
                 "byte_number": 67,
                 "used_by_tables": [
-                  "tbl_mcp_fabric679"
+                  "tbl_mcp_fabric717"
                 ]
               },
               {
                 "byte_number": 32,
                 "used_by_tables": [
-                  "tbl_mcp_fabric683"
+                  "tbl_mcp_fabric721"
                 ]
               },
               {
                 "byte_number": 33,
                 "used_by_tables": [
-                  "tbl_mcp_fabric683"
+                  "tbl_mcp_fabric721"
                 ]
               }
             ],
@@ -1680,7 +2430,7 @@
                 "id": 0,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric679",
+                    "used_by": "tbl_mcp_fabric717",
                     "used_for": "match_entry_ram"
                   }
                 ]
@@ -1689,7 +2439,7 @@
                 "id": 1,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric673",
+                    "used_by": "tbl_mcp_fabric721",
                     "used_for": "match_entry_ram"
                   }
                 ]
@@ -1698,7 +2448,7 @@
                 "id": 2,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric683",
+                    "used_by": "tbl_mcp_fabric711",
                     "used_for": "match_entry_ram"
                   }
                 ]
@@ -1721,11 +2471,20 @@
                 "id": 0,
                 "usages": [
                   {
-                    "used_by": "cond-7",
+                    "used_by": "cond-9",
                     "used_for": "gateway"
                   },
                   {
-                    "used_by": "tbl_mcp_fabric683-gateway",
+                    "used_by": "tbl_mcp_fabric721-gateway",
+                    "used_for": "gateway"
+                  }
+                ]
+              },
+              {
+                "id": 2,
+                "usages": [
+                  {
+                    "used_by": "tbl_mcp_fabric711-gateway",
                     "used_for": "gateway"
                   }
                 ]
@@ -1738,7 +2497,7 @@
                     "used_for": "match_entry_ram"
                   },
                   {
-                    "used_by": "cond-8",
+                    "used_by": "cond-10",
                     "used_for": "gateway"
                   }
                 ]
@@ -1753,7 +2512,17 @@
                 "unit_id": 0,
                 "usages": [
                   {
-                    "used_by": "cond-7",
+                    "used_by": "cond-9",
+                    "used_for": "gateway"
+                  }
+                ]
+              },
+              {
+                "row": 1,
+                "unit_id": 0,
+                "usages": [
+                  {
+                    "used_by": "tbl_mcp_fabric711-gateway",
                     "used_for": "gateway"
                   }
                 ]
@@ -1763,7 +2532,7 @@
                 "unit_id": 0,
                 "usages": [
                   {
-                    "used_by": "cond-8",
+                    "used_by": "cond-10",
                     "used_for": "gateway"
                   }
                 ]
@@ -1773,7 +2542,7 @@
                 "unit_id": 1,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric683-gateway",
+                    "used_by": "tbl_mcp_fabric721-gateway",
                     "used_for": "gateway"
                   }
                 ]
@@ -2273,7 +3042,7 @@
                     "value": 0
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric679",
+                "used_by_table": "tbl_mcp_fabric717",
                 "used_for": "immediate hi"
               },
               {
@@ -2285,7 +3054,7 @@
                     "value": 1
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric679",
+                "used_by_table": "tbl_mcp_fabric717",
                 "used_for": "immediate hi"
               },
               {
@@ -2297,7 +3066,7 @@
                     "value": 2
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric679",
+                "used_by_table": "tbl_mcp_fabric717",
                 "used_for": "immediate hi"
               },
               {
@@ -2309,7 +3078,7 @@
                     "value": 3
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric679",
+                "used_by_table": "tbl_mcp_fabric717",
                 "used_for": "immediate hi"
               },
               {
@@ -2321,7 +3090,7 @@
                     "value": 4
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric679",
+                "used_by_table": "tbl_mcp_fabric717",
                 "used_for": "immediate hi"
               },
               {
@@ -2333,7 +3102,7 @@
                     "value": 5
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric679",
+                "used_by_table": "tbl_mcp_fabric717",
                 "used_for": "immediate hi"
               },
               {
@@ -2345,7 +3114,7 @@
                     "value": 6
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric679",
+                "used_by_table": "tbl_mcp_fabric717",
                 "used_for": "immediate hi"
               },
               {
@@ -2357,7 +3126,7 @@
                     "value": 7
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric679",
+                "used_by_table": "tbl_mcp_fabric717",
                 "used_for": "immediate hi"
               },
               {
@@ -2369,7 +3138,7 @@
                     "value": 8
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric679",
+                "used_by_table": "tbl_mcp_fabric717",
                 "used_for": "immediate hi"
               },
               {
@@ -2381,7 +3150,7 @@
                     "value": 9
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric679",
+                "used_by_table": "tbl_mcp_fabric717",
                 "used_for": "immediate hi"
               },
               {
@@ -2393,7 +3162,7 @@
                     "value": 10
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric679",
+                "used_by_table": "tbl_mcp_fabric717",
                 "used_for": "immediate hi"
               },
               {
@@ -2405,7 +3174,7 @@
                     "value": 11
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric679",
+                "used_by_table": "tbl_mcp_fabric717",
                 "used_for": "immediate hi"
               },
               {
@@ -2417,7 +3186,7 @@
                     "value": 12
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric679",
+                "used_by_table": "tbl_mcp_fabric717",
                 "used_for": "immediate hi"
               },
               {
@@ -2429,7 +3198,7 @@
                     "value": 13
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric679",
+                "used_by_table": "tbl_mcp_fabric717",
                 "used_for": "immediate hi"
               },
               {
@@ -2441,7 +3210,7 @@
                     "value": 14
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric679",
+                "used_by_table": "tbl_mcp_fabric717",
                 "used_for": "immediate hi"
               },
               {
@@ -2453,7 +3222,7 @@
                     "value": 15
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric679",
+                "used_by_table": "tbl_mcp_fabric717",
                 "used_for": "immediate hi"
               },
               {
@@ -2465,7 +3234,7 @@
                     "value": 0
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric683",
+                "used_by_table": "tbl_mcp_fabric721",
                 "used_for": "meter address"
               },
               {
@@ -2477,7 +3246,7 @@
                     "value": 1
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric683",
+                "used_by_table": "tbl_mcp_fabric721",
                 "used_for": "meter address"
               },
               {
@@ -2489,7 +3258,7 @@
                     "value": 2
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric683",
+                "used_by_table": "tbl_mcp_fabric721",
                 "used_for": "meter address"
               },
               {
@@ -2501,7 +3270,7 @@
                     "value": 3
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric683",
+                "used_by_table": "tbl_mcp_fabric721",
                 "used_for": "meter address"
               },
               {
@@ -2513,7 +3282,7 @@
                     "value": 4
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric683",
+                "used_by_table": "tbl_mcp_fabric721",
                 "used_for": "meter address"
               },
               {
@@ -2525,7 +3294,7 @@
                     "value": 5
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric683",
+                "used_by_table": "tbl_mcp_fabric721",
                 "used_for": "meter address"
               },
               {
@@ -2537,7 +3306,7 @@
                     "value": 6
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric683",
+                "used_by_table": "tbl_mcp_fabric721",
                 "used_for": "meter address"
               },
               {
@@ -2549,7 +3318,7 @@
                     "value": 7
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric683",
+                "used_by_table": "tbl_mcp_fabric721",
                 "used_for": "meter address"
               },
               {
@@ -2561,7 +3330,7 @@
                     "value": 8
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric683",
+                "used_by_table": "tbl_mcp_fabric721",
                 "used_for": "meter address"
               },
               {
@@ -2573,7 +3342,7 @@
                     "value": 9
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric683",
+                "used_by_table": "tbl_mcp_fabric721",
                 "used_for": "meter address"
               },
               {
@@ -2585,7 +3354,7 @@
                     "value": 10
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric683",
+                "used_by_table": "tbl_mcp_fabric721",
                 "used_for": "meter address"
               },
               {
@@ -2597,7 +3366,7 @@
                     "value": 11
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric683",
+                "used_by_table": "tbl_mcp_fabric721",
                 "used_for": "meter address"
               },
               {
@@ -2609,7 +3378,7 @@
                     "value": 12
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric683",
+                "used_by_table": "tbl_mcp_fabric721",
                 "used_for": "meter address"
               },
               {
@@ -2621,7 +3390,7 @@
                     "value": 13
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric683",
+                "used_by_table": "tbl_mcp_fabric721",
                 "used_for": "meter address"
               },
               {
@@ -2633,7 +3402,7 @@
                     "value": 14
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric683",
+                "used_by_table": "tbl_mcp_fabric721",
                 "used_for": "meter address"
               },
               {
@@ -2645,7 +3414,7 @@
                     "value": 15
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric683",
+                "used_by_table": "tbl_mcp_fabric721",
                 "used_for": "meter address"
               }
             ],
@@ -2661,7 +3430,7 @@
                 "unit_id": 0,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric679",
+                    "used_by": "tbl_mcp_fabric717",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -2671,7 +3440,7 @@
                 "unit_id": 1,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric683",
+                    "used_by": "tbl_mcp_fabric721",
                     "used_for": "meter address"
                   }
                 ]
@@ -2682,23 +3451,27 @@
             "ids": [
               {
                 "id": 0,
-                "table_name": "tbl_mcp_fabric673"
-              },
-              {
-                "id": 4,
-                "table_name": "tbl_mcp_fabric665"
-              },
-              {
-                "id": 1,
                 "table_name": "Ingress.tbl_dst_leaf"
               },
               {
+                "id": 5,
+                "table_name": "tbl_mcp_fabric703"
+              },
+              {
+                "id": 1,
+                "table_name": "tbl_mcp_fabric711"
+              },
+              {
                 "id": 2,
-                "table_name": "tbl_mcp_fabric679"
+                "table_name": "tbl_mcp_fabric717"
               },
               {
                 "id": 3,
-                "table_name": "tbl_mcp_fabric683"
+                "table_name": "tbl_mcp_fabric721"
+              },
+              {
+                "id": 4,
+                "table_name": "Egress.tbl_csig_diff"
               }
             ],
             "size": 16
@@ -2845,7 +3618,7 @@
                 "id": 0,
                 "usages": [
                   {
-                    "used_by": "cond-8",
+                    "used_by": "cond-10",
                     "used_for": "gateway"
                   }
                 ]
@@ -2854,8 +3627,8 @@
                 "id": 1,
                 "usages": [
                   {
-                    "used_by": "cond-7",
-                    "used_for": "gateway"
+                    "used_by": "tbl_mcp_fabric703",
+                    "used_for": "ternary_indirection_ram"
                   }
                 ]
               },
@@ -2863,7 +3636,7 @@
                 "id": 2,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric665",
+                    "used_by": "Egress.tbl_csig_diff",
                     "used_for": "ternary_indirection_ram"
                   }
                 ]
@@ -2881,9 +3654,21 @@
                     "usages": [
                       {
                         "action_names": [
-                          "mcp_fabric673"
+                          "Ingress.set_dst"
                         ],
-                        "used_by": "tbl_mcp_fabric673"
+                        "used_by": "Ingress.tbl_dst_leaf"
+                      }
+                    ]
+                  },
+                  {
+                    "color": 1,
+                    "gress": "egress",
+                    "usages": [
+                      {
+                        "action_names": [
+                          "Egress.csig_diff"
+                        ],
+                        "used_by": "Egress.tbl_csig_diff"
                       }
                     ]
                   }
@@ -2898,9 +3683,9 @@
                     "usages": [
                       {
                         "action_names": [
-                          "mcp_fabric665"
+                          "mcp_fabric703"
                         ],
-                        "used_by": "tbl_mcp_fabric665"
+                        "used_by": "tbl_mcp_fabric703"
                       }
                     ]
                   },
@@ -2910,9 +3695,9 @@
                     "usages": [
                       {
                         "action_names": [
-                          "mcp_fabric683"
+                          "mcp_fabric721"
                         ],
-                        "used_by": "tbl_mcp_fabric683"
+                        "used_by": "tbl_mcp_fabric721"
                       }
                     ]
                   }
@@ -2927,9 +3712,9 @@
                     "usages": [
                       {
                         "action_names": [
-                          "Ingress.set_dst"
+                          "mcp_fabric711"
                         ],
-                        "used_by": "Ingress.tbl_dst_leaf"
+                        "used_by": "tbl_mcp_fabric711"
                       }
                     ]
                   },
@@ -2939,9 +3724,9 @@
                     "usages": [
                       {
                         "action_names": [
-                          "mcp_fabric679"
+                          "mcp_fabric717"
                         ],
-                        "used_by": "tbl_mcp_fabric679"
+                        "used_by": "tbl_mcp_fabric717"
                       }
                     ]
                   }
@@ -2953,60 +3738,6 @@
           },
           "xbar_bytes": {
             "bytes": [
-              {
-                "byte_number": 1,
-                "byte_type": "exact",
-                "usages": [
-                  {
-                    "slices": [
-                      {
-                        "field_name": "ingress::md.role",
-                        "lsb": 8,
-                        "msb": 15,
-                        "offset": 0
-                      }
-                    ],
-                    "used_by": "cond-7",
-                    "used_for": "gateway"
-                  }
-                ]
-              },
-              {
-                "byte_number": 0,
-                "byte_type": "exact",
-                "usages": [
-                  {
-                    "slices": [
-                      {
-                        "field_name": "ingress::md.role",
-                        "lsb": 0,
-                        "msb": 7,
-                        "offset": 0
-                      }
-                    ],
-                    "used_by": "cond-7",
-                    "used_for": "gateway"
-                  }
-                ]
-              },
-              {
-                "byte_number": 2,
-                "byte_type": "exact",
-                "usages": [
-                  {
-                    "slices": [
-                      {
-                        "field_name": "ingress::hdr.fabric.$valid",
-                        "lsb": 0,
-                        "msb": 0,
-                        "offset": 1
-                      }
-                    ],
-                    "used_by": "cond-7",
-                    "used_for": "gateway"
-                  }
-                ]
-              },
               {
                 "byte_number": 3,
                 "byte_type": "exact",
@@ -3026,7 +3757,7 @@
                 ]
               },
               {
-                "byte_number": 6,
+                "byte_number": 2,
                 "byte_type": "exact",
                 "usages": [
                   {
@@ -3044,7 +3775,7 @@
                 ]
               },
               {
-                "byte_number": 5,
+                "byte_number": 1,
                 "byte_type": "exact",
                 "usages": [
                   {
@@ -3062,7 +3793,7 @@
                 ]
               },
               {
-                "byte_number": 4,
+                "byte_number": 0,
                 "byte_type": "exact",
                 "usages": [
                   {
@@ -3080,6 +3811,60 @@
                 ]
               },
               {
+                "byte_number": 5,
+                "byte_type": "exact",
+                "usages": [
+                  {
+                    "slices": [
+                      {
+                        "field_name": "ingress::md.role",
+                        "lsb": 8,
+                        "msb": 15,
+                        "offset": 0
+                      }
+                    ],
+                    "used_by": "cond-9",
+                    "used_for": "gateway"
+                  }
+                ]
+              },
+              {
+                "byte_number": 4,
+                "byte_type": "exact",
+                "usages": [
+                  {
+                    "slices": [
+                      {
+                        "field_name": "ingress::md.role",
+                        "lsb": 0,
+                        "msb": 7,
+                        "offset": 0
+                      }
+                    ],
+                    "used_by": "cond-9",
+                    "used_for": "gateway"
+                  }
+                ]
+              },
+              {
+                "byte_number": 6,
+                "byte_type": "exact",
+                "usages": [
+                  {
+                    "slices": [
+                      {
+                        "field_name": "ingress::hdr.fabric.$valid",
+                        "lsb": 0,
+                        "msb": 0,
+                        "offset": 1
+                      }
+                    ],
+                    "used_by": "cond-9",
+                    "used_for": "gateway"
+                  }
+                ]
+              },
+              {
                 "byte_number": 7,
                 "byte_type": "exact",
                 "usages": [
@@ -3092,7 +3877,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "cond-8",
+                    "used_by": "cond-10",
                     "used_for": "gateway"
                   }
                 ]
@@ -3110,7 +3895,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "cond-8",
+                    "used_by": "cond-10",
                     "used_for": "gateway"
                   }
                 ]
@@ -3128,7 +3913,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric679",
+                    "used_by": "tbl_mcp_fabric717",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -3146,7 +3931,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric679",
+                    "used_by": "tbl_mcp_fabric717",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -3164,7 +3949,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric679",
+                    "used_by": "tbl_mcp_fabric717",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -3182,7 +3967,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric679",
+                    "used_by": "tbl_mcp_fabric717",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -3200,7 +3985,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric679",
+                    "used_by": "tbl_mcp_fabric717",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -3218,7 +4003,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric679",
+                    "used_by": "tbl_mcp_fabric717",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -3236,7 +4021,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric679",
+                    "used_by": "tbl_mcp_fabric717",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -3254,7 +4039,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric679",
+                    "used_by": "tbl_mcp_fabric717",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -3272,7 +4057,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric679",
+                    "used_by": "tbl_mcp_fabric717",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -3290,13 +4075,13 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric679",
+                    "used_by": "tbl_mcp_fabric717",
                     "used_for": "immediate hi"
                   }
                 ]
               },
               {
-                "byte_number": 28,
+                "byte_number": 27,
                 "byte_type": "exact",
                 "usages": [
                   {
@@ -3308,7 +4093,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric683",
+                    "used_by": "tbl_mcp_fabric721",
                     "used_for": "meter address"
                   }
                 ]
@@ -3326,7 +4111,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric683",
+                    "used_by": "tbl_mcp_fabric721",
                     "used_for": "meter address"
                   }
                 ]
@@ -3394,6 +4179,10 @@
                   {
                     "used_by": "Ingress.tbl_spray_sel",
                     "used_for": "match_entry_ram"
+                  },
+                  {
+                    "used_by": "cond-16",
+                    "used_for": "gateway"
                   }
                 ]
               }
@@ -3401,7 +4190,18 @@
             "size": 16
           },
           "gateways": {
-            "gateways": [],
+            "gateways": [
+              {
+                "row": 7,
+                "unit_id": 0,
+                "usages": [
+                  {
+                    "used_by": "cond-16",
+                    "used_for": "gateway"
+                  }
+                ]
+              }
+            ],
             "nRows": 8,
             "nUnits": 2
           },
@@ -4069,6 +4869,14 @@
               {
                 "id": 0,
                 "table_name": "Ingress.tbl_spray_sel"
+              },
+              {
+                "id": 1,
+                "table_name": "Egress.tbl_csig_replace_b"
+              },
+              {
+                "id": 2,
+                "table_name": "Egress.tbl_csig_replace_a"
               }
             ],
             "size": 16
@@ -4220,7 +5028,26 @@
             "tcams": []
           },
           "tind_result_buses": {
-            "ids": [],
+            "ids": [
+              {
+                "id": 0,
+                "usages": [
+                  {
+                    "used_by": "Egress.tbl_csig_replace_b",
+                    "used_for": "ternary_indirection_ram"
+                  }
+                ]
+              },
+              {
+                "id": 1,
+                "usages": [
+                  {
+                    "used_by": "Egress.tbl_csig_replace_a",
+                    "used_for": "ternary_indirection_ram"
+                  }
+                ]
+              }
+            ],
             "size": 16
           },
           "vliw": {
@@ -4250,9 +5077,38 @@
                         "used_by": "Ingress.tbl_spray_sel"
                       }
                     ]
+                  },
+                  {
+                    "color": 1,
+                    "gress": "egress",
+                    "usages": [
+                      {
+                        "action_names": [
+                          "Egress.csig_replace_b"
+                        ],
+                        "used_by": "Egress.tbl_csig_replace_b"
+                      }
+                    ]
                   }
                 ],
                 "instruction_number": 0
+              },
+              {
+                "color_usages": [
+                  {
+                    "color": 0,
+                    "gress": "egress",
+                    "usages": [
+                      {
+                        "action_names": [
+                          "Egress.csig_replace_a"
+                        ],
+                        "used_by": "Egress.tbl_csig_replace_a"
+                      }
+                    ]
+                  }
+                ],
+                "instruction_number": 1
               }
             ],
             "size": 32
@@ -4267,8 +5123,8 @@
                     "slices": [
                       {
                         "field_name": "ingress::md.src_leaf",
-                        "lsb": 8,
-                        "msb": 15,
+                        "lsb": 0,
+                        "msb": 7,
                         "offset": 0
                       }
                     ],
@@ -4278,15 +5134,15 @@
                 ]
               },
               {
-                "byte_number": 0,
+                "byte_number": 3,
                 "byte_type": "exact",
                 "usages": [
                   {
                     "slices": [
                       {
                         "field_name": "ingress::md.src_leaf",
-                        "lsb": 0,
-                        "msb": 7,
+                        "lsb": 8,
+                        "msb": 15,
                         "offset": 0
                       }
                     ],
@@ -4330,6 +5186,42 @@
                     "used_for": "selection"
                   }
                 ]
+              },
+              {
+                "byte_number": 5,
+                "byte_type": "exact",
+                "usages": [
+                  {
+                    "slices": [
+                      {
+                        "field_name": "egress::md.diff",
+                        "lsb": 8,
+                        "msb": 15,
+                        "offset": 0
+                      }
+                    ],
+                    "used_by": "cond-16",
+                    "used_for": "gateway"
+                  }
+                ]
+              },
+              {
+                "byte_number": 0,
+                "byte_type": "exact",
+                "usages": [
+                  {
+                    "slices": [
+                      {
+                        "field_name": "egress::md.diff",
+                        "lsb": 0,
+                        "msb": 7,
+                        "offset": 0
+                      }
+                    ],
+                    "used_by": "cond-16",
+                    "used_for": "gateway"
+                  }
+                ]
               }
             ],
             "exact_size": 128,
@@ -4355,25 +5247,25 @@
               {
                 "byte_number": 96,
                 "used_by_tables": [
-                  "tbl_mcp_fabric672"
+                  "tbl_mcp_fabric710"
                 ]
               },
               {
                 "byte_number": 97,
                 "used_by_tables": [
-                  "tbl_mcp_fabric672"
+                  "tbl_mcp_fabric710"
                 ]
               },
               {
                 "byte_number": 98,
                 "used_by_tables": [
-                  "tbl_mcp_fabric672"
+                  "tbl_mcp_fabric710"
                 ]
               },
               {
                 "byte_number": 99,
                 "used_by_tables": [
-                  "tbl_mcp_fabric672"
+                  "tbl_mcp_fabric710"
                 ]
               }
             ],
@@ -4402,7 +5294,7 @@
                 "id": 0,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric672",
+                    "used_by": "tbl_mcp_fabric710",
                     "used_for": "match_entry_ram"
                   }
                 ]
@@ -4425,11 +5317,11 @@
                 "id": 0,
                 "usages": [
                   {
-                    "used_by": "cond-9",
+                    "used_by": "cond-11",
                     "used_for": "gateway"
                   },
                   {
-                    "used_by": "tbl_mcp_fabric672-gateway",
+                    "used_by": "tbl_mcp_fabric710-gateway",
                     "used_for": "gateway"
                   }
                 ]
@@ -4442,7 +5334,7 @@
                     "used_for": "match_entry_ram"
                   },
                   {
-                    "used_by": "cond-10",
+                    "used_by": "cond-12",
                     "used_for": "gateway"
                   }
                 ]
@@ -4457,7 +5349,7 @@
                 "unit_id": 0,
                 "usages": [
                   {
-                    "used_by": "cond-9",
+                    "used_by": "cond-11",
                     "used_for": "gateway"
                   }
                 ]
@@ -4467,7 +5359,7 @@
                 "unit_id": 0,
                 "usages": [
                   {
-                    "used_by": "cond-10",
+                    "used_by": "cond-12",
                     "used_for": "gateway"
                   }
                 ]
@@ -4477,7 +5369,7 @@
                 "unit_id": 1,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric672-gateway",
+                    "used_by": "tbl_mcp_fabric710-gateway",
                     "used_for": "gateway"
                   }
                 ]
@@ -4993,7 +5885,7 @@
               },
               {
                 "id": 3,
-                "table_name": "tbl_mcp_fabric672"
+                "table_name": "tbl_mcp_fabric710"
               }
             ],
             "size": 16
@@ -5125,6 +6017,16 @@
               {
                 "column": 0,
                 "row": 0,
+                "usages": [
+                  {
+                    "used_by": "Ingress.tbl_exceed_csig",
+                    "used_for": "ternary_match"
+                  }
+                ]
+              },
+              {
+                "column": 0,
+                "row": 1,
                 "usages": [
                   {
                     "used_by": "Ingress.tbl_exceed_csig",
@@ -5289,9 +6191,9 @@
                     "usages": [
                       {
                         "action_names": [
-                          "mcp_fabric672"
+                          "mcp_fabric710"
                         ],
-                        "used_by": "tbl_mcp_fabric672"
+                        "used_by": "tbl_mcp_fabric710"
                       }
                     ]
                   }
@@ -5394,7 +6296,7 @@
                 ]
               },
               {
-                "byte_number": 130,
+                "byte_number": 129,
                 "byte_type": "ternary",
                 "usages": [
                   {
@@ -5412,7 +6314,7 @@
                 ]
               },
               {
-                "byte_number": 135,
+                "byte_number": 134,
                 "byte_type": "ternary",
                 "usages": [
                   {
@@ -5430,7 +6332,7 @@
                 ]
               },
               {
-                "byte_number": 137,
+                "byte_number": 136,
                 "byte_type": "ternary",
                 "usages": [
                   {
@@ -5454,31 +6356,31 @@
                   {
                     "slices": [
                       {
-                        "field_name": "ingress::hdr.csig.$valid",
-                        "lsb": 0,
-                        "msb": 0,
-                        "offset": 2
-                      }
-                    ],
-                    "used_by": "cond-10",
-                    "used_for": "gateway"
-                  },
-                  {
-                    "slices": [
-                      {
                         "field_name": "ingress::hdr.evid.$valid",
                         "lsb": 0,
                         "msb": 0,
                         "offset": 6
                       }
                     ],
-                    "used_by": "cond-9",
+                    "used_by": "cond-11",
+                    "used_for": "gateway"
+                  },
+                  {
+                    "slices": [
+                      {
+                        "field_name": "ingress::hdr.csig.$valid",
+                        "lsb": 0,
+                        "msb": 0,
+                        "offset": 2
+                      }
+                    ],
+                    "used_by": "cond-12",
                     "used_for": "gateway"
                   }
                 ]
               },
               {
-                "byte_number": 139,
+                "byte_number": 145,
                 "byte_type": "ternary",
                 "usages": [
                   {
@@ -5496,7 +6398,7 @@
                 ]
               },
               {
-                "byte_number": 141,
+                "byte_number": 149,
                 "byte_type": "ternary",
                 "usages": [
                   {
@@ -5514,7 +6416,7 @@
                 ]
               },
               {
-                "byte_number": 140,
+                "byte_number": 132,
                 "byte_type": "ternary",
                 "usages": [
                   {
@@ -5532,7 +6434,7 @@
                 ]
               },
               {
-                "byte_number": 142,
+                "byte_number": 148,
                 "byte_type": "ternary",
                 "usages": [
                   {
@@ -5601,19 +6503,7 @@
                 ]
               },
               {
-                "byte_number": 17,
-                "used_by_tables": [
-                  "Ingress.tbl_vlink"
-                ]
-              },
-              {
-                "byte_number": 18,
-                "used_by_tables": [
-                  "Ingress.tbl_vlink"
-                ]
-              },
-              {
-                "byte_number": 19,
+                "byte_number": 3,
                 "used_by_tables": [
                   "Ingress.tbl_vlink"
                 ]
@@ -5626,6 +6516,18 @@
               },
               {
                 "byte_number": 37,
+                "used_by_tables": [
+                  "Ingress.tbl_vlink"
+                ]
+              },
+              {
+                "byte_number": 38,
+                "used_by_tables": [
+                  "Ingress.tbl_vlink"
+                ]
+              },
+              {
+                "byte_number": 39,
                 "used_by_tables": [
                   "Ingress.tbl_vlink"
                 ]
@@ -5674,7 +6576,7 @@
                     "used_for": "match_entry_ram"
                   },
                   {
-                    "used_by": "cond-11",
+                    "used_by": "cond-13",
                     "used_for": "gateway"
                   }
                 ]
@@ -5689,7 +6591,7 @@
                 "unit_id": 0,
                 "usages": [
                   {
-                    "used_by": "cond-11",
+                    "used_by": "cond-13",
                     "used_for": "gateway"
                   }
                 ]
@@ -6410,7 +7312,7 @@
                 "id": 14,
                 "usages": [
                   {
-                    "used_by": "cond-11",
+                    "used_by": "cond-13",
                     "used_for": "gateway"
                   }
                 ]
@@ -6484,26 +7386,8 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "cond-11",
+                    "used_by": "cond-13",
                     "used_for": "gateway"
-                  }
-                ]
-              },
-              {
-                "byte_number": 7,
-                "byte_type": "exact",
-                "usages": [
-                  {
-                    "slices": [
-                      {
-                        "field_name": "ingress::md.dst_leaf",
-                        "lsb": 8,
-                        "msb": 15,
-                        "offset": 0
-                      }
-                    ],
-                    "used_by": "Ingress.tbl_vlink",
-                    "used_for": "exact_match"
                   }
                 ]
               },
@@ -6532,26 +7416,8 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "cond-11",
+                    "used_by": "cond-13",
                     "used_for": "gateway"
-                  }
-                ]
-              },
-              {
-                "byte_number": 6,
-                "byte_type": "exact",
-                "usages": [
-                  {
-                    "slices": [
-                      {
-                        "field_name": "ingress::md.dst_leaf",
-                        "lsb": 0,
-                        "msb": 7,
-                        "offset": 0
-                      }
-                    ],
-                    "used_by": "Ingress.tbl_vlink",
-                    "used_for": "exact_match"
                   }
                 ]
               },
@@ -6580,7 +7446,7 @@
                   {
                     "slices": [
                       {
-                        "field_name": "ingress::md.src_leaf",
+                        "field_name": "ingress::md.dst_leaf",
                         "lsb": 8,
                         "msb": 15,
                         "offset": 0
@@ -6616,7 +7482,7 @@
                   {
                     "slices": [
                       {
-                        "field_name": "ingress::md.src_leaf",
+                        "field_name": "ingress::md.dst_leaf",
                         "lsb": 0,
                         "msb": 7,
                         "offset": 0
@@ -6628,7 +7494,7 @@
                 ]
               },
               {
-                "byte_number": 9,
+                "byte_number": 7,
                 "byte_type": "exact",
                 "usages": [
                   {
@@ -6646,7 +7512,43 @@
                 ]
               },
               {
-                "byte_number": 8,
+                "byte_number": 9,
+                "byte_type": "exact",
+                "usages": [
+                  {
+                    "slices": [
+                      {
+                        "field_name": "ingress::md.src_leaf",
+                        "lsb": 0,
+                        "msb": 7,
+                        "offset": 0
+                      }
+                    ],
+                    "used_by": "Ingress.tbl_vlink",
+                    "used_for": "exact_match"
+                  }
+                ]
+              },
+              {
+                "byte_number": 11,
+                "byte_type": "exact",
+                "usages": [
+                  {
+                    "slices": [
+                      {
+                        "field_name": "ingress::md.src_leaf",
+                        "lsb": 8,
+                        "msb": 15,
+                        "offset": 0
+                      }
+                    ],
+                    "used_by": "Ingress.tbl_vlink",
+                    "used_for": "exact_match"
+                  }
+                ]
+              },
+              {
+                "byte_number": 6,
                 "byte_type": "exact",
                 "usages": [
                   {
@@ -6664,7 +7566,7 @@
                 ]
               },
               {
-                "byte_number": 10,
+                "byte_number": 8,
                 "byte_type": "exact",
                 "usages": [
                   {
@@ -6676,8 +7578,355 @@
                         "offset": 6
                       }
                     ],
-                    "used_by": "cond-11",
+                    "used_by": "cond-13",
                     "used_for": "gateway"
+                  }
+                ]
+              }
+            ],
+            "exact_size": 128,
+            "size": 194,
+            "ternary_size": 66
+          }
+        },
+        {
+          "action_bus_bytes": {
+            "bytes": [],
+            "size": 128
+          },
+          "action_slots": [
+            {
+              "maximum_slots": 32,
+              "number_used": 0,
+              "slot_bit_width": 8
+            },
+            {
+              "maximum_slots": 32,
+              "number_used": 0,
+              "slot_bit_width": 16
+            },
+            {
+              "maximum_slots": 32,
+              "number_used": 0,
+              "slot_bit_width": 32
+            }
+          ],
+          "exm_result_buses": {
+            "ids": [],
+            "size": 16
+          },
+          "exm_search_buses": {
+            "ids": [],
+            "size": 16
+          },
+          "gateways": {
+            "gateways": [],
+            "nRows": 8,
+            "nUnits": 2
+          },
+          "hash_bits": {
+            "bits": [],
+            "nBits": 52,
+            "nFunctions": 8
+          },
+          "hash_distribution_units": {
+            "nHashIds": 2,
+            "nUnitIds": 3,
+            "units": []
+          },
+          "logical_tables": {
+            "ids": [
+              {
+                "id": 0,
+                "table_name": "Ingress.tbl_fail"
+              }
+            ],
+            "size": 16
+          },
+          "map_rams": {
+            "maprams": [
+              {
+                "row": 6,
+                "unit_id": 0,
+                "usages": [
+                  {
+                    "used_by": "Ingress.fail_ctr",
+                    "used_for": "statistics_ram"
+                  }
+                ]
+              },
+              {
+                "row": 6,
+                "unit_id": 1,
+                "usages": [
+                  {
+                    "used_by": "Ingress.fail_ctr",
+                    "used_for": "statistics_ram"
+                  }
+                ]
+              }
+            ],
+            "nRows": 8,
+            "nUnits": 6
+          },
+          "meter_alus": {
+            "meters": [],
+            "nAlus": 4
+          },
+          "rams": {
+            "nColumns": 10,
+            "nRows": 8,
+            "srams": [
+              {
+                "column": 0,
+                "row": 0,
+                "usages": [
+                  {
+                    "used_by": "Ingress.tbl_fail",
+                    "used_for": "ternary_indirection_ram"
+                  }
+                ]
+              },
+              {
+                "column": 4,
+                "row": 6,
+                "usages": [
+                  {
+                    "used_by": "Ingress.fail_ctr",
+                    "used_for": "statistics_ram"
+                  }
+                ]
+              },
+              {
+                "column": 5,
+                "row": 6,
+                "usages": [
+                  {
+                    "used_by": "Ingress.fail_ctr",
+                    "used_for": "statistics_ram"
+                  }
+                ]
+              }
+            ]
+          },
+          "stage_number": 5,
+          "stashes": {
+            "nRows": 8,
+            "nUnits": 2,
+            "stashes": []
+          },
+          "statistic_alus": {
+            "nAlus": 4,
+            "stats": [
+              {
+                "row": 6,
+                "usages": [
+                  {
+                    "used_by": "Ingress.fail_ctr",
+                    "used_for": "statistics_ram"
+                  }
+                ]
+              }
+            ]
+          },
+          "tcams": {
+            "nColumns": 2,
+            "nRows": 12,
+            "tcams": [
+              {
+                "column": 0,
+                "row": 0,
+                "usages": [
+                  {
+                    "used_by": "Ingress.tbl_fail",
+                    "used_for": "ternary_match"
+                  }
+                ]
+              },
+              {
+                "column": 0,
+                "row": 1,
+                "usages": [
+                  {
+                    "used_by": "Ingress.tbl_fail",
+                    "used_for": "ternary_match"
+                  }
+                ]
+              }
+            ]
+          },
+          "tind_result_buses": {
+            "ids": [
+              {
+                "id": 0,
+                "usages": [
+                  {
+                    "used_by": "Ingress.tbl_fail",
+                    "used_for": "ternary_indirection_ram"
+                  }
+                ]
+              }
+            ],
+            "size": 16
+          },
+          "vliw": {
+            "instructions": [
+              {
+                "color_usages": [
+                  {
+                    "color": 0,
+                    "gress": "ingress",
+                    "usages": [
+                      {
+                        "action_names": [
+                          "Ingress.inj_corrupt"
+                        ],
+                        "used_by": "Ingress.tbl_fail"
+                      }
+                    ]
+                  }
+                ],
+                "instruction_number": 1
+              },
+              {
+                "color_usages": [
+                  {
+                    "color": 1,
+                    "gress": "ingress",
+                    "usages": [
+                      {
+                        "action_names": [
+                          "Ingress.inj_drop"
+                        ],
+                        "used_by": "Ingress.tbl_fail"
+                      }
+                    ]
+                  },
+                  {
+                    "color": 0,
+                    "gress": "ingress",
+                    "usages": [
+                      {
+                        "action_names": [
+                          "Ingress.inj_none"
+                        ],
+                        "used_by": "Ingress.tbl_fail"
+                      }
+                    ]
+                  }
+                ],
+                "instruction_number": 0
+              }
+            ],
+            "size": 32
+          },
+          "xbar_bytes": {
+            "bytes": [
+              {
+                "byte_number": 135,
+                "byte_type": "ternary",
+                "usages": [
+                  {
+                    "slices": [
+                      {
+                        "field_name": "ingress::md.rnd_fail",
+                        "lsb": 8,
+                        "msb": 15,
+                        "offset": 0
+                      }
+                    ],
+                    "used_by": "Ingress.tbl_fail",
+                    "used_for": "ternary_match"
+                  }
+                ]
+              },
+              {
+                "byte_number": 131,
+                "byte_type": "ternary",
+                "usages": [
+                  {
+                    "slices": [
+                      {
+                        "field_name": "ingress::md.rnd_fail",
+                        "lsb": 8,
+                        "msb": 15,
+                        "offset": 0
+                      }
+                    ],
+                    "used_by": "Ingress.tbl_fail",
+                    "used_for": "ternary_match"
+                  }
+                ]
+              },
+              {
+                "byte_number": 134,
+                "byte_type": "ternary",
+                "usages": [
+                  {
+                    "slices": [
+                      {
+                        "field_name": "ingress::md.rnd_fail",
+                        "lsb": 0,
+                        "msb": 7,
+                        "offset": 0
+                      }
+                    ],
+                    "used_by": "Ingress.tbl_fail",
+                    "used_for": "ternary_match"
+                  }
+                ]
+              },
+              {
+                "byte_number": 138,
+                "byte_type": "ternary",
+                "usages": [
+                  {
+                    "slices": [
+                      {
+                        "field_name": "ingress::md.rnd_fail",
+                        "lsb": 0,
+                        "msb": 7,
+                        "offset": 0
+                      }
+                    ],
+                    "used_by": "Ingress.tbl_fail",
+                    "used_for": "ternary_match"
+                  }
+                ]
+              },
+              {
+                "byte_number": 137,
+                "byte_type": "ternary",
+                "usages": [
+                  {
+                    "slices": [
+                      {
+                        "field_name": "ingress::md.vlink_id",
+                        "lsb": 8,
+                        "msb": 15,
+                        "offset": 0
+                      }
+                    ],
+                    "used_by": "Ingress.tbl_fail",
+                    "used_for": "ternary_match"
+                  }
+                ]
+              },
+              {
+                "byte_number": 136,
+                "byte_type": "ternary",
+                "usages": [
+                  {
+                    "slices": [
+                      {
+                        "field_name": "ingress::md.vlink_id",
+                        "lsb": 0,
+                        "msb": 7,
+                        "offset": 0
+                      }
+                    ],
+                    "used_by": "Ingress.tbl_fail",
+                    "used_for": "ternary_match"
                   }
                 ]
               }
@@ -7459,10 +8708,6 @@
             "ids": [
               {
                 "id": 0,
-                "table_name": "Ingress.tbl_fail"
-              },
-              {
-                "id": 1,
                 "table_name": "Ingress.tbl_attn"
               }
             ],
@@ -7471,28 +8716,8 @@
           "map_rams": {
             "maprams": [
               {
-                "row": 6,
-                "unit_id": 0,
-                "usages": [
-                  {
-                    "used_by": "Ingress.fail_ctr",
-                    "used_for": "statistics_ram"
-                  }
-                ]
-              },
-              {
-                "row": 6,
-                "unit_id": 1,
-                "usages": [
-                  {
-                    "used_by": "Ingress.fail_ctr",
-                    "used_for": "statistics_ram"
-                  }
-                ]
-              },
-              {
                 "row": 7,
-                "unit_id": 1,
+                "unit_id": 0,
                 "usages": [
                   {
                     "used_by": "Ingress.reg_attn",
@@ -7502,7 +8727,7 @@
               },
               {
                 "row": 7,
-                "unit_id": 2,
+                "unit_id": 1,
                 "usages": [
                   {
                     "used_by": "Ingress.reg_attn",
@@ -7532,36 +8757,6 @@
             "nColumns": 10,
             "nRows": 8,
             "srams": [
-              {
-                "column": 0,
-                "row": 0,
-                "usages": [
-                  {
-                    "used_by": "Ingress.tbl_fail",
-                    "used_for": "ternary_indirection_ram"
-                  }
-                ]
-              },
-              {
-                "column": 4,
-                "row": 6,
-                "usages": [
-                  {
-                    "used_by": "Ingress.fail_ctr",
-                    "used_for": "statistics_ram"
-                  }
-                ]
-              },
-              {
-                "column": 5,
-                "row": 6,
-                "usages": [
-                  {
-                    "used_by": "Ingress.fail_ctr",
-                    "used_for": "statistics_ram"
-                  }
-                ]
-              },
               {
                 "column": 0,
                 "row": 7,
@@ -7596,7 +8791,7 @@
                 "way": 2
               },
               {
-                "column": 4,
+                "column": 3,
                 "row": 7,
                 "usages": [
                   {
@@ -7607,7 +8802,7 @@
                 "way": 3
               },
               {
-                "column": 5,
+                "column": 4,
                 "row": 7,
                 "usages": [
                   {
@@ -7617,7 +8812,7 @@
                 ]
               },
               {
-                "column": 6,
+                "column": 5,
                 "row": 7,
                 "usages": [
                   {
@@ -7628,7 +8823,7 @@
               }
             ]
           },
-          "stage_number": 5,
+          "stage_number": 6,
           "stashes": {
             "nRows": 8,
             "nUnits": 2,
@@ -7647,56 +8842,15 @@
           },
           "statistic_alus": {
             "nAlus": 4,
-            "stats": [
-              {
-                "row": 6,
-                "usages": [
-                  {
-                    "used_by": "Ingress.fail_ctr",
-                    "used_for": "statistics_ram"
-                  }
-                ]
-              }
-            ]
+            "stats": []
           },
           "tcams": {
             "nColumns": 2,
             "nRows": 12,
-            "tcams": [
-              {
-                "column": 0,
-                "row": 0,
-                "usages": [
-                  {
-                    "used_by": "Ingress.tbl_fail",
-                    "used_for": "ternary_match"
-                  }
-                ]
-              },
-              {
-                "column": 0,
-                "row": 1,
-                "usages": [
-                  {
-                    "used_by": "Ingress.tbl_fail",
-                    "used_for": "ternary_match"
-                  }
-                ]
-              }
-            ]
+            "tcams": []
           },
           "tind_result_buses": {
-            "ids": [
-              {
-                "id": 0,
-                "usages": [
-                  {
-                    "used_by": "Ingress.tbl_fail",
-                    "used_for": "ternary_indirection_ram"
-                  }
-                ]
-              }
-            ],
+            "ids": [],
             "size": 16
           },
           "vliw": {
@@ -7709,9 +8863,9 @@
                     "usages": [
                       {
                         "action_names": [
-                          "Ingress.inj_corrupt"
+                          "NoAction"
                         ],
-                        "used_by": "Ingress.tbl_fail"
+                        "used_by": "Ingress.tbl_attn"
                       }
                     ]
                   },
@@ -7722,41 +8876,6 @@
                       {
                         "action_names": [
                           "Ingress.act_attn_exceed"
-                        ],
-                        "used_by": "Ingress.tbl_attn"
-                      }
-                    ]
-                  }
-                ],
-                "instruction_number": 1
-              },
-              {
-                "color_usages": [
-                  {
-                    "color": 1,
-                    "gress": "ingress",
-                    "usages": [
-                      {
-                        "action_names": [
-                          "Ingress.inj_drop"
-                        ],
-                        "used_by": "Ingress.tbl_fail"
-                      }
-                    ]
-                  },
-                  {
-                    "color": 0,
-                    "gress": "ingress",
-                    "usages": [
-                      {
-                        "action_names": [
-                          "Ingress.inj_none"
-                        ],
-                        "used_by": "Ingress.tbl_fail"
-                      },
-                      {
-                        "action_names": [
-                          "NoAction"
                         ],
                         "used_by": "Ingress.tbl_attn"
                       }
@@ -7780,121 +8899,13 @@
                     ]
                   }
                 ],
-                "instruction_number": 2
+                "instruction_number": 1
               }
             ],
             "size": 32
           },
           "xbar_bytes": {
             "bytes": [
-              {
-                "byte_number": 129,
-                "byte_type": "ternary",
-                "usages": [
-                  {
-                    "slices": [
-                      {
-                        "field_name": "ingress::md.rnd_fail",
-                        "lsb": 8,
-                        "msb": 15,
-                        "offset": 0
-                      }
-                    ],
-                    "used_by": "Ingress.tbl_fail",
-                    "used_for": "ternary_match"
-                  }
-                ]
-              },
-              {
-                "byte_number": 145,
-                "byte_type": "ternary",
-                "usages": [
-                  {
-                    "slices": [
-                      {
-                        "field_name": "ingress::md.rnd_fail",
-                        "lsb": 8,
-                        "msb": 15,
-                        "offset": 0
-                      }
-                    ],
-                    "used_by": "Ingress.tbl_fail",
-                    "used_for": "ternary_match"
-                  }
-                ]
-              },
-              {
-                "byte_number": 128,
-                "byte_type": "ternary",
-                "usages": [
-                  {
-                    "slices": [
-                      {
-                        "field_name": "ingress::md.rnd_fail",
-                        "lsb": 0,
-                        "msb": 7,
-                        "offset": 0
-                      }
-                    ],
-                    "used_by": "Ingress.tbl_fail",
-                    "used_for": "ternary_match"
-                  }
-                ]
-              },
-              {
-                "byte_number": 132,
-                "byte_type": "ternary",
-                "usages": [
-                  {
-                    "slices": [
-                      {
-                        "field_name": "ingress::md.rnd_fail",
-                        "lsb": 0,
-                        "msb": 7,
-                        "offset": 0
-                      }
-                    ],
-                    "used_by": "Ingress.tbl_fail",
-                    "used_for": "ternary_match"
-                  }
-                ]
-              },
-              {
-                "byte_number": 149,
-                "byte_type": "ternary",
-                "usages": [
-                  {
-                    "slices": [
-                      {
-                        "field_name": "ingress::md.vlink_id",
-                        "lsb": 8,
-                        "msb": 15,
-                        "offset": 0
-                      }
-                    ],
-                    "used_by": "Ingress.tbl_fail",
-                    "used_for": "ternary_match"
-                  }
-                ]
-              },
-              {
-                "byte_number": 148,
-                "byte_type": "ternary",
-                "usages": [
-                  {
-                    "slices": [
-                      {
-                        "field_name": "ingress::md.vlink_id",
-                        "lsb": 0,
-                        "msb": 7,
-                        "offset": 0
-                      }
-                    ],
-                    "used_by": "Ingress.tbl_fail",
-                    "used_for": "ternary_match"
-                  }
-                ]
-              },
               {
                 "byte_number": 3,
                 "byte_type": "exact",
@@ -7950,7 +8961,7 @@
                 ]
               },
               {
-                "byte_number": 9,
+                "byte_number": 10,
                 "byte_type": "exact",
                 "usages": [
                   {
@@ -8018,7 +9029,7 @@
                 "id": 0,
                 "usages": [
                   {
-                    "used_by": "cond-12",
+                    "used_by": "cond-14",
                     "used_for": "gateway"
                   }
                 ]
@@ -8033,7 +9044,7 @@
                 "unit_id": 0,
                 "usages": [
                   {
-                    "used_by": "cond-12",
+                    "used_by": "cond-14",
                     "used_for": "gateway"
                   }
                 ]
@@ -8060,7 +9071,7 @@
               },
               {
                 "id": 1,
-                "table_name": "tbl_mcp_fabric709"
+                "table_name": "tbl_mcp_fabric747"
               }
             ],
             "size": 16
@@ -8090,7 +9101,7 @@
               }
             ]
           },
-          "stage_number": 6,
+          "stage_number": 7,
           "stashes": {
             "nRows": 8,
             "nUnits": 2,
@@ -8152,7 +9163,7 @@
                 "id": 1,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric709",
+                    "used_by": "tbl_mcp_fabric747",
                     "used_for": "ternary_indirection_ram"
                   }
                 ]
@@ -8199,9 +9210,9 @@
                     "usages": [
                       {
                         "action_names": [
-                          "mcp_fabric709"
+                          "mcp_fabric747"
                         ],
-                        "used_by": "tbl_mcp_fabric709"
+                        "used_by": "tbl_mcp_fabric747"
                       }
                     ]
                   }
@@ -8214,7 +9225,7 @@
           "xbar_bytes": {
             "bytes": [
               {
-                "byte_number": 135,
+                "byte_number": 129,
                 "byte_type": "ternary",
                 "usages": [
                   {
@@ -8232,7 +9243,7 @@
                 ]
               },
               {
-                "byte_number": 131,
+                "byte_number": 137,
                 "byte_type": "ternary",
                 "usages": [
                   {
@@ -8250,7 +9261,7 @@
                 ]
               },
               {
-                "byte_number": 134,
+                "byte_number": 128,
                 "byte_type": "ternary",
                 "usages": [
                   {
@@ -8268,7 +9279,7 @@
                 ]
               },
               {
-                "byte_number": 138,
+                "byte_number": 132,
                 "byte_type": "ternary",
                 "usages": [
                   {
@@ -8286,7 +9297,7 @@
                 ]
               },
               {
-                "byte_number": 136,
+                "byte_number": 130,
                 "byte_type": "ternary",
                 "usages": [
                   {
@@ -8316,7 +9327,7 @@
                         "offset": 6
                       }
                     ],
-                    "used_by": "cond-12",
+                    "used_by": "cond-14",
                     "used_for": "gateway"
                   }
                 ]
@@ -8350,6 +9361,18 @@
               },
               {
                 "byte_number": 67,
+                "used_by_tables": [
+                  "Ingress.tbl_final"
+                ]
+              },
+              {
+                "byte_number": 32,
+                "used_by_tables": [
+                  "Ingress.tbl_final"
+                ]
+              },
+              {
+                "byte_number": 33,
                 "used_by_tables": [
                   "Ingress.tbl_final"
                 ]
@@ -8963,10 +9986,20 @@
                   }
                 ],
                 "way": 3
+              },
+              {
+                "column": 4,
+                "row": 7,
+                "usages": [
+                  {
+                    "used_by": "Ingress.tbl_final$action",
+                    "used_for": "action_ram"
+                  }
+                ]
               }
             ]
           },
-          "stage_number": 7,
+          "stage_number": 8,
           "stashes": {
             "nRows": 8,
             "nUnits": 2,
@@ -9085,24 +10118,6 @@
                 ]
               },
               {
-                "byte_number": 7,
-                "byte_type": "exact",
-                "usages": [
-                  {
-                    "slices": [
-                      {
-                        "field_name": "ingress::md.dst_leaf",
-                        "lsb": 8,
-                        "msb": 15,
-                        "offset": 0
-                      }
-                    ],
-                    "used_by": "Ingress.tbl_final",
-                    "used_for": "exact_match"
-                  }
-                ]
-              },
-              {
                 "byte_number": 2,
                 "byte_type": "exact",
                 "usages": [
@@ -9110,24 +10125,6 @@
                     "slices": [
                       {
                         "field_name": "ingress::md.hop",
-                        "lsb": 0,
-                        "msb": 7,
-                        "offset": 0
-                      }
-                    ],
-                    "used_by": "Ingress.tbl_final",
-                    "used_for": "exact_match"
-                  }
-                ]
-              },
-              {
-                "byte_number": 6,
-                "byte_type": "exact",
-                "usages": [
-                  {
-                    "slices": [
-                      {
-                        "field_name": "ingress::md.dst_leaf",
                         "lsb": 0,
                         "msb": 7,
                         "offset": 0
@@ -9157,6 +10154,24 @@
                 ]
               },
               {
+                "byte_number": 5,
+                "byte_type": "exact",
+                "usages": [
+                  {
+                    "slices": [
+                      {
+                        "field_name": "ingress::md.dst_leaf",
+                        "lsb": 8,
+                        "msb": 15,
+                        "offset": 0
+                      }
+                    ],
+                    "used_by": "Ingress.tbl_final",
+                    "used_for": "exact_match"
+                  }
+                ]
+              },
+              {
                 "byte_number": 0,
                 "byte_type": "exact",
                 "usages": [
@@ -9164,6 +10179,24 @@
                     "slices": [
                       {
                         "field_name": "ingress::md.role",
+                        "lsb": 0,
+                        "msb": 7,
+                        "offset": 0
+                      }
+                    ],
+                    "used_by": "Ingress.tbl_final",
+                    "used_for": "exact_match"
+                  }
+                ]
+              },
+              {
+                "byte_number": 4,
+                "byte_type": "exact",
+                "usages": [
+                  {
+                    "slices": [
+                      {
+                        "field_name": "ingress::md.dst_leaf",
                         "lsb": 0,
                         "msb": 7,
                         "offset": 0
@@ -9195,35 +10228,53 @@
               "extracts": [
                 {
                   "bit_width": 16,
-                  "dest_container": 144,
+                  "dest_container": 148,
                   "extractor_id": 0,
                   "buffer_offset": 0
                 },
                 {
+                  "bit_width": 8,
+                  "dest_container": 87,
+                  "extractor_id": 0,
+                  "buffer_offset": 10
+                },
+                {
                   "bit_width": 16,
-                  "dest_container": 343,
+                  "dest_container": 144,
                   "extractor_id": 1,
+                  "buffer_offset": 11
+                },
+                {
+                  "bit_width": 32,
+                  "dest_container": 16,
+                  "extractor_id": 0,
+                  "buffer_offset": 15
+                },
+                {
+                  "bit_width": 32,
+                  "dest_container": 19,
+                  "extractor_id": 1,
+                  "buffer_offset": 19
+                },
+                {
+                  "bit_width": 16,
+                  "dest_container": 339,
+                  "extractor_id": 2,
                   "buffer_offset": 27
                 },
                 {
-                  "bit_width": 16,
-                  "dest_container": 321,
-                  "extractor_id": 2,
-                  "buffer_offset": 29
-                },
-                {
                   "bit_width": 8,
-                  "dest_container": 81,
-                  "extractor_id": 0,
+                  "dest_container": 86,
+                  "extractor_id": 1,
                   "constant_value": 1
                 }
               ],
               "has_counter": true,
               "matchesOn": [],
-              "next_state_id": 10,
+              "next_state_id": 11,
               "next_state_name": "$entry_point.start.$oob_stall_0",
               "previous_state_id": 1,
-              "shifts": 31,
+              "shifts": 29,
               "tcam_row": 255,
               "previous_state_name": "$entry_point.start"
             },
@@ -9233,13 +10284,13 @@
               "matchesOn": [],
               "next_state_id": 0,
               "next_state_name": "$entry_point.start.$split_0",
-              "previous_state_id": 10,
+              "previous_state_id": 11,
               "shifts": 0,
               "tcam_row": 254,
               "previous_state_name": "$entry_point.start.$oob_stall_0",
               "savesTo": [
                 {
-                  "buffer_offset": 8,
+                  "buffer_offset": 10,
                   "hardware_id": 0
                 }
               ]
@@ -9247,45 +10298,57 @@
             {
               "extracts": [
                 {
-                  "bit_width": 16,
-                  "dest_container": 320,
+                  "bit_width": 32,
+                  "dest_container": 259,
                   "extractor_id": 0,
                   "buffer_offset": 0
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 342,
-                  "extractor_id": 1,
-                  "buffer_offset": 2
-                },
-                {
-                  "bit_width": 32,
-                  "dest_container": 259,
+                  "dest_container": 338,
                   "extractor_id": 0,
                   "buffer_offset": 4
                 },
                 {
-                  "bit_width": 16,
-                  "dest_container": 341,
-                  "extractor_id": 2,
-                  "buffer_offset": 8
+                  "bit_width": 32,
+                  "dest_container": 258,
+                  "extractor_id": 1,
+                  "buffer_offset": 6
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 340,
-                  "extractor_id": 3,
+                  "dest_container": 325,
+                  "extractor_id": 1,
                   "buffer_offset": 10
                 },
                 {
-                  "bit_width": 32,
-                  "dest_container": 256,
-                  "extractor_id": 1,
+                  "bit_width": 8,
+                  "dest_container": 291,
+                  "extractor_id": 0,
                   "buffer_offset": 12
                 },
                 {
                   "bit_width": 8,
                   "dest_container": 81,
-                  "extractor_id": 0,
+                  "extractor_id": 1,
+                  "buffer_offset": 13
+                },
+                {
+                  "bit_width": 16,
+                  "dest_container": 320,
+                  "extractor_id": 2,
+                  "buffer_offset": 14
+                },
+                {
+                  "bit_width": 32,
+                  "dest_container": 256,
+                  "extractor_id": 2,
+                  "buffer_offset": 16
+                },
+                {
+                  "bit_width": 8,
+                  "dest_container": 86,
+                  "extractor_id": 2,
                   "constant_value": 2
                 }
               ],
@@ -9300,12 +10363,12 @@
               "next_state_id": 2,
               "next_state_name": "parse_fabric",
               "previous_state_id": 0,
-              "shifts": 16,
+              "shifts": 20,
               "tcam_row": 253,
               "previous_state_name": "$entry_point.start.$split_0",
               "savesTo": [
                 {
-                  "buffer_offset": 15,
+                  "buffer_offset": 17,
                   "hardware_id": 2
                 }
               ]
@@ -9313,28 +10376,28 @@
             {
               "extracts": [
                 {
-                  "bit_width": 16,
-                  "dest_container": 320,
+                  "bit_width": 32,
+                  "dest_container": 259,
                   "extractor_id": 0,
                   "buffer_offset": 0
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 342,
-                  "extractor_id": 1,
-                  "buffer_offset": 2
-                },
-                {
-                  "bit_width": 32,
-                  "dest_container": 259,
+                  "dest_container": 338,
                   "extractor_id": 0,
                   "buffer_offset": 4
                 },
                 {
+                  "bit_width": 32,
+                  "dest_container": 258,
+                  "extractor_id": 1,
+                  "buffer_offset": 6
+                },
+                {
                   "bit_width": 16,
-                  "dest_container": 341,
-                  "extractor_id": 2,
-                  "buffer_offset": 8
+                  "dest_container": 325,
+                  "extractor_id": 1,
+                  "buffer_offset": 10
                 }
               ],
               "has_counter": false,
@@ -9345,43 +10408,55 @@
                   "value": "0x****"
                 }
               ],
-              "next_state_id": 11,
+              "next_state_id": 12,
               "next_state_name": "min_parse_depth_accept_initial",
               "previous_state_id": 0,
-              "shifts": 10,
+              "shifts": 12,
               "tcam_row": 252,
               "previous_state_name": "$entry_point.start.$split_0"
             },
             {
               "extracts": [
                 {
-                  "bit_width": 32,
-                  "dest_container": 257,
+                  "bit_width": 8,
+                  "dest_container": 84,
                   "extractor_id": 0,
                   "buffer_offset": 0
                 },
                 {
-                  "bit_width": 16,
-                  "dest_container": 323,
-                  "extractor_id": 0,
-                  "buffer_offset": 4
+                  "bit_width": 8,
+                  "dest_container": 82,
+                  "extractor_id": 1,
+                  "buffer_offset": 1
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 322,
+                  "dest_container": 149,
+                  "extractor_id": 0,
+                  "buffer_offset": 2
+                },
+                {
+                  "bit_width": 16,
+                  "dest_container": 145,
                   "extractor_id": 1,
+                  "buffer_offset": 4
+                },
+                {
+                  "bit_width": 32,
+                  "dest_container": 17,
+                  "extractor_id": 0,
                   "buffer_offset": 6
                 },
                 {
                   "bit_width": 32,
-                  "dest_container": 258,
+                  "dest_container": 257,
                   "extractor_id": 1,
-                  "buffer_offset": 8
+                  "buffer_offset": 10
                 },
                 {
                   "bit_width": 8,
-                  "dest_container": 81,
-                  "extractor_id": 0,
+                  "dest_container": 86,
+                  "extractor_id": 2,
                   "constant_value": 4
                 }
               ],
@@ -9393,10 +10468,10 @@
                   "value": "0x01"
                 }
               ],
-              "next_state_id": 11,
+              "next_state_id": 12,
               "next_state_name": "min_parse_depth_accept_initial",
               "previous_state_id": 2,
-              "shifts": 12,
+              "shifts": 14,
               "tcam_row": 251,
               "previous_state_name": "parse_fabric"
             },
@@ -9410,7 +10485,7 @@
                   "value": "0x**"
                 }
               ],
-              "next_state_id": 11,
+              "next_state_id": 12,
               "next_state_name": "min_parse_depth_accept_initial",
               "previous_state_id": 2,
               "shifts": 0,
@@ -9426,48 +10501,42 @@
                   "buffer_offset": 0
                 },
                 {
-                  "bit_width": 8,
-                  "dest_container": 300,
-                  "extractor_id": 1,
-                  "buffer_offset": 1
-                },
-                {
-                  "bit_width": 8,
-                  "dest_container": 291,
-                  "extractor_id": 2,
-                  "buffer_offset": 2
-                },
-                {
-                  "bit_width": 32,
-                  "dest_container": 268,
-                  "extractor_id": 0,
-                  "buffer_offset": 3
-                },
-                {
                   "bit_width": 16,
-                  "dest_container": 325,
+                  "dest_container": 340,
                   "extractor_id": 0,
-                  "buffer_offset": 7
+                  "buffer_offset": 1
                 },
                 {
                   "bit_width": 16,
                   "dest_container": 324,
                   "extractor_id": 1,
-                  "buffer_offset": 9
+                  "buffer_offset": 3
+                },
+                {
+                  "bit_width": 16,
+                  "dest_container": 323,
+                  "extractor_id": 2,
+                  "buffer_offset": 5
+                },
+                {
+                  "bit_width": 16,
+                  "dest_container": 322,
+                  "extractor_id": 3,
+                  "buffer_offset": 7
                 },
                 {
                   "bit_width": 8,
                   "dest_container": 80,
-                  "extractor_id": 3,
+                  "extractor_id": 1,
                   "constant_value": 4
                 }
               ],
               "has_counter": true,
               "matchesOn": [],
-              "next_state_id": 12,
+              "next_state_id": 13,
               "next_state_name": "min_parse_depth_accept_loop.$split_0",
-              "previous_state_id": 11,
-              "shifts": 11,
+              "previous_state_id": 12,
+              "shifts": 9,
               "tcam_row": 249,
               "previous_state_name": "min_parse_depth_accept_initial"
             },
@@ -9477,7 +10546,7 @@
               "matchesOn": [],
               "next_state_id": 4,
               "next_state_name": "END",
-              "previous_state_id": 11,
+              "previous_state_id": 12,
               "shifts": 0,
               "tcam_row": 248,
               "previous_state_name": "min_parse_depth_accept_initial"
@@ -9485,59 +10554,66 @@
             {
               "extracts": [
                 {
-                  "bit_width": 8,
-                  "dest_container": 289,
+                  "bit_width": 16,
+                  "dest_container": 321,
                   "extractor_id": 0,
                   "buffer_offset": 0
                 },
                 {
                   "bit_width": 8,
-                  "dest_container": 302,
-                  "extractor_id": 1,
-                  "buffer_offset": 1
-                },
-                {
-                  "bit_width": 8,
-                  "dest_container": 301,
-                  "extractor_id": 2,
+                  "dest_container": 289,
+                  "extractor_id": 0,
                   "buffer_offset": 2
                 },
                 {
-                  "bit_width": 32,
-                  "dest_container": 270,
-                  "extractor_id": 0,
+                  "bit_width": 16,
+                  "dest_container": 341,
+                  "extractor_id": 1,
                   "buffer_offset": 3
                 },
                 {
                   "bit_width": 32,
                   "dest_container": 269,
+                  "extractor_id": 0,
+                  "buffer_offset": 5
+                },
+                {
+                  "bit_width": 32,
+                  "dest_container": 268,
                   "extractor_id": 1,
-                  "buffer_offset": 7
+                  "buffer_offset": 9
                 },
                 {
                   "bit_width": 8,
                   "dest_container": 80,
-                  "extractor_id": 3,
+                  "extractor_id": 1,
                   "constant_value": 2
                 }
               ],
               "has_counter": true,
               "matchesOn": [],
-              "next_state_id": 13,
+              "next_state_id": 14,
               "next_state_name": "min_parse_depth_accept_loop.$it1.$split_0",
-              "previous_state_id": 12,
-              "shifts": 11,
+              "previous_state_id": 13,
+              "shifts": 13,
               "tcam_row": 247,
               "previous_state_name": "min_parse_depth_accept_loop.$split_0"
             },
             {
-              "extracts": [],
+              "extracts": [
+                {
+                  "bit_width": 16,
+                  "dest_container": 321,
+                  "extractor_id": 0,
+                  "buffer_offset": 0
+                }
+              ],
               "has_counter": false,
               "matchesOn": [],
               "next_state_id": 4,
               "next_state_name": "END",
-              "previous_state_id": 12,
-              "shifts": 0,
+              "previous_state_id": 13,
+              "shifts": 2,
               "tcam_row": 246,
               "previous_state_name": "min_parse_depth_accept_loop.$split_0"
             },
@@ -9551,26 +10627,20 @@
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 344,
+                  "dest_container": 342,
                   "extractor_id": 0,
                   "buffer_offset": 1
-                },
-                {
-                  "bit_width": 16,
-                  "dest_container": 339,
-                  "extractor_id": 1,
-                  "buffer_offset": 3
-                },
-                {
-                  "bit_width": 16,
-                  "dest_container": 338,
-                  "extractor_id": 2,
-                  "buffer_offset": 5
                 },
                 {
                   "bit_width": 32,
                   "dest_container": 271,
                   "extractor_id": 0,
+                  "buffer_offset": 3
+                },
+                {
+                  "bit_width": 32,
+                  "dest_container": 270,
+                  "extractor_id": 1,
                   "buffer_offset": 7
                 },
                 {
@@ -9584,7 +10654,7 @@
               "matchesOn": [],
               "next_state_id": 4,
               "next_state_name": "END",
-              "previous_state_id": 13,
+              "previous_state_id": 14,
               "shifts": 11,
               "tcam_row": 245,
               "previous_state_name": "min_parse_depth_accept_loop.$it1.$split_0"
@@ -9595,7 +10665,7 @@
               "matchesOn": [],
               "next_state_id": 4,
               "next_state_name": "END",
-              "previous_state_id": 13,
+              "previous_state_id": 14,
               "shifts": 0,
               "tcam_row": 244,
               "previous_state_name": "min_parse_depth_accept_loop.$it1.$split_0"
@@ -9611,7 +10681,7 @@
               "extracts": [
                 {
                   "bit_width": 16,
-                  "dest_container": 143,
+                  "dest_container": 140,
                   "extractor_id": 0,
                   "buffer_offset": 0
                 },
@@ -9622,38 +10692,20 @@
                   "buffer_offset": 16
                 },
                 {
-                  "bit_width": 32,
-                  "dest_container": 264,
-                  "extractor_id": 0,
+                  "bit_width": 16,
+                  "dest_container": 331,
+                  "extractor_id": 2,
                   "buffer_offset": 18
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 332,
-                  "extractor_id": 2,
-                  "buffer_offset": 22
-                },
-                {
-                  "bit_width": 8,
-                  "dest_container": 294,
-                  "extractor_id": 0,
-                  "buffer_offset": 24
-                },
-                {
-                  "bit_width": 8,
-                  "dest_container": 293,
-                  "extractor_id": 1,
-                  "buffer_offset": 25
-                },
-                {
-                  "bit_width": 16,
-                  "dest_container": 331,
+                  "dest_container": 330,
                   "extractor_id": 3,
-                  "buffer_offset": 26
+                  "buffer_offset": 20
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 131,
+                  "dest_container": 132,
                   "extractor_id": 4,
                   "constant_value": 1
                 }
@@ -9663,7 +10715,7 @@
               "next_state_id": 0,
               "next_state_name": "$entry_point.start.$split_0",
               "previous_state_id": 1,
-              "shifts": 28,
+              "shifts": 22,
               "tcam_row": 255,
               "previous_state_name": "$entry_point.start",
               "savesTo": [
@@ -9677,9 +10729,27 @@
               "extracts": [
                 {
                   "bit_width": 16,
-                  "dest_container": 160,
+                  "dest_container": 332,
                   "extractor_id": 0,
                   "buffer_offset": 0
+                },
+                {
+                  "bit_width": 16,
+                  "dest_container": 329,
+                  "extractor_id": 1,
+                  "buffer_offset": 2
+                },
+                {
+                  "bit_width": 16,
+                  "dest_container": 328,
+                  "extractor_id": 2,
+                  "buffer_offset": 4
+                },
+                {
+                  "bit_width": 16,
+                  "dest_container": 163,
+                  "extractor_id": 3,
+                  "buffer_offset": 6
                 }
               ],
               "has_counter": false,
@@ -9693,23 +10763,35 @@
               "next_state_id": 2,
               "next_state_name": "parse_fabric",
               "previous_state_id": 0,
-              "shifts": 2,
+              "shifts": 8,
               "tcam_row": 254,
-              "previous_state_name": "$entry_point.start.$split_0",
-              "savesTo": [
-                {
-                  "buffer_offset": 7,
-                  "hardware_id": 2
-                }
-              ]
+              "previous_state_name": "$entry_point.start.$split_0"
             },
             {
               "extracts": [
                 {
                   "bit_width": 16,
-                  "dest_container": 160,
+                  "dest_container": 332,
                   "extractor_id": 0,
                   "buffer_offset": 0
+                },
+                {
+                  "bit_width": 16,
+                  "dest_container": 329,
+                  "extractor_id": 1,
+                  "buffer_offset": 2
+                },
+                {
+                  "bit_width": 16,
+                  "dest_container": 328,
+                  "extractor_id": 2,
+                  "buffer_offset": 4
+                },
+                {
+                  "bit_width": 16,
+                  "dest_container": 163,
+                  "extractor_id": 3,
+                  "buffer_offset": 6
                 }
               ],
               "has_counter": false,
@@ -9723,7 +10805,7 @@
               "next_state_id": 3,
               "next_state_name": "parse_ipv4",
               "previous_state_id": 0,
-              "shifts": 2,
+              "shifts": 8,
               "tcam_row": 253,
               "previous_state_name": "$entry_point.start.$split_0"
             },
@@ -9731,9 +10813,27 @@
               "extracts": [
                 {
                   "bit_width": 16,
-                  "dest_container": 160,
+                  "dest_container": 332,
                   "extractor_id": 0,
                   "buffer_offset": 0
+                },
+                {
+                  "bit_width": 16,
+                  "dest_container": 329,
+                  "extractor_id": 1,
+                  "buffer_offset": 2
+                },
+                {
+                  "bit_width": 16,
+                  "dest_container": 328,
+                  "extractor_id": 2,
+                  "buffer_offset": 4
+                },
+                {
+                  "bit_width": 16,
+                  "dest_container": 163,
+                  "extractor_id": 3,
+                  "buffer_offset": 6
                 }
               ],
               "has_counter": false,
@@ -9747,7 +10847,7 @@
               "next_state_id": 4,
               "next_state_name": "END",
               "previous_state_id": 0,
-              "shifts": 2,
+              "shifts": 8,
               "tcam_row": 252,
               "previous_state_name": "$entry_point.start.$split_0"
             },
@@ -9755,39 +10855,75 @@
               "extracts": [
                 {
                   "bit_width": 16,
-                  "dest_container": 142,
+                  "dest_container": 131,
                   "extractor_id": 0,
                   "buffer_offset": 0
                 },
                 {
                   "bit_width": 32,
-                  "dest_container": 2,
+                  "dest_container": 4,
                   "extractor_id": 0,
                   "buffer_offset": 0
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 136,
+                  "dest_container": 137,
                   "extractor_id": 1,
                   "buffer_offset": 1
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 135,
+                  "dest_container": 136,
                   "extractor_id": 2,
                   "buffer_offset": 2
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 130,
+                  "dest_container": 139,
                   "extractor_id": 3,
                   "buffer_offset": 4
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 131,
+                  "dest_container": 132,
                   "extractor_id": 4,
                   "constant_value": 2
+                }
+              ],
+              "has_counter": false,
+              "matchesOn": [],
+              "next_state_id": 5,
+              "next_state_name": "parse_fabric.$split_0",
+              "previous_state_id": 2,
+              "shifts": 5,
+              "tcam_row": 251,
+              "previous_state_name": "parse_fabric",
+              "savesTo": [
+                {
+                  "buffer_offset": 5,
+                  "hardware_id": 2
+                }
+              ]
+            },
+            {
+              "extracts": [
+                {
+                  "bit_width": 16,
+                  "dest_container": 169,
+                  "extractor_id": 0,
+                  "buffer_offset": 0
+                },
+                {
+                  "bit_width": 16,
+                  "dest_container": 161,
+                  "extractor_id": 1,
+                  "buffer_offset": 1
+                },
+                {
+                  "bit_width": 16,
+                  "dest_container": 168,
+                  "extractor_id": 2,
+                  "buffer_offset": 1
                 }
               ],
               "has_counter": false,
@@ -9798,50 +10934,32 @@
                   "value": "0x01"
                 }
               ],
-              "next_state_id": 5,
+              "next_state_id": 6,
               "next_state_name": "parse_csig",
-              "previous_state_id": 2,
-              "shifts": 6,
-              "tcam_row": 251,
-              "previous_state_name": "parse_fabric"
+              "previous_state_id": 5,
+              "shifts": 3,
+              "tcam_row": 250,
+              "previous_state_name": "parse_fabric.$split_0"
             },
             {
               "extracts": [
                 {
                   "bit_width": 16,
-                  "dest_container": 142,
-                  "extractor_id": 0,
-                  "buffer_offset": 0
-                },
-                {
-                  "bit_width": 32,
-                  "dest_container": 2,
+                  "dest_container": 169,
                   "extractor_id": 0,
                   "buffer_offset": 0
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 136,
+                  "dest_container": 161,
                   "extractor_id": 1,
                   "buffer_offset": 1
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 135,
+                  "dest_container": 168,
                   "extractor_id": 2,
-                  "buffer_offset": 2
-                },
-                {
-                  "bit_width": 16,
-                  "dest_container": 130,
-                  "extractor_id": 3,
-                  "buffer_offset": 4
-                },
-                {
-                  "bit_width": 16,
-                  "dest_container": 131,
-                  "extractor_id": 4,
-                  "constant_value": 2
+                  "buffer_offset": 1
                 }
               ],
               "has_counter": false,
@@ -9854,59 +10972,47 @@
               ],
               "next_state_id": 3,
               "next_state_name": "parse_ipv4",
-              "previous_state_id": 2,
-              "shifts": 6,
-              "tcam_row": 250,
-              "previous_state_name": "parse_fabric"
+              "previous_state_id": 5,
+              "shifts": 3,
+              "tcam_row": 249,
+              "previous_state_name": "parse_fabric.$split_0"
             },
             {
               "extracts": [
                 {
                   "bit_width": 16,
-                  "dest_container": 326,
+                  "dest_container": 164,
                   "extractor_id": 0,
                   "buffer_offset": 0
                 },
                 {
-                  "bit_width": 16,
-                  "dest_container": 139,
-                  "extractor_id": 1,
+                  "bit_width": 32,
+                  "dest_container": 0,
+                  "extractor_id": 0,
                   "buffer_offset": 2
                 },
                 {
                   "bit_width": 32,
-                  "dest_container": 265,
-                  "extractor_id": 0,
-                  "buffer_offset": 4
-                },
-                {
-                  "bit_width": 8,
-                  "dest_container": 68,
-                  "extractor_id": 0,
-                  "buffer_offset": 8
-                },
-                {
-                  "bit_width": 16,
-                  "dest_container": 328,
-                  "extractor_id": 2,
-                  "buffer_offset": 8
-                },
-                {
-                  "bit_width": 8,
-                  "dest_container": 67,
+                  "dest_container": 1,
                   "extractor_id": 1,
-                  "buffer_offset": 9
+                  "buffer_offset": 6
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 327,
-                  "extractor_id": 3,
+                  "dest_container": 162,
+                  "extractor_id": 1,
                   "buffer_offset": 10
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 131,
-                  "extractor_id": 4,
+                  "dest_container": 141,
+                  "extractor_id": 2,
+                  "buffer_offset": 12
+                },
+                {
+                  "bit_width": 16,
+                  "dest_container": 132,
+                  "extractor_id": 3,
                   "constant_value": 4
                 }
               ],
@@ -9914,9 +11020,9 @@
               "matchesOn": [],
               "next_state_id": 3,
               "next_state_name": "parse_ipv4",
-              "previous_state_id": 5,
-              "shifts": 12,
-              "tcam_row": 249,
+              "previous_state_id": 6,
+              "shifts": 14,
+              "tcam_row": 248,
               "previous_state_name": "parse_csig"
             },
             {
@@ -9929,36 +11035,36 @@
                 },
                 {
                   "bit_width": 32,
-                  "dest_container": 262,
+                  "dest_container": 263,
                   "extractor_id": 1,
                   "buffer_offset": 4
                 },
                 {
                   "bit_width": 32,
-                  "dest_container": 261,
+                  "dest_container": 262,
                   "extractor_id": 2,
                   "buffer_offset": 8
                 },
                 {
                   "bit_width": 32,
-                  "dest_container": 1,
+                  "dest_container": 3,
                   "extractor_id": 3,
                   "buffer_offset": 12
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 131,
+                  "dest_container": 132,
                   "extractor_id": 0,
                   "constant_value": 8
                 }
               ],
               "has_counter": false,
               "matchesOn": [],
-              "next_state_id": 6,
+              "next_state_id": 7,
               "next_state_name": "parse_ipv4.$split_0",
               "previous_state_id": 3,
               "shifts": 16,
-              "tcam_row": 248,
+              "tcam_row": 247,
               "previous_state_name": "parse_ipv4",
               "savesTo": [
                 {
@@ -9971,7 +11077,7 @@
               "extracts": [
                 {
                   "bit_width": 32,
-                  "dest_container": 0,
+                  "dest_container": 2,
                   "extractor_id": 0,
                   "buffer_offset": 0
                 }
@@ -9984,11 +11090,11 @@
                   "value": "0x11"
                 }
               ],
-              "next_state_id": 7,
+              "next_state_id": 8,
               "next_state_name": "parse_udp",
-              "previous_state_id": 6,
+              "previous_state_id": 7,
               "shifts": 4,
-              "tcam_row": 247,
+              "tcam_row": 246,
               "previous_state_name": "parse_ipv4.$split_0",
               "savesTo": [
                 {
@@ -10001,7 +11107,7 @@
               "extracts": [
                 {
                   "bit_width": 32,
-                  "dest_container": 0,
+                  "dest_container": 2,
                   "extractor_id": 0,
                   "buffer_offset": 0
                 }
@@ -10016,40 +11122,40 @@
               ],
               "next_state_id": 4,
               "next_state_name": "END",
-              "previous_state_id": 6,
+              "previous_state_id": 7,
               "shifts": 4,
-              "tcam_row": 246,
+              "tcam_row": 245,
               "previous_state_name": "parse_ipv4.$split_0"
             },
             {
               "extracts": [
                 {
                   "bit_width": 16,
-                  "dest_container": 141,
+                  "dest_container": 143,
                   "extractor_id": 0,
                   "buffer_offset": 0
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 330,
+                  "dest_container": 327,
                   "extractor_id": 1,
                   "buffer_offset": 2
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 329,
+                  "dest_container": 326,
                   "extractor_id": 2,
                   "buffer_offset": 4
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 140,
+                  "dest_container": 142,
                   "extractor_id": 3,
                   "buffer_offset": 6
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 131,
+                  "dest_container": 132,
                   "extractor_id": 4,
                   "constant_value": 16
                 }
@@ -10062,42 +11168,42 @@
                   "value": "0x12b7"
                 }
               ],
-              "next_state_id": 8,
+              "next_state_id": 9,
               "next_state_name": "parse_bth",
-              "previous_state_id": 7,
+              "previous_state_id": 8,
               "shifts": 8,
-              "tcam_row": 245,
+              "tcam_row": 244,
               "previous_state_name": "parse_udp"
             },
             {
               "extracts": [
                 {
                   "bit_width": 16,
-                  "dest_container": 141,
+                  "dest_container": 143,
                   "extractor_id": 0,
                   "buffer_offset": 0
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 330,
+                  "dest_container": 327,
                   "extractor_id": 1,
                   "buffer_offset": 2
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 329,
+                  "dest_container": 326,
                   "extractor_id": 2,
                   "buffer_offset": 4
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 140,
+                  "dest_container": 142,
                   "extractor_id": 3,
                   "buffer_offset": 6
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 131,
+                  "dest_container": 132,
                   "extractor_id": 4,
                   "constant_value": 16
                 }
@@ -10110,42 +11216,42 @@
                   "value": "0xe5e5"
                 }
               ],
-              "next_state_id": 9,
+              "next_state_id": 10,
               "next_state_name": "parse_evid",
-              "previous_state_id": 7,
+              "previous_state_id": 8,
               "shifts": 8,
-              "tcam_row": 244,
+              "tcam_row": 243,
               "previous_state_name": "parse_udp"
             },
             {
               "extracts": [
                 {
                   "bit_width": 16,
-                  "dest_container": 141,
+                  "dest_container": 143,
                   "extractor_id": 0,
                   "buffer_offset": 0
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 330,
+                  "dest_container": 327,
                   "extractor_id": 1,
                   "buffer_offset": 2
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 329,
+                  "dest_container": 326,
                   "extractor_id": 2,
                   "buffer_offset": 4
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 140,
+                  "dest_container": 142,
                   "extractor_id": 3,
                   "buffer_offset": 6
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 131,
+                  "dest_container": 132,
                   "extractor_id": 4,
                   "constant_value": 16
                 }
@@ -10160,34 +11266,52 @@
               ],
               "next_state_id": 4,
               "next_state_name": "END",
-              "previous_state_id": 7,
+              "previous_state_id": 8,
               "shifts": 8,
-              "tcam_row": 243,
+              "tcam_row": 242,
               "previous_state_name": "parse_udp"
             },
             {
               "extracts": [
                 {
                   "bit_width": 32,
-                  "dest_container": 267,
+                  "dest_container": 264,
                   "extractor_id": 0,
                   "buffer_offset": 0
                 },
                 {
-                  "bit_width": 32,
-                  "dest_container": 266,
-                  "extractor_id": 1,
+                  "bit_width": 8,
+                  "dest_container": 295,
+                  "extractor_id": 0,
                   "buffer_offset": 4
                 },
                 {
-                  "bit_width": 32,
-                  "dest_container": 263,
+                  "bit_width": 8,
+                  "dest_container": 294,
+                  "extractor_id": 1,
+                  "buffer_offset": 5
+                },
+                {
+                  "bit_width": 8,
+                  "dest_container": 293,
                   "extractor_id": 2,
+                  "buffer_offset": 6
+                },
+                {
+                  "bit_width": 8,
+                  "dest_container": 292,
+                  "extractor_id": 3,
+                  "buffer_offset": 7
+                },
+                {
+                  "bit_width": 32,
+                  "dest_container": 261,
+                  "extractor_id": 1,
                   "buffer_offset": 8
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 131,
+                  "dest_container": 132,
                   "extractor_id": 0,
                   "constant_value": 32
                 }
@@ -10196,9 +11320,9 @@
               "matchesOn": [],
               "next_state_id": 4,
               "next_state_name": "END",
-              "previous_state_id": 8,
+              "previous_state_id": 9,
               "shifts": 12,
-              "tcam_row": 242,
+              "tcam_row": 241,
               "previous_state_name": "parse_bth"
             },
             {
@@ -10210,26 +11334,26 @@
                   "buffer_offset": 0
                 },
                 {
-                  "bit_width": 8,
-                  "dest_container": 66,
-                  "extractor_id": 1,
+                  "bit_width": 16,
+                  "dest_container": 160,
+                  "extractor_id": 0,
                   "buffer_offset": 1
                 },
                 {
-                  "bit_width": 16,
-                  "dest_container": 138,
-                  "extractor_id": 0,
-                  "buffer_offset": 2
+                  "bit_width": 8,
+                  "dest_container": 66,
+                  "extractor_id": 1,
+                  "buffer_offset": 3
                 },
                 {
                   "bit_width": 32,
-                  "dest_container": 263,
+                  "dest_container": 261,
                   "extractor_id": 0,
                   "buffer_offset": 4
                 },
                 {
                   "bit_width": 16,
-                  "dest_container": 131,
+                  "dest_container": 132,
                   "extractor_id": 1,
                   "constant_value": 64
                 }
@@ -10238,9 +11362,9 @@
               "matchesOn": [],
               "next_state_id": 4,
               "next_state_name": "END",
-              "previous_state_id": 9,
+              "previous_state_id": 10,
               "shifts": 8,
-              "tcam_row": 241,
+              "tcam_row": 240,
               "previous_state_name": "parse_evid"
             }
           ],

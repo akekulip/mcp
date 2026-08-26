@@ -1,3 +1,11 @@
 digraph egress {
 0 [label="$root" shape=box color="black"];
+2 [label="tbl_csig_diff_0" shape=box color="black"];
+4 [label="tbl_csig_replace_a_0" shape=box color="black"];
+3 [label="tbl_csig_replace_b_0" shape=box color="black"];
+1 [label="tbl_eg_vlink_0" shape=box color="black"];
+0-> 1 [label="$start" color="black"];
+2-> 3 [label="csig_diff" color="black"];
+3-> 4 [label="csig_replace_b" color="black"];
+1-> 2 [label="set_eg_vlink" color="black"];
 }

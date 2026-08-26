@@ -167,6 +167,13 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   STEP 5 DONE (me): attention register + §7.4 rule + TCAM gate; 0 errors both SDEs, 8 stages;
   PREREG v1.3 freezes §7.4; H22 closed; 3 new bf-p4c constraint classes (9-11) in the tofino-p4
   skill. Next: step 6 (mirror on inj_drop -> collector dp9), control-plane additions for step 5.
+- ~23:45 STEPS 6 + 7 DONE: mirrors (sid 3 on injected faults, sid 1 on gated samples, OR-composed;
+  collector = dp9 for now) and the CSIG tag (inserted/zeroed in ingress act_enter with path_id +
+  epoch, compare-and-replaced in egress via diff = worst |-| this, gate diff == 0). fabric_h is 8 B
+  (+path_id), csig_h 14 B. Ingress 9 stages (at the §8.1 limit), egress 3. Both SDEs 0 errors,
+  bin 1461583 B, sha a0dee21f. Constraint classes 12-13 added to the tofino-p4 skill (mid-word
+  intrinsic slices; egress one-source-per-container). Not yet loaded on the chip: the switch still
+  runs the step-4 build while the agent smoke-tests it; reload after that.
 
 ## Next action
 1. Vision/Hulk: check Netronome SDK, rxe, kernel, perftest, DPDK availability (M4 prep).
