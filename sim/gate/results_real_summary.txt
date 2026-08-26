@@ -1,0 +1,21 @@
+moe8x8b_n16,uniform,seed1000,onset_epoch=3,ttl_epochs=32,censored=1,horizon=35,finish=3.58435 s,wall_s=4219.93 maxrss_kb=21472080
+moe8x8b_n16,uniform,seed1001,onset_epoch=5,ttl_epochs=30,censored=1,horizon=35,finish=3.58535 s,wall_s=4272.54 maxrss_kb=21471120
+moe8x8b_n16,uniform,seed1002,onset_epoch=3,ttl_epochs=32,censored=1,horizon=35,finish=3.58589 s,wall_s=4284.96 maxrss_kb=21469404
+moe8x8b_n16,uniform,seed1003,onset_epoch=4,ttl_epochs=31,censored=1,horizon=35,finish=3.58861 s,wall_s=4212.95 maxrss_kb=21471820
+moe8x8b_n16,uniform,seed1004,onset_epoch=4,ttl_epochs=31,censored=1,horizon=35,finish=3.58696 s,wall_s=4418.04 maxrss_kb=21472176
+moe8x8b_n16,uniform,seed1005,onset_epoch=4,ttl_epochs=31,censored=1,horizon=35,finish=3.58595 s,wall_s=4283.12 maxrss_kb=21472160
+moe8x8b_n16,uniform,seed1006,onset_epoch=4,ttl_epochs=31,censored=1,horizon=35,finish=3.58371 s,wall_s=4316.93 maxrss_kb=21472080
+moe8x8b_n16,uniform,seed1007,onset_epoch=7,ttl_epochs=28,censored=1,horizon=35,finish=3.58831 s,wall_s=4276.12 maxrss_kb=21472808
+moe8x8b_n16,uniform,seed1008,onset_epoch=5,ttl_epochs=30,censored=1,horizon=35,finish=3.58479 s,wall_s=4284.65 maxrss_kb=21473056
+moe8x8b_n16,uniform,seed1009,onset_epoch=8,ttl_epochs=27,censored=1,horizon=35,finish=3.58988 s,wall_s=4225.14 maxrss_kb=21471804
+moe8x8b_n16,uniform,seed1015,onset_epoch=3,ttl_epochs=32,censored=1,horizon=35,finish=3.58769 s,wall_s=3709.01 maxrss_kb=21325596
+moe8x8b_n16,uniform,seed1016,onset_epoch=8,ttl_epochs=27,censored=1,horizon=35,finish=3.5857 s,wall_s=3774.91 maxrss_kb=21323140
+moe8x8b_n16,uniform,seed1017,onset_epoch=5,ttl_epochs=30,censored=1,horizon=35,finish=3.58696 s,wall_s=3751.23 maxrss_kb=21321284
+moe8x8b_n16,uniform,seed1020,onset_epoch=7,ttl_epochs=28,censored=1,horizon=35,finish=3.58427 s,wall_s=3706.17 maxrss_kb=21326728
+moe8x8b_n16,uniform,seed1021,onset_epoch=6,ttl_epochs=29,censored=1,horizon=35,finish=3.58482 s,wall_s=3731.21 maxrss_kb=21323188
+
+| trace | policy | n | median TTL (epochs) | IQR | censored | CV(log TTL, uncens.) |
+|---|---|---|---|---|---|---|
+| moe8x8b_n16 | uniform | 15 | 30 | [28, 31] | 100% | nan |
+rho(uniform,random) log-TTL [moe8x8b_n16]: nan on n=0 seeds uncensored in both
+PREREG verdict [moe8x8b_n16]: TOO HARD (uniform censored in > 50% of seeds): loosen the operating point one step

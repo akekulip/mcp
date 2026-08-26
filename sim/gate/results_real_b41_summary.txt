@@ -1,0 +1,56 @@
+moe8x8b_n16,oracle,seed1000,onset_epoch=3,ttl_epochs=14,censored=0,horizon=35,finish=3.58435 s,wall_s=3423.19 maxrss_kb=21471372
+moe8x8b_n16,oracle,seed1001,onset_epoch=5,ttl_epochs=11,censored=0,horizon=35,finish=3.58535 s,wall_s=3490.32 maxrss_kb=21471632
+moe8x8b_n16,oracle,seed1002,onset_epoch=3,ttl_epochs=13,censored=0,horizon=35,finish=3.58589 s,wall_s=3407.08 maxrss_kb=21470848
+moe8x8b_n16,oracle,seed1003,onset_epoch=4,ttl_epochs=12,censored=0,horizon=35,finish=3.58861 s,wall_s=3338.31 maxrss_kb=21472308
+moe8x8b_n16,oracle,seed1004,onset_epoch=4,ttl_epochs=12,censored=0,horizon=35,finish=3.58696 s,wall_s=3299.29 maxrss_kb=21471572
+moe8x8b_n16,oracle,seed1005,onset_epoch=4,ttl_epochs=12,censored=0,horizon=35,finish=3.58595 s,wall_s=3845.84 maxrss_kb=21471044
+moe8x8b_n16,oracle,seed1006,onset_epoch=4,ttl_epochs=12,censored=0,horizon=35,finish=3.58371 s,wall_s=3930.16 maxrss_kb=21473356
+moe8x8b_n16,oracle,seed1007,onset_epoch=7,ttl_epochs=9,censored=0,horizon=35,finish=3.58831 s,wall_s=3946.56 maxrss_kb=21472576
+moe8x8b_n16,oracle,seed1008,onset_epoch=5,ttl_epochs=11,censored=0,horizon=35,finish=3.58479 s,wall_s=3908.69 maxrss_kb=21470596
+moe8x8b_n16,oracle,seed1009,onset_epoch=8,ttl_epochs=9,censored=0,horizon=35,finish=3.58988 s,wall_s=3904.85 maxrss_kb=21471404
+moe8x8b_n16,oracle,seed1010,onset_epoch=5,ttl_epochs=11,censored=0,horizon=35,finish=3.58788 s,wall_s=3881.84 maxrss_kb=21471688
+moe8x8b_n16,oracle,seed1011,onset_epoch=6,ttl_epochs=10,censored=0,horizon=35,finish=3.58763 s,wall_s=3853.91 maxrss_kb=21472532
+moe8x8b_n16,oracle,seed1012,onset_epoch=6,ttl_epochs=10,censored=0,horizon=35,finish=3.58796 s,wall_s=3874.20 maxrss_kb=21471728
+moe8x8b_n16,oracle,seed1013,onset_epoch=8,ttl_epochs=8,censored=0,horizon=35,finish=3.58782 s,wall_s=3908.27 maxrss_kb=21469416
+moe8x8b_n16,oracle,seed1014,onset_epoch=6,ttl_epochs=10,censored=0,horizon=35,finish=3.58861 s,wall_s=3901.93 maxrss_kb=21469748
+moe8x8b_n16,random,seed1000,onset_epoch=3,ttl_epochs=17,censored=0,horizon=35,finish=3.58435 s,wall_s=3480.14 maxrss_kb=21472340
+moe8x8b_n16,random,seed1001,onset_epoch=5,ttl_epochs=30,censored=1,horizon=35,finish=3.58535 s,wall_s=3444.60 maxrss_kb=21472996
+moe8x8b_n16,random,seed1002,onset_epoch=3,ttl_epochs=15,censored=0,horizon=35,finish=3.58589 s,wall_s=3338.74 maxrss_kb=21472164
+moe8x8b_n16,random,seed1003,onset_epoch=4,ttl_epochs=28,censored=0,horizon=35,finish=3.58861 s,wall_s=3259.92 maxrss_kb=21472932
+moe8x8b_n16,random,seed1004,onset_epoch=4,ttl_epochs=16,censored=0,horizon=35,finish=3.58696 s,wall_s=3369.69 maxrss_kb=21472268
+moe8x8b_n16,random,seed1005,onset_epoch=4,ttl_epochs=30,censored=0,horizon=35,finish=3.58595 s,wall_s=3925.04 maxrss_kb=21473308
+moe8x8b_n16,random,seed1006,onset_epoch=4,ttl_epochs=21,censored=0,horizon=35,finish=3.58371 s,wall_s=3909.14 maxrss_kb=21471708
+moe8x8b_n16,random,seed1007,onset_epoch=7,ttl_epochs=11,censored=0,horizon=35,finish=3.58831 s,wall_s=3882.26 maxrss_kb=21472100
+moe8x8b_n16,random,seed1008,onset_epoch=5,ttl_epochs=22,censored=0,horizon=35,finish=3.58479 s,wall_s=3906.40 maxrss_kb=21473700
+moe8x8b_n16,random,seed1009,onset_epoch=8,ttl_epochs=27,censored=1,horizon=35,finish=3.58988 s,wall_s=3913.42 maxrss_kb=21473060
+moe8x8b_n16,random,seed1010,onset_epoch=5,ttl_epochs=18,censored=0,horizon=35,finish=3.58788 s,wall_s=3947.71 maxrss_kb=21472576
+moe8x8b_n16,random,seed1011,onset_epoch=6,ttl_epochs=29,censored=1,horizon=35,finish=3.58763 s,wall_s=3929.73 maxrss_kb=21473052
+moe8x8b_n16,random,seed1012,onset_epoch=6,ttl_epochs=29,censored=1,horizon=35,finish=3.58796 s,wall_s=3970.35 maxrss_kb=21471540
+moe8x8b_n16,random,seed1013,onset_epoch=8,ttl_epochs=27,censored=1,horizon=35,finish=3.58782 s,wall_s=3885.46 maxrss_kb=21471740
+moe8x8b_n16,random,seed1014,onset_epoch=6,ttl_epochs=27,censored=0,horizon=35,finish=3.58861 s,wall_s=3882.20 maxrss_kb=21471968
+moe8x8b_n16,uniform,seed1000,onset_epoch=3,ttl_epochs=22,censored=0,horizon=35,finish=3.58435 s,wall_s=3208.69 maxrss_kb=21473584
+moe8x8b_n16,uniform,seed1001,onset_epoch=5,ttl_epochs=20,censored=0,horizon=35,finish=3.58535 s,wall_s=3387.68 maxrss_kb=21473164
+moe8x8b_n16,uniform,seed1002,onset_epoch=3,ttl_epochs=22,censored=0,horizon=35,finish=3.58589 s,wall_s=3450.72 maxrss_kb=21473768
+moe8x8b_n16,uniform,seed1003,onset_epoch=4,ttl_epochs=21,censored=0,horizon=35,finish=3.58861 s,wall_s=3203.23 maxrss_kb=21473092
+moe8x8b_n16,uniform,seed1004,onset_epoch=4,ttl_epochs=21,censored=0,horizon=35,finish=3.58696 s,wall_s=3501.16 maxrss_kb=21471700
+moe8x8b_n16,uniform,seed1005,onset_epoch=4,ttl_epochs=21,censored=0,horizon=35,finish=3.58595 s,wall_s=3822.78 maxrss_kb=21472780
+moe8x8b_n16,uniform,seed1006,onset_epoch=4,ttl_epochs=21,censored=0,horizon=35,finish=3.58371 s,wall_s=3931.08 maxrss_kb=21472192
+moe8x8b_n16,uniform,seed1007,onset_epoch=7,ttl_epochs=18,censored=0,horizon=35,finish=3.58831 s,wall_s=3880.85 maxrss_kb=21471816
+moe8x8b_n16,uniform,seed1008,onset_epoch=5,ttl_epochs=20,censored=0,horizon=35,finish=3.58479 s,wall_s=3861.01 maxrss_kb=21471776
+moe8x8b_n16,uniform,seed1009,onset_epoch=8,ttl_epochs=17,censored=0,horizon=35,finish=3.58988 s,wall_s=3913.16 maxrss_kb=21474156
+moe8x8b_n16,uniform,seed1010,onset_epoch=5,ttl_epochs=20,censored=0,horizon=35,finish=3.58788 s,wall_s=3888.08 maxrss_kb=21470860
+moe8x8b_n16,uniform,seed1011,onset_epoch=6,ttl_epochs=19,censored=0,horizon=35,finish=3.58763 s,wall_s=3860.49 maxrss_kb=21470824
+moe8x8b_n16,uniform,seed1012,onset_epoch=6,ttl_epochs=19,censored=0,horizon=35,finish=3.58796 s,wall_s=3916.71 maxrss_kb=21471600
+moe8x8b_n16,uniform,seed1013,onset_epoch=8,ttl_epochs=17,censored=0,horizon=35,finish=3.58782 s,wall_s=3856.46 maxrss_kb=21473600
+moe8x8b_n16,uniform,seed1014,onset_epoch=6,ttl_epochs=19,censored=0,horizon=35,finish=3.58861 s,wall_s=3855.65 maxrss_kb=21472768
+
+| trace | policy | n | median TTL (epochs) | IQR | censored | CV(log TTL, uncens.) |
+|---|---|---|---|---|---|---|
+| moe8x8b_n16 | oracle | 15 | 11 | [10, 12] | 0% | 0.06 |
+  KM moe8x8b_n16/oracle: t=8:S=0.93(n=15,d=1), t=9:S=0.80(n=14,d=2), t=10:S=0.60(n=12,d=3), t=11:S=0.40(n=9,d=3), t=12:S=0.13(n=6,d=4), t=13:S=0.07(n=2,d=1), t=14:S=0.00(n=1,d=1)
+| moe8x8b_n16 | random | 15 | 27 | [17, 29] | 33% | 0.11 |
+  KM moe8x8b_n16/random: t=11:S=0.93(n=15,d=1), t=15:S=0.87(n=14,d=1), t=16:S=0.80(n=13,d=1), t=17:S=0.73(n=12,d=1), t=18:S=0.67(n=11,d=1), t=21:S=0.60(n=10,d=1), t=22:S=0.53(n=9,d=1), t=27:S=0.47(n=8,d=1), t=28:S=0.37(n=5,d=1), t=30:S=0.19(n=2,d=1)
+| moe8x8b_n16 | uniform | 15 | 20 | [19, 21] | 0% | 0.03 |
+  KM moe8x8b_n16/uniform: t=17:S=0.87(n=15,d=2), t=18:S=0.80(n=13,d=1), t=19:S=0.60(n=12,d=3), t=20:S=0.40(n=9,d=3), t=21:S=0.13(n=6,d=4), t=22:S=0.00(n=2,d=2)
+rho(uniform,random) log-TTL [moe8x8b_n16]: 0.203 on n=10 seeds uncensored in both
+PREREG verdict [moe8x8b_n16]: OK (uniform median TTL >= 5 epochs)

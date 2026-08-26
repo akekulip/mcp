@@ -1,0 +1,25 @@
+timeout: the monitored command dumped core
+Command terminated by signal 25
+	Command being timed: "timeout 1800 ../htsim/htsim/sim/datacenter/htsim_uec -topo ../htsim/htsim/sim/datacenter/topologies/fat_tree_1024_1os.topo -goal ../traces/moe8x8b_n16/moe.bin -nodes 1024 -linkspeed 200000 -mtu 4096 -paths 1024 -strat ecmp_host -load_balancing_algo oblivious -q 1000000 -seed 1000 -end 200000 -o /dev/null -rto_min_us 300 -mcp_rank_stride 16 -mcp_loss AGG:0:0:1e-4 -mcp_epoch_us 1000000 -mcp_policy uniform -mcp_budget 20 -mcp_log probe/moe64.csv"
+	User time (seconds): 270.23
+	System time (seconds): 2.52
+	Percent of CPU this job got: 99%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:33.57
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 4937784
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 1231922
+	Voluntary context switches: 35
+	Involuntary context switches: 33740
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 409728
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
