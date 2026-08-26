@@ -1244,3 +1244,28 @@ Files read or measured this session, by path:
 
 One correction to the local knowledge base, already applied to the skill: the switch is
 `decps@10.10.54.81`, not `10.10.54.15` (H14).
+
+---
+
+## Errata from the compile sequence (2026-08-26, steps 5–7 on SDE 9.13.1 and 9.13.2)
+
+Three claims above did not survive bf-p4c; the shipped program does it differently. Kept here so
+nobody "restores" the original text.
+
+1. **§5.3 gating compare.** `if (md.rnd_attn < md.attn)` is rejected regardless of width: a gateway
+   magnitude compare needs a constant operand ("one operand … must be constant"). The gate is a
+   256-row TCAM table on `attn[15:8]` (exact) × `rnd_attn` (range) — 1/256 resolution, no gateway.
+2. **§5.5 compare-and-replace.** Same rule: `this_qdepth > worst_qdepth` cannot be a gateway
+   predicate. Shipped: `diff = worst |-| this` (saturating) and `if (diff == 0)`.
+   Also `deq_qdepth[18:3]` does not allocate in egress (mid-word slice of intrinsic metadata);
+   the tag carries `deq_qdepth[15:0]` (1-cell granularity). `deq_timedelta` is 18 bits.
+3. **§5.5 bridged metadata / egress insertion.** Not used. The tag is inserted and zeroed by
+   ingress `act_enter` (source leaf); egress only updates `worst_*` from the shim's `hop`, the
+   (port, qid) → vlink table and the intrinsic metadata. Reason: egress header writes may fill a
+   packed container from one source only (casts and constants count), and the `(path_id|epoch)`
+   pair could not be written in egress in any arrangement tried. `fabric_h` carries `path_id` (8 B).
+4. **§7.4 register constants.** A register's actions share 4 parameter slots: `a_max` is implicit
+   (`bump_cap + k_up − 1`); a stateful action with a computed index cannot be a default action.
+
+Stage budget after all eight steps: ingress 9 of 12 (the §8.1 target, fully spent), egress 3.
+
