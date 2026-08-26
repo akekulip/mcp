@@ -50,7 +50,7 @@ Usage (on the switch, with the SDE env set):
     python3 setup_skeleton.py spray hash|random|rr|sel
     python3 setup_skeleton.py fail <vlink> <pct> [drop|corrupt]
     python3 setup_skeleton.py fail-clear
-    python3 setup_skeleton.py shape <vlink> <gbps> # optional, NOT part of `up`
+    python3 setup_skeleton.py shape <vlink> <gbps>        # UNIT IS Gb/s: 0.05 = 50 Mb/s (a bare "50" means 50 Gb/s = no shaping) # optional, NOT part of `up`
     python3 setup_skeleton.py unshape <vlink>      # disarm it again
     python3 setup_skeleton.py blackhole <src_leaf> <dst_leaf> <spray>
     python3 setup_skeleton.py counters [--json]

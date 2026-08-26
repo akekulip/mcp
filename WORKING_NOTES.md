@@ -212,6 +212,20 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   csig.worst_qdepth>=4096 copy (switch clock), tau_slow = full 256-slot reg read + counter sync +
   256-slot write from the switch's control plane, >=10 reps, specificity across healthy paths.
   F1 (loss) cannot be timed until the NIC evidence producer (nic/) exists -> needs Hulk + rxe.
+- 08-27 ~02:00 H7 (F6) RESULT (p4/reports/h7-timing-F6.md, 12 reps): tau_fast as PREREG defines it
+  is 0 by construction (ingress order exceed -> attn -> gate: the evidence packet is gated under
+  the attention it just raised; t_react - t_evid <= 0 in 12/12). Back-extrapolated tau_fast
+  median 97.4 us (BCa CI 68-215 us); ramp to saturation 1.21 ms; tau_slow full-sweep epoch 88.8
+  ms (read 48.5 + counter sync 29.8 + write 9.6) -> ratio median 907, CI 452-1143 (sign test
+  12/12, p=2.4e-4); but vs a minimal 1-slot epoch (2.2 ms) ratio 22, CI 6-27 (< 100).
+  Specificity 0/13 healthy path-instances reacted. F1 not run (no NIC evidence producer).
+  DECISIONS FOR PHILIP (PREREG, post-hoc-flagged): (i) tau_fast definition — first gated sample
+  after the first *exceeding* packet is degenerate; candidates: ramp back-extrapolation, or
+  time from fault ARM (shaper on) to first raised-attention copy, or from first over-threshold
+  queue sample to attn crossing a fixed level (e.g. 2x baseline); (ii) tau_slow scope — the
+  claimed 100x must name the epoch (full sweep vs minimal); (iii) H7 needs F1 -> nic/ producer.
+  Anomalies: 0.15-0.22 % collector-side frame drops at saturation; `shape` unit is Gb/s (fixed
+  usage text). Chip idle, attn 4096, PID 26316.
 
 ## Next action
 1. Vision/Hulk: check Netronome SDK, rxe, kernel, perftest, DPDK availability (M4 prep).
