@@ -125,6 +125,10 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   rho(uniform,random) = 0.20 (n=10). §10 verdict OK mechanically, but H27/H-order caveats stand:
   do NOT freeze §14 until Philip decides TTL definition + faulty-link randomization.
   Summaries: sim/gate/results_real_summary.txt (2 %), results_real_b41_summary.txt (4 %).
+- 2026-08-27 ~00:15 "go": decisions taken = TTL_obs (from first observable drop, via counters) as the
+  §10 rule metric + from-onset reported; faulty uplink randomized per seed (seed<N>.fault);
+  point frozen at 4 %, loss 1e-4, 100 ms. PREREG §14 amendment v1.2 appended. v1.2 GATE LAUNCHED:
+  Vision seeds 1000-1019 (10-wide), Hulk 1020-1029 (5-wide), OUT=results_real_v12 (~6.5 h).
 
 ## Next action
 1. Vision/Hulk: check Netronome SDK, rxe, kernel, perftest, DPDK availability (M4 prep).

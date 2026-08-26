@@ -16,8 +16,20 @@ import sys
 from pathlib import Path
 
 
-def read_run(csv_path: Path, onset_us: float, epoch_us: float):
-    onset_epoch = int(onset_us // epoch_us)
+def first_drop_epoch(counters_path: Path, link: str):
+    """First epoch whose cumulative drop count on `link` is > 0 (the first *observable* fault epoch)."""
+    if not counters_path.exists() or not link:
+        return None
+    with open(counters_path) as f:
+        for row in csv.DictReader(f):
+            if row["link_name"] == link and int(row["drop"]) > 0:
+                return int(row["epoch"])
+    return None
+
+
+def read_run(csv_path: Path, onset_us: float, epoch_us: float, onset_epoch=None):
+    if onset_epoch is None:
+        onset_epoch = int(onset_us // epoch_us)
     horizon = 0
     ttl = None
     with open(csv_path) as f:
@@ -79,22 +91,37 @@ def main():
     if not root.is_dir():
         sys.exit(f"no results dir {root}")
 
-    per = {}  # (trace, policy) -> {seed: (ttl, censored)}
+    per = {}  # (trace, policy) -> {seed: (ttl, censored)}   TTL from onset
+    per_obs = {}  # same, TTL from the first observable drop (needs counters + .fault)
     for trace_dir in sorted(p for p in root.iterdir() if p.is_dir()):
         for pol_dir in sorted(p for p in trace_dir.iterdir() if p.is_dir()):
-            for f in sorted(pol_dir.glob("seed*.csv")):
+            for f in sorted(p for p in pol_dir.glob("seed*.csv") if not p.name.endswith(".counters.csv")):
                 onset_file = f.with_suffix(".onset")
                 onset_us = float(onset_file.read_text().strip()) * 1000.0 if onset_file.exists() else 0.0
                 ttl, cens, hor, oe = read_run(f, onset_us, a.epoch_us)
+                fault_file = f.with_suffix(".fault")
+                link = fault_file.read_text().strip() if fault_file.exists() else ""
+                fde = first_drop_epoch(f.with_name(f.stem + ".counters.csv"), link)
+                if fde is not None:
+                    ttl_obs, cens_obs, _, _ = read_run(f, onset_us, a.epoch_us, onset_epoch=fde)
+                else:
+                    ttl_obs, cens_obs = ttl, cens   # no counters: fall back to from-onset
                 fin = f.with_suffix(".finish")
                 fin_s = fin.read_text().strip().split("(")[-1].rstrip(")") if fin.exists() else "?"
                 tim = f.with_suffix(".time")
                 wall = tim.read_text().strip() if tim.exists() else ""
                 per.setdefault((trace_dir.name, pol_dir.name), {})[f.stem] = (ttl, cens)
-                print(f"{trace_dir.name},{pol_dir.name},{f.stem},onset_epoch={oe},ttl_epochs={ttl},"
-                      f"censored={int(cens)},horizon={hor},finish={fin_s},{wall}")
+                per_obs.setdefault((trace_dir.name, pol_dir.name), {})[f.stem] = (ttl_obs, cens_obs)
+                print(f"{trace_dir.name},{pol_dir.name},{f.stem},fault={link},onset_epoch={oe},first_drop_epoch={fde},"
+                      f"ttl_epochs={ttl},censored={int(cens)},ttl_obs={ttl_obs},censored_obs={int(cens_obs)},"
+                      f"horizon={hor},finish={fin_s},{wall}")
 
-    print("\n| trace | policy | n | median TTL (epochs) | IQR | censored | CV(log TTL, uncens.) |")
+    for label, per_x in (("from onset", per), ("from first observable drop (TTL_obs)", per_obs)):
+        summarize(per_x, label, a)
+
+
+def summarize(per, label, a):
+    print(f"\n### TTL {label}\n| trace | policy | n | median TTL (epochs) | IQR | censored | CV(log TTL, uncens.) |")
     print("|---|---|---|---|---|---|---|")
     rows = {}
     for (trace, pol), d in sorted(per.items()):
@@ -130,7 +157,7 @@ def main():
             v = "OK (uniform median TTL >= 5 epochs)"
         else:
             v = "BORDERLINE (uniform median TTL in (2,5) epochs): tighten one step"
-        print(f"PREREG verdict [{trace}]: {v}")
+        print(f"PREREG verdict [{trace}] ({label}): {v}")
 
 
 if __name__ == "__main__":

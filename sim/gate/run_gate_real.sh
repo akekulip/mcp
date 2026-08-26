@@ -18,7 +18,9 @@ STRIDE=${STRIDE:-16}                              # GOAL rank -> host stride: 64
 END_MS=${END_MS:-200000}                          # upper bound only; a run ends when the trace finishes
 EPOCH_US=${EPOCH_US:-100000}                      # 100 ms measurement epochs (PREREG says 1 s; see WORKING_NOTES 2026-08-26)
 BUDGET=${BUDGET:-20}                              # 2 % of 1024 uplinks
-LOSS=${LOSS:-AGG:0:0:1e-4}                        # F1: silent 1e-4 Bernoulli loss on one spine uplink
+LOSS_P=${LOSS_P:-1e-4}                            # F1: silent Bernoulli loss probability on one spine uplink
+LOSS=${LOSS:-}                                    # fixed link "AGG:<agg>:<core>:<p>"; empty = randomize the uplink per seed
+NAGG=${NAGG:-128}                                 # fat_tree_1024_1os: 128 agg switches, each on 8 cores (core = agg%8 + 8j)
 ONSET_LO_MS=${ONSET_LO_MS:-300}                   # F1 onset ~ U[lo,hi] ms per seed (PREREG U[10,30] s of 120 s, scaled to the 3.5 s iteration)
 ONSET_HI_MS=${ONSET_HI_MS:-900}
 POLICIES=${POLICIES:-"uniform random oracle"}
@@ -39,11 +41,17 @@ one_run() {
     # deterministic per-seed onset draw (recorded next to the result)
     local onset; onset=$(python3 -c "import random; r=random.Random($seed ^ 0x4d43); print(round(r.uniform($ONSET_LO_MS,$ONSET_HI_MS),1))")
     echo "$onset" > "$out/seed$seed.onset"
+    # faulty uplink: fixed via LOSS, else a deterministic per-seed draw over the agg->core uplinks
+    local loss=$LOSS
+    if [ -z "$loss" ]; then
+        loss=$(python3 -c "import random; r=random.Random($seed ^ 0x4641); a=r.randrange($NAGG); c=a%8+8*r.randrange(8); print(f'AGG:{a}:{c}:$LOSS_P')")
+    fi
+    echo "$loss" | awk -F: '{print "US"$2"->CS"$3}' > "$out/seed$seed.fault"
     ( ulimit -f 4000000; /usr/bin/time -f "wall_s=%e maxrss_kb=%M" -o "$out/seed$seed.time" \
       timeout "$TIMEOUT" "$H/htsim_uec" -topo "$TOPO" -goal "$BIN" -nodes "$NODES" \
         -linkspeed "$LINKSPEED" -mtu 4096 -paths "$NODES" -strat ecmp_host -load_balancing_algo oblivious \
         -q 1000000 -seed "$seed" -end "$END_MS" -o /dev/null -rto_min_us "$RTO_MIN_US" \
-        -mcp_rank_stride "$STRIDE" -mcp_loss "$LOSS" -mcp_loss_onset_ms "$onset" -mcp_epoch_us "$EPOCH_US" \
+        -mcp_rank_stride "$STRIDE" -mcp_loss "$loss" -mcp_loss_onset_ms "$onset" -mcp_epoch_us "$EPOCH_US" \
         -mcp_policy "$policy" -mcp_budget "$BUDGET" -mcp_log "$out/seed$seed.csv.tmp" -mcp_counters "$out/seed$seed.counters.csv" \
         > "$out/seed$seed.log" 2>&1 ) || true
     if grep -q "Finished all" "$out/seed$seed.log"; then
@@ -57,7 +65,7 @@ one_run() {
         echo "STALLED $TRACE/$policy/seed$seed"
     fi
 }
-export -f one_run; export OUT TRACE BIN TOPO NODES LINKSPEED STRIDE END_MS EPOCH_US BUDGET LOSS ONSET_LO_MS ONSET_HI_MS RTO_MIN_US TIMEOUT H
+export -f one_run; export OUT TRACE BIN TOPO NODES LINKSPEED STRIDE END_MS EPOCH_US BUDGET LOSS LOSS_P NAGG ONSET_LO_MS ONSET_HI_MS RTO_MIN_US TIMEOUT H
 
 { for p in $POLICIES; do for s in $SEEDS; do echo "$p $s"; done; done; } \
   | xargs -P "$JOBS" -L 1 bash -c 'one_run "$@"' _

@@ -733,6 +733,32 @@ Every reported number is traceable to (config, seed, commit). The following are 
 | 2026-08-25 | §9.2 | (b) now the fast-loop reaction-time measurement; on-silicon MCP vs B7/B7' added to (d); "3-level" and "testbed" excluded from hardware claims; NIC evidence channels on hardware stated (RTT via host XDP; PSN gaps reorder-confounded; no ECN) | PRE-REVIEW R2, §3, §4 |
 | 2026-08-25 | §9.2, §12, §13 | rxe-under-spraying pre-test (NAK/retx floor, all-reduce completion) made a prerequisite for any NIC-evidence claim from hardware (HURDLES H20) | PRE-REVIEW R2 |
 | 2026-08-25 | §11 | Run counts updated for the added arms and blocks (≈ 18,400 runs) | consequence of the above |
+| 2026-08-26 | §10 (v1.2) | Gate as run: ATLAHS MoE8x8B-64 trace, 1024-NIC htsim fat tree, 100 ms epoch / one-iteration horizon, budget 4 % after 2 % was TOO HARD, faulty uplink randomized per seed, TTL_obs from first observable drop (H27), probe evidence window and transport RTO stated | see Amendment v1.2 below |
 
 Amendments are appended only. An amendment after the corresponding block has started running
 is flagged "post-hoc" in the paper.
+
+### Amendment v1.2 — 2026-08-26 — §10 gate experiment as actually run (gate rehearsal + real gate)
+
+**Reason.** The §10 specification could not be executed as written: no "NeMo Mixtral" Chakra
+trace exists in the ATLAHS collection; the available Mixtral-class GOAL traces are one training
+iteration long (3.5 s), so a 120 s horizon with a 1 s epoch is not reachable; and htsim's
+memory (21.5 GB per run, HURDLES H26) bounds the fleet width. Two confounds surfaced in the
+first runs and are corrected here (HURDLES H27 and the sweep-order artifact).
+
+| §10 item | v1.1 text | v1.2 (as run) |
+|---|---|---|
+| Topology | k = 16 fat tree, 1024 NICs | htsim `fat_tree_1024_1os.topo`: 1024 NICs, 16 pods × 8 agg × 8 core, 1024 agg→core uplinks, 200 G links |
+| Workload | NeMo Mixtral Chakra trace (Zenodo) | ATLAHS `MoE8x8B_N16_GPU64_TP1_PP8_DP8_EP1_7B_BS32` GOAL trace (`moe.bin`, 523 239 908 B, SHA256 `b00e6c76…17b7f7`, `sim/traces/moe8x8b_n16/SOURCE`); 64 ranks spread over all 16 pods with rank stride 16; one iteration = 3.52 s |
+| Fault | F1 on one spine uplink, onset U[10, 30] s | F1 silent 1e-4 Bernoulli loss on **one agg→core uplink drawn per seed** (deterministic from the seed; recorded in `seed<N>.fault`), onset U[0.3, 0.9] s per seed (`seed<N>.onset`) — same 8–25 % position in the horizon as v1.1 |
+| Arms / budget | B3, B9, B12 at B = 2 % | same arms; **B = 4 % (41 of 1024 uplinks)** after the v1.1 point (2 %) was TOO HARD by the §10 rule (uniform censored 15/15 — its 52-epoch sweep exceeds the horizon) |
+| Epoch / horizon | 1 s / 120 s | **100 ms / one iteration (≈ 36 epochs)** |
+| Seeds | 30 (1000–1029) | unchanged |
+| TTL definition | from fault onset | reported **both** from onset and from the first *observable* drop on the faulty link (`TTL_obs`, from the per-epoch link counters); the abort/tighten rule is applied to `TTL_obs`, because the MoE iteration is compute-dominated and the fabric is idle outside three communication bursts (896 of 1024 uplinks carry no packets in epoch 10), so from-onset TTL measures the collective schedule, not the policy (H27) |
+| Probe evidence window | (unspecified) | a probed link's drop/tx ratio is computed over the interval since that link was last probed; verdict = argmax over the probed set if ratio > 1e-5 |
+| Transport | (unspecified) | UEC, per-packet oblivious spraying, min RTO 300 µs (`-rto_min_us`; H25 — the queue-derived default disables retransmission at the gate's queue size) |
+| Outputs | as v1.1 | as v1.1 plus `TTL_obs`; overhead units deferred to the main block |
+
+**Evidence so far (n = 15 per arm at 4 %, faulty link fixed at US0→CS0, from-onset TTL):**
+oracle 11 [10, 12] epochs, random 27 [17, 29] (33 % censored), uniform 20 [19, 21] (0 % censored),
+ρ(B3, B9) = 0.20. The v1.2 run (randomized link, `TTL_obs`) supersedes these numbers for §6.5.
