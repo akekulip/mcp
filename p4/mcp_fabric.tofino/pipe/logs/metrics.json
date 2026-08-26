@@ -1,43 +1,43 @@
 {
     "program_name": "mcp_fabric.p4", 
-    "build_date": "Tue Aug 25 22:06:19 2026", 
-    "run_id": "ea303d583d7b44a3", 
+    "build_date": "Tue Aug 25 22:16:50 2026", 
+    "run_id": "54887098b56e4e28", 
     "compiler_version": "9.13.1", 
     "schema_version": "1.1.0", 
     "target": "tofino", 
-    "compilation_time": "2.3011600971221924", 
+    "compilation_time": "4.028042793273926", 
     "phv": {
         "normal": [
             {
                 "bit_width": 8, 
-                "containers_occupied": 4, 
-                "bits_occupied": 16, 
+                "containers_occupied": 7, 
+                "bits_occupied": 41, 
                 "bits_overlaid": 3
             }, 
             {
                 "bit_width": 16, 
-                "containers_occupied": 2, 
-                "bits_occupied": 19, 
-                "bits_overlaid": 0
+                "containers_occupied": 17, 
+                "bits_occupied": 251, 
+                "bits_overlaid": 9
             }, 
             {
                 "bit_width": 32, 
-                "containers_occupied": 0, 
-                "bits_occupied": 0, 
+                "containers_occupied": 4, 
+                "bits_occupied": 128, 
                 "bits_overlaid": 0
             }
         ], 
         "tagalong": [
             {
                 "bit_width": 8, 
-                "containers_occupied": 15, 
-                "bits_occupied": 120, 
+                "containers_occupied": 11, 
+                "bits_occupied": 88, 
                 "bits_overlaid": 0
             }, 
             {
                 "bit_width": 16, 
-                "containers_occupied": 29, 
-                "bits_occupied": 464, 
+                "containers_occupied": 21, 
+                "bits_occupied": 336, 
                 "bits_overlaid": 32
             }, 
             {
@@ -50,24 +50,24 @@
     }, 
     "parser": {
         "ingress": {
-            "tcam_rows": 14
+            "tcam_rows": 15
         }, 
         "egress": {
             "tcam_rows": 12
         }
     }, 
     "mau": {
-        "srams": 0, 
-        "tcams": 0, 
-        "map_rams": 0, 
-        "logical_tables": 0, 
-        "action_bus_bytes": 0, 
-        "exact_crossbar_bytes": 0, 
-        "ternary_crossbar_bytes": 0, 
+        "srams": 35, 
+        "tcams": 2, 
+        "map_rams": 11, 
+        "logical_tables": 11, 
+        "action_bus_bytes": 33, 
+        "exact_crossbar_bytes": 47, 
+        "ternary_crossbar_bytes": 6, 
         "latency": [
             {
                 "gress": "ingress", 
-                "cycles": 54
+                "cycles": 149
             }, 
             {
                 "gress": "egress", 
@@ -77,7 +77,7 @@
         "power": [
             {
                 "gress": "ingress", 
-                "estimate": "0.0"
+                "estimate": "3.59826599532"
             }, 
             {
                 "gress": "egress", 

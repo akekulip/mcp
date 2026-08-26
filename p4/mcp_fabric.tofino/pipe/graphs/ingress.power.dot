@@ -1,3 +1,27 @@
 digraph ingress {
 0 [label="$root" shape=box color="black"];
+6 [label="tbl_dst_leaf_0" shape=box color="black"];
+10 [label="tbl_fail_0" shape=box color="black"];
+11 [label="tbl_final_0" shape=box color="black"];
+4 [label="tbl_mcp_fabric533" shape=box color="black"];
+2 [label="tbl_mcp_fabric540" shape=box color="black"];
+3 [label="tbl_mcp_fabric546" shape=box color="black"];
+5 [label="tbl_mcp_fabric550" shape=box color="black"];
+1 [label="tbl_port_role_0" shape=box color="black"];
+8 [label="tbl_spray_mode_0" shape=box color="black"];
+7 [label="tbl_spray_sel_0" shape=box color="black"];
+9 [label="tbl_vlink_0" shape=box color="black"];
+0-> 1 [label="$start" color="black"];
+6-> 9 [label="set_dst" color="black"];
+10-> 11 [label="inj_drop" color="black"];
+2-> 3 [label="mcp_fabric540" color="black"];
+2-> 4 [label="$true" color="black"];
+3-> 5 [label="mcp_fabric546" color="black"];
+3-> 6 [label="$false" color="black"];
+5-> 7 [label="mcp_fabric550" color="black"];
+1-> 2 [label="set_role" color="black"];
+8-> 6 [label="spray_from_random" color="black"];
+7-> 8 [label="spray_member" color="black"];
+9-> 10 [label="to_loop" color="black"];
+9-> 11 [label="$false" color="black"];
 }

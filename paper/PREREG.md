@@ -1,8 +1,9 @@
 # PREREG — Pre-registered evaluation protocol
 
 **Project:** MCP — "The data plane decides what to measure"
-**Version:** 1.0, 2026-08-25 (frozen at commit `<fill at freeze>`; any later change is an
-amendment appended in §14 with date and reason, never an edit in place)
+**Version:** 1.1, 2026-08-25 (v1.0 frozen 2026-08-25 pre-review; v1.1 amends it in place in
+response to `docs/PRE-REVIEW.md` before any block has run — every change is logged in §14. From
+v1.1 on, changes are amendments appended in §14 with date and reason, never edits in place)
 **Plan of record:** `~/.claude/plans/we-have-to-do-spicy-patterson.md`; hurdle register `HURDLES.md`
 **Status of the numbers herein:** every claim below is a commitment, not a result. No experiment
 in §10–§11 has been run at freeze time except as stated in §14.
@@ -22,7 +23,18 @@ equal measurement budget, while keeping collective completion time (CCT) overhea
 fixed-policy baseline at equal budget; (b) H6 fails — CCT overhead exceeds 1 %; or (c) H3 and
 H4 both fail — neither shadow prices nor context contribute, in which case the two-timescale
 design is not what produces the benefit and the paper must be reframed as a fast-loop-only
-result. Outcomes (a)–(c) are reported, not suppressed.
+result; or (d) **fast-loop falsification condition (PRE-REVIEW R1):** ablation A7 (slow-loop
+only, attention gating disabled) is within the 95 % CI of full MCP on H1 — in which case the
+data-plane loop is *not* the contribution, the paper may not claim that "the data plane
+decides", and the contribution is restated as a controller-side budgeted scheduler. The same
+verdict follows if H7 fails on silicon (the gate does not react to a loss step without
+controller involvement, or reacts no faster than the slow loop). Outcomes (a)–(d) are reported,
+not suppressed.
+
+**Claim (2) conditionality (PRE-REVIEW §4).** The plan's claim (2) — localization on *lossy*
+fabrics — is asserted only if MCP beats B7' SprayCheck-L (baseline-loss-aware) on H1 at every
+non-zero level of the background-loss sweep of §4.2; beating only as-published SprayCheck (B7)
+at non-zero background loss is a straw-man win and is reported as such.
 
 **What is not claimed.** GPU-scale CCT numbers, lossless (PFC/DCQCN) fabrics, hardware RDMA,
 and multi-switch skew are outside the claim set (§9).
@@ -33,21 +45,26 @@ and multi-switch skew are outside the claim set (§9).
 
 All comparisons are at *equal measurement budget* (§2.3) after *equal tuning budget* (§3.2).
 Primary hypothesis is H1; the rest are secondary. Family-wise error is controlled with Holm's
-step-down over the six hypotheses at α = 0.05 (§6.4). Effect sizes are reported for every
-hypothesis regardless of significance.
+step-down over the six *tested* hypotheses {H1, H2, H3, H4, H6, H7} at α = 0.05 (§6.4); H5 is
+descriptive and outside the family (amended v1.1). Effect sizes are reported for every
+hypothesis regardless of significance. The "best baseline" set for H1 excludes any arm reported
+as "infeasible at $B$" at the operating point in question (in practice B1 at $B$ < its fixed
+tag overhead); an infeasible arm cannot be the best baseline at a budget it cannot meet.
 
 | ID | Hypothesis (H1 = alternative) | Pre-specified success criterion | Primary test | Effect size |
 |---|---|---|---|---|
 | **H1** Faster localization | MCP's time-to-localize (TTL) is lower than every fixed-policy baseline at equal budget | Median TTL reduction ≥ 30 % vs the *best* baseline on the fault catalogue (§5), AND Holm-adjusted p < 0.05, AND 95 % bootstrap CI of the median ratio excludes 0.70 from above | Log-rank (Mantel–Cox) on right-censored TTL, stratified by fault type; confirmatory paired Wilcoxon on log-TTL per seed | Hazard ratio with 95 % CI; Cliff's δ on uncensored pairs; median ratio with BCa CI |
-| **H2** Pareto dominance | On the (F1, overhead) plane, MCP's curve dominates every baseline's curve | For every budget level in the sweep {0.5, 1, 2, 5, 10, 20} %, MCP's localization F1 ≥ best baseline's F1 at ≤ its overhead in each of the five overhead units of §2.3 (weak dominance), with strict dominance in ≥ 4 of 6 budget levels | Per-budget-level paired comparison of F1 (Wilcoxon signed-rank across seeds); dominance declared only if no unit shows MCP overhead higher than baseline by more than the CI | Hypervolume gain of the dominated region (normalized), with bootstrap CI |
+| **H2** Pareto dominance (restated v1.1, PRE-REVIEW R3) | On the two-dimensional plane (localization F1, $\beta_{probe}+\beta_{tag}$) MCP's curve Pareto-dominates every baseline's curve, with all arms sharing the common inference layer of §3.3 | For every budget level in the sweep {0.5, 1, 2, 5, 10, 20} %, MCP's F1 ≥ best baseline's F1 at ≤ its $\beta_{probe}+\beta_{tag}$ (weak dominance), with strict dominance (F1 higher by more than the paired CI, or bandwidth lower by more than the CI at equal F1) in ≥ 4 of 6 budget levels. SRAM/stages, NIC reads/s and host CPU are **side constraints, reported not tested**: each arm's value is tabulated next to its point, and any arm that exceeds the §2.3 side-constraint cap is marked on the plot but not excluded. Zero-SRAM arms (B3, B11) therefore no longer make H2 unpassable | Per-budget-level paired comparison of F1 (Wilcoxon signed-rank across seeds) at matched $\beta_{probe}+\beta_{tag}$ | Hypervolume gain of the dominated region on the 2-D plane (normalized), with bootstrap CI |
 | **H3** Shadow prices are necessary | Removing shadow prices (ablation A1) degrades TTL or violates budgets | Ablation A1 has median TTL ≥ 15 % higher than full MCP OR budget-violation rate ≥ 5× full MCP, Holm-adjusted p < 0.05 | Log-rank (TTL); two-proportion z-test on violation rate | HR; risk ratio of violation |
 | **H4** Context is necessary | Removing the context vector (ablation A2) degrades TTL under non-stationary workloads | On the held-out parallelism configurations (§8.3), A2 median TTL ≥ 15 % higher than full MCP, Holm-adjusted p < 0.05 | Log-rank on TTL, stratified by parallelism config | HR; Cliff's δ |
-| **H5** Near-oracle | MCP attains ≥ 70 % of the oracle's regret-free reward | Cumulative regret vs the *dynamic* oracle (§8.2) ≤ 30 % of the oracle's cumulative reward over the run, averaged over seeds, with the upper 95 % CI bound also ≤ 30 % | One-sided bootstrap test on mean normalized regret | Normalized regret with CI |
-| **H6** Negligible CCT overhead | MCP's measurement traffic and actions do not slow the collective | CCT overhead ≤ 1 % (median over seeds and traces) relative to the no-measurement run, AND p99 straggler lag overhead ≤ 2 %, with the upper 95 % CI bound ≤ 1.5 % and ≤ 3 % respectively | Equivalence test (TOST) with margin 1 % on log-CCT ratio | Median CCT ratio with CI |
+| **H5** Near-oracle — **DESCRIPTIVE (demoted v1.1, PRE-REVIEW §4)** | MCP's cumulative regret against the *dynamic* oracle (§8.2) is small relative to the oracle's cumulative reward | No pass/fail threshold (the former "≥ 70 % of oracle" bar was arbitrary). Normalized regret is reported with its 95 % BCa CI, alongside the static-oracle gap, for each learner of §8.1 | None (not in the Holm family) | Normalized regret with CI |
+| **H6** Simulated CCT overhead (renamed v1.1, PRE-REVIEW §3) | In the htsim simulation, MCP's measurement traffic and actions do not slow the collective | Simulated CCT overhead ≤ 1 % (median over seeds and traces) relative to the no-measurement run, AND p99 straggler lag overhead ≤ 2 %, with the upper 95 % CI bound ≤ 1.5 % and ≤ 3 % respectively. Stated as a *simulation* result throughout the paper; no GPU-scale CCT claim is made and the near-tautological character of the test at $B$ ≤ 2 % is acknowledged in the text | Equivalence test (TOST) with margin 1 % on log-CCT ratio | Median CCT ratio with CI |
+| **H7** Fast-loop reaction latency (added v1.1, PRE-REVIEW R1) | On Tofino silicon, the attention gate reacts to an injected loss step on a sprayed path without controller involvement, in microseconds, and at least 100× faster than the slow loop's decision→install latency | **Measurement.** Fault F1 ★ (or F6 ★) is switched on at a known instant on one virtual link while the controller's write path to `reg_attn`/`reg_thresh` is *frozen* (bfrt writes disabled for the run). Reaction time $\tau_{fast}$ = time from the first dropped packet on the faulty path to the first gated mirror / tag emitted for that path, both timestamped by the switch's own ingress global timestamp (mirrored copies carry `ig_intr_md.ingress_mac_tstamp`; the fault onset is timestamped by the packet generator's TX timestamp cross-calibrated to the switch clock via a pre-run loopback, residual ≤ 1 µs). The slow-loop install latency $\tau_{slow}$ = time from the controller's epoch tick that first observes the fault to the completed bfrt table/register write, measured by the same clock. **Success:** median $\tau_{fast}$ ≤ 100 µs across ≥ 10 reps × 2 faults, AND the 95 % BCa CI of the paired ratio $\tau_{slow}/\tau_{fast}$ lies entirely above 100, AND in the frozen-controller runs the gate fires on the faulty path but not on ≥ 90 % of healthy paths (specificity check). **Failure:** any of the above not met, or no gated sample within $T$ when the controller is frozen (the gate is then shown to depend on the controller, and §0(d) applies) | One-sample sign test on $\log_{10}(\tau_{slow}/\tau_{fast}) > 2$ over reps; two-proportion z-test faulty vs healthy paths for specificity | Median $\tau_{fast}$ and $\tau_{slow}$ with CIs; paired ratio with BCa CI |
 
 Falsification of H1 by the *best* baseline is a stricter bar than by the *mean* baseline; we
 commit to the stricter one. If a baseline ties MCP within CI on H1, the paper reports it as a
-tie and the contribution shifts to H2–H4.
+tie and the contribution shifts to H2–H4 and H7. H7 is the only hypothesis whose primary
+evidence is Tier-2 (silicon); Tier-1 cannot test it (§9.2).
 
 ---
 
@@ -91,13 +108,17 @@ Every arm's overhead is reported in all five units so that "equal budget" is che
 | Unit | Definition | Symbol |
 |---|---|---|
 | Probe bytes | Bytes of injected probe packets on the fabric per second, summed over all links, divided by total fabric link capacity | $\beta_{probe}$, fraction of capacity |
-| INT/tag bytes | Bytes of INT headers, CSIG-style tags, or mirrored/truncated copies added to production packets per second, same normalization | $\beta_{tag}$, fraction of capacity |
+| INT/tag/evidence bytes | Bytes of INT headers, CSIG-style tags, mirrored/truncated copies, **NIC evidence packets** (the NIC→switch reflected per-path evidence of the fast loop, and any NIC→controller evidence export in B11), and **mirror bytes on the collector port** — counted wherever they traverse a fabric link *or* a collector link, per second, same normalization (amended v1.1, PRE-REVIEW R3) | $\beta_{tag}$, fraction of capacity |
 | Tofino SRAM and stages | SRAM (in 16 KB units) and MAU stages consumed by the measurement primitives, from the bf-p4c resource report (`*.resources.json`); Tier-1 uses the cost model calibrated from that report | SRAM units; stages |
 | NIC reads/s | Counter/register reads issued to the NIC per second (Agilio: XDP map lookups or firmware counter reads; simulated equivalently) | reads/s |
 | Host CPU | Fraction of one core consumed by the collector/controller per 1k monitored endpoints, measured with `perf stat` (Tier-2) or by the calibrated cost model (Tier-1) | core-fraction |
 
-**Budget.** The "measurement budget" $B$ that all arms share is defined as $\beta_{probe} + \beta_{tag} \le B$ (bandwidth), with SRAM/stages/NIC-reads/CPU reported as side constraints
-that no arm may exceed by more than 10 % of MCP's usage. Sweep values: $B \in$
+**Budget.** The "measurement budget" $B$ that all arms share is defined as $\beta_{probe} + \beta_{tag} \le B$ (bandwidth), where $\beta_{tag}$ **includes NIC evidence packets and
+collector-port mirror bytes** as defined above, so that no arm can move cost off-budget by
+routing it through the NIC or the collector link. Collector-link bytes are normalized by the
+same fabric capacity so that a collector port is not "free" capacity. SRAM/stages/NIC-reads/CPU
+are reported as side constraints that no arm may exceed by more than 10 % of MCP's usage (for
+H1); for H2 they are reported next to each point and not tested (§1). Sweep values: $B \in$
 {0.5, 1, 2, 5, 10, 20} % of fabric capacity. Default $B$ = 2 %.
 
 **Budget-violation rate** = fraction of epochs in which any resource exceeds its cap by more
@@ -136,18 +157,20 @@ the same budget accounting. "Decides" = what the arm chooses each epoch or per p
 
 | # | Baseline | Stands in for | What it decides | Tunable knobs | Notes |
 |---|---|---|---|---|---|
-| B1 | Fixed INT, all flows | HPCC-style always-on INT | Nothing; every packet carries a tag | Tag size (8/12 B); which fields | Overhead is what it is; will exceed small budgets and is then reported as "infeasible at $B$" rather than silently scaled |
+| B1 | Fixed INT, all flows | HPCC-style always-on INT | Nothing; every packet carries a tag | Tag size (8/12 B); which fields | Overhead is what it is; will exceed small budgets and is then reported as "infeasible at $B$" rather than silently scaled. **An infeasible B1 is excluded from the H1 "best baseline" set at that $B$** (v1.1, PRE-REVIEW §4); it is still plotted on H2 |
 | B2 | INT 1/N | Sampled INT | Nothing adaptive; tags every N-th packet per port | $N$ (set so $\beta_{tag} = B$) | Sampling is uniform over packets, hence proportional to load |
 | B3 | Uniform probe mesh | R-Pingmesh / Hostmesh | Nothing adaptive; every NIC probes a fixed pinglist at a fixed rate | Probe rate (set to $B$), payload (50 B as R-Pingmesh), timeout (500 ms as R-Pingmesh), pinglist density, anomaly threshold | Localization by probe-path intersection as in Pingmesh |
 | B4 | Sketch-only | Switch sketch telemetry | Nothing adaptive; per-port count/loss sketch exported every epoch | Sketch width/depth (within SRAM cap), export epoch | No probes, no tags |
-| B5 | Rule-based adaptive sampling | CPRANT / ChameleMon stand-in | Raises sampling rate on ports whose sketch deviation exceeds a threshold, lowers elsewhere, controller-side at epoch cadence | Deviation threshold, up/down multipliers, min/max rate, epoch | The strongest "adaptive but not learned" comparator |
+| B5 | Rule-based threshold-adaptive sampling | ChameleMon-style stand-in (renamed v1.1: CPRANT's mechanism is not verified, so its name is not attached to this arm) | Raises sampling rate on ports whose sketch deviation exceeds a threshold, lowers elsewhere, controller-side at epoch cadence | Deviation threshold, up/down multipliers, min/max rate, epoch | The strongest "adaptive but not learned" comparator |
 | B6 | FlowPulse | FlowPulse (Technion) | Per-iteration symmetry check of collective flow pairs; flags asymmetric pairs | Asymmetry threshold, window | Uses the iteration clock; no budget knob, overhead reported |
-| B7 | SprayCheck round-robin | SprayCheck | Round-robins one prioritized flow across spray paths on a fixed schedule; localizes by path-set difference | Schedule period, number of paths per round | Extended to 3-level topologies and lossy fabrics exactly as its paper says it does not support, to test claim (2) of the plan |
+| B7 | SprayCheck round-robin (as-published) | SprayCheck (arXiv 2605.03702) | Round-robins one prioritized flow across spray paths on a fixed schedule; flags a path on *any* loss (as-published threshold, designed for a lossless fabric) | Schedule period, number of paths per round | Extended to 3-level topologies and lossy fabrics exactly as its paper says it does not support. On lossy fabrics this arm is expected to false-alarm; it is kept so the reader sees the as-published behaviour, but it is **not** the arm claim (2) must beat. **Run in both tiers** (v1.1, PRE-REVIEW R2) |
+| B7' | SprayCheck-L (baseline-loss-aware) | SprayCheck, made fair for lossy fabrics (added v1.1, PRE-REVIEW §4) | As B7, but the per-path loss threshold is set relative to an estimated background loss rate: over the first $M$ collective iterations of the run (no-fault warm-up) it estimates the fabric-wide loss rate $\hat\ell_0$ and its per-path spread, then flags a path only when its measured loss exceeds $\hat\ell_0$ by $z$ standard errors; localizes by path-set difference | $M$ (warm-up iterations), $z$, schedule period, paths per round | The arm claim (2) must beat at every non-zero background-loss level (§0, §4.2). **Run in both tiers** |
 | B8 | DynATOS+-style scheduler | DynATOS/DynATOS+ | Time-divides switch resources among measurement tasks to meet per-task accuracy targets, controller-side | Accuracy targets, epoch, task set | No spraying awareness |
 | B9 | Random at equal budget | — | Picks a random subset of paths/ports to measure each epoch, spending exactly $B$ | Subset size (from $B$), epoch | Sanity floor |
 | B10 | Round-robin at equal budget | — | Cycles through paths/ports in fixed order, spending exactly $B$ | Cycle order, epoch | Sanity floor; also the "no learning" ablation of the slow loop |
-| B11 | NIC-only | MetaRoCE-like | Per-path RTT/ECN/PSN-gap counters on every NIC, always on; localizes by per-path statistics only, no switch involvement | Per-path window, anomaly threshold, number of paths tracked | Tests claim (3): is the NIC sufficient? |
+| B11 | NIC-only, **aggregating** (restated v1.1, PRE-REVIEW §4) | NIC-side per-path telemetry pooled at a controller, as Meta's fleet does | Per-path RTT/ECN/PSN-gap counters on every NIC, always on; each NIC exports per-path evidence to a controller every epoch; the controller **pools evidence per path across all NICs** (a path's statistic is the union of all NICs' samples on it) and localizes on the pooled statistic through the common inference layer of §3.3; **no switch state at all** | Per-path window, number of paths tracked, export epoch | Tests claim (3): is the NIC alone, with fleet-wide aggregation, sufficient? A non-aggregating per-NIC variant is *not* run — it would be a straw man. Evidence export bytes count in $\beta_{tag}$ (§2.3). On hardware it is **not** called "MetaRoCE-like": it has RTT (host XDP) and reorder-confounded PSN gaps only, no ECN (§9.2) |
 | B12 | Oracle | — | Knows the injected fault and measures exactly the elements needed; upper bound on what the budget can buy | None | Used for H5 regret and as the ceiling on all plots; the *dynamic* oracle re-solves each epoch (§8.2) |
+| B13 | OPP-style probe duplication (added v1.1, PRE-REVIEW §2 housekeeping) | OmniPath Ping (SIGCOMM'26) — **reimplemented from the published abstract only; the full paper was not available at v1.1** | Each NIC's probe is duplicated at the first hop onto *every* spray path toward its destination (full path coverage per probe), and copies are de-duplicated in-network at the last hop so that the receiver sees one probe per (src, dst) while every path is exercised; per-path loss is inferred from which copies survived (a per-path bitmap carried by the surviving copy or by the dedup switch's counter) | Probe rate (set so $\beta_{probe}$ = $B$, counting *all duplicates* on every link), dedup table size (within the SRAM side constraint) | Labelled "OPP-style (abstract-only reimplementation)" in every figure and table. **Decision rule:** if the full OPP paper becomes available before the tuning block starts and its mechanism differs materially from the above, B13 is re-implemented to match and the change is logged in §14; if it cannot be obtained before tuning starts, B13 is retained as "OPP-style" and the paper's claim (1) is worded to compare against "OPP-style probe duplication" rather than OPP itself. Duplicated probes are charged to $\beta_{probe}$ on every link they traverse, so at $B$ = 2 % the per-source rate is $1/N_{paths}$ of B3's |
 
 ### 3.2 Equal tuning budget
 
@@ -161,7 +184,50 @@ the same budget accounting. "Decides" = what the arm chooses each epoch or per p
   fixed before tuning and listed in `conf/mcp/default.yaml`.
 - The selected configuration per arm is frozen and recorded (`conf/tuned/<arm>.yaml`, with the
   tuning-run manifest) before any evaluation-split run starts.
-- Baselines B1, B12 have nothing to tune; B9/B10 tune only epoch.
+- Baselines B1, B12 have nothing to tune; B9/B10 tune only epoch. B7' additionally tunes
+  ($M$, $z$); B13 tunes probe rate and dedup table size.
+- **Tuning covers the localizer-independent knobs only.** The common inference layer of §3.3
+  is frozen before tuning starts and is not a per-arm knob.
+
+### 3.3 Common inference layer (added v1.1, PRE-REVIEW R3)
+
+**Problem addressed.** In v1.0 each arm localized with its own rule (MCP: Beta-Binomial /
+Normal-Gamma + CUSUM; B3: probe-path intersection; B7: path-set difference; B2/B4:
+unspecified). A TTL difference could then come from the *localizer*, not from which samples the
+measurement policy delivered. That confound is removed as follows.
+
+**One frozen localizer, shared by every arm.** All arms — MCP, A1–A7, B1–B13 — feed their
+samples into the *same* inference module, `controller/infer.py`, frozen (hash recorded in
+`conf/infer/frozen.yaml`) before the tuning block starts:
+
+1. **Per-element posterior.** For every measurable element $e$ (virtual link, spine port, NIC,
+   and each sprayed path as a composite), a Beta-Binomial posterior on the loss rate from
+   (delivered, lost) sample counts and a Normal-Gamma posterior on latency from RTT / one-way
+   samples. A probe, a tag, a mirrored copy, a sketch delta and a NIC counter delta are all
+   converted to the same `(element, delivered, lost, latency_samples)` record by the arm's
+   *sample adapter*, which is the only per-arm code. Path-level samples are attributed to
+   links by the known path→link map with the uniform-prior de-aggregation already used for
+   Pingmesh-style intersection (so B3's "intersection" becomes a special case).
+2. **Change detection.** A two-sided CUSUM per element on the posterior-mean loss (and
+   latency) against that element's own running baseline; the CUSUM constants ($k$, $h$) are
+   shared and frozen.
+3. **Ranking.** Elements are ranked by CUSUM statistic; the anomaly bit (§2.1) is 1 when the
+   top-ranked element's CUSUM exceeds $h$; the top-$k$ suspect list is the top-$k$ of that
+   ranking.
+
+**What differs across arms is only which samples arrive** — their elements, count, timing and
+cost. An arm's tunable knobs (§3.1) affect the sample stream, never the localizer. The
+false-alarm operating-point knob of §2.2 is $h$ **per arm**, the one exception, because arms
+with different sample rates need different $h$ to meet the 6 h⁻¹ cap; the selected $h$ per arm
+is recorded and the sweep of $h$ is plotted in the appendix.
+
+**Verification.** `controller/tests/test_common_inference.py` asserts that (i) every arm's
+localization call resolves to the same `infer.localize` function object, (ii) the module hash
+at run time equals the frozen hash in the manifest, and (iii) feeding two arms the identical
+sample stream yields identical suspect lists. The paper states this design in the Evaluation
+setup and reports, in the appendix, each arm's *published* localizer as an exploratory
+comparison (B3 with Pingmesh intersection, B7 with path-set difference) so the reader can see
+how much the common layer changed each baseline.
 
 ---
 
@@ -188,11 +254,21 @@ the same budget accounting. "Decides" = what the arm chooses each epoch or per p
 | Slow-loop epoch | 10 ms, 100 ms, **1 s**, 10 s |
 | Spray paths per source–destination | 8, **16**, 32, 64 |
 | Silent loss rate on faulty element | 1e-5, **1e-4**, 1e-3, 1e-2 |
+| **Background loss, fabric-wide** (added v1.1, PRE-REVIEW §4) | **0**, 1e-5, 1e-4, 1e-3 — applied as i.i.d. Bernoulli drops on *every* link (random-drop mode) and, as a second variant, as congestion-induced drops from raising offered load until the tail-drop rate on the busiest 10 % of links reaches the same nominal value (congestion mode); the faulty element's excess loss is *added* to the background |
 | Concurrent faults | **1**, 2, 4 |
 | Offered load | 30, **60**, 90 % of bisection |
 
 Each sweep point: 30 seeds, full baseline set on the H1 metric only (TTL) plus overhead in all
 five units. A full-factorial design is *not* run; interactions are exploratory (§12).
+
+**Exception — background loss × fault loss.** The background-loss factor is crossed with the
+faulty-element loss rate (4 × 4 = 16 points, the F1 ★ fault) because claim (2) is *about* that
+interaction: a 1e-4 fault on a 1e-4 background is the hard case. At every non-zero
+background-loss point the arms of record are MCP, B7 (as-published), B7' (SprayCheck-L), B11
+(aggregating) and B3; claim (2) requires MCP to beat B7' on H1 (log-rank, Holm within the
+sweep-point family) at each of the three non-zero levels, and B7's false-alarm rate is reported
+alongside so the straw-man gap is visible. The no-fault F0 runs are repeated at each
+background-loss level for the false-alarm cap of §2.2, which is applied per level.
 
 ---
 
@@ -283,8 +359,11 @@ in §6.4 valid.
   as stratum) and Cliff's δ on uncensored pairs.
 - **Proportions (budget violation, false alarm):** two-proportion z-test; risk ratio with CI.
 - **CCT overhead (H6):** TOST equivalence on log-ratio with margin ln(1.01).
-- **Regret (H5):** one-sided bootstrap on mean normalized regret against 0.30.
-- **Multiple comparisons:** Holm step-down over the six hypotheses (family = H1–H6). Within H1,
+- **Regret (H5, descriptive):** normalized regret with BCa CI; no test (demoted v1.1).
+- **Fast-loop latency (H7, Tier-2):** one-sample sign test on $\log_{10}(\tau_{slow}/\tau_{fast}) > 2$
+  over reps; two-proportion z-test faulty vs healthy paths for specificity (§1).
+- **Multiple comparisons:** Holm step-down over the six tested hypotheses (family = {H1, H2,
+  H3, H4, H6, H7}; H5 is descriptive and outside the family). Within H1,
   MCP-vs-each-baseline comparisons are a second family, Holm-adjusted separately, and the
   headline H1 p-value is the one against the best baseline.
 - **Sweeps** are descriptive (CIs only); no tests are run on sweep points to avoid a 36-way
@@ -325,7 +404,7 @@ before any MCP evaluation run, and the change is logged in §14.
 
 *Tier-2 (10 reps)* is under-powered for a 30 % effect under any plausible CV and is therefore
 used **only** to establish that the hardware loop behaves as the calibrated simulator predicts
-(§9.2), never for H1–H5 inference.
+(§9.2), never for H1–H6 inference (it is the primary evidence for H7 only).
 
 ---
 
@@ -405,6 +484,39 @@ def test_reward_raises_on_oracle_access(monkeypatch, make_observation, make_pric
 The test runs in CI on every commit; a red run blocks any evaluation run (the `make eval`
 target depends on `make test-integrity`).
 
+### 7.4 In-switch attention update rule — TO BE FIXED BEFORE P4 STEP 5 (see HURDLES H22)
+
+**Status: PLACEHOLDER (v1.1, PRE-REVIEW R1).** As of v1.0 the only in-data-plane decision was
+`rnd < attn` with `attn` written by the controller each epoch; per-path statistics were
+computed off-chip (P4-DESIGN-SPACE §5.2, §5.7, §11). That is controller-set rate sampling, and
+under it ablation A6 (fast-loop only) is undefined and H7 cannot hold. The rule below is the
+**candidate** form from the review; it is *not yet pre-registered*. It must be fixed — one
+rule, with constants — and logged in §14 before P4 implementation step 5 begins, and before
+any Tier-2 run. Until then A6, A7 and H7 are pending on this section.
+
+*Candidate rule (from PRE-REVIEW R1; feasible under bf-p4c constraint classes N8/N9 — one
+SALU per stage, one register access per packet, 32-bit ALU):* per (dst-leaf, spine) register
+`reg_attn[p]` in $[0, A_{max}]$,
+
+- on a **threshold exceedance** observed in the data plane for path $p$ (e.g. `deq_qdepth`
+  above $q_{thr}$ on the egress toward $p$, or a per-path sequence/ICRC anomaly counter crossing
+  $c_{thr}$), **or on arrival of a NIC evidence packet** for $p$ whose quantized RTT/PSN-gap
+  field exceeds its threshold: `attn[p] = min(attn[p] + k_up, A_max)`;
+- on every $N$-th **clean** sample for $p$ (a per-path clean-sample counter in the same SALU
+  word, upper 16 bits, wraps at $N$): `attn[p] = max(attn[p] - 1, A_min)`;
+- the gate remains `rnd < attn[p]`, so the *controller* only sets $A_{min}$, $A_{max}$,
+  $k_{up}$, $N$ and the thresholds once per epoch (the re-pricing of §0), and the switch moves
+  `attn[p]` between those bounds on its own, per packet.
+
+*Open decisions to close before step 5:* (i) which data-plane signal(s) count as
+"exceedance" on Tofino 1 (queue depth is available in egress only; the anomaly counter must be
+in the same SALU as `attn` or one stage earlier); (ii) packing of `attn` and the clean counter
+into one 32-bit register so a single SALU op does both; (iii) the constants $k_{up}$, $N$,
+$A_{min}$, $A_{max}$ — the update gain $k_{up}$ is the "attention-weight update gain" tuning
+knob of §3.2, the others are fixed; (iv) whether the NIC evidence packet is itself gated (it
+must not be, or the loop can starve). The frozen rule replaces this section verbatim in the
+next amendment, with the P4 source hash.
+
 ---
 
 ## 8. Non-stationarity protocol
@@ -441,7 +553,7 @@ injected 5 s after the switch, to measure TTL under a fresh regime. Reported des
 
 ### 9.1 Tier-1 — htsim, 1k–4k NICs
 
-**Claims supported:** H1–H6; all baselines; all ablations and sweeps; coverage vs budget;
+**Claims supported:** H1–H6 (H7 is Tier-2 only); all baselines; all ablations and sweeps; coverage vs budget;
 regret; multi-fault; 3-level topologies (fat-tree k = 16 → 1024 NICs, k = 24 → 3456 NICs).
 **Fidelity limits:** switch cost model calibrated from the bf-p4c resource report, not
 measured on Tier-1; host CPU from the cost model; PFC/DCQCN cross-checked on one scenario in
@@ -450,14 +562,45 @@ measured on Tier-1; host CPU from the cost model; PFC/DCQCN cross-checked on one
 ### 9.2 Tier-2 — one Tofino 1 + Agilio CX + two hosts, Soft-RoCE, lossy
 
 **Claims supported (and only these):** (a) the measured per-primitive resource cost (SRAM,
-stages, PHV) from the compiler report; (b) fast-loop decision latency and slow-loop
-decision→install latency on silicon; (c) the calibration distributions of §9.3; (d) that
-injected faults F1, F2, F3, F4, F6, F8 on the virtual sprayed fabric are localized by the
-hardware loop with TTL inside the calibrated simulator's 95 % prediction band; (e) budgets are
-respected on silicon (violation rate). **Not claimed:** coverage at scale, CCT with real GPUs,
-multi-switch skew (HURDLES H8), lossless-fabric behaviour. The paper states in the
-Implementation section: lossy fabric, software RDMA (`rdma_rxe`), no PFC/DCQCN, single traffic
-manager, virtual switches via recirculation (as SprayCheck did).
+stages, PHV) from the compiler report; (b) **fast-loop reaction time** $\tau_{fast}$ — the
+time from an injected loss step on a sprayed path to the first gated mirror/tag for that path,
+with the controller's write path frozen — and slow-loop decision→install latency
+$\tau_{slow}$ on silicon, both by the switch ingress timestamp as specified in H7 (§1); this
+is the primary evidence for H7 and for §0(d) (amended v1.1, PRE-REVIEW R2); (c) the
+calibration distributions of §9.3; (d) that injected faults F1, F2, F3, F4, F6, F8 on the
+virtual sprayed fabric are localized by the hardware loop with TTL inside the calibrated
+simulator's 95 % prediction band, **and** that on the same silicon, same virtual fabric, same
+budget and same common inference layer, MCP's TTL on F1 ★ and F4 ★ is lower than B7
+(SprayCheck as-published) and B7' (SprayCheck-L) — reported with CIs, not as an H1 test (10
+reps are under-powered, §6.5); (e) budgets are respected on silicon (violation rate).
+**Not claimed:** coverage at scale, CCT with real GPUs, multi-switch skew (HURDLES H8),
+lossless-fabric behaviour, 3-level topologies (simulation only). The paper states in the first
+paragraph of the Implementation section: software-RDMA, lossy, single-chip *emulation* (never
+"testbed"), `rdma_rxe`, no PFC/DCQCN, single traffic manager, virtual switches via
+recirculation (as SprayCheck did).
+
+**NIC evidence channels that exist on the hardware (stated explicitly, v1.1, PRE-REVIEW §4).**
+On the Agilio CX / Hulk hosts the NIC arm and MCP's NIC-evidence path have exactly these
+signals: (i) **per-path RTT**, measured by a host XDP program from probe/ACK timestamps — this
+is the only clean channel; (ii) **PSN gaps**, read from `rdma_rxe` — **reorder-confounded**
+under per-packet spraying, because go-back-N reports a gap on every reorder as well as on every
+loss, so PSN-gap evidence is used only after subtracting the no-fault floor measured by the
+pre-test below, and is reported as such; (iii) **no ECN** — there is no DCQCN/ECN marking on
+the lossy fabric, so the ECN evidence field is absent on hardware (zero) and exists only in
+Tier-1. Hardware results that depend on the NIC channel are therefore labelled "RTT + PSN-gap
+(reorder-floor-corrected)" and never "MetaRoCE-like".
+
+**Prerequisite pre-test — `rdma_rxe` under per-packet spraying (HURDLES H20; v1.1,
+PRE-REVIEW R2).** Before any hardware result that uses NIC evidence is reported, a no-fault run
+on the sprayed virtual fabric (16 paths, default load, F0) establishes the **NAK/retransmit
+floor**: NAK rate, retransmitted-bytes fraction, and PSN-gap events per 10⁴ packets, over
+≥ 10 reps × 60 s, plus whether the Gloo/`perftest` all-reduce completes. Pass: the all-reduce
+completes in every rep AND the NAK rate is stable across reps (CV ≤ 0.3) so it can be
+subtracted as a floor. Fail: all-reduce does not complete, or the floor is not stable — then
+spray fan-out is reduced (32 → 16 → 8) or flowlet mode is used for `rdma_rxe`, the change is
+logged in §14, and if no configuration passes, **no NIC-evidence claim is made from hardware**
+and claim (3) rests on Tier-1 plus ablation A5/C3 only. The measured floor is published as a
+table and fed into Tier-1's noise stream (§6.2, stream 4) as the PSN-gap noise model.
 
 ### 9.3 Sim→hardware calibration procedure
 
@@ -501,15 +644,19 @@ manager, virtual switches via recirculation (as SprayCheck did).
 | Block | Arms | Faults | Seeds | Runs (approx.) |
 |---|---|---|---|---|
 | Gate | 3 | F1 | 30 | 90 |
-| Tuning | 12 arms × 64 configs | F1, F3 | 5 | 3,840 |
-| Main (H1, H2, H6) | 12 baselines + MCP ×3 learners | F0–F9 | 30 | 4,500 |
+| Tuning | 14 arms × 64 configs | F1, F3 | 5 | 4,480 |
+| Main (H1, H2, H6) | 14 baselines (B1–B13 incl. B7') + MCP ×3 learners | F0–F9 | 30 | 5,100 |
 | Ablations (H3, H4) | 8 | F0–F9 | 30 | 2,400 |
-| Sweeps | MCP + best 3 baselines | F1 (+F0) | 30 × 21 points | 2,520 |
+| Sweeps | MCP + best 3 baselines | F1 (+F0) | 30 × 25 points | 3,000 |
+| Background-loss × fault-loss (claim 2) | MCP, B3, B7, B7', B11 | F1 (+F0 per level) | 30 × 16 points (+ 4 F0 levels) | 3,000 |
 | Non-stationarity (H4, H5) | MCP ×3 + oracles | held-out configs × F1, F3, F5 | 30 | 720 |
-| Tier-2 hardware | MCP, B3, B9, B11 | ★ faults + F0 | 10 | 280 |
+| Tier-2 hardware | MCP, B3, B7, B7', B9, B11 | ★ faults + F0 | 10 | 420 |
+| Tier-2 H7 (frozen controller) | MCP | F1 ★, F6 ★ | 10 | 20 |
+| Tier-2 rxe pre-test (H20) | no measurement | F0 | 10 | 10 |
 
-Total ≈ 14,350 simulated runs. At an estimated 2–6 min per run on the lab servers this is
-~1,000 core-hours; feasible on Vision/Hulk (72 cores each).
+Total ≈ 18,400 simulated runs (v1.1; was 14,350 at v1.0). At an estimated 2–6 min per run on the lab servers this is
+~1,300 core-hours; feasible on Vision/Hulk (72 cores each), subject to HURDLES H18 (the
+per-seed cost of the Llama trace is unmeasured and may exceed the 6 min estimate).
 
 ---
 
@@ -518,11 +665,13 @@ Total ≈ 14,350 simulated runs. At an estimated 2–6 min per run on the lab se
 1. Gate experiment → CV, ρ, censor fraction → confirm or amend seed count (§6.5).
 2. Tuning → freeze `conf/tuned/*.yaml`.
 3. Main block → H1 (log-rank vs best baseline, then vs each), H2 (dominance per budget level),
-   H6 (TOST). Holm across H1–H6 once all six p-values exist.
+   H6 (TOST). Holm across {H1, H2, H3, H4, H6, H7} once all six p-values exist (H7 arrives from Tier-2, step 7).
 4. Ablations → H3, H4.
-5. Non-stationarity block → H5, H4 confirmation.
-6. Sweeps → descriptive figures.
-7. Tier-2 → calibration KS, prediction-band check, primitive cost table.
+5. Non-stationarity block → H5 (descriptive regret), H4 confirmation.
+6. Sweeps → descriptive figures; background-loss × fault-loss block → claim (2) test vs B7'.
+7. Tier-2 → rxe pre-test floor first (gates all NIC-evidence claims); then H7 (fast-loop
+   reaction time, frozen controller); then calibration KS, prediction-band check, MCP vs
+   B7/B7' on-silicon CIs, primitive cost table.
 8. Everything not listed above is **exploratory** and labelled as such in the paper.
 
 Analysis is implemented in `paper/analysis/analysis.ipynb` and `paper/analysis/*.py`; every
@@ -544,6 +693,9 @@ Every reported number is traceable to (config, seed, commit). The following are 
 - [ ] Python version, `uv.lock` hash, `pip freeze` snapshot
 - [ ] Hostname, CPU model, kernel version
 - [ ] Calibration distribution files and their SHA256 (Tier-1 runs after calibration)
+- [ ] Common inference layer hash (`conf/infer/frozen.yaml`) equal to the frozen value (§3.3)
+- [ ] **Tier-2 only:** rxe-under-spraying pre-test result file and its SHA256 (§9.2); the
+      §7.4 update rule's P4 source hash (must be non-placeholder before any Tier-2 run)
 - [ ] **Tier-2 only:** Intel SDE version (9.13.2 expected), `bf-p4c` version string, P4 source
       SHA256 and compiled `*.tofino` bundle SHA256, resource report archived, bfrt control
       script hash, Tofino firmware/`bf_switchd` build id, Agilio firmware version and driver
@@ -562,6 +714,25 @@ Every reported number is traceable to (config, seed, commit). The following are 
 | Date | Section | Change | Reason |
 |---|---|---|---|
 | 2026-08-25 | — | Document frozen at v1.0 | Initial pre-registration (M1) |
+| 2026-08-25 | header | Version 1.1; in-place amendment permitted once, pre-build | All v1.1 changes respond to `docs/PRE-REVIEW.md` before any block has run; no result existed to be biased |
+| 2026-08-25 | §0 | Added falsification condition (d): A7 within CI of full MCP on H1 ⇒ data-plane loop is not the contribution; H7 failure triggers the same verdict | PRE-REVIEW R1 |
+| 2026-08-25 | §0 | Added claim (2) conditionality: must beat B7' SprayCheck-L at every non-zero background-loss level | PRE-REVIEW §4 |
+| 2026-08-25 | §1 | Added H7 "fast-loop reaction latency" (µs on silicon, ≥ 100× faster than slow-loop install, frozen-controller measurement, specificity check) | PRE-REVIEW R1 |
+| 2026-08-25 | §1 | H2 restated as Pareto dominance on the (F1, $\beta_{probe}+\beta_{tag}$) plane; SRAM/stages/NIC-reads/CPU reported as side constraints, not tested | PRE-REVIEW R3 |
+| 2026-08-25 | §1, §6.4, §12 | H5 demoted to descriptive (arbitrary 70 % bar removed); Holm family now {H1, H2, H3, H4, H6, H7} | PRE-REVIEW §4 |
+| 2026-08-25 | §1 | H6 renamed "Simulated CCT overhead"; stated as a simulation-only result | PRE-REVIEW §3 |
+| 2026-08-25 | §1, §3.1 | B1 excluded from the H1 "best baseline" set wherever it is infeasible at $B$ | PRE-REVIEW §4 |
+| 2026-08-25 | §2.3 | Budget $B$ redefined: $\beta_{tag}$ includes NIC evidence packets and collector-port mirror bytes wherever they traverse a fabric or collector link | PRE-REVIEW R3 |
+| 2026-08-25 | §3.1 | B5 renamed to drop CPRANT's name (mechanism unverified) | PRE-REVIEW §4 |
+| 2026-08-25 | §3.1, §11 | B7 split into B7 (as-published) and B7' SprayCheck-L (background-loss-aware threshold, warm-up estimate over $M$ iterations); both run in Tier-1 and Tier-2 | PRE-REVIEW R2, §4 |
+| 2026-08-25 | §3.1 | B11 NIC-only restated as an aggregating arm (per-path evidence pooled across all NICs at a controller, no switch state); "MetaRoCE-like" label dropped on hardware | PRE-REVIEW §4 |
+| 2026-08-25 | §3.1 | Added B13 OPP-style probe duplication with in-network dedup, labelled "abstract-only reimplementation", with a decision rule: re-implement if the full paper appears before tuning, else claim (1) is worded against "OPP-style" not OPP | PRE-REVIEW §2 housekeeping |
+| 2026-08-25 | §3.3 (new), §3.2, §13 | Common inference layer: one frozen Beta-Binomial/Normal-Gamma + CUSUM top-$k$ localizer shared by all arms; arms differ only in which samples arrive; test file and manifest hash added | PRE-REVIEW R3 |
+| 2026-08-25 | §4.2, §11 | Background-loss sweep factor (0, 1e-5, 1e-4, 1e-3; random-drop and congestion modes), crossed with fault loss for F1; per-level F0 runs | PRE-REVIEW §4 |
+| 2026-08-25 | §7.4 (new) | Placeholder for the in-switch attention update rule with the review's candidate SALU form; marked BLOCKING before P4 step 5 (HURDLES H22); A6/A7/H7 pending on it | PRE-REVIEW R1 |
+| 2026-08-25 | §9.2 | (b) now the fast-loop reaction-time measurement; on-silicon MCP vs B7/B7' added to (d); "3-level" and "testbed" excluded from hardware claims; NIC evidence channels on hardware stated (RTT via host XDP; PSN gaps reorder-confounded; no ECN) | PRE-REVIEW R2, §3, §4 |
+| 2026-08-25 | §9.2, §12, §13 | rxe-under-spraying pre-test (NAK/retx floor, all-reduce completion) made a prerequisite for any NIC-evidence claim from hardware (HURDLES H20) | PRE-REVIEW R2 |
+| 2026-08-25 | §11 | Run counts updated for the added arms and blocks (≈ 18,400 runs) | consequence of the above |
 
 Amendments are appended only. An amendment after the corresponding block has started running
 is flagged "post-hoc" in the paper.

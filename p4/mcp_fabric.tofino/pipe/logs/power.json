@@ -1,8 +1,8 @@
 {
-    "build_date": "Tue Aug 25 22:06:19 2026",
+    "build_date": "Tue Aug 25 22:16:50 2026",
     "compiler_version": "9.13.1",
     "program_name": "mcp_fabric.p4",
-    "run_id": "ea303d583d7b44a3",
+    "run_id": "54887098b56e4e28",
     "schema_version": "1.0.1",
     "stage_characteristics": [
         {
@@ -10,7 +10,7 @@
             "cycles_contribute_to_latency": 20,
             "dependency_to_previous": "match",
             "features": {
-                "exact": false,
+                "exact": true,
                 "lpf_wred": false,
                 "selectors": false,
                 "stateful": false,
@@ -31,16 +31,16 @@
             "stage_number": 0
         },
         {
-            "clock_cycles": 20,
-            "cycles_contribute_to_latency": 1,
-            "dependency_to_previous": "concurrent",
+            "clock_cycles": 26,
+            "cycles_contribute_to_latency": 26,
+            "dependency_to_previous": "match",
             "features": {
-                "exact": false,
+                "exact": true,
                 "lpf_wred": false,
                 "selectors": false,
-                "stateful": false,
+                "stateful": true,
                 "statistics": false,
-                "ternary": false,
+                "ternary": true,
                 "max_selector_words": 0
             },
             "features_to_balance_latency": {
@@ -52,21 +52,21 @@
                 "ternary": false
             },
             "gress": "ingress",
-            "predication_cycle": 11,
+            "predication_cycle": 13,
             "stage_number": 1
         },
         {
-            "clock_cycles": 20,
-            "cycles_contribute_to_latency": 1,
-            "dependency_to_previous": "concurrent",
+            "clock_cycles": 30,
+            "cycles_contribute_to_latency": 30,
+            "dependency_to_previous": "match",
             "features": {
-                "exact": false,
+                "exact": true,
                 "lpf_wred": false,
-                "selectors": false,
-                "stateful": false,
+                "selectors": true,
+                "stateful": true,
                 "statistics": false,
                 "ternary": false,
-                "max_selector_words": 0
+                "max_selector_words": 1
             },
             "features_to_balance_latency": {
                 "exact": false,
@@ -77,15 +77,15 @@
                 "ternary": false
             },
             "gress": "ingress",
-            "predication_cycle": 11,
+            "predication_cycle": 13,
             "stage_number": 2
         },
         {
-            "clock_cycles": 20,
-            "cycles_contribute_to_latency": 1,
-            "dependency_to_previous": "concurrent",
+            "clock_cycles": 30,
+            "cycles_contribute_to_latency": 2,
+            "dependency_to_previous": "action",
             "features": {
-                "exact": false,
+                "exact": true,
                 "lpf_wred": false,
                 "selectors": false,
                 "stateful": false,
@@ -96,25 +96,25 @@
             "features_to_balance_latency": {
                 "exact": false,
                 "lpf_wred": false,
-                "selectors": false,
-                "stateful": false,
+                "selectors": true,
+                "stateful": true,
                 "statistics": false,
-                "ternary": false
+                "ternary": true
             },
             "gress": "ingress",
-            "predication_cycle": 11,
+            "predication_cycle": 13,
             "stage_number": 3
         },
         {
             "clock_cycles": 20,
-            "cycles_contribute_to_latency": 1,
-            "dependency_to_previous": "concurrent",
+            "cycles_contribute_to_latency": 20,
+            "dependency_to_previous": "match",
             "features": {
-                "exact": false,
+                "exact": true,
                 "lpf_wred": false,
                 "selectors": false,
                 "stateful": false,
-                "statistics": false,
+                "statistics": true,
                 "ternary": false,
                 "max_selector_words": 0
             },
@@ -131,16 +131,16 @@
             "stage_number": 4
         },
         {
-            "clock_cycles": 20,
-            "cycles_contribute_to_latency": 1,
-            "dependency_to_previous": "concurrent",
+            "clock_cycles": 22,
+            "cycles_contribute_to_latency": 22,
+            "dependency_to_previous": "match",
             "features": {
                 "exact": false,
                 "lpf_wred": false,
                 "selectors": false,
                 "stateful": false,
-                "statistics": false,
-                "ternary": false,
+                "statistics": true,
+                "ternary": true,
                 "max_selector_words": 0
             },
             "features_to_balance_latency": {
@@ -152,7 +152,7 @@
                 "ternary": false
             },
             "gress": "ingress",
-            "predication_cycle": 11,
+            "predication_cycle": 13,
             "stage_number": 5
         },
         {
@@ -160,7 +160,7 @@
             "cycles_contribute_to_latency": 20,
             "dependency_to_previous": "match",
             "features": {
-                "exact": false,
+                "exact": true,
                 "lpf_wred": false,
                 "selectors": false,
                 "stateful": false,
@@ -194,7 +194,7 @@
                 "max_selector_words": 0
             },
             "features_to_balance_latency": {
-                "exact": false,
+                "exact": true,
                 "lpf_wred": false,
                 "selectors": false,
                 "stateful": false,
@@ -219,7 +219,7 @@
                 "max_selector_words": 0
             },
             "features_to_balance_latency": {
-                "exact": false,
+                "exact": true,
                 "lpf_wred": false,
                 "selectors": false,
                 "stateful": false,
@@ -244,7 +244,7 @@
                 "max_selector_words": 0
             },
             "features_to_balance_latency": {
-                "exact": false,
+                "exact": true,
                 "lpf_wred": false,
                 "selectors": false,
                 "stateful": false,
@@ -269,7 +269,7 @@
                 "max_selector_words": 0
             },
             "features_to_balance_latency": {
-                "exact": false,
+                "exact": true,
                 "lpf_wred": false,
                 "selectors": false,
                 "stateful": false,
@@ -294,7 +294,7 @@
                 "max_selector_words": 0
             },
             "features_to_balance_latency": {
-                "exact": false,
+                "exact": true,
                 "lpf_wred": false,
                 "selectors": false,
                 "stateful": false,
@@ -606,11 +606,294 @@
             "stage_number": 11
         }
     ],
-    "tables": [],
+    "tables": [
+        {
+            "gress": "ingress",
+            "name": "Ingress.tbl_dst_leaf",
+            "stages": [
+                {
+                    "always_runs": false,
+                    "memories": [
+                        {
+                            "access_type": "read",
+                            "memory_type": "sram",
+                            "num_memories": 4
+                        }
+                    ],
+                    "on_critical_path": true,
+                    "stage_number": 3,
+                    "weight": 25.307901907356947
+                }
+            ]
+        },
+        {
+            "gress": "ingress",
+            "name": "Ingress.tbl_fail",
+            "stages": [
+                {
+                    "always_runs": false,
+                    "memories": [
+                        {
+                            "access_type": "read",
+                            "memory_type": "sram",
+                            "num_memories": 2
+                        },
+                        {
+                            "access_type": "write",
+                            "memory_type": "sram",
+                            "num_memories": 1
+                        },
+                        {
+                            "access_type": "search",
+                            "memory_type": "tcam",
+                            "num_memories": 2
+                        },
+                        {
+                            "access_type": "read",
+                            "memory_type": "map_ram",
+                            "num_memories": 2
+                        },
+                        {
+                            "access_type": "write",
+                            "memory_type": "map_ram",
+                            "num_memories": 1
+                        },
+                        {
+                            "access_type": "read",
+                            "memory_type": "deferred_ram",
+                            "num_memories": 1
+                        },
+                        {
+                            "access_type": "write",
+                            "memory_type": "deferred_ram",
+                            "num_memories": 1
+                        }
+                    ],
+                    "on_critical_path": true,
+                    "stage_number": 5,
+                    "weight": 43.8781447845931
+                }
+            ]
+        },
+        {
+            "gress": "ingress",
+            "name": "Ingress.tbl_final",
+            "stages": [
+                {
+                    "always_runs": false,
+                    "memories": [
+                        {
+                            "access_type": "read",
+                            "memory_type": "sram",
+                            "num_memories": 4
+                        }
+                    ],
+                    "on_critical_path": true,
+                    "stage_number": 6,
+                    "weight": 25.307901907356947
+                }
+            ]
+        },
+        {
+            "gress": "ingress",
+            "name": "Ingress.tbl_port_role",
+            "stages": [
+                {
+                    "always_runs": false,
+                    "memories": [
+                        {
+                            "access_type": "read",
+                            "memory_type": "sram",
+                            "num_memories": 1
+                        }
+                    ],
+                    "on_critical_path": true,
+                    "stage_number": 0,
+                    "weight": 6.3269754768392369
+                }
+            ]
+        },
+        {
+            "gress": "ingress",
+            "name": "Ingress.tbl_spray_mode",
+            "stages": [
+                {
+                    "always_runs": false,
+                    "memories": [
+                        {
+                            "access_type": "read",
+                            "memory_type": "sram",
+                            "num_memories": 4
+                        }
+                    ],
+                    "on_critical_path": true,
+                    "stage_number": 3,
+                    "weight": 25.307901907356947
+                }
+            ]
+        },
+        {
+            "gress": "ingress",
+            "name": "Ingress.tbl_spray_sel",
+            "stages": [
+                {
+                    "always_runs": false,
+                    "memories": [
+                        {
+                            "access_type": "read",
+                            "memory_type": "sram",
+                            "num_memories": 6
+                        },
+                        {
+                            "access_type": "write",
+                            "memory_type": "sram",
+                            "num_memories": 1
+                        },
+                        {
+                            "access_type": "read",
+                            "memory_type": "map_ram",
+                            "num_memories": 2
+                        },
+                        {
+                            "access_type": "write",
+                            "memory_type": "map_ram",
+                            "num_memories": 1
+                        }
+                    ],
+                    "on_critical_path": true,
+                    "stage_number": 2,
+                    "weight": 53.617983651226158
+                }
+            ]
+        },
+        {
+            "gress": "ingress",
+            "name": "Ingress.tbl_vlink",
+            "stages": [
+                {
+                    "always_runs": false,
+                    "memories": [
+                        {
+                            "access_type": "read",
+                            "memory_type": "sram",
+                            "num_memories": 6
+                        },
+                        {
+                            "access_type": "write",
+                            "memory_type": "sram",
+                            "num_memories": 1
+                        },
+                        {
+                            "access_type": "read",
+                            "memory_type": "map_ram",
+                            "num_memories": 5
+                        },
+                        {
+                            "access_type": "write",
+                            "memory_type": "map_ram",
+                            "num_memories": 1
+                        },
+                        {
+                            "access_type": "read",
+                            "memory_type": "deferred_ram",
+                            "num_memories": 1
+                        },
+                        {
+                            "access_type": "write",
+                            "memory_type": "deferred_ram",
+                            "num_memories": 1
+                        }
+                    ],
+                    "on_critical_path": true,
+                    "stage_number": 4,
+                    "weight": 59.910081743869209
+                }
+            ]
+        },
+        {
+            "gress": "ingress",
+            "name": "tbl_mcp_fabric533",
+            "stages": [
+                {
+                    "always_runs": false,
+                    "memories": [
+                        {
+                            "access_type": "read",
+                            "memory_type": "sram",
+                            "num_memories": 1
+                        }
+                    ],
+                    "on_critical_path": false,
+                    "stage_number": 1,
+                    "weight": 6.3269754768392369
+                }
+            ]
+        },
+        {
+            "gress": "ingress",
+            "name": "tbl_mcp_fabric540",
+            "stages": [
+                {
+                    "always_runs": false,
+                    "memories": [],
+                    "on_critical_path": true,
+                    "stage_number": 1,
+                    "weight": 0.0
+                }
+            ]
+        },
+        {
+            "gress": "ingress",
+            "name": "tbl_mcp_fabric546",
+            "stages": [
+                {
+                    "always_runs": false,
+                    "memories": [],
+                    "on_critical_path": true,
+                    "stage_number": 1,
+                    "weight": 0.0
+                }
+            ]
+        },
+        {
+            "gress": "ingress",
+            "name": "tbl_mcp_fabric550",
+            "stages": [
+                {
+                    "always_runs": false,
+                    "memories": [
+                        {
+                            "access_type": "read",
+                            "memory_type": "sram",
+                            "num_memories": 1
+                        },
+                        {
+                            "access_type": "write",
+                            "memory_type": "sram",
+                            "num_memories": 1
+                        },
+                        {
+                            "access_type": "read",
+                            "memory_type": "map_ram",
+                            "num_memories": 2
+                        },
+                        {
+                            "access_type": "write",
+                            "memory_type": "map_ram",
+                            "num_memories": 1
+                        }
+                    ],
+                    "on_critical_path": true,
+                    "stage_number": 1,
+                    "weight": 21.983106267029976
+                }
+            ]
+        }
+    ],
     "total_latency": [
         {
             "gress": "ingress",
-            "latency": 54,
+            "latency": 149,
             "pipe_number": 0
         },
         {
@@ -623,7 +906,7 @@
         {
             "gress": "ingress",
             "pipe_number": 0,
-            "power": 0.0
+            "power": 3.59826599532
         },
         {
             "gress": "egress",

@@ -1,8 +1,19 @@
 /* mcp_fabric.p4 — Tofino 1 (TNA) emulation of a packet-sprayed leaf-spine fabric.
  *
- * Implements docs/P4-DESIGN-SPACE.md.  STEP 1 of the §9.2 offline compile sequence:
- * headers, parser, deparser, EMPTY controls.  This step exists only to prove the
- * on-the-wire header layout parses and deparses and to give a baseline PHV report.
+ * Implements docs/P4-DESIGN-SPACE.md.  STEPS 1-4 of the §9.2 offline compile
+ * sequence: headers/parser/deparser, forwarding + virtual-link resolve, spraying,
+ * failure injection.  Steps 5-8 (measurement + attention registers, mirror, egress
+ * CSIG, evidence) are NOT here yet — see p4/README.md.
+ *
+ * Fabric shape is entirely control-plane data.  The reference bring-up
+ * (p4/control/setup_skeleton.py) programs 2 leaves x 4 spines = 16 virtual links
+ * (8 uplinks + 8 downlinks) over 16 real TM queues on two loop ports; nothing in
+ * this file hard-codes 2x4.
+ *
+ * Three passes per packet (§1):
+ *   hop 0  from a host port      -> source leaf: spray, pick spine, shim on, to loop
+ *   hop 1  from a loop port      -> spine:       forward to destination leaf, to loop
+ *   hop 2  from a loop port      -> dest leaf:   strip shim, deliver to the host port
  *
  * Wire format inside the fabric (§3, alternative A2):
  *
@@ -37,6 +48,17 @@ const bit<8>  NXT_CSIG          = 1;
 const bit<8>  IP_PROTO_UDP      = 17;
 const bit<16> UDP_PORT_ROCEV2   = 4791;
 const bit<16> UDP_PORT_EVIDENCE = 0xE5E5;
+
+/* Port roles, written by tbl_port_role from the ingress port (§3 carriage detail 2). */
+const bit<16> ROLE_OTHER = 0;
+const bit<16> ROLE_HOST  = 1;   // dp9 — traffic source/sink
+const bit<16> ROLE_LOOP  = 2;   // dp68 / dp8 — the loop ports carrying the virtual links
+const bit<16> ROLE_NIC   = 3;   // dp65 — Agilio: evidence in, mirrored copies out
+
+/* Number of fabric passes.  hop == LAST_HOP is the destination leaf, which delivers
+ * to a host port instead of resolving another virtual link.  A 3-level fabric is
+ * LAST_HOP = 4 and needs no other change here. */
+const bit<16> LAST_HOP = 2;
 
 /* ======================= headers ======================= */
 
@@ -145,6 +167,7 @@ struct ig_md_t {
     bit<16> spray_rand;
     bit<16> spray_hash;
     bit<16> spray_rr;
+    bit<16> spray_sel;
     bit<16> vlink_id;
     bit<16> rnd_fail;    // range key: exactly 16 bits = 4 of the 5 range nibbles (Class 2)
     bit<16> rnd_attn;
@@ -177,6 +200,7 @@ parser IgParser(packet_in pkt, out headers_t hdr, out ig_md_t md,
         md.spray_rand = 0;
         md.spray_hash = 0;
         md.spray_rr   = 0;
+        md.spray_sel  = 0;
         md.vlink_id   = 0;
         md.rnd_fail   = 0;
         md.rnd_attn   = 0;
@@ -198,6 +222,18 @@ parser IgParser(packet_in pkt, out headers_t hdr, out ig_md_t md,
 
     state parse_fabric {
         pkt.extract(hdr.fabric);
+        /* Lift the wire-carried pass state into metadata HERE rather than in a MAU
+         * gateway: the parser is free, and an `if (hdr.fabric.isValid())` block in the
+         * MAU would become its own logical table (§8.4/N10).  Re-assigning md fields
+         * that the start state already zeroed is legal on bf-p4c 9.13.1. */
+        md.hop    = (bit<16>)hdr.fabric.hop;
+        md.vsw_id = (bit<16>)hdr.fabric.vsw_id;
+        /* The spray index is chosen ONCE, at the source leaf, and then carried on the
+         * wire (§4, "determinism, stated honestly").  Later passes reuse it rather
+         * than re-drawing, which is both correct — the spine a packet is on cannot
+         * change mid-flight — and what makes a capture at the collector sufficient to
+         * reconstruct the path even in the unseeded Random mode. */
+        md.spray_idx = (bit<16>)hdr.fabric.spray;
         transition select(hdr.fabric.nxt) {
             NXT_CSIG : parse_csig;
             default  : parse_ipv4;
@@ -244,7 +280,288 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
                 in    ingress_intrinsic_metadata_from_parser_t  ig_prsr_md,
                 inout ingress_intrinsic_metadata_for_deparser_t ig_dprsr_md,
                 inout ingress_intrinsic_metadata_for_tm_t       ig_tm_md) {
-    apply { }
+
+    /* ---- S0: port role ------------------------------------------------------
+     * §8.1 notes a lever here: classifying ig_intr_md.ingress_port in the PARSER
+     * removes this stage entirely.  Kept as a table for now because the role map is
+     * the thing an operator most wants to change at runtime; revisit if the stage
+     * budget tightens (README, "levers not yet spent"). */
+    action set_role(bit<16> role, bit<16> src_leaf) {
+        md.role     = role;
+        md.src_leaf = src_leaf;
+    }
+
+    table tbl_port_role {
+        key     = { ig_intr_md.ingress_port : exact; }
+        actions = { set_role; }
+        size    = 64;
+        const default_action = set_role(ROLE_OTHER, 0);
+    }
+
+    /* ---- S1: destination leaf ------------------------------------------------
+     * path_base is (dst_leaf << 2) computed by the CONTROL PLANE and shipped as
+     * action data.  Folding the shift into action data is the Class 5 mitigation
+     * named in §8.4: the data plane only ORs in the spray index later. */
+    action set_dst(bit<16> dst_leaf, bit<16> path_base) {
+        md.dst_leaf = dst_leaf;
+        md.path_id  = path_base;
+    }
+
+    table tbl_dst_leaf {
+        key     = { hdr.ipv4.dst_addr : exact; }
+        actions = { set_dst; }
+        size    = 1024;
+        const default_action = set_dst(0, 0);
+    }
+
+    /* ---- S1/S2: spray (§4) ---------------------------------------------------
+     * Three modes in ONE binary, selected at runtime by which action the control
+     * plane installs in tbl_spray_mode.  The evaluation needs uniform-random,
+     * hash-of-entropy and perfect round-robin as baselines against each other; a
+     * runtime switch removes three recompiles and three chances for the pipelines to
+     * differ in some other way (§4 recommendation).
+     *
+     *   B1 Random<>            — genuinely per-packet, NOT replayable (Tofino 1 has
+     *                            no control-plane seed for Random<>)
+     *   B2 hash of the NIC's per-packet UDP source-port entropy  ★ default
+     *   B4 control-plane-seeded round-robin via a SALU counter, indexed by src_leaf
+     *
+     * All three candidates are computed unconditionally at the source leaf; the mode
+     * table then picks one. That costs one extra stage versus branching and is far
+     * easier to debug on hardware, which is the tie-breaker (§4). */
+    Random<bit<16>>() rng_spray;
+
+    /* Class 7: a Hash instance is bound to the field list of its FIRST .get().  This
+     * one is only ever called on this 3-tuple.  A second tuple shape needs a second
+     * CRCPolynomial + Hash instance — watch for the warning "Expected single call to
+     * get for hash instance", which is the canary. */
+    CRCPolynomial<bit<32>>(coeff = 32w0x04C11DB7, reversed = true, msb = false,
+                           extended = false, init = 32w0xFFFFFFFF,
+                           xor = 32w0xFFFFFFFF) poly_spray;
+    Hash<bit<16>>(HashAlgorithm_t.CUSTOM, poly_spray) h_spray;
+
+    /* One counter per source leaf, so multi-leaf distribution cannot skew the way a
+     * single shared counter does.  Class 8: the control plane SEEDS every slot at
+     * startup; nothing here relies on an in-SALU `v == 0` sentinel. */
+    Register<bit<16>, bit<16>>(64, 0) reg_spray_rr;
+    RegisterAction<bit<16>, bit<16>, bit<16>>(reg_spray_rr) rr_next = {
+        void apply(inout bit<16> value, out bit<16> rv) {
+            rv    = value;
+            value = value + 1;
+        }
+    };
+
+    /* B3 ActionSelector.  Group membership lives in the control plane, so removing a
+     * spine from the group emulates link-down-plus-REROUTE (§7.5) rather than the
+     * silent sink that deleting a tbl_vlink row gives.  RESILIENT mode would reshuffle
+     * only the removed member's share; FAIR is used here because max_group_size is
+     * small and FAIR needs a 14-bit selector hash instead of 51. */
+    ActionProfile(size = 64) spray_prof;
+    Hash<bit<14>>(HashAlgorithm_t.IDENTITY) sel_hash_fn;
+    ActionSelector(action_profile = spray_prof,
+                   hash           = sel_hash_fn,
+                   mode           = SelectorMode_t.FAIR,
+                   max_group_size = 8,
+                   num_groups     = 16) spray_sel_impl;
+
+    action spray_member(bit<16> idx) { md.spray_sel = idx; }
+
+    table tbl_spray_sel {
+        key = { md.src_leaf   : exact;
+                md.spray_hash : selector; }
+        actions        = { spray_member; }
+        size           = 64;
+        implementation = spray_sel_impl;
+    }
+
+    /* mask is action data = k-1 (3 for 4 spines).  Keeping k in the control plane is
+     * what makes 2x4 vs 4x2 a table edit rather than a recompile. */
+    action spray_from_random(bit<16> mask) { md.spray_idx = md.spray_rand & mask; }
+    action spray_from_hash  (bit<16> mask) { md.spray_idx = md.spray_hash & mask; }
+    action spray_from_rr    (bit<16> mask) { md.spray_idx = md.spray_rr   & mask; }
+    action spray_from_sel   (bit<16> mask) { md.spray_idx = md.spray_sel  & mask; }
+
+    table tbl_spray_mode {
+        key     = { md.role : exact; md.hop : exact; }
+        actions = { spray_from_random; spray_from_hash; spray_from_rr; spray_from_sel;
+                    @defaultonly NoAction; }
+        size    = 16;
+        const default_action = NoAction();
+    }
+
+    /* ---- S3: virtual-link resolve -------------------------------------------
+     * THE load-bearing table.  It maps (role, hop, src_leaf, dst_leaf, spray_idx)
+     * onto one real TM queue on one real loop port — §3 mapping option M2:
+     *   vlink_id[3]   selects the loop port, vlink_id[2:0] is the qid.
+     * The control plane owns that encoding; the data plane just writes what the
+     * action data says.
+     *
+     * Black hole (§7.5) = DELETE the row.  The default action drops and counts, so
+     * the number of black-holed packets is exact ground truth (§7.6). */
+    DirectCounter<bit<64>>(CounterType_t.PACKETS_AND_BYTES) vlink_ctr;
+
+    action to_loop(bit<16> vlink_id, bit<9> loop_port, bit<5> qid, bit<16> next_vsw) {
+        md.vlink_id                = vlink_id;
+        md.next_vsw                = next_vsw;
+        ig_tm_md.ucast_egress_port = loop_port;
+        ig_tm_md.qid               = qid;
+        vlink_ctr.count();
+    }
+
+    action black_hole() {
+        ig_dprsr_md.drop_ctl = 1;
+        vlink_ctr.count();
+    }
+
+    table tbl_vlink {
+        key = {
+            md.role      : exact;
+            md.hop       : exact;
+            md.src_leaf  : exact;
+            md.dst_leaf  : exact;
+            md.spray_idx : exact;
+        }
+        actions  = { to_loop; black_hole; }
+        counters = vlink_ctr;
+        size     = 256;
+        const default_action = black_hole();
+    }
+
+    /* ---- S4: failure injection (§7) -----------------------------------------
+     * Forked from sdnp_exp.p4:54-89, which is silicon-verified (2026-06-27).  Same
+     * shape: a hardware Random draw as a TCAM RANGE key, a DirectCounter for ground
+     * truth, and a control plane that retunes the drop probability by rewriting the
+     * range bounds — no recompile.  Drop probability = (high - low + 1)/65536.
+     *
+     * Keyed on md.vlink_id, which already encodes DIRECTION (uplink L->S and downlink
+     * S->L are distinct ids), so one-direction asymmetry (§7.3) is free: install the
+     * row for the uplink id only.
+     *
+     * Why a range table and not `if (md.rnd_fail < reg_dropprob[vlink])`: that is two
+     * runtime 16-bit operands, which is legal alone but overflows the 44-bit gateway
+     * budget the moment it is combined with anything else (Class 1), and it costs an
+     * extra register-read stage.  The range table costs TCAM, which this program is
+     * not otherwise using at all.
+     *
+     * Class 2 check: a 16-bit range key consumes 4 of the 5 available range nibbles.
+     * DO NOT add a second range field to this table — put it in a second table. */
+    Random<bit<16>>() rng_fail;
+    DirectCounter<bit<64>>(CounterType_t.PACKETS_AND_BYTES) fail_ctr;
+
+    action inj_drop() {
+        ig_dprsr_md.drop_ctl = 1;
+        md.fault             = 1;      // recorded into fabric_h.flags by tbl_final
+        fail_ctr.count();
+    }
+
+    /* §7.2 F1.  RoCEv2 normally carries UDP checksum 0 (ignored); a wrong non-zero
+     * value makes the receiving NIC drop the frame — the same observable as a
+     * corrupted ICRC, for one 16-bit CONSTANT write.  A constant write, not carry
+     * arithmetic, so it stays clear of Class 6. */
+    action inj_corrupt() {
+        hdr.udp.checksum = 16w0xBAD1;
+        md.fault         = 2;
+        fail_ctr.count();
+    }
+
+    action inj_none() {
+        fail_ctr.count();
+    }
+
+    table tbl_fail {
+        key = {
+            md.vlink_id : exact;
+            md.rnd_fail : range;
+        }
+        actions  = { inj_drop; inj_corrupt; inj_none; }
+        counters = fail_ctr;
+        size     = 64;
+        const default_action = inj_none();
+    }
+
+    /* ---- S8: final forward, shim write / strip -------------------------------
+     * next_hop arrives as action data instead of being computed as md.hop + 1: hop
+     * is already a key of this table, so the increment is free in the control plane
+     * and costs no data-plane ALU op. */
+    action act_enter(bit<8> next_hop) {
+        hdr.fabric.setValid();
+        hdr.fabric.vsw_id = (bit<8>)md.next_vsw;
+        hdr.fabric.hop    = next_hop;
+        hdr.fabric.spray  = (bit<8>)md.spray_idx;
+        hdr.fabric.loops  = 0;
+        hdr.fabric.flags  = (bit<8>)md.fault;
+        hdr.fabric.nxt    = NXT_IPV4;      // egress sets NXT_CSIG when it inserts the tag
+        hdr.ethernet.ether_type = ETYPE_MCP_FABRIC;
+    }
+
+    action act_transit(bit<8> next_hop) {
+        hdr.fabric.vsw_id = (bit<8>)md.next_vsw;
+        hdr.fabric.hop    = next_hop;
+        hdr.fabric.flags  = (bit<8>)md.fault;
+    }
+
+    action act_deliver(bit<9> port) {
+        hdr.fabric.setInvalid();
+        hdr.csig.setInvalid();
+        hdr.ethernet.ether_type    = ETYPE_IPV4;
+        ig_tm_md.ucast_egress_port = port;
+        ig_tm_md.qid               = 0;
+    }
+
+    action act_drop() {
+        ig_dprsr_md.drop_ctl = 1;
+    }
+
+    /* dst_leaf is part of the key because the destination leaf's host port is what
+     * act_deliver has to write, and a 2-leaf fabric has two of them (dp9 and dp65).
+     * It costs no stage: tbl_final already sits downstream of tbl_dst_leaf. */
+    table tbl_final {
+        key     = { md.role : exact; md.hop : exact; md.dst_leaf : exact; }
+        actions = { act_enter; act_transit; act_deliver; act_drop; }
+        size    = 64;
+        const default_action = act_drop();
+    }
+
+    apply {
+        tbl_port_role.apply();
+
+        /* §3 carriage detail 2.  The fabric ethertype is internal-only, so a frame
+         * carrying it that arrives on a HOST port is injected, not looped: drop it.
+         * One 16-bit equality plus one validity bit = 17 of the 44 gateway bits
+         * (Class 1). */
+        if (md.role == ROLE_HOST && hdr.fabric.isValid()) {
+            ig_dprsr_md.drop_ctl = 1;
+        } else {
+            tbl_dst_leaf.apply();
+
+            /* Drawn on EVERY fabric pass (each pass crosses one virtual link), and
+             * drawn here rather than next to tbl_fail so it co-places with the other
+             * independent draws instead of serialising behind tbl_vlink. */
+            md.rnd_fail = rng_fail.get();
+
+            /* Spray only at the SOURCE leaf (hop 0).  Later passes reuse the index
+             * the parser lifted out of the shim.  Gating the round-robin SALU here
+             * also keeps it advancing once per PACKET rather than once per pass. */
+            if (md.hop == 0) {
+                md.spray_rand = rng_spray.get();
+                md.spray_hash = h_spray.get({ hdr.ipv4.src_addr,
+                                              hdr.ipv4.dst_addr,
+                                              hdr.udp.src_port });
+                md.spray_rr   = rr_next.execute(md.src_leaf);
+                tbl_spray_sel.apply();
+                tbl_spray_mode.apply();
+            }
+
+            /* The destination leaf delivers; it does not resolve another link, and a
+             * link it is not on cannot fail it. */
+            if (md.hop != LAST_HOP) {
+                tbl_vlink.apply();
+                tbl_fail.apply();
+            }
+
+            tbl_final.apply();
+        }
+    }
 }
 
 control IgDeparser(packet_out pkt, inout headers_t hdr, in ig_md_t md,

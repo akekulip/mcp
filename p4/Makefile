@@ -23,8 +23,11 @@ LOGDIR  := $(OUTDIR)/pipe/logs
 
 .PHONY: all report phv resources clean
 
+# --verbose 2 is REQUIRED: without it pipe/logs/ is created but left EMPTY, so
+# mau.resources.log / phv_allocation_summary_0.log never appear.  Measured on
+# 9.13.1 this session.
 all:
-	@$(BFP4C) --target tofino --arch tna \
+	@$(BFP4C) --target tofino --arch tna --verbose 2 \
 	    -o $(OUTDIR) --bf-rt-schema $(SCHEMA) \
 	    $(SRC) ; st=$$? ; echo "bf-p4c exit status: $$st" ; exit $$st
 

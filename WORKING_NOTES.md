@@ -11,6 +11,37 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   (infeasible). Realistic: SIGCOMM'27 (~late Jan 2027, verify) or NSDI'28 spring (~Apr 2027).
 - Running: literature-reviewer → docs/NOVELTY-MATRIX.md + Zotero collection "MCP-sprayed-fabrics".
 
+## Status (2026-08-26, later) — gate RERUN with RTO fix: 105/105, 0 stalls
+- Added `-rto_min_us` to htsim main_uec.cpp; run_gate.sh sets RTO_MIN_US=300. Seeds 11/26 now
+  recover the single drop via RTO (finish 13.2435 ms vs 13.2367 loss-free). 18/105 runs saw a
+  silent drop; all completed. Old dead-RTO results archived in sim/gate/results_2026-08-26_deadRTO/.
+- analyze.py: incast TOO HARD (uniform censored 93%, all TTL=132 = horizon; trace too short at
+  EPOCH_US=100), lulesh OK (uniform median TTL 52193 epochs, censored 40%; oracle 52182, random 52267
+  — policies indistinguishable at n=5).
+
+## (superseded) Status (2026-08-26) — first gate run, dead RTO, verdict TOO HARD
+- `sim/gate/run_gate.sh` finished: 133 result csv (incast 28/28/28, lulesh oracle 5 / random 17 / uniform 27).
+  `analyze.py` verdict for BOTH traces: TOO HARD — uniform censored >50% (incast 100%, lulesh 67%)
+  → PREREG says loosen the operating point one step before proceeding.
+- incast runs last only ~13 ms sim time = 132 epochs at EPOCH_US=100; that horizon is far too short
+  for localization (all policies censored at 132). Consider longer trace or smaller epoch.
+- incast seeds 11 and 26 STALL under every policy: a flow never completes before `-end 1000` ms
+  and the htsim GOAL loop then spins forever printing `progress:` (6.5 GB log / 5 min; this is what
+  killed the 08-25 batch too). Guard added to run_gate.sh (timeout + ulimit -f 512MiB +
+  `seed<N>.STALLED` marker); their `.csv.tmp` measurement logs (10000 epochs) are kept but excluded
+  by analyze.py. Root cause is in htsim `logsim-interface.cpp:1005` (no exit when htsim time hits end);
+  ROOT CAUSE (2026-08-26, seed 11 bisected): one silent DATA drop (flow 1000000001, psn 433, 148 us)
+  is never retransmitted because the UEC RTO is effectively disabled: main_uec.cpp:751 sets
+  min_rto = 15us + queuesize*6*8/linkspeed with queuesize in BYTES; our `-q 1000000` packets
+  (=4.096 GB) gives min RTO = 1.97 s > sim end, so every startRTO() is rejected as "too late"
+  (uec.cpp startRTO null-handle branch). Silent loss has no trim/NACK path, sleek is off, so the
+  hole persists; after 16384 packets the receiver's ModularVector<1<<14> rx bitmap wraps and
+  aliases psn 433+16384 onto the hole (the "Spurious" burst at 5.73 ms). Fix options: add a
+  -rto_min_us CLI (recommended, ~200-500 us) or use a realistic -q; then rerun the WHOLE gate.
+  Temporary instrumentation left in sim/htsim (uncommitted): pipe.cpp MCP_DROP print,
+  main_uec.cpp UEC_DEBUG_FLOWID env hook, uec.cpp timer debug prints widened to _debug_flowid.
+- NOTE: LULESH runs take ~1 min each; script comment corrected.
+
 ## Next action
 1. Vision/Hulk: check Netronome SDK, rxe, kernel, perftest, DPDK availability (M4 prep).
 2. Simulator tier: clone/build htsim (csg-htsim), ATLAHS, Chakra; gate experiment.
