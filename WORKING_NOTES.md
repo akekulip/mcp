@@ -200,6 +200,13 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   the packet as arrived), egress skips copies, evidence forwarded host-pipe -> loop-pipe (reg_attn is
   PER PIPE: dp9 = pipe 0, loops = another pipe), attention only on fabric passes. Class 14 added to
   the skill. Agent re-validating v2 now.
+- 08-27 ~01:15 V2 VERIFIED ON SILICON (p4/reports/step5-7-silicon-v2.md): all exact — 487/487 copies
+  0x88F1 with flags bit0, fault copies 246 == inj_drop 246, evidence +10240 in BOTH pipes, decay
+  symmetric [4095,4095]/[904,904], inner CSIG worst_vlink 269/269, loop closes (attn trajectory
+  visible in mirror_h.attn: 843 @4096, one per +1024 step, 8675 @65535). Notes: mirror_h.hop is
+  next_hop (renamed); CSIG exceedance only in the loop pipe by construction (design errata 8).
+  H4, H5 closed. Chip state: build 789b5b27 loaded, both control planes up, attn seeded 4096.
+  NEXT on hardware: H7 timing (tau_fast vs tau_slow), rxe pre-test (H20) needs Hulk cabled.
 
 ## Next action
 1. Vision/Hulk: check Netronome SDK, rxe, kernel, perftest, DPDK availability (M4 prep).

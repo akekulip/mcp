@@ -150,7 +150,10 @@ header mirror_h {
     bit<48> dmac;
     bit<48> smac;
     bit<16> etype;
-    bit<16> hop;       // pass that took the sample / injected the fault
+    bit<16> next_hop;  // hdr.fabric.hop AFTER this pass's act_enter/act_transit, i.e. the
+                       // mirroring pass + 1 (silicon: source-leaf copy = 1, spine copy = 2).
+                       // md.hop cannot be emitted (Class 14); the inner frame's ethertype
+                       // (0x0800 source-leaf, 0x88F0 spine) is the unambiguous discriminator.
     bit<16> vlink;     // virtual link the packet was on (0 at the delivery pass)
     bit<16> path_id;
     bit<16> attn;      // attention weight read for this path on this pass

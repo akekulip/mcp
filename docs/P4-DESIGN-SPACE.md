@@ -1278,6 +1278,12 @@ nobody "restores" the original text.
    different registers. Evidence packets update the host pipe's register, are forwarded to loop
    port 5/0 (`tbl_evid_fwd`), update the loop pipe's register on the second pass and are dropped.
    The controller must read/seed all pipes (`pipe_id=0xffff` writes; reads return one value per pipe).
+8. **§5.5/§7.4 CSIG exceedance is single-pipe by construction.** The tag is inserted at the source
+   leaf's own pass, so the first ingress that can see a tag is a loop port (the loop pipe); the host
+   pipe's `reg_attn` reacts only to NIC evidence and controller re-pricing. Measured
+   `attn = [4094, 65535]` on the congested path. The epoch controller reads both pipes.
+9. **Mirror header `next_hop`.** The emitted `hdr.fabric.hop` is already incremented by the mirroring
+   pass; the inner frame's ethertype discriminates source-leaf (0x0800) from spine (0x88F0) copies.
 7. **§5.3 update cadence.** Attention is updated on the two fabric passes of a data packet (hops 0
    and 1) and by evidence packets; the delivery pass is not a sample.
 

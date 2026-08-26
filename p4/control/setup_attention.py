@@ -6,41 +6,53 @@ failure injection), which must have run first and is the ONLY client that binds
 (client_id 0).  This script uses client_id 2 and does not bind (§5.7).
 
 ===========================================================================
-STATUS — RUN ON SILICON 2026-08-27.  Full numbers: p4/reports/step5-7-silicon.md.
+STATUS — RE-VERIFIED ON SILICON 2026-08-27 (v2 build).
+Full numbers: p4/reports/step5-7-silicon-v2.md ; first round: step5-7-silicon.md.
 ---------------------------------------------------------------------------
-Against the live switch (bf_switchd PID 15392, SDE 9.13.2, mcp_fabric build
-sha256 232b7355fe58c67c...), traffic from Vision on dp9:
+Live switch, bf_switchd PID 23015, SDE 9.13.2, mcp_fabric build
+sha256 789b5b27d95ccae3..., traffic from Vision on dp9.  All four acceptance
+items pass; every count that should be exact is exact.
 
-  up: params + 256 reg_attn slots + 255 tbl_gate + 16 tbl_eg_vlink   PASS
-  gate volume at attn=4096 (P = 1/16 per pass)   PASS  508 copies / 4000 pkts
-  seed 0 -> 0 copies ; seed 65535 -> ~2 copies + 1 duplicate / pkt   PASS
-  csig.path_id == fabric.path_id                 PASS  508/508, 1989/1989
-  fault mirror count == fail_ctr inj_drop        PASS  256/256 and 238/238
-  NIC evidence bump, 10 x loss_q=5               PASS  4096 -> 14336, exact
-  loss_q=0 does not bump                         PASS
-  clean decay over 10000 pkts                    PASS  exact in both pipes
-  CSIG compare-and-replace under congestion      PASS  worst_vlink=1 in 92.5%,
-                                                       worst_qdepth up to 11306
+  (a) regression, gate off        PASS  1000/1000, 0 duplicate deliveries
+  (b') mirror header, 4000 pkts   PASS  487 copies, 100% ethertype 0x88F1,
+                                        100% flags bit0, attn=4096 in all,
+                                        vlink {0,1} source-leaf / {9,13} spine,
+                                        path_id == inner shim 234/234
+  (c') fail 0 50 drop, 1000 pkts  PASS  copies with flags bit1 == inj_drop = 246
+                                        (+-0), all 64 B, vlink 0, inner 0x0800;
+                                        delivered 754 = 1000-246
+  (d') evidence, 10 x loss_q=5    PASS  attn [4096,4096] -> [14336,14336], EXACT
+                                        in BOTH pipes; bypasses tbl_vlink; the
+                                        5/0 and 6/0 port counters see it
+  (e') decay, 10000 pkts          PASS  [4095,4095] clean [904,904], exact and
+                                        SYMMETRIC = 2 updates/packet, 1 per pipe
+  extra: inner CSIG tag           PASS  csig.worst_vlink correct 269/269
+                                        (was 0/508 before the egress fix)
+  extra: congestion loop          PASS  attn ramp 4096 -> 65535 visible in the
+                                        mirror_h.attn field itself
 
-TWO CONTROL-PLANE DEFECTS FOUND AND FIXED HERE:
- 1. vlink_dn disagreed with setup_skeleton.py for 6 of the 8 downlinks, so
-    csig.worst_vlink named the wrong link.  See vlink_dn() below.
- 2. tbl_eg_vlink was keyed on the raw qid, but eg_intr_md.egress_qid is the
-    PORT-GROUP queue number, so 12 of 16 rows could never match.  Measured 1
-    miss per packet in pipe 1 before the fix, 0 after.  See eg_qid() below.
+THE THREE v1 DEFECTS THAT WERE FIXED ARE CONFIRMED FIXED:
+  D3 mirror copies now carry the mirroring pass's verdict in a prepended 24 B
+     mirror_h: flags bit0 went from 7.3% to 100%, and a source-leaf fault copy
+     is now identifiable instead of arriving as a plain untruncated frame.
+  D4 the egress no longer runs the CSIG compare-and-replace on copies, so the
+     tag inside a copy is what the fabric wrote, not the collector's queue.
+  D5 (half) evidence packets now update BOTH pipes' registers.
 
-TWO DEFECTS LEFT FOR THE OWNER OF mcp_fabric.p4:
- 3. Mirror.emit() copies the packet AS IT ARRIVED, without that pass's header
-    edits, so fabric_h.flags never marks the copy it describes (bit1 "dropped"
-    never appears at all) and a hop-0 sample arrives as a plain IPv4 frame that
-    is indistinguishable from a delivery.
- 4. The egress CSIG compare-and-replace also runs on mirrored copies leaving the
-    COLLECTOR port, and its `diff == 0` predicate is true on ties, so on an idle
-    fabric every copy is stamped with the collector's own queue instead of the
-    fabric's.  Gate it on the egress port being a fabric loop port.
-Also: reg_attn is PER PIPE, and the two evidence sources land in different pipes
-(NIC evidence on dp9 = pipe 0, CSIG exceedance on the loop ports = pipe 1), so
-the source-leaf gate and the in-fabric gate never see each other's evidence.
+ONE NEW, MINOR DEFECT (N1): mirror_h.hop is the NEXT hop, not the pass index.
+  The deparser emits hdr.fabric.hop, which act_enter/act_transit already
+  incremented, so a source-leaf copy reads hop=1 and a spine copy reads hop=2 —
+  never 0.  Everything else in mirror_h is MAU-written and correct.  Use the
+  INNER ethertype as the pass discriminator until this is fixed: 0x0800 = the
+  packet had no shim yet = source-leaf pass, 0x88F0 = spine pass.
+
+STILL OPEN (N2): the CSIG evidence path remains single-pipe by construction.
+  Exceedance is detected at the ingress of the pass AFTER the congested hop,
+  which is always a loop port (pipe 1); the source leaf ingresses on dp9
+  (pipe 0) and never sees a CSIG tag, because act_enter inserts it later in
+  that same pass.  Measured: path 3 attn = [4094, 65535] under congestion.
+  "Attention" therefore means something different in each pipe, and the epoch
+  controller has to read and reconcile both.
 ===========================================================================
 
 Frozen rule (PREREG amendment v1.3):

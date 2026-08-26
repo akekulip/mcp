@@ -1,8 +1,8 @@
 {
-  "build_date": "Wed Aug 26 19:10:15 2026",
+  "build_date": "Wed Aug 26 19:21:54 2026",
   "compiler_version": "9.13.1",
   "program_name": "mcp_fabric.p4",
-  "run_id": "84782a2d9d2b4cee",
+  "run_id": "9154718c2dc948bb",
   "schema_version": "2.4.2",
   "resources": {
     "deparser": [
@@ -2609,25 +2609,25 @@
               {
                 "byte_number": 96,
                 "used_by_tables": [
-                  "tbl_mcp_fabric766"
+                  "tbl_mcp_fabric769"
                 ]
               },
               {
                 "byte_number": 97,
                 "used_by_tables": [
-                  "tbl_mcp_fabric766"
+                  "tbl_mcp_fabric769"
                 ]
               },
               {
                 "byte_number": 98,
                 "used_by_tables": [
-                  "tbl_mcp_fabric766"
+                  "tbl_mcp_fabric769"
                 ]
               },
               {
                 "byte_number": 99,
                 "used_by_tables": [
-                  "tbl_mcp_fabric766"
+                  "tbl_mcp_fabric769"
                 ]
               },
               {
@@ -2657,37 +2657,37 @@
               {
                 "byte_number": 64,
                 "used_by_tables": [
-                  "tbl_mcp_fabric772"
+                  "tbl_mcp_fabric775"
                 ]
               },
               {
                 "byte_number": 65,
                 "used_by_tables": [
-                  "tbl_mcp_fabric772"
+                  "tbl_mcp_fabric775"
                 ]
               },
               {
                 "byte_number": 66,
                 "used_by_tables": [
-                  "tbl_mcp_fabric772"
+                  "tbl_mcp_fabric775"
                 ]
               },
               {
                 "byte_number": 67,
                 "used_by_tables": [
-                  "tbl_mcp_fabric772"
+                  "tbl_mcp_fabric775"
                 ]
               },
               {
                 "byte_number": 32,
                 "used_by_tables": [
-                  "tbl_mcp_fabric776"
+                  "tbl_mcp_fabric779"
                 ]
               },
               {
                 "byte_number": 33,
                 "used_by_tables": [
-                  "tbl_mcp_fabric776"
+                  "tbl_mcp_fabric779"
                 ]
               }
             ],
@@ -2716,7 +2716,7 @@
                 "id": 0,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric772",
+                    "used_by": "tbl_mcp_fabric775",
                     "used_for": "match_entry_ram"
                   }
                 ]
@@ -2725,7 +2725,7 @@
                 "id": 1,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric766",
+                    "used_by": "tbl_mcp_fabric769",
                     "used_for": "match_entry_ram"
                   }
                 ]
@@ -2734,7 +2734,7 @@
                 "id": 2,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric776",
+                    "used_by": "tbl_mcp_fabric779",
                     "used_for": "match_entry_ram"
                   }
                 ]
@@ -2761,7 +2761,7 @@
                     "used_for": "gateway"
                   },
                   {
-                    "used_by": "tbl_mcp_fabric776-gateway",
+                    "used_by": "tbl_mcp_fabric779-gateway",
                     "used_for": "gateway"
                   }
                 ]
@@ -2809,7 +2809,7 @@
                 "unit_id": 1,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric776-gateway",
+                    "used_by": "tbl_mcp_fabric779-gateway",
                     "used_for": "gateway"
                   }
                 ]
@@ -3309,7 +3309,7 @@
                     "value": 0
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric772",
+                "used_by_table": "tbl_mcp_fabric775",
                 "used_for": "immediate hi"
               },
               {
@@ -3321,7 +3321,7 @@
                     "value": 1
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric772",
+                "used_by_table": "tbl_mcp_fabric775",
                 "used_for": "immediate hi"
               },
               {
@@ -3333,7 +3333,7 @@
                     "value": 2
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric772",
+                "used_by_table": "tbl_mcp_fabric775",
                 "used_for": "immediate hi"
               },
               {
@@ -3345,7 +3345,7 @@
                     "value": 3
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric772",
+                "used_by_table": "tbl_mcp_fabric775",
                 "used_for": "immediate hi"
               },
               {
@@ -3357,7 +3357,7 @@
                     "value": 4
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric772",
+                "used_by_table": "tbl_mcp_fabric775",
                 "used_for": "immediate hi"
               },
               {
@@ -3369,7 +3369,7 @@
                     "value": 5
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric772",
+                "used_by_table": "tbl_mcp_fabric775",
                 "used_for": "immediate hi"
               },
               {
@@ -3381,7 +3381,7 @@
                     "value": 6
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric772",
+                "used_by_table": "tbl_mcp_fabric775",
                 "used_for": "immediate hi"
               },
               {
@@ -3393,7 +3393,7 @@
                     "value": 7
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric772",
+                "used_by_table": "tbl_mcp_fabric775",
                 "used_for": "immediate hi"
               },
               {
@@ -3405,7 +3405,7 @@
                     "value": 8
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric772",
+                "used_by_table": "tbl_mcp_fabric775",
                 "used_for": "immediate hi"
               },
               {
@@ -3417,7 +3417,7 @@
                     "value": 9
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric772",
+                "used_by_table": "tbl_mcp_fabric775",
                 "used_for": "immediate hi"
               },
               {
@@ -3429,7 +3429,7 @@
                     "value": 10
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric772",
+                "used_by_table": "tbl_mcp_fabric775",
                 "used_for": "immediate hi"
               },
               {
@@ -3441,7 +3441,7 @@
                     "value": 11
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric772",
+                "used_by_table": "tbl_mcp_fabric775",
                 "used_for": "immediate hi"
               },
               {
@@ -3453,7 +3453,7 @@
                     "value": 12
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric772",
+                "used_by_table": "tbl_mcp_fabric775",
                 "used_for": "immediate hi"
               },
               {
@@ -3465,7 +3465,7 @@
                     "value": 13
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric772",
+                "used_by_table": "tbl_mcp_fabric775",
                 "used_for": "immediate hi"
               },
               {
@@ -3477,7 +3477,7 @@
                     "value": 14
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric772",
+                "used_by_table": "tbl_mcp_fabric775",
                 "used_for": "immediate hi"
               },
               {
@@ -3489,7 +3489,7 @@
                     "value": 15
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric772",
+                "used_by_table": "tbl_mcp_fabric775",
                 "used_for": "immediate hi"
               },
               {
@@ -3501,7 +3501,7 @@
                     "value": 0
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric776",
+                "used_by_table": "tbl_mcp_fabric779",
                 "used_for": "meter address"
               },
               {
@@ -3513,7 +3513,7 @@
                     "value": 1
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric776",
+                "used_by_table": "tbl_mcp_fabric779",
                 "used_for": "meter address"
               },
               {
@@ -3525,7 +3525,7 @@
                     "value": 2
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric776",
+                "used_by_table": "tbl_mcp_fabric779",
                 "used_for": "meter address"
               },
               {
@@ -3537,7 +3537,7 @@
                     "value": 3
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric776",
+                "used_by_table": "tbl_mcp_fabric779",
                 "used_for": "meter address"
               },
               {
@@ -3549,7 +3549,7 @@
                     "value": 4
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric776",
+                "used_by_table": "tbl_mcp_fabric779",
                 "used_for": "meter address"
               },
               {
@@ -3561,7 +3561,7 @@
                     "value": 5
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric776",
+                "used_by_table": "tbl_mcp_fabric779",
                 "used_for": "meter address"
               },
               {
@@ -3573,7 +3573,7 @@
                     "value": 6
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric776",
+                "used_by_table": "tbl_mcp_fabric779",
                 "used_for": "meter address"
               },
               {
@@ -3585,7 +3585,7 @@
                     "value": 7
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric776",
+                "used_by_table": "tbl_mcp_fabric779",
                 "used_for": "meter address"
               },
               {
@@ -3597,7 +3597,7 @@
                     "value": 8
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric776",
+                "used_by_table": "tbl_mcp_fabric779",
                 "used_for": "meter address"
               },
               {
@@ -3609,7 +3609,7 @@
                     "value": 9
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric776",
+                "used_by_table": "tbl_mcp_fabric779",
                 "used_for": "meter address"
               },
               {
@@ -3621,7 +3621,7 @@
                     "value": 10
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric776",
+                "used_by_table": "tbl_mcp_fabric779",
                 "used_for": "meter address"
               },
               {
@@ -3633,7 +3633,7 @@
                     "value": 11
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric776",
+                "used_by_table": "tbl_mcp_fabric779",
                 "used_for": "meter address"
               },
               {
@@ -3645,7 +3645,7 @@
                     "value": 12
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric776",
+                "used_by_table": "tbl_mcp_fabric779",
                 "used_for": "meter address"
               },
               {
@@ -3657,7 +3657,7 @@
                     "value": 13
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric776",
+                "used_by_table": "tbl_mcp_fabric779",
                 "used_for": "meter address"
               },
               {
@@ -3669,7 +3669,7 @@
                     "value": 14
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric776",
+                "used_by_table": "tbl_mcp_fabric779",
                 "used_for": "meter address"
               },
               {
@@ -3681,7 +3681,7 @@
                     "value": 15
                   }
                 ],
-                "used_by_table": "tbl_mcp_fabric776",
+                "used_by_table": "tbl_mcp_fabric779",
                 "used_for": "meter address"
               }
             ],
@@ -3697,7 +3697,7 @@
                 "unit_id": 0,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric772",
+                    "used_by": "tbl_mcp_fabric775",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -3707,7 +3707,7 @@
                 "unit_id": 1,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric776",
+                    "used_by": "tbl_mcp_fabric779",
                     "used_for": "meter address"
                   }
                 ]
@@ -3718,11 +3718,11 @@
             "ids": [
               {
                 "id": 0,
-                "table_name": "tbl_mcp_fabric766"
+                "table_name": "tbl_mcp_fabric769"
               },
               {
                 "id": 5,
-                "table_name": "tbl_mcp_fabric758"
+                "table_name": "tbl_mcp_fabric761"
               },
               {
                 "id": 1,
@@ -3730,11 +3730,11 @@
               },
               {
                 "id": 2,
-                "table_name": "tbl_mcp_fabric772"
+                "table_name": "tbl_mcp_fabric775"
               },
               {
                 "id": 3,
-                "table_name": "tbl_mcp_fabric776"
+                "table_name": "tbl_mcp_fabric779"
               },
               {
                 "id": 4,
@@ -3903,7 +3903,7 @@
                 "id": 2,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric758",
+                    "used_by": "tbl_mcp_fabric761",
                     "used_for": "ternary_indirection_ram"
                   }
                 ]
@@ -3930,9 +3930,9 @@
                     "usages": [
                       {
                         "action_names": [
-                          "mcp_fabric766"
+                          "mcp_fabric769"
                         ],
-                        "used_by": "tbl_mcp_fabric766"
+                        "used_by": "tbl_mcp_fabric769"
                       }
                     ]
                   },
@@ -3959,9 +3959,9 @@
                     "usages": [
                       {
                         "action_names": [
-                          "mcp_fabric758"
+                          "mcp_fabric761"
                         ],
-                        "used_by": "tbl_mcp_fabric758"
+                        "used_by": "tbl_mcp_fabric761"
                       }
                     ]
                   },
@@ -3971,9 +3971,9 @@
                     "usages": [
                       {
                         "action_names": [
-                          "mcp_fabric776"
+                          "mcp_fabric779"
                         ],
-                        "used_by": "tbl_mcp_fabric776"
+                        "used_by": "tbl_mcp_fabric779"
                       }
                     ]
                   }
@@ -4000,9 +4000,9 @@
                     "usages": [
                       {
                         "action_names": [
-                          "mcp_fabric772"
+                          "mcp_fabric775"
                         ],
-                        "used_by": "tbl_mcp_fabric772"
+                        "used_by": "tbl_mcp_fabric775"
                       }
                     ]
                   }
@@ -4189,7 +4189,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric772",
+                    "used_by": "tbl_mcp_fabric775",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -4207,7 +4207,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric772",
+                    "used_by": "tbl_mcp_fabric775",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -4225,7 +4225,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric772",
+                    "used_by": "tbl_mcp_fabric775",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -4243,7 +4243,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric772",
+                    "used_by": "tbl_mcp_fabric775",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -4261,7 +4261,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric772",
+                    "used_by": "tbl_mcp_fabric775",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -4279,7 +4279,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric772",
+                    "used_by": "tbl_mcp_fabric775",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -4297,7 +4297,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric772",
+                    "used_by": "tbl_mcp_fabric775",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -4315,7 +4315,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric772",
+                    "used_by": "tbl_mcp_fabric775",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -4333,7 +4333,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric772",
+                    "used_by": "tbl_mcp_fabric775",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -4351,7 +4351,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric772",
+                    "used_by": "tbl_mcp_fabric775",
                     "used_for": "immediate hi"
                   }
                 ]
@@ -4369,7 +4369,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric776",
+                    "used_by": "tbl_mcp_fabric779",
                     "used_for": "meter address"
                   }
                 ]
@@ -4387,7 +4387,7 @@
                         "offset": 0
                       }
                     ],
-                    "used_by": "tbl_mcp_fabric776",
+                    "used_by": "tbl_mcp_fabric779",
                     "used_for": "meter address"
                   }
                 ]
@@ -5523,25 +5523,25 @@
               {
                 "byte_number": 96,
                 "used_by_tables": [
-                  "tbl_mcp_fabric765"
+                  "tbl_mcp_fabric768"
                 ]
               },
               {
                 "byte_number": 97,
                 "used_by_tables": [
-                  "tbl_mcp_fabric765"
+                  "tbl_mcp_fabric768"
                 ]
               },
               {
                 "byte_number": 98,
                 "used_by_tables": [
-                  "tbl_mcp_fabric765"
+                  "tbl_mcp_fabric768"
                 ]
               },
               {
                 "byte_number": 99,
                 "used_by_tables": [
-                  "tbl_mcp_fabric765"
+                  "tbl_mcp_fabric768"
                 ]
               }
             ],
@@ -5570,7 +5570,7 @@
                 "id": 0,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric765",
+                    "used_by": "tbl_mcp_fabric768",
                     "used_for": "match_entry_ram"
                   }
                 ]
@@ -5597,7 +5597,7 @@
                     "used_for": "gateway"
                   },
                   {
-                    "used_by": "tbl_mcp_fabric765-gateway",
+                    "used_by": "tbl_mcp_fabric768-gateway",
                     "used_for": "gateway"
                   }
                 ]
@@ -5645,7 +5645,7 @@
                 "unit_id": 1,
                 "usages": [
                   {
-                    "used_by": "tbl_mcp_fabric765-gateway",
+                    "used_by": "tbl_mcp_fabric768-gateway",
                     "used_for": "gateway"
                   }
                 ]
@@ -6161,7 +6161,7 @@
               },
               {
                 "id": 3,
-                "table_name": "tbl_mcp_fabric765"
+                "table_name": "tbl_mcp_fabric768"
               }
             ],
             "size": 16
@@ -6467,9 +6467,9 @@
                     "usages": [
                       {
                         "action_names": [
-                          "mcp_fabric765"
+                          "mcp_fabric768"
                         ],
-                        "used_by": "tbl_mcp_fabric765"
+                        "used_by": "tbl_mcp_fabric768"
                       }
                     ]
                   }

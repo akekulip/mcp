@@ -1,6 +1,6 @@
 version:
   version: 1.0.1
-  run_id: "84782a2d9d2b4cee"
+  run_id: "9154718c2dc948bb"
   target: Tofino
 error_mode: propagate_and_disable
 phv ingress:
@@ -213,7 +213,7 @@ phv egress:
   hdr.mirror.smac.32-39: TB3
   hdr.mirror.smac.40-47: TB12
   hdr.mirror.etype: TW1(16..31)
-  hdr.mirror.hop: TW1(0..15)
+  hdr.mirror.next_hop: TW1(0..15)
   hdr.mirror.vlink: TH1
   hdr.mirror.path_id: TH0
   hdr.mirror.attn: TW0(16..31)
@@ -598,7 +598,7 @@ parser egress:
         8..11: TW2  # egress::hdr.mirror.smac[31:0].0-31
         12..15: TW1
             # - bit[96..111] -> TW1 bit[31..16]: egress::hdr.mirror.etype
-            # - bit[112..127] -> TW1 bit[15..0]: egress::hdr.mirror.hop
+            # - bit[112..127] -> TW1 bit[15..0]: egress::hdr.mirror.next_hop
         16..17: TH1  # egress::hdr.mirror.vlink
         18..19: TH0  # egress::hdr.mirror.path_id
         20..23: TW0
@@ -750,7 +750,7 @@ deparser egress:
     TW2: B17(0)  # egress::hdr.mirror.smac.0-31 if egress::hdr.mirror.$valid
     TW1: B17(0)
         # - bit[31..16]: egress::hdr.mirror.etype if egress::hdr.mirror.$valid
-        # - bit[15..0]: egress::hdr.mirror.hop if egress::hdr.mirror.$valid
+        # - bit[15..0]: egress::hdr.mirror.next_hop if egress::hdr.mirror.$valid
     TH1: B17(0)  # egress::hdr.mirror.vlink if egress::hdr.mirror.$valid
     TH0: B17(0)  # egress::hdr.mirror.path_id if egress::hdr.mirror.$valid
     TW0: B17(0)
@@ -834,8 +834,8 @@ stage 0 ingress:
         seed: 0x0
     format: { immediate(0): 0..31, version(0): 112..115 }
     match_group_map: [ [ 0 ] ]
-    hit: [  tbl_mcp_fabric766 ]
-    miss:  tbl_mcp_fabric766
+    hit: [  tbl_mcp_fabric769 ]
+    miss:  tbl_mcp_fabric769
     action_bus: { 96..99 : immediate(0..31) }
     instruction: tbl_port_role_0($DEFAULT, $DEFAULT)
     actions:
@@ -854,8 +854,8 @@ stage 0 ingress:
       src_leaf: "0x0"
 stage 1 ingress:
   dependency: match
-  hash_action tbl_mcp_fabric766 0:
-    p4: { name: tbl_mcp_fabric766, hidden: true }
+  hash_action tbl_mcp_fabric769 0:
+    p4: { name: tbl_mcp_fabric769, hidden: true }
     row: 0
     result_bus: 1
     gateway:
@@ -876,38 +876,38 @@ stage 1 ingress:
         next:  tbl_dst_leaf_0
       condition: 
         expression: "(md.role == 1 && hdr.fabric.$valid == 1)"
-        true:  tbl_mcp_fabric758
+        true:  tbl_mcp_fabric761
         false:  tbl_dst_leaf_0
-    next:  tbl_mcp_fabric758
+    next:  tbl_mcp_fabric761
     action_bus: { 96..99 : rng(0, 0..31) }
-    instruction: tbl_mcp_fabric766(action, $DEFAULT)
+    instruction: tbl_mcp_fabric769(action, $DEFAULT)
     actions:
-      mcp_fabric766(1, 1):
+      mcp_fabric769(1, 1):
       - hit_allowed: { allowed: true }
       - default_action: { allowed: true, is_constant: true }
       - handle: 0x20000005
       - next_table: 0
       - set md.next_vsw, 0
       - set W9(0..15), rng(0, 0..15)
-    default_action: mcp_fabric766
-  ternary_match tbl_mcp_fabric758 5:
-    p4: { name: tbl_mcp_fabric758, hidden: true }
+    default_action: mcp_fabric769
+  ternary_match tbl_mcp_fabric761 5:
+    p4: { name: tbl_mcp_fabric761, hidden: true }
     hit: [  END ]
     miss:  END
-    indirect: tbl_mcp_fabric758$tind
-  ternary_indirect tbl_mcp_fabric758$tind:
+    indirect: tbl_mcp_fabric761$tind
+  ternary_indirect tbl_mcp_fabric761$tind:
     row: 1
     bus: 0
     format: { action: 0..0 }
-    instruction: tbl_mcp_fabric758$tind(action, $DEFAULT)
+    instruction: tbl_mcp_fabric761$tind(action, $DEFAULT)
     actions:
-      mcp_fabric758(0, 5):
+      mcp_fabric761(0, 5):
       - hit_allowed: { allowed: true }
       - default_action: { allowed: true, is_constant: true }
       - handle: 0x20000002
       - next_table: 0
       - set ig_intr_md_for_dprsr.drop_ctl, 1
-    default_action: mcp_fabric758
+    default_action: mcp_fabric761
   exact_match tbl_dst_leaf_0 1:
     p4: { name: Ingress.tbl_dst_leaf, size: 1024 }
     p4_param_order: 
@@ -944,8 +944,8 @@ stage 1 ingress:
     format: { immediate(0): 0..15, version(0): 112..115, match(0): [ 50..55, 32..47 ], immediate(1): 16..31, version(1): 116..119, match(1): [ 74..79, 56..71 ] }
     match: [ hdr.ipv4.dst_addr(10..15), hdr.ipv4.dst_addr(16..23), hdr.ipv4.dst_addr(24..31) ]
     match_group_map: [ [ 0, 1 ] ]
-    hit: [  tbl_mcp_fabric772 ]
-    miss:  tbl_mcp_fabric772
+    hit: [  tbl_mcp_fabric775 ]
+    miss:  tbl_mcp_fabric775
     action_bus: { 100..103 : immediate(0..15) }
     instruction: tbl_dst_leaf_0($DEFAULT, $DEFAULT)
     actions:
@@ -961,8 +961,8 @@ stage 1 ingress:
     default_action_parameters:
       dst_leaf: "0x0"
       path_base: "0x0"
-  hash_action tbl_mcp_fabric772 2:
-    p4: { name: tbl_mcp_fabric772, hidden: true }
+  hash_action tbl_mcp_fabric775 2:
+    p4: { name: tbl_mcp_fabric775, hidden: true }
     row: 0
     result_bus: 0
     hash_dist:
@@ -989,27 +989,27 @@ stage 1 ingress:
       format: { action: 0..0 }
       match: { 0: md.hop(0..7), 8: md.hop(8..15) }
       0x0000:
-        next:  tbl_mcp_fabric776
+        next:  tbl_mcp_fabric779
       miss:
         run_table : true
       condition: 
         expression: "(md.hop == 0)"
-        true:  tbl_mcp_fabric776
+        true:  tbl_mcp_fabric779
         false:  tbl_exceed_evid_0
     next:  tbl_exceed_evid_0
     action_bus: { 64..65 : rng(1, 0..15), 66..67 : hash_dist(0, hi) }
-    instruction: tbl_mcp_fabric772(action, $DEFAULT)
+    instruction: tbl_mcp_fabric775(action, $DEFAULT)
     actions:
-      mcp_fabric772(1, 3):
+      mcp_fabric775(1, 3):
       - hit_allowed: { allowed: true }
       - default_action: { allowed: true, is_constant: true }
       - handle: 0x20000006
       - next_table: 0
       - set H5(0..15), rng(1, 0..15)
       - set H6(0..15), hash_dist(0, 0..15)
-    default_action: mcp_fabric772
-  hash_action tbl_mcp_fabric776 3:
-    p4: { name: tbl_mcp_fabric776, hidden: true }
+    default_action: mcp_fabric775
+  hash_action tbl_mcp_fabric779 3:
+    p4: { name: tbl_mcp_fabric779, hidden: true }
     row: 1
     result_bus: 0
     hash_dist:
@@ -1022,7 +1022,7 @@ stage 1 ingress:
         table: [3]
         seed: 0x0
     gateway:
-      name: tbl_mcp_fabric776-gateway
+      name: tbl_mcp_fabric779-gateway
       row: 0
       bus: 0
       unit: 1
@@ -1033,19 +1033,19 @@ stage 1 ingress:
         true:  tbl_spray_sel_0
         false:  tbl_spray_sel_0
     next: []
-    action_bus: { 32..33 : tbl_mcp_fabric776$salu.Ingress.reg_spray_rr(0..15) }
-    stateful: tbl_mcp_fabric776$salu.Ingress.reg_spray_rr(hash_dist 1, $DEFAULT, $DEFAULT)
-    instruction: tbl_mcp_fabric776($DEFAULT, $DEFAULT)
+    action_bus: { 32..33 : tbl_mcp_fabric779$salu.Ingress.reg_spray_rr(0..15) }
+    stateful: tbl_mcp_fabric779$salu.Ingress.reg_spray_rr(hash_dist 1, $DEFAULT, $DEFAULT)
+    instruction: tbl_mcp_fabric779($DEFAULT, $DEFAULT)
     actions:
-      mcp_fabric776(0, 4):
+      mcp_fabric779(0, 4):
       - hit_allowed: { allowed: true }
       - default_action: { allowed: true, is_constant: true }
       - handle: 0x20000007
       - next_table: 0
-      - set H7(0..15), tbl_mcp_fabric776$salu.Ingress.reg_spray_rr
-      - tbl_mcp_fabric776$salu.Ingress.reg_spray_rr(rr_next_0, $hash_dist)
-    default_action: mcp_fabric776
-  stateful tbl_mcp_fabric776$salu.Ingress.reg_spray_rr:
+      - set H7(0..15), tbl_mcp_fabric779$salu.Ingress.reg_spray_rr
+      - tbl_mcp_fabric779$salu.Ingress.reg_spray_rr(rr_next_0, $hash_dist)
+    default_action: mcp_fabric779
+  stateful tbl_mcp_fabric779$salu.Ingress.reg_spray_rr:
     p4: { name: Ingress.reg_spray_rr, size: 64 }
     row: 15
     logical_bus: S
@@ -1271,8 +1271,8 @@ stage 3 ingress:
         expression: "(hdr.evid.$valid == 1)"
         true:  tbl_exceed_evid_0
         false:  tbl_exceed_csig_0
-    hit: [  tbl_mcp_fabric765 ]
-    miss:  tbl_mcp_fabric765
+    hit: [  tbl_mcp_fabric768 ]
+    miss:  tbl_mcp_fabric768
     indirect: tbl_exceed_evid_0$tind
   ternary_indirect tbl_exceed_evid_0$tind:
     row: 1
@@ -1326,13 +1326,13 @@ stage 3 ingress:
       0x1:
         run_table: true
       miss:
-        next:  tbl_mcp_fabric765
+        next:  tbl_mcp_fabric768
       condition: 
         expression: "(hdr.csig.$valid == 1)"
         true:  tbl_exceed_csig_0
-        false:  tbl_mcp_fabric765
-    hit: [  tbl_mcp_fabric765 ]
-    miss:  tbl_mcp_fabric765
+        false:  tbl_mcp_fabric768
+    hit: [  tbl_mcp_fabric768 ]
+    miss:  tbl_mcp_fabric768
     indirect: tbl_exceed_csig_0$tind
   ternary_indirect tbl_exceed_csig_0$tind:
     row: 0
@@ -1356,12 +1356,12 @@ stage 3 ingress:
       - handle: 0x20000012
       - next_table: 0
     default_only_action: NoAction
-  hash_action tbl_mcp_fabric765 3:
-    p4: { name: tbl_mcp_fabric765, hidden: true }
+  hash_action tbl_mcp_fabric768 3:
+    p4: { name: tbl_mcp_fabric768, hidden: true }
     row: 0
     result_bus: 0
     gateway:
-      name: tbl_mcp_fabric765-gateway
+      name: tbl_mcp_fabric768-gateway
       row: 0
       bus: 0
       unit: 1
@@ -1373,15 +1373,15 @@ stage 3 ingress:
         false:  tbl_vlink_0
     next: []
     action_bus: { 96..99 : rng(0, 0..31) }
-    instruction: tbl_mcp_fabric765($DEFAULT, $DEFAULT)
+    instruction: tbl_mcp_fabric768($DEFAULT, $DEFAULT)
     actions:
-      mcp_fabric765(0, 8):
+      mcp_fabric768(0, 8):
       - hit_allowed: { allowed: true }
       - default_action: { allowed: true, is_constant: true }
       - handle: 0x20000004
       - next_table: 0
       - set W8(16..31), rng(0, 16..31)
-    default_action: mcp_fabric765
+    default_action: mcp_fabric768
 stage 4 ingress:
   dependency: match
   exact_match tbl_vlink_0 0:
@@ -1856,7 +1856,7 @@ stage 7 ingress:
       - default_action: { allowed: false, reason: has_const_default_action }
       - handle: 0x2000001f
       - next_table: 0
-      - { next_hop: immediate(0..15), epoch_1: immediate(16..31), epoch: epoch_1 }
+      - { next_hop_2: immediate(0..15), next_hop: next_hop_2, epoch_1: immediate(16..31), epoch: epoch_1 }
       - set hdr.fabric.vsw_id, md.next_vsw
       - set hdr.fabric.hop, next_hop
       - set hdr.fabric.spray, md.spray_idx
@@ -1878,7 +1878,7 @@ stage 7 ingress:
       - default_action: { allowed: false, reason: has_const_default_action }
       - handle: 0x20000020
       - next_table: 0
-      - { next_hop_2: immediate(0..15), next_hop: next_hop_2 }
+      - { next_hop_3: immediate(0..15), next_hop: next_hop_3 }
       - set hdr.fabric.vsw_id, md.next_vsw
       - set hdr.fabric.hop, next_hop
       - set hdr.fabric.flags, md.flags_out(0..7)

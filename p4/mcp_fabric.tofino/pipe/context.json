@@ -1,5 +1,5 @@
 {
-  "build_date": "Wed Aug 26 19:10:15 2026",
+  "build_date": "Wed Aug 26 19:21:54 2026",
   "schema_version": "1.12.4",
   "compiler_version": "9.13.1 (e558d01)",
   "target": "tofino",
@@ -1974,7 +1974,7 @@
             },
             {
               "position_offset": 97,
-              "field_name": "hdr.mirror.hop",
+              "field_name": "hdr.mirror.next_hop",
               "field_msb": 15,
               "field_lsb": 0,
               "field_width": 2,
@@ -4352,7 +4352,7 @@
             },
             {
               "position_offset": 97,
-              "field_name": "hdr.mirror.hop",
+              "field_name": "hdr.mirror.next_hop",
               "field_msb": 15,
               "field_lsb": 0,
               "field_width": 2,
@@ -6891,7 +6891,7 @@
             },
             {
               "position_offset": 97,
-              "field_name": "hdr.mirror.hop",
+              "field_name": "hdr.mirror.next_hop",
               "field_msb": 15,
               "field_lsb": 0,
               "field_width": 2,
@@ -9367,7 +9367,7 @@
             },
             {
               "position_offset": 97,
-              "field_name": "hdr.mirror.hop",
+              "field_name": "hdr.mirror.next_hop",
               "field_msb": 15,
               "field_lsb": 0,
               "field_width": 2,
@@ -11808,7 +11808,7 @@
             },
             {
               "position_offset": 97,
-              "field_name": "hdr.mirror.hop",
+              "field_name": "hdr.mirror.next_hop",
               "field_msb": 15,
               "field_lsb": 0,
               "field_width": 2,
@@ -14291,7 +14291,7 @@
             },
             {
               "position_offset": 97,
-              "field_name": "hdr.mirror.hop",
+              "field_name": "hdr.mirror.next_hop",
               "field_msb": 15,
               "field_lsb": 0,
               "field_width": 2,
@@ -16823,7 +16823,7 @@
             },
             {
               "position_offset": 97,
-              "field_name": "hdr.mirror.hop",
+              "field_name": "hdr.mirror.next_hop",
               "field_msb": 15,
               "field_lsb": 0,
               "field_width": 2,
@@ -19334,7 +19334,7 @@
             },
             {
               "position_offset": 97,
-              "field_name": "hdr.mirror.hop",
+              "field_name": "hdr.mirror.next_hop",
               "field_msb": 15,
               "field_lsb": 0,
               "field_width": 2,
@@ -21712,7 +21712,7 @@
             },
             {
               "position_offset": 97,
-              "field_name": "hdr.mirror.hop",
+              "field_name": "hdr.mirror.next_hop",
               "field_msb": 15,
               "field_lsb": 0,
               "field_width": 2,
@@ -24090,7 +24090,7 @@
             },
             {
               "position_offset": 97,
-              "field_name": "hdr.mirror.hop",
+              "field_name": "hdr.mirror.next_hop",
               "field_msb": 15,
               "field_lsb": 0,
               "field_width": 2,
@@ -26468,7 +26468,7 @@
             },
             {
               "position_offset": 97,
-              "field_name": "hdr.mirror.hop",
+              "field_name": "hdr.mirror.next_hop",
               "field_msb": 15,
               "field_lsb": 0,
               "field_width": 2,
@@ -28846,7 +28846,7 @@
             },
             {
               "position_offset": 97,
-              "field_name": "hdr.mirror.hop",
+              "field_name": "hdr.mirror.next_hop",
               "field_msb": 15,
               "field_lsb": 0,
               "field_width": 2,
@@ -31289,7 +31289,7 @@
             },
             {
               "position_offset": 97,
-              "field_name": "hdr.mirror.hop",
+              "field_name": "hdr.mirror.next_hop",
               "field_msb": 15,
               "field_lsb": 0,
               "field_width": 2,
@@ -32151,7 +32151,7 @@
                 "vliw_instruction_full": 65,
                 "next_tables": [
                   {
-                    "next_table_name": "tbl_mcp_fabric766",
+                    "next_table_name": "tbl_mcp_fabric769",
                     "next_table_logical_id": 0,
                     "next_table_stage_no": 1
                   }
@@ -34721,7 +34721,7 @@
     {
       "direction": "ingress",
       "handle": 16777219,
-      "name": "tbl_mcp_fabric766",
+      "name": "tbl_mcp_fabric769",
       "table_type": "match",
       "size": 1,
       "p4_hidden": true,
@@ -34746,7 +34746,7 @@
             "result_physical_buses": [ 1 ],
             "action_format": [
               {
-                "action_name": "mcp_fabric766",
+                "action_name": "mcp_fabric769",
                 "action_handle": 536870917,
                 "table_name": "--END_OF_PIPELINE--",
                 "next_table": 0,
@@ -34755,7 +34755,7 @@
                 "vliw_instruction_full": 65,
                 "next_tables": [
                   {
-                    "next_table_name": "tbl_mcp_fabric758",
+                    "next_table_name": "tbl_mcp_fabric761",
                     "next_table_logical_id": 5,
                     "next_table_stage_no": 1
                   }
@@ -34769,7 +34769,7 @@
       },
       "actions": [
         {
-          "name": "mcp_fabric766",
+          "name": "mcp_fabric769",
           "handle": 536870917,
           "primitives": [
             {
@@ -34823,14 +34823,14 @@
     },
     {
       "direction": "ingress",
-      "attached_to": "tbl_mcp_fabric766",
+      "attached_to": "tbl_mcp_fabric769",
       "handle": 1879048193,
       "name": "cond-10",
       "table_type": "condition",
       "stage_tables": [
         {
           "next_tables": { "false": "17", "true": "21" },
-          "next_table_names": { "false": "Ingress.tbl_dst_leaf", "true": "tbl_mcp_fabric758" },
+          "next_table_names": { "false": "Ingress.tbl_dst_leaf", "true": "tbl_mcp_fabric761" },
           "memory_resource_allocation": { "memory_unit": 0, "memory_type": "gateway", "payload_buses": [] },
           "pack_format": [],
           "logical_table_id": 0,
@@ -38507,7 +38507,7 @@
                 "vliw_instruction_full": 66,
                 "next_tables": [
                   {
-                    "next_table_name": "tbl_mcp_fabric772",
+                    "next_table_name": "tbl_mcp_fabric775",
                     "next_table_logical_id": 2,
                     "next_table_stage_no": 1
                   }
@@ -39526,7 +39526,7 @@
     {
       "direction": "ingress",
       "handle": 16777222,
-      "name": "tbl_mcp_fabric772",
+      "name": "tbl_mcp_fabric775",
       "table_type": "match",
       "size": 65536,
       "p4_hidden": true,
@@ -39551,7 +39551,7 @@
             "result_physical_buses": [ 0 ],
             "action_format": [
               {
-                "action_name": "mcp_fabric772",
+                "action_name": "mcp_fabric775",
                 "action_handle": 536870918,
                 "table_name": "--END_OF_PIPELINE--",
                 "next_table": 0,
@@ -39574,7 +39574,7 @@
       },
       "actions": [
         {
-          "name": "mcp_fabric772",
+          "name": "mcp_fabric775",
           "handle": 536870918,
           "primitives": [
             {
@@ -39631,14 +39631,14 @@
     },
     {
       "direction": "ingress",
-      "attached_to": "tbl_mcp_fabric772",
+      "attached_to": "tbl_mcp_fabric775",
       "handle": 1879048194,
       "name": "cond-11",
       "table_type": "condition",
       "stage_tables": [
         {
           "next_tables": { "false": "49", "true": "19" },
-          "next_table_names": { "false": "Ingress.tbl_exceed_evid", "true": "tbl_mcp_fabric776" },
+          "next_table_names": { "false": "Ingress.tbl_exceed_evid", "true": "tbl_mcp_fabric779" },
           "memory_resource_allocation": { "memory_unit": 14, "memory_type": "gateway", "payload_buses": [] },
           "pack_format": [],
           "logical_table_id": 2,
@@ -39657,7 +39657,7 @@
     {
       "direction": "ingress",
       "handle": 16777223,
-      "name": "tbl_mcp_fabric776",
+      "name": "tbl_mcp_fabric779",
       "table_type": "match",
       "size": 65536,
       "p4_hidden": true,
@@ -39682,7 +39682,7 @@
             "result_physical_buses": [ 2 ],
             "action_format": [
               {
-                "action_name": "mcp_fabric776",
+                "action_name": "mcp_fabric779",
                 "action_handle": 536870919,
                 "table_name": "--END_OF_PIPELINE--",
                 "next_table": 0,
@@ -39699,7 +39699,7 @@
       },
       "actions": [
         {
-          "name": "mcp_fabric776",
+          "name": "mcp_fabric779",
           "handle": 536870919,
           "primitives": [
             {
@@ -39769,9 +39769,9 @@
     },
     {
       "direction": "ingress",
-      "attached_to": "tbl_mcp_fabric776",
+      "attached_to": "tbl_mcp_fabric779",
       "handle": 1879048195,
-      "name": "tbl_mcp_fabric776-gateway",
+      "name": "tbl_mcp_fabric779-gateway",
       "table_type": "condition",
       "stage_tables": [
         {
@@ -40832,7 +40832,7 @@
     {
       "direction": "ingress",
       "handle": 16777220,
-      "name": "tbl_mcp_fabric758",
+      "name": "tbl_mcp_fabric761",
       "table_type": "match",
       "size": 0,
       "p4_hidden": true,
@@ -41763,7 +41763,7 @@
               "memory_resource_allocation": null,
               "action_format": [
                 {
-                  "action_name": "mcp_fabric758",
+                  "action_name": "mcp_fabric761",
                   "action_handle": 536870914,
                   "table_name": "--END_OF_PIPELINE--",
                   "next_table": 0,
@@ -41786,7 +41786,7 @@
       "stateful_table_refs": [],
       "actions": [
         {
-          "name": "mcp_fabric758",
+          "name": "mcp_fabric761",
           "handle": 536870914,
           "primitives": [
             {
@@ -52983,7 +52983,7 @@
                   "vliw_instruction_full": 69,
                   "next_tables": [
                     {
-                      "next_table_name": "tbl_mcp_fabric765",
+                      "next_table_name": "tbl_mcp_fabric768",
                       "next_table_logical_id": 3,
                       "next_table_stage_no": 3
                     }
@@ -53000,7 +53000,7 @@
                   "vliw_instruction_full": 67,
                   "next_tables": [
                     {
-                      "next_table_name": "tbl_mcp_fabric765",
+                      "next_table_name": "tbl_mcp_fabric768",
                       "next_table_logical_id": 3,
                       "next_table_stage_no": 3
                     }
@@ -54268,7 +54268,7 @@
                   "vliw_instruction_full": 64,
                   "next_tables": [
                     {
-                      "next_table_name": "tbl_mcp_fabric765",
+                      "next_table_name": "tbl_mcp_fabric768",
                       "next_table_logical_id": 3,
                       "next_table_stage_no": 3
                     }
@@ -54285,7 +54285,7 @@
                   "vliw_instruction_full": 71,
                   "next_tables": [
                     {
-                      "next_table_name": "tbl_mcp_fabric765",
+                      "next_table_name": "tbl_mcp_fabric768",
                       "next_table_logical_id": 3,
                       "next_table_stage_no": 3
                     }
@@ -54389,7 +54389,7 @@
       "stage_tables": [
         {
           "next_tables": { "false": "51", "true": "50" },
-          "next_table_names": { "false": "tbl_mcp_fabric765", "true": "Ingress.tbl_exceed_csig" },
+          "next_table_names": { "false": "tbl_mcp_fabric768", "true": "Ingress.tbl_exceed_csig" },
           "memory_resource_allocation": { "memory_unit": 14, "memory_type": "gateway", "payload_buses": [] },
           "pack_format": [],
           "logical_table_id": 2,
@@ -54405,7 +54405,7 @@
     {
       "direction": "ingress",
       "handle": 16777228,
-      "name": "tbl_mcp_fabric765",
+      "name": "tbl_mcp_fabric768",
       "table_type": "match",
       "size": 1,
       "p4_hidden": true,
@@ -54430,7 +54430,7 @@
             "result_physical_buses": [ 0 ],
             "action_format": [
               {
-                "action_name": "mcp_fabric765",
+                "action_name": "mcp_fabric768",
                 "action_handle": 536870916,
                 "table_name": "--END_OF_PIPELINE--",
                 "next_table": 0,
@@ -54447,7 +54447,7 @@
       },
       "actions": [
         {
-          "name": "mcp_fabric765",
+          "name": "mcp_fabric768",
           "handle": 536870916,
           "primitives": [
             {
@@ -54494,9 +54494,9 @@
     },
     {
       "direction": "ingress",
-      "attached_to": "tbl_mcp_fabric765",
+      "attached_to": "tbl_mcp_fabric768",
       "handle": 1879048199,
-      "name": "tbl_mcp_fabric765-gateway",
+      "name": "tbl_mcp_fabric768-gateway",
       "table_type": "condition",
       "stage_tables": [
         {
@@ -82725,7 +82725,7 @@
       "hash_bit_width": 16
     }
   ],
-  "run_id": "84782a2d9d2b4cee",
+  "run_id": "9154718c2dc948bb",
   "driver_options": {
     "hash_parity_enabled": false,
     "high_availability_enabled": true,

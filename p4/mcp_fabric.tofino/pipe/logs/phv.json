@@ -1,5 +1,5 @@
 {
-    "build_date": "Wed Aug 26 19:10:15 2026",
+    "build_date": "Wed Aug 26 19:21:54 2026",
     "compiler_version": "9.13.1",
     "constraint_reasons": [
         "Solitary (ALU): This field cannot be packed with anything else due to ALU operation.",
@@ -102,8 +102,8 @@
                                 "detail": "vliw",
                                 "stage": 1,
                                 "type": "mau",
-                                "action": "mcp_fabric766",
-                                "table": "tbl_mcp_fabric766"
+                                "action": "mcp_fabric769",
+                                "table": "tbl_mcp_fabric769"
                             }
                         },
                         {
@@ -414,8 +414,8 @@
                                 "detail": "vliw",
                                 "stage": 3,
                                 "type": "mau",
-                                "action": "mcp_fabric765",
-                                "table": "tbl_mcp_fabric765"
+                                "action": "mcp_fabric768",
+                                "table": "tbl_mcp_fabric768"
                             }
                         }
                     ]
@@ -548,8 +548,8 @@
                                 "detail": "vliw",
                                 "stage": 1,
                                 "type": "mau",
-                                "action": "mcp_fabric772",
-                                "table": "tbl_mcp_fabric772"
+                                "action": "mcp_fabric775",
+                                "table": "tbl_mcp_fabric775"
                             }
                         }
                     ]
@@ -602,8 +602,8 @@
                                 "detail": "vliw",
                                 "stage": 1,
                                 "type": "mau",
-                                "action": "mcp_fabric772",
-                                "table": "tbl_mcp_fabric772"
+                                "action": "mcp_fabric775",
+                                "table": "tbl_mcp_fabric775"
                             }
                         }
                     ]
@@ -648,8 +648,8 @@
                                 "detail": "vliw",
                                 "stage": 1,
                                 "type": "mau",
-                                "action": "mcp_fabric776",
-                                "table": "tbl_mcp_fabric776"
+                                "action": "mcp_fabric779",
+                                "table": "tbl_mcp_fabric779"
                             }
                         }
                     ]
@@ -790,8 +790,8 @@
                                 "detail": "vliw",
                                 "stage": 1,
                                 "type": "mau",
-                                "action": "mcp_fabric766",
-                                "table": "tbl_mcp_fabric766"
+                                "action": "mcp_fabric769",
+                                "table": "tbl_mcp_fabric769"
                             }
                         }
                     ]
@@ -3622,8 +3622,8 @@
                                 "detail": "vliw",
                                 "stage": 1,
                                 "type": "mau",
-                                "action": "mcp_fabric758",
-                                "table": "tbl_mcp_fabric758"
+                                "action": "mcp_fabric761",
+                                "table": "tbl_mcp_fabric761"
                             }
                         },
                         {
@@ -4521,7 +4521,7 @@
                 },
                 {
                     "field_slice": {
-                        "field_name": "hdr.mirror.hop",
+                        "field_name": "hdr.mirror.next_hop",
                         "slice_info": {
                             "lsb": 0,
                             "msb": 15
@@ -4585,7 +4585,7 @@
                         }
                     ],
                     "mutually_exclusive_with": [
-                        "hdr.mirror.hop",
+                        "hdr.mirror.next_hop",
                         "hdr.mirror.etype"
                     ]
                 },
@@ -4620,7 +4620,7 @@
                         }
                     ],
                     "mutually_exclusive_with": [
-                        "hdr.mirror.hop",
+                        "hdr.mirror.next_hop",
                         "hdr.mirror.etype"
                     ]
                 }
@@ -7009,7 +7009,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 203
+                                "line": 206
                             }
                         }
                     ]
@@ -7114,7 +7114,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 204
+                                "line": 207
                             }
                         }
                     ]
@@ -7203,7 +7203,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 205
+                                "line": 208
                             }
                         }
                     ]
@@ -7292,7 +7292,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 206
+                                "line": 209
                             }
                         },
                         {
@@ -7302,7 +7302,7 @@
                             "name": "Alignment",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 206
+                                "line": 209
                             }
                         }
                     ]
@@ -7397,7 +7397,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 207
+                                "line": 210
                             }
                         }
                     ]
@@ -7434,7 +7434,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 208
+                                "line": 211
                             }
                         }
                     ]
@@ -7495,8 +7495,8 @@
                                 "detail": "vliw",
                                 "stage": 1,
                                 "type": "mau",
-                                "action": "mcp_fabric766",
-                                "table": "tbl_mcp_fabric766"
+                                "action": "mcp_fabric769",
+                                "table": "tbl_mcp_fabric769"
                             }
                         },
                         {
@@ -7534,7 +7534,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 209
+                                "line": 212
                             }
                         }
                     ]
@@ -7571,7 +7571,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 210
+                                "line": 213
                             }
                         },
                         {
@@ -7581,7 +7581,7 @@
                             "name": "Alignment",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 210
+                                "line": 213
                             }
                         }
                     ]
@@ -7705,7 +7705,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 211
+                                "line": 214
                             }
                         }
                     ]
@@ -7757,8 +7757,8 @@
                                 "detail": "vliw",
                                 "stage": 1,
                                 "type": "mau",
-                                "action": "mcp_fabric772",
-                                "table": "tbl_mcp_fabric772"
+                                "action": "mcp_fabric775",
+                                "table": "tbl_mcp_fabric775"
                             }
                         }
                     ]
@@ -7787,7 +7787,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 212
+                                "line": 215
                             }
                         }
                     ]
@@ -7847,8 +7847,8 @@
                                 "detail": "vliw",
                                 "stage": 1,
                                 "type": "mau",
-                                "action": "mcp_fabric772",
-                                "table": "tbl_mcp_fabric772"
+                                "action": "mcp_fabric775",
+                                "table": "tbl_mcp_fabric775"
                             }
                         }
                     ]
@@ -7877,7 +7877,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 213
+                                "line": 216
                             }
                         }
                     ]
@@ -7929,8 +7929,8 @@
                                 "detail": "vliw",
                                 "stage": 1,
                                 "type": "mau",
-                                "action": "mcp_fabric776",
-                                "table": "tbl_mcp_fabric776"
+                                "action": "mcp_fabric779",
+                                "table": "tbl_mcp_fabric779"
                             }
                         }
                     ]
@@ -7959,7 +7959,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 214
+                                "line": 217
                             }
                         }
                     ]
@@ -8183,7 +8183,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 215
+                                "line": 218
                             }
                         },
                         {
@@ -8193,7 +8193,7 @@
                             "name": "ExactContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 215
+                                "line": 218
                             }
                         }
                     ]
@@ -8280,7 +8280,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 216
+                                "line": 219
                             }
                         }
                     ]
@@ -8331,8 +8331,8 @@
                                 "detail": "vliw",
                                 "stage": 3,
                                 "type": "mau",
-                                "action": "mcp_fabric765",
-                                "table": "tbl_mcp_fabric765"
+                                "action": "mcp_fabric768",
+                                "table": "tbl_mcp_fabric768"
                             }
                         }
                     ]
@@ -8361,7 +8361,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 217
+                                "line": 220
                             }
                         }
                     ]
@@ -8412,8 +8412,8 @@
                                 "detail": "vliw",
                                 "stage": 1,
                                 "type": "mau",
-                                "action": "mcp_fabric766",
-                                "table": "tbl_mcp_fabric766"
+                                "action": "mcp_fabric769",
+                                "table": "tbl_mcp_fabric769"
                             }
                         }
                     ]
@@ -8586,7 +8586,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 218
+                                "line": 221
                             }
                         },
                         {
@@ -8596,7 +8596,7 @@
                             "name": "ExactContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 218
+                                "line": 221
                             }
                         }
                     ]
@@ -8684,7 +8684,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 219
+                                "line": 222
                             }
                         },
                         {
@@ -8694,7 +8694,7 @@
                             "name": "Alignment",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 219
+                                "line": 222
                             }
                         }
                     ]
@@ -8869,7 +8869,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 220
+                                "line": 223
                             }
                         }
                     ]
@@ -8959,7 +8959,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 221
+                                "line": 224
                             }
                         }
                     ]
@@ -8996,7 +8996,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 222
+                                "line": 225
                             }
                         }
                     ]
@@ -9176,7 +9176,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 223
+                                "line": 226
                             }
                         },
                         {
@@ -9186,7 +9186,7 @@
                             "name": "ExactContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 223
+                                "line": 226
                             }
                         }
                     ]
@@ -9435,7 +9435,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 224
+                                "line": 227
                             }
                         },
                         {
@@ -9445,7 +9445,7 @@
                             "name": "NoSplit",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 224
+                                "line": 227
                             }
                         },
                         {
@@ -9455,7 +9455,7 @@
                             "name": "ExactContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 224
+                                "line": 227
                             }
                         }
                     ]
@@ -9703,7 +9703,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 225
+                                "line": 228
                             }
                         },
                         {
@@ -9713,7 +9713,7 @@
                             "name": "ExactContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 225
+                                "line": 228
                             }
                         }
                     ]
@@ -9970,7 +9970,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 226
+                                "line": 229
                             }
                         },
                         {
@@ -9980,7 +9980,7 @@
                             "name": "ExactContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 226
+                                "line": 229
                             }
                         }
                     ]
@@ -10237,7 +10237,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 227
+                                "line": 230
                             }
                         },
                         {
@@ -10247,7 +10247,7 @@
                             "name": "ExactContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 227
+                                "line": 230
                             }
                         }
                     ]
@@ -16184,7 +16184,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 162
+                                "line": 165
                             }
                         },
                         {
@@ -16194,7 +16194,7 @@
                             "name": "Alignment",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 162
+                                "line": 165
                             }
                         },
                         {
@@ -16204,7 +16204,7 @@
                             "name": "ExactContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 162
+                                "line": 165
                             }
                         }
                     ]
@@ -16320,7 +16320,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 163
+                                "line": 166
                             }
                         },
                         {
@@ -16330,7 +16330,7 @@
                             "name": "Alignment",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 163
+                                "line": 166
                             }
                         },
                         {
@@ -16340,7 +16340,7 @@
                             "name": "ExactContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 163
+                                "line": 166
                             }
                         }
                     ]
@@ -16471,7 +16471,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 164
+                                "line": 167
                             }
                         },
                         {
@@ -16481,7 +16481,7 @@
                             "name": "Alignment",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 164
+                                "line": 167
                             }
                         },
                         {
@@ -16491,7 +16491,7 @@
                             "name": "ExactContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 164
+                                "line": 167
                             }
                         }
                     ]
@@ -16612,7 +16612,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 165
+                                "line": 168
                             }
                         },
                         {
@@ -16622,7 +16622,7 @@
                             "name": "Alignment",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 165
+                                "line": 168
                             }
                         },
                         {
@@ -16632,7 +16632,7 @@
                             "name": "ExactContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 165
+                                "line": 168
                             }
                         }
                     ]
@@ -16753,7 +16753,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 166
+                                "line": 169
                             }
                         },
                         {
@@ -16763,7 +16763,7 @@
                             "name": "Alignment",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 166
+                                "line": 169
                             }
                         },
                         {
@@ -16773,7 +16773,7 @@
                             "name": "ExactContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 166
+                                "line": 169
                             }
                         }
                     ]
@@ -16889,7 +16889,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 167
+                                "line": 170
                             }
                         },
                         {
@@ -16899,7 +16899,7 @@
                             "name": "Alignment",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 167
+                                "line": 170
                             }
                         },
                         {
@@ -16909,7 +16909,7 @@
                             "name": "ExactContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 167
+                                "line": 170
                             }
                         }
                     ]
@@ -17025,7 +17025,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 168
+                                "line": 171
                             }
                         },
                         {
@@ -17035,7 +17035,7 @@
                             "name": "Alignment",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 168
+                                "line": 171
                             }
                         },
                         {
@@ -17045,7 +17045,7 @@
                             "name": "ExactContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 168
+                                "line": 171
                             }
                         }
                     ]
@@ -17261,8 +17261,8 @@
                                 "detail": "vliw",
                                 "stage": 1,
                                 "type": "mau",
-                                "action": "mcp_fabric758",
-                                "table": "tbl_mcp_fabric758"
+                                "action": "mcp_fabric761",
+                                "table": "tbl_mcp_fabric761"
                             }
                         },
                         {
@@ -20136,12 +20136,12 @@
             "field_info": {
                 "bit_width": 16,
                 "field_class": "pkt",
-                "field_name": "hdr.mirror.hop",
+                "field_name": "hdr.mirror.next_hop",
                 "gress": "egress"
             },
             "field_slices": [
                 {
-                    "field_name": "hdr.mirror.hop",
+                    "field_name": "hdr.mirror.next_hop",
                     "slice_info": {
                         "lsb": 0,
                         "msb": 15
@@ -20151,7 +20151,7 @@
             "phv_slices": [
                 {
                     "field_slice": {
-                        "field_name": "hdr.mirror.hop",
+                        "field_name": "hdr.mirror.next_hop",
                         "slice_info": {
                             "lsb": 0,
                             "msb": 15
@@ -20228,7 +20228,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 154
+                                "line": 157
                             }
                         },
                         {
@@ -20238,7 +20238,7 @@
                             "name": "Alignment",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 154
+                                "line": 157
                             }
                         },
                         {
@@ -20248,7 +20248,7 @@
                             "name": "ExactContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 154
+                                "line": 157
                             }
                         }
                     ]
@@ -20348,7 +20348,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 155
+                                "line": 158
                             }
                         },
                         {
@@ -20358,7 +20358,7 @@
                             "name": "Alignment",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 155
+                                "line": 158
                             }
                         },
                         {
@@ -20368,7 +20368,7 @@
                             "name": "ExactContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 155
+                                "line": 158
                             }
                         }
                     ]
@@ -20468,7 +20468,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 156
+                                "line": 159
                             }
                         },
                         {
@@ -20478,7 +20478,7 @@
                             "name": "Alignment",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 156
+                                "line": 159
                             }
                         },
                         {
@@ -20488,7 +20488,7 @@
                             "name": "ExactContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 156
+                                "line": 159
                             }
                         }
                     ]
@@ -20591,7 +20591,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 157
+                                "line": 160
                             }
                         },
                         {
@@ -20601,7 +20601,7 @@
                             "name": "Alignment",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 157
+                                "line": 160
                             }
                         },
                         {
@@ -20611,7 +20611,7 @@
                             "name": "ExactContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 157
+                                "line": 160
                             }
                         }
                     ]
@@ -22697,7 +22697,7 @@
                         }
                     ],
                     "mutually_exclusive_with": [
-                        "hdr.mirror.hop",
+                        "hdr.mirror.next_hop",
                         "hdr.mirror.etype"
                     ]
                 }
@@ -22818,7 +22818,7 @@
                         }
                     ],
                     "mutually_exclusive_with": [
-                        "hdr.mirror.hop",
+                        "hdr.mirror.next_hop",
                         "hdr.mirror.etype"
                     ]
                 }
@@ -24342,7 +24342,7 @@
                             "name": "Solitary",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 231
+                                "line": 234
                             }
                         },
                         {
@@ -24361,7 +24361,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 231
+                                "line": 234
                             }
                         },
                         {
@@ -24371,7 +24371,7 @@
                             "name": "NoSplit",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 231
+                                "line": 234
                             }
                         }
                     ]
@@ -24453,7 +24453,7 @@
                             "name": "Solitary",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 234
+                                "line": 237
                             }
                         },
                         {
@@ -24472,7 +24472,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 234
+                                "line": 237
                             }
                         },
                         {
@@ -24482,7 +24482,7 @@
                             "name": "NoSplit",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 234
+                                "line": 237
                             }
                         }
                     ]
@@ -24554,7 +24554,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 235
+                                "line": 238
                             }
                         }
                     ]
@@ -24636,7 +24636,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 236
+                                "line": 239
                             }
                         }
                     ]
@@ -24718,7 +24718,7 @@
                             "name": "DifferentContainer",
                             "source": {
                                 "file": "mcp_fabric.p4",
-                                "line": 237
+                                "line": 240
                             }
                         }
                     ]
@@ -25716,7 +25716,7 @@
             "num_containers": 64
         }
     ],
-    "run_id": "84782a2d9d2b4cee",
+    "run_id": "9154718c2dc948bb",
     "schema_version": "3.0.0",
     "structures": [
         {
@@ -26746,7 +26746,7 @@
                     }
                 },
                 {
-                    "field_name": "hdr.mirror.hop",
+                    "field_name": "hdr.mirror.next_hop",
                     "slice_info": {
                         "lsb": 0,
                         "msb": 15
@@ -27127,7 +27127,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 218
+                "line": 221
             }
         },
         {
@@ -27139,7 +27139,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 223
+                "line": 226
             }
         },
         {
@@ -27151,7 +27151,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 225
+                "line": 228
             }
         },
         {
@@ -27163,7 +27163,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 227
+                "line": 230
             }
         },
         {
@@ -27175,7 +27175,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 226
+                "line": 229
             }
         },
         {
@@ -27187,7 +27187,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 224
+                "line": 227
             }
         },
         {
@@ -27199,7 +27199,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 215
+                "line": 218
             }
         },
         {
@@ -27259,7 +27259,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 203
+                "line": 206
             }
         },
         {
@@ -27271,7 +27271,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 204
+                "line": 207
             }
         },
         {
@@ -27283,7 +27283,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 205
+                "line": 208
             }
         },
         {
@@ -27295,7 +27295,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 206
+                "line": 209
             }
         },
         {
@@ -27307,7 +27307,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 207
+                "line": 210
             }
         },
         {
@@ -27319,7 +27319,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 208
+                "line": 211
             }
         },
         {
@@ -27331,7 +27331,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 209
+                "line": 212
             }
         },
         {
@@ -27343,7 +27343,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 210
+                "line": 213
             }
         },
         {
@@ -27355,7 +27355,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 211
+                "line": 214
             }
         },
         {
@@ -27367,7 +27367,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 212
+                "line": 215
             }
         },
         {
@@ -27379,7 +27379,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 213
+                "line": 216
             }
         },
         {
@@ -27391,7 +27391,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 214
+                "line": 217
             }
         },
         {
@@ -27919,7 +27919,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 156
+                "line": 159
             }
         },
         {
@@ -27955,14 +27955,14 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 157
+                "line": 160
             }
         },
         {
             "field_info": {
                 "bit_width": 16,
                 "field_class": "pkt",
-                "field_name": "hdr.mirror.hop",
+                "field_name": "hdr.mirror.next_hop",
                 "gress": "egress"
             },
             "source": {
@@ -27979,7 +27979,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 155
+                "line": 158
             }
         },
         {
@@ -28003,7 +28003,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 154
+                "line": 157
             }
         },
         {
@@ -28015,7 +28015,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 234
+                "line": 237
             }
         },
         {
@@ -28027,7 +28027,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 236
+                "line": 239
             }
         },
         {
@@ -28039,7 +28039,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 237
+                "line": 240
             }
         },
         {
@@ -28051,7 +28051,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 231
+                "line": 234
             }
         },
         {
@@ -28063,7 +28063,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 235
+                "line": 238
             }
         },
         {
@@ -28267,7 +28267,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 166
+                "line": 169
             }
         },
         {
@@ -28279,7 +28279,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 167
+                "line": 170
             }
         },
         {
@@ -28291,7 +28291,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 165
+                "line": 168
             }
         },
         {
@@ -28303,7 +28303,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 162
+                "line": 165
             }
         },
         {
@@ -28315,7 +28315,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 163
+                "line": 166
             }
         },
         {
@@ -28327,7 +28327,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 164
+                "line": 167
             }
         },
         {
@@ -28339,7 +28339,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 168
+                "line": 171
             }
         },
         {
@@ -28927,7 +28927,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 219
+                "line": 222
             }
         },
         {
@@ -28939,7 +28939,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 221
+                "line": 224
             }
         },
         {
@@ -28951,7 +28951,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 220
+                "line": 223
             }
         },
         {
@@ -28963,7 +28963,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 222
+                "line": 225
             }
         },
         {
@@ -28975,7 +28975,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 217
+                "line": 220
             }
         },
         {
@@ -28987,7 +28987,7 @@
             },
             "source": {
                 "file": "mcp_fabric.p4",
-                "line": 216
+                "line": 219
             }
         }
     ],
