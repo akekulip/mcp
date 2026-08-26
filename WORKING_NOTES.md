@@ -191,6 +191,15 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   setup_skeleton up + setup_attention up succeeded (bind_pipeline_config needed per client).
   Agent now validating steps 5-7 on silicon (gate sampling, fault mirrors, evidence bump, decay,
   CSIG). Skill testbed.md updated with the deployment landmines.
+- 08-27 ~00:55 STEPS 5-7 SILICON (agent, p4/reports/step5-7-silicon.md): gate 508/4000 copies at
+  attn=4096 (6.25 % x 2 passes), seed 0 -> 0, seed 65535 -> 2/pkt; evidence +1024/pkt exact; decay
+  exact; fault mirrors == inj_drop count exactly; CSIG under a 50 Mb/s shaper: worst_vlink correct
+  92.5 %, qdepth up to 11306 cells, attn saturated 65535 -> ~100 % sampling: THE FAST LOOP CLOSED
+  END-TO-END ON SILICON (H7 mechanism demonstrated; timing measurement still to do).
+  Defects -> P4 v2 (sha 789b5b27, deployed 23:11): mirror_h prepended to copies (Mirror.emit copies
+  the packet as arrived), egress skips copies, evidence forwarded host-pipe -> loop-pipe (reg_attn is
+  PER PIPE: dp9 = pipe 0, loops = another pipe), attention only on fabric passes. Class 14 added to
+  the skill. Agent re-validating v2 now.
 
 ## Next action
 1. Vision/Hulk: check Netronome SDK, rxe, kernel, perftest, DPDK availability (M4 prep).

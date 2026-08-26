@@ -1267,5 +1267,19 @@ nobody "restores" the original text.
 4. **§7.4 register constants.** A register's actions share 4 parameter slots: `a_max` is implicit
    (`bump_cap + k_up − 1`); a stateful action with a computed index cannot be a default action.
 
-Stage budget after all eight steps: ingress 9 of 12 (the §8.1 target, fully spent), egress 3.
+5. **§5.4 mirror content.** Ingress `Mirror.emit()` copies the packet *as it arrived*, not as this
+   pass modified it (measured: the copy's flags tracked the previous pass). The copy therefore
+   carries a 24-byte `mirror_h` (fake Ethernet dst `A5:A5:A5:A5:A5:A5`, ethertype `0x88F1`, then
+   hop/vlink/path_id/attn/flags of the mirroring pass) in front of the unmodified frame; the
+   egress parser recognises the `0xA5A5` prefix and does not run CSIG on copies. The field list
+   may contain no literals, and parser-written key metadata in it breaks stage-1 RNG placement.
+6. **§5.3/§5.7 registers are per pipe.** `reg_attn` is one instance per pipe; the host port (dp9)
+   and the loop ports are in different pipes, so NIC evidence and CSIG exceedance would land in
+   different registers. Evidence packets update the host pipe's register, are forwarded to loop
+   port 5/0 (`tbl_evid_fwd`), update the loop pipe's register on the second pass and are dropped.
+   The controller must read/seed all pipes (`pipe_id=0xffff` writes; reads return one value per pipe).
+7. **§5.3 update cadence.** Attention is updated on the two fabric passes of a data packet (hops 0
+   and 1) and by evidence packets; the delivery pass is not a sample.
+
+Stage budget after all eight steps: ingress 8 of 12, egress 3 (the 16-bit shim removed a stage).
 
