@@ -6,9 +6,9 @@ M:\l
  md.role\l
  md.src_leaf\l
  "];
-cond_9 [ shape=record, style="filled", fillcolor=cornsilk, label="md.role == 1 && hdr.fabric.$valid == 1\l\l
+cond_10 [ shape=record, style="filled", fillcolor=cornsilk, label="md.role == 1 && hdr.fabric.$valid == 1\l\l
  "];
-tbl_mcp_fabric708 [ shape=record, style="filled", fillcolor=cornsilk, label="tbl_mcp_fabric708\l\l
+tbl_mcp_fabric758 [ shape=record, style="filled", fillcolor=cornsilk, label="tbl_mcp_fabric758\l\l
 W:\l
  ig_intr_md_for_dprsr.drop_ctl\l
  "];
@@ -18,24 +18,24 @@ M:\l
 \lW:\l
  md.dst_leaf\l
  "];
-tbl_mcp_fabric715 [ shape=record, style="filled", fillcolor=cornsilk, label="tbl_mcp_fabric715\l\l
+tbl_mcp_fabric765 [ shape=record, style="filled", fillcolor=cornsilk, label="tbl_mcp_fabric765\l\l
 W:\l
  md.rnd_fail\l
  "];
-tbl_mcp_fabric716 [ shape=record, style="filled", fillcolor=cornsilk, label="tbl_mcp_fabric716\l\l
+tbl_mcp_fabric766 [ shape=record, style="filled", fillcolor=cornsilk, label="tbl_mcp_fabric766\l\l
 W:\l
  md.rnd_attn\l
  "];
-cond_10 [ shape=record, style="filled", fillcolor=cornsilk, label="md.hop == 0\l\l
+cond_11 [ shape=record, style="filled", fillcolor=cornsilk, label="md.hop == 0\l\l
  "];
-tbl_mcp_fabric722 [ shape=record, style="filled", fillcolor=cornsilk, label="tbl_mcp_fabric722\l\l
+tbl_mcp_fabric772 [ shape=record, style="filled", fillcolor=cornsilk, label="tbl_mcp_fabric772\l\l
 W:\l
  md.spray_rand\l
  md.spray_hash\l
  "];
-cond_11 [ shape=record, style="filled", fillcolor=cornsilk, label="hdr.evid.$valid == 1\l\l
+cond_12 [ shape=record, style="filled", fillcolor=cornsilk, label="hdr.evid.$valid == 1\l\l
  "];
-tbl_mcp_fabric726 [ shape=record, style="filled", fillcolor=cornsilk, label="tbl_mcp_fabric726\l\l
+tbl_mcp_fabric776 [ shape=record, style="filled", fillcolor=cornsilk, label="tbl_mcp_fabric776\l\l
 W:\l
  md.spray_rr\l
  "];
@@ -68,9 +68,9 @@ M:\l
  md.exceed\l
  md.attn_idx\l
  "];
-cond_12 [ shape=record, style="filled", fillcolor=cornsilk, label="hdr.csig.$valid == 1\l\l
+cond_13 [ shape=record, style="filled", fillcolor=cornsilk, label="hdr.csig.$valid == 1\l\l
  "];
-cond_13 [ shape=record, style="filled", fillcolor=cornsilk, label="md.hop != 2 && !(hdr.evid.$valid == 1)\l\l
+cond_14 [ shape=record, style="filled", fillcolor=cornsilk, label="md.hop != 2 && !(hdr.evid.$valid == 1)\l\l
  "];
 tbl_exceed_csig_0 [ shape=record, style="filled", fillcolor=cornsilk, label="tbl_exceed_csig_0\l\l
 M:\l
@@ -93,11 +93,7 @@ M:\l
  ig_intr_md_for_tm.qid\l
  ig_intr_md_for_dprsr.drop_ctl\l
  "];
-tbl_attn_0 [ shape=record, style="filled", fillcolor=cornsilk, label="tbl_attn_0\l\l
-M:\l
- md.exceed\l
-\lW:\l
- md.attn\l
+cond_15 [ shape=record, style="filled", fillcolor=cornsilk, label="md.hop != 2 || hdr.evid.$valid == 1\l\l
  "];
 tbl_fail_0 [ shape=record, style="filled", fillcolor=cornsilk, label="tbl_fail_0\l\l
 M:\l
@@ -109,6 +105,14 @@ M:\l
  md.mirror_sid\l
  md.flags_out\l
  hdr.udp.checksum\l
+ "];
+tbl_attn_0 [ shape=record, style="filled", fillcolor=cornsilk, label="tbl_attn_0\l\l
+M:\l
+ md.exceed\l
+\lW:\l
+ md.attn\l
+ "];
+cond_16 [ shape=record, style="filled", fillcolor=cornsilk, label="hdr.evid.$valid == 1\l\l
  "];
 tbl_gate_0 [ shape=record, style="filled", fillcolor=cornsilk, label="tbl_gate_0\l\l
 M:\l
@@ -122,10 +126,12 @@ M:\l
  ig_intr_md_for_dprsr.mirror_type\l
  md.mirror_sid\l
  "];
-cond_14 [ shape=record, style="filled", fillcolor=cornsilk, label="hdr.evid.$valid == 1\l\l
- "];
-tbl_mcp_fabric752 [ shape=record, style="filled", fillcolor=cornsilk, label="tbl_mcp_fabric752\l\l
-W:\l
+tbl_evid_fwd_0 [ shape=record, style="filled", fillcolor=cornsilk, label="tbl_evid_fwd_0\l\l
+M:\l
+ md.role\l
+\lW:\l
+ ig_intr_md_for_tm.ucast_egress_port\l
+ ig_intr_md_for_tm.qid\l
  ig_intr_md_for_dprsr.drop_ctl\l
  "];
 tbl_final_0 [ shape=record, style="filled", fillcolor=cornsilk, label="tbl_final_0\l\l
@@ -161,33 +167,35 @@ M:\l
  ig_intr_md_for_dprsr.drop_ctl\l
  "];
     PARSER -> tbl_port_role_0
-    tbl_port_role_0 -> cond_9
-    cond_9 -> tbl_mcp_fabric708
-    cond_9 -> tbl_dst_leaf_0
-    tbl_mcp_fabric708 -> DEPARSER
-    tbl_dst_leaf_0 -> tbl_mcp_fabric715
-    tbl_mcp_fabric715 -> tbl_mcp_fabric716
-    tbl_mcp_fabric716 -> cond_10
-    cond_10 -> tbl_mcp_fabric722
-    cond_10 -> cond_11
-    tbl_mcp_fabric722 -> tbl_mcp_fabric726
-    tbl_mcp_fabric726 -> tbl_spray_sel_0
-    tbl_spray_sel_0 -> tbl_spray_mode_0
-    tbl_spray_mode_0 -> cond_11
-    cond_11 -> tbl_exceed_evid_0
+    tbl_port_role_0 -> cond_10
+    cond_10 -> tbl_mcp_fabric758
+    cond_10 -> tbl_dst_leaf_0
+    tbl_mcp_fabric758 -> DEPARSER
+    tbl_dst_leaf_0 -> tbl_mcp_fabric765
+    tbl_mcp_fabric765 -> tbl_mcp_fabric766
+    tbl_mcp_fabric766 -> cond_11
+    cond_11 -> tbl_mcp_fabric772
     cond_11 -> cond_12
-    tbl_exceed_evid_0 -> cond_13
-    cond_12 -> tbl_exceed_csig_0
+    tbl_mcp_fabric772 -> tbl_mcp_fabric776
+    tbl_mcp_fabric776 -> tbl_spray_sel_0
+    tbl_spray_sel_0 -> tbl_spray_mode_0
+    tbl_spray_mode_0 -> cond_12
+    cond_12 -> tbl_exceed_evid_0
     cond_12 -> cond_13
-    tbl_exceed_csig_0 -> cond_13
-    cond_13 -> tbl_vlink_0
-    cond_13 -> tbl_attn_0
+    tbl_exceed_evid_0 -> cond_14
+    cond_13 -> tbl_exceed_csig_0
+    cond_13 -> cond_14
+    tbl_exceed_csig_0 -> cond_14
+    cond_14 -> tbl_vlink_0
+    cond_14 -> cond_15
     tbl_vlink_0 -> tbl_fail_0
-    tbl_fail_0 -> tbl_attn_0
+    tbl_fail_0 -> cond_15
+    cond_15 -> tbl_attn_0
+    cond_15 -> cond_16
     tbl_attn_0 -> tbl_gate_0
-    tbl_gate_0 -> cond_14
-    cond_14 -> tbl_mcp_fabric752
-    cond_14 -> tbl_final_0
-    tbl_mcp_fabric752 -> DEPARSER
+    tbl_gate_0 -> cond_16
+    cond_16 -> tbl_evid_fwd_0
+    cond_16 -> tbl_final_0
+    tbl_evid_fwd_0 -> DEPARSER
     tbl_final_0 -> DEPARSER
 }

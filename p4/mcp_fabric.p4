@@ -43,6 +43,10 @@
 
 const bit<16> ETYPE_IPV4        = 0x0800;
 const bit<16> ETYPE_MCP_FABRIC  = 0x88F0;   // private, internal only (§3)
+const bit<16> ETYPE_MCP_MIRROR  = 0x88F1;   // mirrored copies to the collector (step 6)
+/* The mirror header's fake Ethernet fields (dst A5:A5:A5:A5:A5:A5, src 02:00:00:00:4D:43)
+ * cannot be constants in the emit field list ("Non-zero constant value ... in digest
+ * field list is not supported on tofino"): the parser start state writes them into metadata. */
 
 /* fabric_h.nxt — what follows the shim.  A parser select on a whole 8-bit value,
  * never a chain of runtime bit tests (§8.4/N11). */
@@ -135,6 +139,24 @@ header bth_h {
     bit<32> w2;
 }
 
+/* Step 6.  Ingress Mirror.emit() copies the packet AS IT ARRIVED — none of this pass's
+ * header edits are in the copy (measured on silicon: the copy's flags tracked the
+ * PREVIOUS pass, p4/reports/step5-7-silicon.md).  So the copy carries this pass's
+ * verdict in a header prepended by the mirror engine, laid out as a complete Ethernet
+ * frame so the collector sees eth(dst A5:A5:…, etype 0x88F1) | mirror_meta | the
+ * original frame.  24 bytes.  The egress parser recognises the 0xA5A5 prefix and
+ * leaves copies alone (no CSIG on copies). */
+header mirror_h {
+    bit<48> dmac;
+    bit<48> smac;
+    bit<16> etype;
+    bit<16> hop;       // pass that took the sample / injected the fault
+    bit<16> vlink;     // virtual link the packet was on (0 at the delivery pass)
+    bit<16> path_id;
+    bit<16> attn;      // attention weight read for this path on this pass
+    bit<16> flags;     // bit0 measured, bit1 dropped, bit2 corrupted
+}
+
 /* §6 D1 — NIC-side evidence. */
 header evid_h {
     bit<8>  magic;
@@ -159,6 +181,7 @@ struct headers_t {
 /* Egress only ever touches the L2 shims (§5.5): everything from IPv4 on is left as
  * unparsed residual, which the deparser re-appends untouched. */
 struct eg_headers_t {
+    mirror_h   mirror;    // present on mirrored copies only; the rest is residual
     ethernet_h ethernet;
     fabric_h   fabric;
     csig_h     csig;
@@ -199,6 +222,9 @@ struct ig_md_t {
     bit<16> fault;       // 0 none, 2 dropped, 4 corrupted (bit0 is reserved for "measured")
     bit<16> flags_out;   // fabric_h.flags to write: fault | measured
     MirrorId_t mirror_sid;   // bit<10>: Mirror.emit() wants a plain field, no cast/slice
+    bit<48> mir_dmac;        // mirror header constants, from tbl_mirror_hdr action data
+    bit<48> mir_smac;
+    bit<16> mir_etype;
 }
 
 struct eg_md_t {
@@ -243,6 +269,11 @@ parser IgParser(packet_in pkt, out headers_t hdr, out ig_md_t md,
         md.fault      = 0;
         md.flags_out  = 0;
         md.mirror_sid = 0;
+        /* Mirror header Ethernet fields: constants are free in the parser, forbidden in
+         * the emit field list, and expensive as MAU action data (112 immediate bits). */
+        md.mir_dmac   = 48w0xA5A5A5A5A5A5;
+        md.mir_smac   = 48w0x020000004D43;
+        md.mir_etype  = ETYPE_MCP_MIRROR;
         transition parse_ethernet;
     }
 
@@ -335,6 +366,7 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
         size    = 64;
         const default_action = set_role(ROLE_OTHER, 0);
     }
+
 
     /* ---- S1: destination leaf ------------------------------------------------
      * path_base is (dst_leaf << 2) computed by the CONTROL PLANE and shipped as
@@ -687,6 +719,24 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
         ig_dprsr_md.drop_ctl = 1;
     }
 
+    /* Step 5/8, per-pipe registers: reg_attn is one instance PER PIPE.  NIC evidence
+     * arrives on the host port (pipe of dp9) while CSIG exceedance is observed on the
+     * loop ports (their pipe), so an evidence packet updates the host pipe's register
+     * and is then FORWARDED to a loop port, where the loop pass updates that pipe's
+     * register and drops it.  Port is control-plane data (a loop port of leaf 0). */
+    action evid_to_loop(bit<9> port) {
+        ig_tm_md.ucast_egress_port = port;
+        ig_tm_md.qid               = 0;
+    }
+    action evid_drop() { ig_dprsr_md.drop_ctl = 1; }
+
+    table tbl_evid_fwd {
+        key     = { md.role : exact; }
+        actions = { evid_to_loop; evid_drop; }
+        size    = 4;
+        const default_action = evid_drop();
+    }
+
     /* dst_leaf is part of the key because the destination leaf's host port is what
      * act_deliver has to write, and a 2-leaf fabric has two of them (dp9 and dp65).
      * It costs no stage: tbl_final already sits downstream of tbl_dst_leaf. */
@@ -745,11 +795,15 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
                 tbl_fail.apply();
             }
 
-            tbl_attn.apply();
-            tbl_gate.apply();
+            /* Attention is updated on the two FABRIC passes of a data packet (hops 0
+             * and 1) and by evidence packets; the delivery pass is not a sample. */
+            if (md.hop != LAST_HOP || hdr.evid.isValid()) {
+                tbl_attn.apply();
+                tbl_gate.apply();
+            }
 
             if (hdr.evid.isValid()) {
-                ig_dprsr_md.drop_ctl = 1;
+                tbl_evid_fwd.apply();
             } else {
                 tbl_final.apply();
             }
@@ -763,7 +817,14 @@ control IgDeparser(packet_out pkt, inout headers_t hdr, in ig_md_t md,
                            // post-MAU frame, shim and all (§5.4 #3); $max_pkt_len truncates
     apply {
         if (ig_dprsr_md.mirror_type == 3w1) {
-            mcp_mirror.emit(md.mirror_sid);
+            /* hop and path_id come from the SHIM, not md.hop / md.attn_idx: emitting
+             * those parser-written key fields here breaks the stage-1 RNG/hash table
+             * placement ("immediate pathway 64 > 32 bits"); header fields and the
+             * MAU-written md fields do not.  The shim is valid post-MAU on every pass
+             * that can mirror (act_enter sets it at hop 0). */
+            mcp_mirror.emit<mirror_h>(md.mirror_sid,
+                { md.mir_dmac, md.mir_smac, md.mir_etype,
+                  hdr.fabric.hop, md.vlink_id, hdr.fabric.path_id, md.attn, md.flags_out });
         }
         pkt.emit(hdr);
     }
@@ -781,7 +842,15 @@ parser EgParser(packet_in pkt, out eg_headers_t hdr, out eg_md_t md,
         md.vlink  = 0;
         md.hop    = 0;
         md.tdelta = 0;
-        transition parse_ethernet;
+        transition select(pkt.lookahead<bit<16>>()) {
+            16w0xA5A5 : parse_mirror;
+            default   : parse_ethernet;
+        }
+    }
+
+    state parse_mirror {
+        pkt.extract(hdr.mirror);
+        transition accept;      // original frame stays residual: no CSIG on copies
     }
 
     state parse_ethernet {

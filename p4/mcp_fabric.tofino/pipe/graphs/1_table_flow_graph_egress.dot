@@ -1,5 +1,5 @@
 digraph egress {
-cond_15 [ shape=record, style="filled", fillcolor=cornsilk, label="hdr.csig.$valid == 1\l\l
+cond_17 [ shape=record, style="filled", fillcolor=cornsilk, label="hdr.csig.$valid == 1\l\l
  "];
 tbl_eg_vlink_0 [ shape=record, style="filled", fillcolor=cornsilk, label="tbl_eg_vlink_0\l\l
 M:\l
@@ -22,7 +22,7 @@ R:\l
 \lW:\l
  md.diff\l
  "];
-cond_16 [ shape=record, style="filled", fillcolor=cornsilk, label="md.diff == 0\l\l
+cond_18 [ shape=record, style="filled", fillcolor=cornsilk, label="md.diff == 0\l\l
  "];
 tbl_csig_replace_a_0 [ shape=record, style="filled", fillcolor=cornsilk, label="tbl_csig_replace_a_0\l\l
 R:\l
@@ -40,14 +40,14 @@ R:\l
  hdr.csig.worst_vlink\l
  hdr.csig.worst_tdelta\l
  "];
-    PARSER -> cond_15
-    cond_15 -> tbl_eg_vlink_0
-    PARSER -> cond_15
-    cond_15 -> DEPARSER
+    PARSER -> cond_17
+    cond_17 -> tbl_eg_vlink_0
+    PARSER -> cond_17
+    cond_17 -> DEPARSER
     tbl_eg_vlink_0 -> tbl_csig_diff_0
-    tbl_csig_diff_0 -> cond_16
-    cond_16 -> tbl_csig_replace_a_0
-    cond_16 -> DEPARSER
+    tbl_csig_diff_0 -> cond_18
+    cond_18 -> tbl_csig_replace_a_0
+    cond_18 -> DEPARSER
     tbl_csig_replace_a_0 -> tbl_csig_replace_b_0
     tbl_csig_replace_b_0 -> DEPARSER
 }

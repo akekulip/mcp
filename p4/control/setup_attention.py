@@ -5,6 +5,44 @@ mirror sessions).  Companion to setup_skeleton.py (steps 1-4: ports, roles, vlin
 failure injection), which must have run first and is the ONLY client that binds
 (client_id 0).  This script uses client_id 2 and does not bind (§5.7).
 
+===========================================================================
+STATUS — RUN ON SILICON 2026-08-27.  Full numbers: p4/reports/step5-7-silicon.md.
+---------------------------------------------------------------------------
+Against the live switch (bf_switchd PID 15392, SDE 9.13.2, mcp_fabric build
+sha256 232b7355fe58c67c...), traffic from Vision on dp9:
+
+  up: params + 256 reg_attn slots + 255 tbl_gate + 16 tbl_eg_vlink   PASS
+  gate volume at attn=4096 (P = 1/16 per pass)   PASS  508 copies / 4000 pkts
+  seed 0 -> 0 copies ; seed 65535 -> ~2 copies + 1 duplicate / pkt   PASS
+  csig.path_id == fabric.path_id                 PASS  508/508, 1989/1989
+  fault mirror count == fail_ctr inj_drop        PASS  256/256 and 238/238
+  NIC evidence bump, 10 x loss_q=5               PASS  4096 -> 14336, exact
+  loss_q=0 does not bump                         PASS
+  clean decay over 10000 pkts                    PASS  exact in both pipes
+  CSIG compare-and-replace under congestion      PASS  worst_vlink=1 in 92.5%,
+                                                       worst_qdepth up to 11306
+
+TWO CONTROL-PLANE DEFECTS FOUND AND FIXED HERE:
+ 1. vlink_dn disagreed with setup_skeleton.py for 6 of the 8 downlinks, so
+    csig.worst_vlink named the wrong link.  See vlink_dn() below.
+ 2. tbl_eg_vlink was keyed on the raw qid, but eg_intr_md.egress_qid is the
+    PORT-GROUP queue number, so 12 of 16 rows could never match.  Measured 1
+    miss per packet in pipe 1 before the fix, 0 after.  See eg_qid() below.
+
+TWO DEFECTS LEFT FOR THE OWNER OF mcp_fabric.p4:
+ 3. Mirror.emit() copies the packet AS IT ARRIVED, without that pass's header
+    edits, so fabric_h.flags never marks the copy it describes (bit1 "dropped"
+    never appears at all) and a hop-0 sample arrives as a plain IPv4 frame that
+    is indistinguishable from a delivery.
+ 4. The egress CSIG compare-and-replace also runs on mirrored copies leaving the
+    COLLECTOR port, and its `diff == 0` predicate is true on ties, so on an idle
+    fabric every copy is stamped with the collector's own queue instead of the
+    fabric's.  Gate it on the egress port being a fabric loop port.
+Also: reg_attn is PER PIPE, and the two evidence sources land in different pipes
+(NIC evidence on dp9 = pipe 0, CSIG exceedance on the loop ports = pipe 1), so
+the source-leaf gate and the in-fabric gate never see each other's evidence.
+===========================================================================
+
 Frozen rule (PREREG amendment v1.3):
     exceedance : attn = attn |+| k_up (saturating, a_max = 65535) ; clean = 0
     clean      : if clean >= n_clean-1 and attn > a_min: clean = 0; attn -= 1
@@ -48,15 +86,40 @@ def vlink_up(leaf, spine):
 
 
 def vlink_dn(spine, leaf):
-    return 8 + leaf * N_SPINE + spine             # 8..15
+    """MUST match setup_skeleton.py's vlink_dn EXACTLY.
+
+    DEFECT FOUND ON SILICON 2026-08-27: this was `8 + leaf*N_SPINE + spine`, which
+    disagrees with the ingress encoding for 6 of the 8 downlinks (only dp172/q0 = 8
+    and dp175/q1 = 15 happened to coincide).  tbl_eg_vlink is what stamps
+    csig.worst_vlink, so the tag named the wrong virtual link exactly when a
+    downlink was the worst hop — the case the mechanism exists to detect.  The
+    ingress encoding in setup_skeleton.py is authoritative because tbl_vlink writes
+    md.vlink_id and tbl_fail keys on it."""
+    return 8 + spine * 4 + leaf                   # 8..15
+
+
+def eg_qid(dev_port, qid):
+    """`eg_intr_md.egress_qid` is the PORT-GROUP queue number, NOT the per-port qid
+    the ingress wrote into ig_tm_md.qid.
+
+    DEFECT FOUND ON SILICON 2026-08-27: tbl_eg_vlink was keyed on the raw qid, so it
+    matched only on ports whose port-group slot is 0 — dp164 and dp172 — and MISSED on
+    the other six loop ports, taking the const default set_eg_vlink(0) and stamping
+    csig.worst_vlink = 0.  Measured: 1 miss per packet in pipe 1 (the dp173 downlink
+    egress), and mirror copies leaving dp9 with qid 0 showed up as egress_qid 8.
+
+    A port group is 4 ports x 8 queues: pg_queue = (port_in_pipe % 4) * 8 + qid.
+    dev_port % 4 == (dev_port & 0x7F) % 4 because 128 is a multiple of 4.  This is the
+    same arithmetic setup_skeleton.tm_coords() uses for the TM shapers."""
+    return (dev_port % 4) * 8 + qid
 
 
 def plan_eg_vlink():
     rows = []
     for leaf in range(4):
         for s in range(N_SPINE):
-            rows.append((LOOP_UP_DP[leaf], s, vlink_up(leaf, s)))
-            rows.append((LOOP_DN_DP[leaf], s, vlink_dn(s, leaf)))
+            rows.append((LOOP_UP_DP[leaf], eg_qid(LOOP_UP_DP[leaf], s), vlink_up(leaf, s)))
+            rows.append((LOOP_DN_DP[leaf], eg_qid(LOOP_DN_DP[leaf], s), vlink_dn(s, leaf)))
     return rows
 
 
@@ -152,12 +215,21 @@ def install_gate(gc, bfrt, tgt):
 
 def install_eg_vlink(gc, bfrt, tgt):
     t = bfrt.table_get("pipe.Egress.tbl_eg_vlink")
+    want = set((p, q) for p, q, _ in plan_eg_vlink())
     for port, qid, vl in plan_eg_vlink():
         _upsert(gc, t, tgt,
                 [t.make_key([gc.KeyTuple("eg_intr_md.egress_port", port),
                              gc.KeyTuple("eg_intr_md.egress_qid", qid)])],
                 [t.make_data([gc.DataTuple("vlink", vl)], "Egress.set_eg_vlink")])
-    print(f"tbl_eg_vlink: {len(plan_eg_vlink())} rows installed")
+    stale = 0
+    for _d, k in list(t.entry_get(tgt, flags={"from_hw": False})):
+        kd = k.to_dict()
+        cur = (kd["eg_intr_md.egress_port"]["value"], kd["eg_intr_md.egress_qid"]["value"])
+        if cur not in want:
+            t.entry_del(tgt, [t.make_key([gc.KeyTuple("eg_intr_md.egress_port", cur[0]),
+                                          gc.KeyTuple("eg_intr_md.egress_qid", cur[1])])])
+            stale += 1
+    print(f"tbl_eg_vlink: {len(plan_eg_vlink())} rows installed, {stale} stale rows removed")
 
 
 def set_thresh_evid(gc, bfrt, tgt, loss_lo, rtt_lo):
@@ -183,6 +255,17 @@ def set_thresh_csig(gc, bfrt, tgt, q_lo):
                              gc.KeyTuple("$MATCH_PRIORITY", 1)])],
                 [t.make_data([], "Ingress.set_exceed")])
     print(f"tbl_exceed_csig: worst_qdepth>={q_lo} cells")
+
+
+def install_evid_fwd(gc, bfrt, tgt, loop_dp=164, role_host=1):
+    """Per-pipe reg_attn (D5): an evidence packet updates the host pipe's register, is
+    forwarded to a loop port (default 5/0 = dp164), updates the loop pipe's register on
+    the second pass and is dropped there (table default)."""
+    t = bfrt.table_get("pipe.Ingress.tbl_evid_fwd")
+    _upsert(gc, t, tgt,
+            [t.make_key([gc.KeyTuple("md.role", role_host)])],
+            [t.make_data([gc.DataTuple("port", loop_dp)], "Ingress.evid_to_loop")])
+    print(f"tbl_evid_fwd: role {role_host} -> loop dev_port {loop_dp}; other roles drop")
 
 
 def install_mirrors(gc, bfrt, tgt, collector_dp):
@@ -223,6 +306,7 @@ def main():
             set_thresh_evid(gc, bfrt, tgt, 1, 255)      # any reported loss is exceedance; rtt off
             set_thresh_csig(gc, bfrt, tgt, 4096)        # 4096 cells ~ 320 KB queued
             install_mirrors(gc, bfrt, tgt, a.collector)
+            install_evid_fwd(gc, bfrt, tgt)
         elif a.cmd == "seed":
             seed_attn(gc, bfrt, tgt, int(a.args[0]))
         elif a.cmd == "params":

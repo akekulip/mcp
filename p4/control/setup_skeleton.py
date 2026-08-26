@@ -51,6 +51,7 @@ Usage (on the switch, with the SDE env set):
     python3 setup_skeleton.py fail <vlink> <pct> [drop|corrupt]
     python3 setup_skeleton.py fail-clear
     python3 setup_skeleton.py shape <vlink> <gbps> # optional, NOT part of `up`
+    python3 setup_skeleton.py unshape <vlink>      # disarm it again
     python3 setup_skeleton.py blackhole <src_leaf> <dst_leaf> <spray>
     python3 setup_skeleton.py counters [--json]
     python3 setup_skeleton.py zero                 # reset vlink counters, clear tbl_fail
@@ -933,16 +934,46 @@ def set_fail(gc, bfrt, tgt, vlink, pct, mode="drop"):
           % (vlink, vlink_name(vlink), mode, hi, (hi + 1) / 65536.0 * 100))
 
 
+def clear_shaper(gc, bfrt, tgt, vlink):
+    """Disarm a virtual link's max-rate shaper and restore it to line rate.
+
+    A shaper left armed by a previous experiment is a silent packet sink that the
+    next person will spend an afternoon on, so `shape` always has an inverse."""
+    port, qid = vlink_placement(vlink)
+    pipe, pg_id, pg_queue = tm_coords(port, qid)
+    tgt_tm = _tm_target(pipe)
+    q_shape = bfrt.table_get("tf1.tm.queue.sched_shaping")
+    q_cfg = bfrt.table_get("tf1.tm.queue.sched_cfg")
+    q_cfg.entry_mod(
+        tgt_tm,
+        [q_cfg.make_key([gc.KeyTuple("pg_id", pg_id), gc.KeyTuple("pg_queue", pg_queue)])],
+        [q_cfg.make_data([gc.DataTuple("scheduling_enable", bool_val=True),
+                          gc.DataTuple("max_rate_enable", bool_val=False)])])
+    q_shape.entry_mod(
+        tgt_tm,
+        [q_shape.make_key([gc.KeyTuple("pg_id", pg_id), gc.KeyTuple("pg_queue", pg_queue)])],
+        [q_shape.make_data([gc.DataTuple("unit", str_val="BPS"),
+                            gc.DataTuple("provisioning", str_val="UPPER"),
+                            gc.DataTuple("max_rate", val=25 * 1000 * 1000),
+                            gc.DataTuple("max_burst_size", val=16384)])])
+    print("  vlink %2d (%s) dp%d qid%d: shaper DISARMED, max_rate back to 25 Gb/s"
+          % (vlink, vlink_name(vlink), port, qid))
+
+
+def _tm_target(pipe):
+    import bfrt_grpc.client as gc_mod
+    return gc_mod.Target(device_id=DEV, pipe_id=pipe)
+
+
 def set_shaper(gc, bfrt, tgt, vlink, gbps):
     """A per-queue max-rate shaper gives a virtual link a finite capacity.
 
     THE SHAPER IS INERT WITHOUT THE SECOND CALL: sched_shaping sets the rate,
     sched_cfg's max_rate_enable arms it.  TM tables are PIPE-SPECIFIC: the target
     must be the port's own pipe, which for the loop ports is pipe 1, NOT 0."""
-    import bfrt_grpc.client as gc_mod
     port, qid = vlink_placement(vlink)
     pipe, pg_id, pg_queue = tm_coords(port, qid)
-    tgt_tm = gc_mod.Target(device_id=DEV, pipe_id=pipe)
+    tgt_tm = _tm_target(pipe)
     q_shape = bfrt.table_get("tf1.tm.queue.sched_shaping")
     q_cfg = bfrt.table_get("tf1.tm.queue.sched_cfg")
     q_shape.entry_mod(
@@ -950,7 +981,7 @@ def set_shaper(gc, bfrt, tgt, vlink, gbps):
         [q_shape.make_key([gc.KeyTuple("pg_id", pg_id), gc.KeyTuple("pg_queue", pg_queue)])],
         [q_shape.make_data([gc.DataTuple("unit", str_val="BPS"),
                             gc.DataTuple("provisioning", str_val="UPPER"),
-                            gc.DataTuple("max_rate", val=gbps * 1000 * 1000),  # kb/s
+                            gc.DataTuple("max_rate", val=int(gbps * 1000 * 1000)),  # kb/s
                             gc.DataTuple("max_burst_size", val=16384)])])
     q_cfg.entry_mod(
         tgt_tm,
@@ -1147,7 +1178,9 @@ def main():
     elif cmd == "fail-clear":
         clear_fail(bfrt, tgt)
     elif cmd == "shape":
-        set_shaper(gc, bfrt, tgt, int(args[1]), int(args[2]))
+        set_shaper(gc, bfrt, tgt, int(args[1]), float(args[2]))
+    elif cmd == "unshape":
+        clear_shaper(gc, bfrt, tgt, int(args[1]))
     elif cmd == "blackhole":
         blackhole(gc, bfrt, tgt, int(args[1]), int(args[2]), int(args[3]))
     elif cmd == "counters":
