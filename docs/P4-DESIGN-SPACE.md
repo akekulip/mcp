@@ -1206,9 +1206,9 @@ Being explicit here is cheaper than rediscovering each of these mid-build.
    table changes.
 3. **`bf_switchd` restart approval and a scheduling window** — the chip currently runs
    `defense4_caseA` (H12).
-4. **Docker group membership**, so the container SDE question in §9.1 can actually be answered rather
+4. **Docker group membership** — checked 2026-08-26: `decps` is not in `docker` on the switch (needs `sudo usermod -aG docker decps`), so the container SDE question in §9.1 can actually be answered rather
    than left unknown.
-5. **Confirm the fabric shape**: 2 leaves × 4 spines or 4 leaves × 2 spines? Both fit 16 virtual links;
+5. **Confirm the fabric shape** — DECIDED 2026-08-26 by Philip: **4 leaves × 2 spines**. Was: 2 leaves × 4 spines or 4 leaves × 2 spines? Both fit 16 virtual links;
    the first gives more spray fan-out (better for the spraying claims), the second more leaf
    diversity (better for the traffic-matrix claims).
 

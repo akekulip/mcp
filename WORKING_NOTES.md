@@ -129,6 +129,16 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   §10 rule metric + from-onset reported; faulty uplink randomized per seed (seed<N>.fault);
   point frozen at 4 %, loss 1e-4, 100 ms. PREREG §14 amendment v1.2 appended. v1.2 GATE LAUNCHED:
   Vision seeds 1000-1019 (10-wide), Hulk 1020-1029 (5-wide), OUT=results_real_v12 (~6.5 h).
+- 2026-08-26 ~21:30 SWITCH REACHABLE (decps@10.10.54.81, up since ~17:15): chip FREE — no
+  bf_switchd, gc-switchd inactive+masked (defense4_caseA NOT loaded). SDE 9.13.2 at
+  /home/decps/Downloads/bf-sde-9.13.2 (also /opt/bf-sde-9.13.2). mcp_fabric.p4 (sha c40dbfbe)
+  compiled there: 0 errors, same stages/tables/bin size as local 9.13.1 -> H17 closed for step 4.
+  Build at ~/mcp/p4/mcp_fabric.tofino on the switch. Starting bf_switchd = gated on Philip.
+- Philip 2026-08-26: bf_switchd NOT YET (chip stays idle; prepared: ~/mcp/p4/mcp_fabric_abs.conf +
+  launch_mcp_switchd.sh on the switch, run with sudo when approved). FABRIC SHAPE DECIDED:
+  **4 leaves x 2 spines** (P4 design §12 Q5) -> update P4-DESIGN-SPACE §5/§12 and the vlink map.
+  Q4: decps is NOT in the docker group on the switch (needs sudo usermod). Q1/Q2 (dp9 host, dp65
+  Agilio leg) still need a live bf_switchd to read link state.
 
 ## Next action
 1. Vision/Hulk: check Netronome SDK, rxe, kernel, perftest, DPDK availability (M4 prep).
