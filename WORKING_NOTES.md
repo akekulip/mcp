@@ -290,6 +290,10 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   §14 (4 %, 1e-4, 100 ms, MoE-64, random uplink, onset U[0.3,0.9] s). Summary:
   sim/gate/results_real_v12_summary.txt. Tier-1 next: MCP + baselines at this point via co-sim
   (1 h/run; 15 concurrent on Vision+Hulk).
+- 08-27 ~09:45 TIER-1 CO-SIM PILOT LAUNCHED at the frozen point: arms mcp (LULESH-tuned dlinucb,
+  alpha 0, floor 0.75 — a PILOT config, Tier-1 tuning not run) and cusum (explore 0), same 30
+  seeds/faults/onsets as the gate -> paired with uniform/random/oracle. Vision seeds 1000-1019
+  (10-wide), Hulk 1020-1029 (5-wide); ~4 h. results_tier1_cosim/ on each host.
 - 08-27 ~05:45 SLOW LOOP ON SILICON (p4/reports/slow-loop-silicon.md): adapter correct first try;
   copies 117/epoch (attn decays to <4096 -> 5.86 %), counters exact, frozen mode 0 writes, uniform
   policy rotates exactly (bfrt readback), fault -> vlink 0/9 top (identifiable only as a pair with
