@@ -259,6 +259,11 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   + explore_floor=0.25 (coverage guarantee) -> b32: mcp median 8 vs uniform 9, 0 censored (no
   more collapse); b4: still 4/5 censored (floor = 1 slot). Awaiting the upper-sided CUSUM fix
   before any tuning; then the §3.2 tuning block, not ad-hoc knob turning.
+- 08-27 ~05:00 Localizer: upper-sided loss CUSUM landed (29fc176) but alarms unchanged (46/55):
+  the real source is IDLE links — a probe returning (0,0) leaves the Beta(1,1) prior mean 0.5
+  and the CUSUM explodes (~2000/epoch). Builder making zero-count samples no-ops. Hardware loop
+  now has --policy mcp (McpLearnedPolicy, ed81082/0b59db6). Pending: zero-count fix -> rerun
+  run_cosim.sh; slow-loop silicon report; v1.2 gate.
 
 ## Next action
 1. Vision/Hulk: check Netronome SDK, rxe, kernel, perftest, DPDK availability (M4 prep).
