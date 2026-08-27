@@ -155,6 +155,49 @@ class TestPooledBaseline(unittest.TestCase):
             locs = sparse_run(seed, 200, "pooled", background=1e-4)
             self.assertFalse(any(l.anomaly for l in locs), "false alarm with seed %d" % seed)
 
+    def test_upper_sided_loss_no_healthy_top_while_alarm_on(self):
+        """Regression (co-sim LULESH-128): budget 32, per-probe counts 500-50000, one link at
+        1e-3 from epoch 5. No alarm before the faulty link's first post-fault probe, and a
+        healthy link is never top-ranked while the anomaly bit is on."""
+        faulty = SPARSE_FAULTY
+        for seed in (1, 2, 3):
+            rng = random.Random(seed)
+            state = InferState()
+            first_probe = None
+            for e in range(55):
+                samples = []
+                for j in range(32):
+                    link = SPARSE_LINKS[(32 * e + j) % 128]
+                    n = rng.choice([500, 1000, 5000, 20000, 50000])
+                    on = link == faulty and e >= 5
+                    if on and first_probe is None:
+                        first_probe = e
+                    lost = sum(1 for _ in range(n) if rng.random() < (1e-3 if on else 0.0))
+                    samples.append(Sample(link, n - lost, lost, (rng.gauss(50.0, 2.0),), e))
+                state = infer.update(state, samples, SPARSE_PATHS, baseline_mode="pooled")
+                loc = infer.localize(state, 1, infer.H_DEFAULT)
+                if first_probe is None:
+                    self.assertFalse(loc.anomaly, "seed %d: alarm at epoch %d before fault probed" % (seed, e))
+                if loc.anomaly:
+                    self.assertEqual(loc.ranked[0][0], faulty, "seed %d epoch %d: healthy top" % (seed, e))
+                self.assertEqual(state.get(link).cusum_loss_neg, 0.0)
+
+    def test_alarm_min_observations_gate(self):
+        locs = sparse_run(1, 60, "pooled", SPARSE_FAULTY, 1e-3)
+        self.assertTrue(any(l.anomaly for l in locs))          # default min_observations = 1
+        self.assertEqual(infer.ALARM_MIN_OBS, 1)
+        state = InferState()
+        rng = random.Random(1)
+        for e in range(60):
+            samples = []
+            for j in range(4):
+                link = SPARSE_LINKS[(4 * e + j) % 128]
+                lost = sum(1 for _ in range(5000) if rng.random() < (1e-3 if link == SPARSE_FAULTY and e >= 5 else 0.0))
+                samples.append(Sample(link, 5000 - lost, lost, (), e))
+            state = infer.update(state, samples, SPARSE_PATHS, baseline_mode="pooled")
+        self.assertTrue(infer.localize(state, 1, min_observations=1).anomaly)
+        self.assertFalse(infer.localize(state, 1, min_observations=3).anomaly)  # only 2 obs by 60
+
     def test_default_mode_is_per_element_and_bad_mode_rejected(self):
         self.assertEqual(infer.load_frozen_config()["baseline_mode"], "per_element")
         self.assertEqual(infer.BASELINE_MODE, "per_element")

@@ -19,8 +19,9 @@ Pipeline per epoch (:func:`update`):
    are discounted toward the prior by the frozen factor ``forget_rho`` (an exponential
    forgetting window of ``1/(1-rho)`` epochs), so the posterior tracks the *recent* state and
    the CUSUM below sees a change rather than a 1/n-diluted average.
-3. **Change detection.** A two-sided CUSUM per element on the posterior-mean loss and on the
-   posterior-mean latency against the element's own running baseline (an exponential moving
+3. **Change detection.** A CUSUM per element on the posterior-mean loss (upper-sided only:
+   an increase in loss is the only loss anomaly) and a two-sided CUSUM on the posterior-mean
+   latency against the element's own running baseline (an exponential moving
    average of the posterior mean).  For the element's first ``baseline_warmup_epochs``
    observed epochs the baseline simply follows the posterior mean and no CUSUM increment is
    taken, so that the decay of the prior pseudo-counts is not read as a change.
@@ -31,10 +32,12 @@ Pipeline per epoch (:func:`update`):
    observation.  Per-element posteriors are unchanged in both modes.
    Increments are normalised by the slack ``k`` so that the statistic is dimensionless and
    the single threshold ``h`` is shared between loss and latency:
-   ``S+ <- max(0, S+ + (x - b)/k - 1)``, ``S- <- max(0, S- + (b - x)/k - 1)``.
+   ``S+ <- max(0, S+ + (x - b)/k - 1)``, ``S- <- max(0, S- + (b - x)/k - 1)`` (latency only;
+   ``S-`` of loss is identically 0).
 4. **Ranking** (:func:`localize`): elements ordered by CUSUM statistic (max of loss and
    latency, max of the two sides), ties broken by posterior-mean loss then element id; the
-   anomaly bit is 1 iff the top-ranked statistic exceeds ``h``.
+   anomaly bit is 1 iff some element with at least ``alarm_min_observations`` observations
+   has a statistic above ``h`` (default 1, i.e. the top-ranked statistic exceeds ``h``).
 
 Everything is deterministic: no randomness, no wall-clock reads.
 """
@@ -97,6 +100,7 @@ FORGET_RHO = _cfg_float(_FROZEN, "forget_rho", 0.9)
 BASELINE_WARMUP = int(_cfg_float(_FROZEN, "baseline_warmup_epochs", 10))
 BASELINE_MODE = _FROZEN.get("baseline_mode", "per_element")
 BASELINE_MODES = ("per_element", "pooled")
+ALARM_MIN_OBS = int(_cfg_float(_FROZEN, "alarm_min_observations", 1))
 PRIOR_BETA_ALPHA = _cfg_float(_FROZEN, "prior_beta_alpha", 1.0)
 PRIOR_BETA_BETA = _cfg_float(_FROZEN, "prior_beta_beta", 1.0)
 PRIOR_NG_MU = _cfg_float(_FROZEN, "prior_ng_mu", 0.0)
@@ -125,7 +129,7 @@ class ElementState:
     base_lat: Optional[float] = None
     n_obs_loss: int = 0
     n_obs_lat: int = 0
-    # Two-sided CUSUM statistics
+    # CUSUM statistics (loss is upper-sided only: cusum_loss_neg stays 0.0)
     cusum_loss_pos: float = 0.0
     cusum_loss_neg: float = 0.0
     cusum_lat_pos: float = 0.0
@@ -214,8 +218,11 @@ def _deaggregate(samples: Iterable[Sample], path_to_links: Dict[str, List[str]]
 
 
 def _track(pos: float, neg: float, x: float, base: Optional[float], n_obs: int, k: float,
-           gamma: float, pooled: bool = False) -> Tuple[float, float, float]:
+           gamma: float, pooled: bool = False, two_sided: bool = True
+           ) -> Tuple[float, float, float]:
     """One CUSUM + baseline step; returns (S+, S-, new baseline).
+
+    ``two_sided=False`` keeps only the upper side (``S-`` returned as 0).
 
     During the first ``BASELINE_WARMUP`` observations the baseline follows ``x`` and the
     CUSUM stays at zero.  In pooled mode ``base``/``n_obs`` are the pool's and the returned
@@ -225,7 +232,8 @@ def _track(pos: float, neg: float, x: float, base: Optional[float], n_obs: int, 
         return 0.0, 0.0, (base if pooled and base is not None else x)
     z = (x - base) / k
     new_base = base if pooled else (1.0 - gamma) * base + gamma * x
-    return max(0.0, pos + z - 1.0), max(0.0, neg - z - 1.0), new_base
+    neg_new = max(0.0, neg - z - 1.0) if two_sided else 0.0
+    return max(0.0, pos + z - 1.0), neg_new, new_base
 
 
 def _forget(x: float, prior: float, rho: float) -> float:
@@ -266,7 +274,7 @@ def _update_element(st: ElementState, delivered: float, lost: float, lats: Seque
     pooled = pool is not None
     b_loss, n_loss = (pool.loss_mean, pool.n_obs_loss) if pooled else (st.base_loss, st.n_obs_loss)
     clp, cln, base_loss = _track(st.cusum_loss_pos, st.cusum_loss_neg, new.loss_mean, b_loss,
-                                 n_loss, K_CUSUM_LOSS, gamma, pooled)
+                                 n_loss, K_CUSUM_LOSS, gamma, pooled, two_sided=False)
     base_lat, cap, can = st.base_lat, st.cusum_lat_pos, st.cusum_lat_neg
     if n:
         b_lat, n_lat = (pool.latency_mean, pool.n_obs_lat) if pooled else (st.base_lat, st.n_obs_lat)
@@ -321,7 +329,8 @@ def update(state: InferState, samples: Iterable[Sample], path_to_links: Dict[str
 # Ranking
 # --------------------------------------------------------------------------------------------
 def localize(state: InferState, k: int = 1, h: float = H_DEFAULT,
-             exclude_prefixes: Tuple[str, ...] = ("path:",)) -> Localization:
+             exclude_prefixes: Tuple[str, ...] = ("path:",),
+             min_observations: int = ALARM_MIN_OBS) -> Localization:
     """Rank elements by CUSUM statistic and emit the anomaly bit and top-``k`` suspects.
 
     Args:
@@ -331,12 +340,15 @@ def localize(state: InferState, k: int = 1, h: float = H_DEFAULT,
             (PREREG section 3.3, false-alarm operating point).
         exclude_prefixes: Composite elements excluded from the ranking (paths are kept as
             elements for the reward's ``C_p`` but a suspect is an atomic element).
+        min_observations: An element can raise the alarm only after this many observations
+            (frozen default ``alarm_min_observations``); the ranking itself is unaffected.
     """
     ranked = sorted(
         ((e, st.cusum) for e, st in state.elements.items() if not e.startswith(exclude_prefixes)),
         key=lambda es: (-es[1], -state.elements[es[0]].loss_mean, es[0]),
     )
-    anomaly = bool(ranked) and ranked[0][1] > h
+    anomaly = any(stat > h and state.elements[e].n_obs_loss >= min_observations
+                  for e, stat in ranked)
     return Localization(anomaly=anomaly, ranked=ranked, suspects=[e for e, _ in ranked[:k]])
 
 

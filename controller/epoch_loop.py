@@ -40,6 +40,7 @@ CSV_COLUMNS = [
     "t_read_us", "t_sync_us", "t_infer_us", "t_write_us", "tau_slow_us",
     "probes_per_s", "mirror_bytes_per_s", "reg_writes", "counter_reads",
     "policy", "budget", "chosen", "frozen", "attn_p0_mean", "attn_hi_slots",
+    "vlink_deltas",
 ]
 
 
@@ -190,6 +191,12 @@ class EpochLoop:
             "frozen": int(self.freeze),
             "attn_p0_mean": (sum(current) / len(current)) if current else 0,
             "attn_hi_slots": sum(1 for a in current if a >= self.policy.a_hi),
+            # per-vlink packet deltas this epoch, straight from the counter samples:
+            # the direct check that the counter read is tracking real traffic
+            "vlink_deltas": ";".join(
+                "%s=%d" % (str(s.element).split(":")[1], s.delivered)
+                for s in obs.samples
+                if str(s.element).startswith("vlink:") and s.delivered),
         }
         self._csv.writerow(row)
         self._fh.flush()
