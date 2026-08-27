@@ -164,6 +164,7 @@ def run(obs_path: str, act_path: str, policy_name: str, explore: float, epoch_us
         if logf:
             top = loc.ranked[0] if loc.ranked else ("-", 0.0)
             logf.write(f"{epoch},{int(loc.anomaly)},{top[0]},{top[1]:.3f},{';'.join(map(str, chosen))}\n")
+            logf.flush()
         act.write(",".join(map(str, chosen)) + "\n")
         act.flush()
     log.info("sim closed the observation stream after epoch %d", epoch)
