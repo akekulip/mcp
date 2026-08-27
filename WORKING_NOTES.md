@@ -301,6 +301,9 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   were at delta 1e-3 (recorded as such). Pilot restarted ~11:00, ~4 h.
   (First relaunch doubled the workers: `pkill -f run_tier1_cosim.sh` killed the ssh shell itself.
   Use `pgrep -f "run_tier1_cosim[.]sh"`. Cleaned and relaunched once at ~11:10: 10 + 5 workers.)
+- 08-27 ~11:20 prior-free p0 landed (hash be12e7b2). PROVENANCE: the running pilot loaded infer.py
+  hash 116ffc9f with delta 1e-4 (pooled mode; p0 = pool posterior mean, prior mass negligible at
+  pool scale) — record this hash with the pilot results; rerun only if numbers are for the paper.
 - 08-27 ~05:45 SLOW LOOP ON SILICON (p4/reports/slow-loop-silicon.md): adapter correct first try;
   copies 117/epoch (attn decays to <4096 -> 5.86 %), counters exact, frozen mode 0 writes, uniform
   policy rotates exactly (bfrt readback), fault -> vlink 0/9 top (identifiable only as a pair with
