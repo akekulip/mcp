@@ -256,6 +256,9 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   LULESH-128 mcp v0 is WORSE than uniform; root cause = localizer false alarms (anomaly on in
   46/55 epochs every run: two-sided loss CUSUM trips on healthy links in pooled mode). Fix: loss
   CUSUM upper-sided only (builder). Learner untuned; results interim, not for the paper.
+  + explore_floor=0.25 (coverage guarantee) -> b32: mcp median 8 vs uniform 9, 0 censored (no
+  more collapse); b4: still 4/5 censored (floor = 1 slot). Awaiting the upper-sided CUSUM fix
+  before any tuning; then the §3.2 tuning block, not ad-hoc knob turning.
 
 ## Next action
 1. Vision/Hulk: check Netronome SDK, rxe, kernel, perftest, DPDK availability (M4 prep).

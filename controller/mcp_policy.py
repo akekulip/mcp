@@ -40,6 +40,8 @@ class McpConfig:
     window: int = 100              # swlinucb window (epochs)
     ridge: float = 1.0
     eta: float = 0.05              # dual-ascent step for shadow prices
+    explore_floor: float = 0.25    # share of each resource cap reserved for the least-recently
+                                   # probed elements (coverage guarantee; 0 = pure bandit)
     beta: float = 1.0              # §7.2 evidence weight
     kappa: float = 4.0             # §7.2 evidence scale (= localizer h)
     no_prices: bool = False        # A1
@@ -159,7 +161,20 @@ class McpPolicy:
         net.sort(key=lambda t: -t[0])
         usage = {r: 0.0 for r in self.cfg.caps}
         chosen: List[str] = []
+        # coverage floor: the least-recently probed elements first, up to explore_floor of caps
+        if self.cfg.explore_floor > 0:
+            xmap = {e: x for _, e, x in net}
+            floor_caps = {r: cap * self.cfg.explore_floor for r, cap in self.cfg.caps.items()}
+            for e in sorted(self.elements, key=lambda e: (self.last_probe[e], e)):
+                c = self.costs.get(e, {})
+                if all(usage.get(r, 0.0) + c.get(r, 0.0) <= fc for r, fc in floor_caps.items()):
+                    chosen.append(e)
+                    for r, v in c.items():
+                        usage[r] = usage.get(r, 0.0) + v
+                    self.last_x[e] = xmap[e]
         for score, e, x in net:
+            if e in chosen:
+                continue
             c = self.costs.get(e, {})
             if all(usage.get(r, 0.0) + c.get(r, 0.0) <= cap for r, cap in self.cfg.caps.items()):
                 chosen.append(e)
