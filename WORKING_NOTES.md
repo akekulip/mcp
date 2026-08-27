@@ -236,6 +236,14 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   reg_attn snapshot; tbl_fail = ground truth, never a sample) + policies.py (uniform/random/
   oracle/mcp_stub = A6). Shared Sample(element, delivered, lost, latency_us, t_us) contract.
   Later: point sim/gate analysis at infer.localize too (§3.3 says every arm uses it).
+- 08-27 ~03:10 nic/evidence_probe.py DONE (agent): spray recovery = zlib.crc32(src|dst|sport)&1,
+  4983/4983 vs silicon; 1 % drop -> loss on the right path only, reg_attn -> 65535 both pipes.
+  H7-F1 (12 reps, v1.4): tau_fast 10.115 ms (CI 10.10-10.13), sid-3 check 10.47 ms, ratio 8.8
+  (CI 8.6-9.1) -> H7 FAILS for F1, structurally (no in-band loss evidence; floor = RTT tail of the
+  probe path, 1.8 ms; 2 ms window gives 2.0 ms/ratio 44 with specificity breaking). Recorded in
+  PREREG §14. Defect: evidence-packet copies had path_id 0 -> P4 emits md.mir_path (MAU copy of
+  attn_idx) now. NOTE for the paper: "fast where the data plane can see, host-bound where it
+  cannot" is the honest H7 story.
 
 ## Next action
 1. Vision/Hulk: check Netronome SDK, rxe, kernel, perftest, DPDK availability (M4 prep).
