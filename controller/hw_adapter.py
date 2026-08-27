@@ -302,6 +302,7 @@ class BfrtAdapter:
         self.tgt = gc.Target(device_id=DEV, pipe_id=0xFFFF)
         self.source = source
         self._prev: Dict[int, Tuple[int, int]] = {}
+        self._attn_keys: Optional[List[Any]] = None
         self.reg_writes = 0
 
     @staticmethod
@@ -344,14 +345,20 @@ class BfrtAdapter:
         return attn, clean
 
     def write_attn(self, vec: List[int]) -> None:
+        # The 256 KEY objects are identical every epoch, so build them once: rebuilding
+        # them per epoch cost a measured 23.6 ms/epoch against 9.6 ms for the same
+        # entry_add with pre-built keys, which is most of the reason tau_slow overran a
+        # 100 ms epoch.  Only the DATA changes, so only the data is rebuilt.
         t = self.bfrt.table_get("pipe.Ingress.reg_attn")
-        keys, data = [], []
-        for i, a in enumerate(vec[:N_PATHS]):
-            keys.append(t.make_key([self.gc.KeyTuple("$REGISTER_INDEX", i)]))
-            data.append(t.make_data([self.gc.DataTuple("Ingress.reg_attn.attn", int(a)),
-                                     self.gc.DataTuple("Ingress.reg_attn.clean", 0)]))
-        t.entry_add(self.tgt, keys, data)      # register writes are idempotent adds
-        self.reg_writes += len(keys)
+        if self._attn_keys is None:
+            self._attn_keys = [t.make_key([self.gc.KeyTuple("$REGISTER_INDEX", i)])
+                               for i in range(N_PATHS)]
+        n = min(len(vec), N_PATHS)
+        data = [t.make_data([self.gc.DataTuple("Ingress.reg_attn.attn", int(a)),
+                             self.gc.DataTuple("Ingress.reg_attn.clean", 0)])
+                for a in vec[:n]]
+        t.entry_add(self.tgt, self._attn_keys[:n], data)   # register writes are idempotent adds
+        self.reg_writes += n
 
     def observe(self, epoch: int) -> Observation:
         t_us = int(time.time() * 1e6)

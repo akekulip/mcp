@@ -198,6 +198,30 @@ class TestPooledBaseline(unittest.TestCase):
         self.assertTrue(infer.localize(state, 1, min_observations=1).anomaly)
         self.assertFalse(infer.localize(state, 1, min_observations=3).anomaly)  # only 2 obs by 60
 
+    def test_idle_probe_carries_no_information(self):
+        """(0,0) samples must not touch posterior, baseline, CUSUM, n_obs or the pool."""
+        for mode in ("per_element", "pooled"):
+            st = InferState()
+            for e in range(30):
+                st = infer.update(st, [Sample("vlink:idle", 0, 0, (), e)], {}, baseline_mode=mode)
+                self.assertEqual(st.pool, InferState().pool)
+                self.assertEqual(infer.localize(st, 1).ranked, [])
+            self.assertEqual(st.get("vlink:idle").n_obs_loss, 0)
+            self.assertEqual(st.get("vlink:idle").cusum, 0.0)
+            self.assertEqual(st.get("vlink:idle").loss_alpha, infer.PRIOR_BETA_ALPHA)
+            # a mixed stream (0,0) x 5 then (5000,0) == the (5000,0) sample alone
+            mixed = InferState()
+            for e in range(5):
+                mixed = infer.update(mixed, [Sample("vlink:7", 0, 0, (), e)], {}, baseline_mode=mode)
+            mixed = infer.update(mixed, [Sample("vlink:7", 5000, 0, (), 5)], {}, baseline_mode=mode)
+            alone = infer.update(InferState(), [Sample("vlink:7", 5000, 0, (), 5)], {},
+                                 baseline_mode=mode)
+            self.assertEqual(mixed.get("vlink:7"), alone.get("vlink:7"))
+            self.assertEqual(mixed.pool, alone.pool)
+            # de-aggregated path sample with zero counts is dropped too
+            z = infer.update(InferState(), [Sample("path:0", 0, 0, (), 1)], PATH_TO_LINKS)
+            self.assertEqual(z.elements, {})
+
     def test_default_mode_is_per_element_and_bad_mode_rejected(self):
         self.assertEqual(infer.load_frozen_config()["baseline_mode"], "per_element")
         self.assertEqual(infer.BASELINE_MODE, "per_element")

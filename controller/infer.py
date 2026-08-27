@@ -13,7 +13,9 @@ Pipeline per epoch (:func:`update`):
    fractional pseudo-counts and each latency sample divided by ``n``.  No rounding is applied
    (Beta/Normal-Gamma posteriors accept real-valued pseudo-counts); this keeps the update
    exactly linear so that Pingmesh-style intersection is a special case.  The path itself is
-   also kept as a composite element.
+   also kept as a composite element.  A sample (or de-aggregated share) with
+   ``delivered + lost == 0`` and no latency samples carries no information: it is dropped
+   before any state is touched (an idle-but-probed link is treated as not probed).
 2. **Posteriors.** Per element: Beta(alpha, beta) on the loss rate (alpha counts losses) and
    Normal-Gamma(mu, kappa, a, b) on latency.  Before each observed epoch the pseudo-counts
    are discounted toward the prior by the frozen factor ``forget_rho`` (an exponential
@@ -242,17 +244,22 @@ def _forget(x: float, prior: float, rho: float) -> float:
 
 def _posterior_step(st: ElementState, delivered: float, lost: float, lats: Sequence[float],
                     t_us: int, rho: float) -> ElementState:
-    """Forgetting + conjugate posterior update only (no baseline / CUSUM)."""
-    # Beta-Binomial with exponential forgetting toward the prior
-    la = _forget(st.loss_alpha, PRIOR_BETA_ALPHA, rho) + lost
-    lb = _forget(st.loss_beta, PRIOR_BETA_BETA, rho) + delivered
-    # Normal-Gamma conjugate update (same forgetting on kappa, a, b; mu is kept)
-    mu = st.ng_mu
-    kappa = _forget(st.ng_kappa, PRIOR_NG_KAPPA, rho)
-    a = _forget(st.ng_alpha, PRIOR_NG_ALPHA, rho)
-    b = _forget(st.ng_beta, PRIOR_NG_BETA, rho)
+    """Forgetting + conjugate posterior update only (no baseline / CUSUM).
+
+    The loss posterior is touched only when ``delivered + lost > 0`` and the latency posterior
+    only when latency samples are present; zero-information parts are left untouched.
+    """
+    la, lb, n_loss = st.loss_alpha, st.loss_beta, st.n_obs_loss
+    if delivered + lost > 0.0:  # Beta-Binomial with exponential forgetting toward the prior
+        la = _forget(st.loss_alpha, PRIOR_BETA_ALPHA, rho) + lost
+        lb = _forget(st.loss_beta, PRIOR_BETA_BETA, rho) + delivered
+        n_loss += 1
+    mu, kappa, a, b = st.ng_mu, st.ng_kappa, st.ng_alpha, st.ng_beta
     n = len(lats)
-    if n:
+    if n:  # Normal-Gamma conjugate update (same forgetting on kappa, a, b; mu is kept)
+        kappa = _forget(st.ng_kappa, PRIOR_NG_KAPPA, rho)
+        a = _forget(st.ng_alpha, PRIOR_NG_ALPHA, rho)
+        b = _forget(st.ng_beta, PRIOR_NG_BETA, rho)
         xbar = sum(lats) / n
         ss = sum((x - xbar) ** 2 for x in lats)
         kappa_n = kappa + n
@@ -262,7 +269,7 @@ def _posterior_step(st: ElementState, delivered: float, lost: float, lats: Seque
         mu, kappa, a, b = mu_n, kappa_n, a_n, b_n
     return replace(st, loss_alpha=la, loss_beta=lb, ng_mu=mu, ng_kappa=kappa, ng_alpha=a,
                    ng_beta=b, last_t_us=max(st.last_t_us, t_us),
-                   n_obs_loss=st.n_obs_loss + 1, n_obs_lat=st.n_obs_lat + (1 if n else 0))
+                   n_obs_loss=n_loss, n_obs_lat=st.n_obs_lat + (1 if n else 0))
 
 
 def _update_element(st: ElementState, delivered: float, lost: float, lats: Sequence[float],
@@ -272,9 +279,12 @@ def _update_element(st: ElementState, delivered: float, lost: float, lats: Seque
     new = _posterior_step(st, delivered, lost, lats, t_us, rho)
     n = len(lats)
     pooled = pool is not None
-    b_loss, n_loss = (pool.loss_mean, pool.n_obs_loss) if pooled else (st.base_loss, st.n_obs_loss)
-    clp, cln, base_loss = _track(st.cusum_loss_pos, st.cusum_loss_neg, new.loss_mean, b_loss,
-                                 n_loss, K_CUSUM_LOSS, gamma, pooled, two_sided=False)
+    clp, cln, base_loss = st.cusum_loss_pos, st.cusum_loss_neg, st.base_loss
+    if delivered + lost > 0.0:
+        b_loss, n_loss = ((pool.loss_mean, pool.n_obs_loss) if pooled
+                          else (st.base_loss, st.n_obs_loss))
+        clp, cln, base_loss = _track(clp, cln, new.loss_mean, b_loss, n_loss, K_CUSUM_LOSS,
+                                     gamma, pooled, two_sided=False)
     base_lat, cap, can = st.base_lat, st.cusum_lat_pos, st.cusum_lat_neg
     if n:
         b_lat, n_lat = (pool.latency_mean, pool.n_obs_lat) if pooled else (st.base_lat, st.n_obs_lat)
@@ -307,6 +317,8 @@ def update(state: InferState, samples: Iterable[Sample], path_to_links: Dict[str
     if baseline_mode not in BASELINE_MODES:
         raise ValueError("baseline_mode must be one of %s" % (BASELINE_MODES,))
     acc, lats, t_max = _deaggregate(samples, path_to_links)
+    # drop zero-information elements: no counts and no latency samples -> not probed
+    acc = {e: dl for e, dl in acc.items() if dl[0] + dl[1] > 0.0 or lats[e]}
     pool = state.pool
     if baseline_mode == "pooled" and acc:
         atomic = [e for e in acc if not e.startswith("path:")]
@@ -344,7 +356,8 @@ def localize(state: InferState, k: int = 1, h: float = H_DEFAULT,
             (frozen default ``alarm_min_observations``); the ranking itself is unaffected.
     """
     ranked = sorted(
-        ((e, st.cusum) for e, st in state.elements.items() if not e.startswith(exclude_prefixes)),
+        ((e, st.cusum) for e, st in state.elements.items()
+         if not e.startswith(exclude_prefixes) and (st.n_obs_loss or st.n_obs_lat)),
         key=lambda es: (-es[1], -state.elements[es[0]].loss_mean, es[0]),
     )
     anomaly = any(stat > h and state.elements[e].n_obs_loss >= min_observations
