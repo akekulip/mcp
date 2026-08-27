@@ -179,6 +179,7 @@ def main() -> None:
     ap.add_argument("--baseline-mode", default="pooled", choices=["per_element", "pooled"])
     ap.add_argument("--learner", default="linucb", choices=["linucb", "dlinucb", "swlinucb"])
     ap.add_argument("--alpha", type=float, default=1.0)
+    ap.add_argument("--explore-floor", type=float, default=0.25)
     ap.add_argument("--ablation", default="", help="comma list of: no_prices,no_context,no_explore,reset")
     ap.add_argument("--explore", type=float, default=0.5)
     ap.add_argument("--epoch-us", type=int, default=100000)
@@ -191,7 +192,7 @@ def main() -> None:
     ab = set(x for x in a.ablation.split(",") if x)
     cfg = McpConfig(learner=a.learner, alpha=0.0 if "no_explore" in ab else a.alpha,
                     no_prices="no_prices" in ab, no_context="no_context" in ab,
-                    reset_each_epoch="reset" in ab, kappa=a.h)
+                    reset_each_epoch="reset" in ab, kappa=a.h, explore_floor=a.explore_floor)
     run(a.obs, a.act, a.policy, a.explore, a.epoch_us, a.h, a.faulty, a.log, a.baseline_mode, cfg)
 
 
