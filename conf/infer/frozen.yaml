@@ -5,7 +5,8 @@ k_cusum_loss: 2.5e-4         # CUSUM slack for posterior-mean loss rate (fractio
 k_cusum_latency_us: 10.0    # CUSUM slack for posterior-mean latency (microseconds)
 h_default: 4.0              # CUSUM threshold (dimensionless, in units of k); per-arm knob
 baseline_gamma: 0.05        # EMA rate of each element's running baseline
-baseline_warmup_epochs: 10  # per-element observed epochs before CUSUM starts
+baseline_warmup_epochs: 10  # observed epochs (per element, or of the pool in pooled mode) before CUSUM starts
+baseline_mode: per_element  # per_element | pooled (fabric-wide pooled posterior-mean baseline)
 forget_rho: 0.9             # posterior pseudo-count discount per observed epoch (~10-epoch window)
 prior_beta_alpha: 1.0       # Beta(1,1) prior on loss rate (alpha = losses)
 prior_beta_beta: 1.0
@@ -14,4 +15,4 @@ prior_ng_kappa: 1e-3
 prior_ng_alpha: 1e-3
 prior_ng_beta: 1e-3
 deaggregation: uniform_prior_fractional   # path counts split evenly over links, no rounding
-module_sha256: f1957bc94bc2c11db2e1c88683152d921b856a0ee6df947d829367f0f2b2f63e
+module_sha256: cbd88784744b41721afb0ab58ee5bd041e24acb21c69526032290183d6c1e8e3

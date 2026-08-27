@@ -115,5 +115,52 @@ class TestCommonInference(unittest.TestCase):
         self.assertAlmostEqual(s.get("path:0").loss_alpha, infer.PRIOR_BETA_ALPHA + 100.0)
 
 
+# --- sparse-probe reproduction (co-sim finding: budget 4 of 128 links per epoch) ---------------
+SPARSE_LINKS = ["vlink:%d" % i for i in range(128)]
+SPARSE_PATHS = {l: [l] for l in SPARSE_LINKS}  # direct link probes, no de-aggregation needed
+SPARSE_FAULTY = "vlink:48"  # round-robin budget 4 -> probed at epochs 12, 44 (both >= warm-up)
+
+
+def sparse_run(seed: int, epochs: int, mode: str, faulty: str = "", loss_rate: float = 0.0,
+               fault_from: int = 5, background: float = 0.0) -> List[Localization]:
+    """128 links, 4 probed per epoch round-robin, ~5000 packets per probe."""
+    rng = random.Random(seed)
+    state = InferState()
+    locs = []
+    for e in range(epochs):
+        samples = []
+        for j in range(4):
+            link = SPARSE_LINKS[(4 * e + j) % 128]
+            rate = loss_rate if (link == faulty and e >= fault_from) else background
+            lost = sum(1 for _ in range(5000) if rng.random() < rate)
+            samples.append(Sample(link, 5000 - lost, lost, (rng.gauss(50.0, 2.0),), e * EPOCH_US))
+        state = infer.update(state, samples, SPARSE_PATHS, baseline_mode=mode)
+        locs.append(infer.localize(state, 1, infer.H_DEFAULT))
+    return locs
+
+
+class TestPooledBaseline(unittest.TestCase):
+    def test_sparse_probe_pooled_detects_per_element_does_not(self):
+        pooled = sparse_run(1, 60, "pooled", SPARSE_FAULTY, 1e-3)
+        first = next((i for i, l in enumerate(pooled) if l.anomaly), None)
+        self.assertIsNotNone(first, "pooled mode never fired by epoch 60")
+        self.assertEqual(pooled[first].suspects, [SPARSE_FAULTY])
+        self.assertEqual(pooled[-1].ranked[0][0], SPARSE_FAULTY)
+        self.assertTrue(pooled[-1].anomaly)
+        per_el = sparse_run(1, 60, "per_element", SPARSE_FAULTY, 1e-3)
+        self.assertFalse(any(l.anomaly for l in per_el))
+
+    def test_pooled_no_fault_no_false_alarm(self):
+        for seed in (21, 22, 23):
+            locs = sparse_run(seed, 200, "pooled", background=1e-4)
+            self.assertFalse(any(l.anomaly for l in locs), "false alarm with seed %d" % seed)
+
+    def test_default_mode_is_per_element_and_bad_mode_rejected(self):
+        self.assertEqual(infer.load_frozen_config()["baseline_mode"], "per_element")
+        self.assertEqual(infer.BASELINE_MODE, "per_element")
+        with self.assertRaises(ValueError):
+            infer.update(InferState(), [], {}, baseline_mode="global")
+
+
 if __name__ == "__main__":
     unittest.main()
