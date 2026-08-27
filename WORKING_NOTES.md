@@ -228,6 +228,14 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   usage text). Chip idle, attn 4096, PID 26316.
 - 08-27 Philip: tau_fast = ramp back-extrapolation; tau_slow = full-sweep epoch -> PREREG amendment
   v1.4 appended (F6 post-hoc, F1 pre-registered). Agent building nic/evidence_probe.py then H7-F1.
+- 08-27 ~02:30 CONTROLLER WORKSTREAM STARTED (two builders in parallel): controller/infer.py = the
+  frozen common inference layer (§3.3: Beta-Binomial + Normal-Gamma posteriors, uniform-prior
+  de-aggregation path->links, two-sided CUSUM, ranking; conf/infer/frozen.yaml + freeze.py hash;
+  tests i-v) + controller/reward.py (§7.2) with test_reward_no_leakage (§7.3);
+  controller/epoch_loop.py + hw_adapter.py (mirror_h/fabric_h/csig_h parser, tbl_vlink deltas,
+  reg_attn snapshot; tbl_fail = ground truth, never a sample) + policies.py (uniform/random/
+  oracle/mcp_stub = A6). Shared Sample(element, delivered, lost, latency_us, t_us) contract.
+  Later: point sim/gate analysis at infer.localize too (§3.3 says every arm uses it).
 
 ## Next action
 1. Vision/Hulk: check Netronome SDK, rxe, kernel, perftest, DPDK availability (M4 prep).
