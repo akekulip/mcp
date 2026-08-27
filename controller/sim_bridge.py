@@ -31,6 +31,7 @@ from typing import Dict, List, Optional
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from controller import infer  # noqa: E402
+from controller.mcp_policy import McpConfig, McpPolicy  # noqa: E402
 from controller.types import Sample  # noqa: E402
 
 log = logging.getLogger("controller.sim_bridge")
@@ -93,8 +94,28 @@ class Cusum(LinkPolicy):
         return out + self._rr(self.budget - len(out), out)
 
 
+class Mcp(LinkPolicy):
+    """Full MCP slow loop (controller/mcp_policy.py) over the sim's link candidates."""
+
+    def __init__(self, n, budget, names: List[str], cfg: McpConfig):
+        super().__init__(n, budget)
+        self.names = names
+        els = [f"vlink:{nm}" for nm in names]
+        cfg.caps = {"probes": float(self.budget)}
+        self.pol = McpPolicy(els, {e: {"probes": 1.0} for e in els}, cfg)
+        self.state: Optional[infer.InferState] = None
+
+    def choose(self, epoch, loc, names):
+        st = self.state if self.state is not None else infer.InferState()
+        chosen = self.pol.choose(st, loc)
+        index = {f"vlink:{nm}": i for i, nm in enumerate(names)}
+        out = [index[e] for e in chosen if e in index][: self.budget]
+        return out + self._rr(self.budget - len(out), out)
+
+
 def run(obs_path: str, act_path: str, policy_name: str, explore: float, epoch_us: int,
-        h: float, faulty: List[int], log_path: Optional[str]) -> None:
+        h: float, faulty: List[int], log_path: Optional[str], baseline_mode: str = "pooled",
+        mcp_cfg: Optional[McpConfig] = None) -> None:
     obs = open(obs_path, "r")            # blocks until the sim opens it for writing
     act = open(act_path, "w")            # blocks until the sim opens it for reading
     header = obs.readline().split()
@@ -108,6 +129,8 @@ def run(obs_path: str, act_path: str, policy_name: str, explore: float, epoch_us
         pol = Oracle(n, budget, faulty)
     elif policy_name == "cusum":
         pol = Cusum(n, budget, explore)
+    elif policy_name == "mcp":
+        pol = Mcp(n, budget, names, mcp_cfg or McpConfig())
     else:
         sys.exit(f"unknown policy {policy_name}")
 
@@ -131,8 +154,12 @@ def run(obs_path: str, act_path: str, policy_name: str, explore: float, epoch_us
             idx, dtx, ddrop = (int(x) for x in rec.split(":"))
             samples.append(Sample(element=f"vlink:{names[idx]}", delivered=max(dtx - ddrop, 0),
                                   lost=ddrop, latency_us=(), t_us=epoch * epoch_us))
-        state = infer.update(state, samples, {})
+        state = infer.update(state, samples, {}, baseline_mode=baseline_mode)
         loc = infer.localize(state, k=budget, h=h)
+        if isinstance(pol, Mcp):
+            loads = {f"vlink:{names[int(r.split(':')[0])]}": float(r.split(':')[1]) for r in parts[2:]}
+            pol.state = state
+            pol.pol.observe(state, loc, loads)
         chosen = pol.choose(epoch + 1, loc, names)
         if logf:
             top = loc.ranked[0] if loc.ranked else ("-", 0.0)
@@ -148,7 +175,11 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--obs", required=True)
     ap.add_argument("--act", required=True)
-    ap.add_argument("--policy", default="cusum", choices=["uniform", "oracle", "cusum"])
+    ap.add_argument("--policy", default="cusum", choices=["uniform", "oracle", "cusum", "mcp"])
+    ap.add_argument("--baseline-mode", default="pooled", choices=["per_element", "pooled"])
+    ap.add_argument("--learner", default="linucb", choices=["linucb", "dlinucb", "swlinucb"])
+    ap.add_argument("--alpha", type=float, default=1.0)
+    ap.add_argument("--ablation", default="", help="comma list of: no_prices,no_context,no_explore,reset")
     ap.add_argument("--explore", type=float, default=0.5)
     ap.add_argument("--epoch-us", type=int, default=100000)
     ap.add_argument("--h", type=float, default=infer.H_DEFAULT)
@@ -157,7 +188,11 @@ def main() -> None:
     ap.add_argument("-v", action="store_true")
     a = ap.parse_args()
     logging.basicConfig(level=logging.INFO if a.v else logging.WARNING, format="%(levelname)s %(message)s")
-    run(a.obs, a.act, a.policy, a.explore, a.epoch_us, a.h, a.faulty, a.log)
+    ab = set(x for x in a.ablation.split(",") if x)
+    cfg = McpConfig(learner=a.learner, alpha=0.0 if "no_explore" in ab else a.alpha,
+                    no_prices="no_prices" in ab, no_context="no_context" in ab,
+                    reset_each_epoch="reset" in ab, kappa=a.h)
+    run(a.obs, a.act, a.policy, a.explore, a.epoch_us, a.h, a.faulty, a.log, a.baseline_mode, cfg)
 
 
 if __name__ == "__main__":
