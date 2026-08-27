@@ -1,17 +1,17 @@
 {
     "program_name": "mcp_fabric.p4", 
-    "build_date": "Wed Aug 26 19:22:39 2026", 
-    "run_id": "c2d5ccb9675d4b99", 
+    "build_date": "Wed Aug 26 20:07:37 2026", 
+    "run_id": "248d44bb672d4b84", 
     "compiler_version": "9.13.1", 
     "schema_version": "1.1.0", 
     "target": "tofino", 
-    "compilation_time": "4.818777561187744", 
+    "compilation_time": "4.816384792327881", 
     "phv": {
         "normal": [
             {
                 "bit_width": 8, 
-                "containers_occupied": 13, 
-                "bits_occupied": 84, 
+                "containers_occupied": 15, 
+                "bits_occupied": 100, 
                 "bits_overlaid": 3
             }, 
             {

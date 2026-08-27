@@ -5,14 +5,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 833,
+                    "line": 836,
                     "column": 13
                 }
             ],
             "symbol_name": "IgDeparser.mcp_mirror",
             "declaration": {
                 "file": "",
-                "line": 824,
+                "line": 827,
                 "column": 14
             },
             "symbol_type": "Declaration_Instance_Type_Extern"
@@ -21,14 +21,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 653,
+                    "line": 656,
                     "column": 41
                 }
             ],
             "symbol_name": "Ingress.attn_on_clean",
             "declaration": {
                 "file": "",
-                "line": 617,
+                "line": 620,
                 "column": 61
             },
             "symbol_type": "Declaration_Instance_Type_Specialized"
@@ -37,14 +37,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 652,
+                    "line": 655,
                     "column": 42
                 }
             ],
             "symbol_name": "Ingress.attn_on_exceed",
             "declaration": {
                 "file": "",
-                "line": 609,
+                "line": 612,
                 "column": 61
             },
             "symbol_type": "Declaration_Instance_Type_Specialized"
@@ -53,200 +53,30 @@
             "references": [
                 {
                     "file": "",
-                    "line": 540,
+                    "line": 543,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 553,
+                    "line": 556,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 557,
+                    "line": 560,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 566,
+                    "line": 569,
                     "column": 20
                 }
             ],
             "symbol_name": "Ingress.fail_ctr",
             "declaration": {
                 "file": "",
-                "line": 529,
+                "line": 532,
                 "column": 61
-            },
-            "symbol_type": "Declaration_Instance_Type_Specialized"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 781,
-                    "column": 33
-                }
-            ],
-            "symbol_name": "Ingress.h_spray",
-            "declaration": {
-                "file": "",
-                "line": 419,
-                "column": 55
-            },
-            "symbol_type": "Declaration_Instance_Type_Specialized"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 619,
-                    "column": 60
-                }
-            ],
-            "symbol_name": "Ingress.p_a_min",
-            "declaration": {
-                "file": "",
-                "line": 604,
-                "column": 36
-            },
-            "symbol_type": "Declaration_Instance_Type_Specialized"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 611,
-                    "column": 33
-                }
-            ],
-            "symbol_name": "Ingress.p_k_up",
-            "declaration": {
-                "file": "",
-                "line": 603,
-                "column": 37
-            },
-            "symbol_type": "Declaration_Instance_Type_Specialized"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 619,
-                    "column": 28
-                },
-                {
-                    "file": "",
-                    "line": 622,
-                    "column": 35
-                }
-            ],
-            "symbol_name": "Ingress.p_n_clean_m1",
-            "declaration": {
-                "file": "",
-                "line": 605,
-                "column": 37
-            },
-            "symbol_type": "Declaration_Instance_Type_Specialized"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 419,
-                    "column": 43
-                }
-            ],
-            "symbol_name": "Ingress.poly_spray",
-            "declaration": {
-                "file": "",
-                "line": 418,
-                "column": 49
-            },
-            "symbol_type": "Declaration_Instance_Type_Specialized"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 609,
-                    "column": 51
-                },
-                {
-                    "file": "",
-                    "line": 617,
-                    "column": 51
-                }
-            ],
-            "symbol_name": "Ingress.reg_attn",
-            "declaration": {
-                "file": "",
-                "line": 607,
-                "column": 41
-            },
-            "symbol_type": "Declaration_Instance_Type_Specialized"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 425,
-                    "column": 47
-                }
-            ],
-            "symbol_name": "Ingress.reg_spray_rr",
-            "declaration": {
-                "file": "",
-                "line": 424,
-                "column": 39
-            },
-            "symbol_type": "Declaration_Instance_Type_Specialized"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 774,
-                    "column": 27
-                }
-            ],
-            "symbol_name": "Ingress.rng_attn",
-            "declaration": {
-                "file": "",
-                "line": 598,
-                "column": 23
-            },
-            "symbol_type": "Declaration_Instance_Type_Specialized"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 773,
-                    "column": 27
-                }
-            ],
-            "symbol_name": "Ingress.rng_fail",
-            "declaration": {
-                "file": "",
-                "line": 528,
-                "column": 23
-            },
-            "symbol_type": "Declaration_Instance_Type_Specialized"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 780,
-                    "column": 33
-                }
-            ],
-            "symbol_name": "Ingress.rng_spray",
-            "declaration": {
-                "file": "",
-                "line": 410,
-                "column": 23
             },
             "symbol_type": "Declaration_Instance_Type_Specialized"
         },
@@ -255,13 +85,183 @@
                 {
                     "file": "",
                     "line": 784,
+                    "column": 33
+                }
+            ],
+            "symbol_name": "Ingress.h_spray",
+            "declaration": {
+                "file": "",
+                "line": 422,
+                "column": 55
+            },
+            "symbol_type": "Declaration_Instance_Type_Specialized"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 622,
+                    "column": 60
+                }
+            ],
+            "symbol_name": "Ingress.p_a_min",
+            "declaration": {
+                "file": "",
+                "line": 607,
+                "column": 36
+            },
+            "symbol_type": "Declaration_Instance_Type_Specialized"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 614,
+                    "column": 33
+                }
+            ],
+            "symbol_name": "Ingress.p_k_up",
+            "declaration": {
+                "file": "",
+                "line": 606,
+                "column": 37
+            },
+            "symbol_type": "Declaration_Instance_Type_Specialized"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 622,
+                    "column": 28
+                },
+                {
+                    "file": "",
+                    "line": 625,
+                    "column": 35
+                }
+            ],
+            "symbol_name": "Ingress.p_n_clean_m1",
+            "declaration": {
+                "file": "",
+                "line": 608,
+                "column": 37
+            },
+            "symbol_type": "Declaration_Instance_Type_Specialized"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 422,
+                    "column": 43
+                }
+            ],
+            "symbol_name": "Ingress.poly_spray",
+            "declaration": {
+                "file": "",
+                "line": 421,
+                "column": 49
+            },
+            "symbol_type": "Declaration_Instance_Type_Specialized"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 612,
+                    "column": 51
+                },
+                {
+                    "file": "",
+                    "line": 620,
+                    "column": 51
+                }
+            ],
+            "symbol_name": "Ingress.reg_attn",
+            "declaration": {
+                "file": "",
+                "line": 610,
+                "column": 41
+            },
+            "symbol_type": "Declaration_Instance_Type_Specialized"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 428,
+                    "column": 47
+                }
+            ],
+            "symbol_name": "Ingress.reg_spray_rr",
+            "declaration": {
+                "file": "",
+                "line": 427,
+                "column": 39
+            },
+            "symbol_type": "Declaration_Instance_Type_Specialized"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 777,
+                    "column": 27
+                }
+            ],
+            "symbol_name": "Ingress.rng_attn",
+            "declaration": {
+                "file": "",
+                "line": 601,
+                "column": 23
+            },
+            "symbol_type": "Declaration_Instance_Type_Specialized"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 776,
+                    "column": 27
+                }
+            ],
+            "symbol_name": "Ingress.rng_fail",
+            "declaration": {
+                "file": "",
+                "line": 531,
+                "column": 23
+            },
+            "symbol_type": "Declaration_Instance_Type_Specialized"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 783,
+                    "column": 33
+                }
+            ],
+            "symbol_name": "Ingress.rng_spray",
+            "declaration": {
+                "file": "",
+                "line": 413,
+                "column": 23
+            },
+            "symbol_type": "Declaration_Instance_Type_Specialized"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 787,
                     "column": 31
                 }
             ],
             "symbol_name": "Ingress.rr_next",
             "declaration": {
                 "file": "",
-                "line": 425,
+                "line": 428,
                 "column": 61
             },
             "symbol_type": "Declaration_Instance_Type_Specialized"
@@ -270,19 +270,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 440,
+                    "line": 443,
                     "column": 20
                 },
                 {
                     "file": "",
-                    "line": 440,
+                    "line": 443,
                     "column": 27
                 }
             ],
             "symbol_name": "Ingress.sel_hash_fn",
             "declaration": {
                 "file": "",
-                "line": 438,
+                "line": 441,
                 "column": 45
             },
             "symbol_type": "Declaration_Instance_Type_Specialized"
@@ -291,19 +291,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 439,
+                    "line": 442,
                     "column": 20
                 },
                 {
                     "file": "",
-                    "line": 439,
+                    "line": 442,
                     "column": 37
                 }
             ],
             "symbol_name": "Ingress.spray_prof",
             "declaration": {
                 "file": "",
-                "line": 437,
+                "line": 440,
                 "column": 30
             },
             "symbol_type": "Declaration_Instance_Type_Extern"
@@ -312,14 +312,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 452,
+                    "line": 455,
                     "column": 26
                 }
             ],
             "symbol_name": "Ingress.spray_sel_impl",
             "declaration": {
                 "file": "",
-                "line": 443,
+                "line": 446,
                 "column": 37
             },
             "symbol_type": "Declaration_Instance_Type_Extern"
@@ -328,24 +328,24 @@
             "references": [
                 {
                     "file": "",
-                    "line": 488,
+                    "line": 491,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 493,
+                    "line": 496,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 505,
+                    "line": 508,
                     "column": 20
                 }
             ],
             "symbol_name": "Ingress.vlink_ctr",
             "declaration": {
                 "file": "",
-                "line": 479,
+                "line": 482,
                 "column": 61
             },
             "symbol_type": "Declaration_Instance_Type_Specialized"
@@ -354,14 +354,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 958,
+                    "line": 961,
                     "column": 8
                 }
             ],
             "symbol_name": "pipe",
             "declaration": {
                 "file": "",
-                "line": 957,
+                "line": 960,
                 "column": 83
             },
             "symbol_type": "Declaration_Instance_Type_Specialized"
@@ -370,19 +370,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 936,
+                    "line": 939,
                     "column": 39
                 },
                 {
                     "file": "",
-                    "line": 936,
+                    "line": 939,
                     "column": 75
                 }
             ],
             "symbol_name": "Egress.csig_diff",
             "declaration": {
                 "file": "",
-                "line": 923,
+                "line": 926,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -391,19 +391,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 937,
+                    "line": 940,
                     "column": 44
                 },
                 {
                     "file": "",
-                    "line": 937,
+                    "line": 940,
                     "column": 85
                 }
             ],
             "symbol_name": "Egress.csig_replace_a",
             "declaration": {
                 "file": "",
-                "line": 927,
+                "line": 930,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -412,19 +412,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 938,
+                    "line": 941,
                     "column": 44
                 },
                 {
                     "file": "",
-                    "line": 938,
+                    "line": 941,
                     "column": 85
                 }
             ],
             "symbol_name": "Egress.csig_replace_b",
             "declaration": {
                 "file": "",
-                "line": 931,
+                "line": 934,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -433,19 +433,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 914,
+                    "line": 917,
                     "column": 21
                 },
                 {
                     "file": "",
-                    "line": 916,
+                    "line": 919,
                     "column": 32
                 }
             ],
             "symbol_name": "Egress.set_eg_vlink",
             "declaration": {
                 "file": "",
-                "line": 905,
+                "line": 908,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -454,19 +454,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 659,
+                    "line": 662,
                     "column": 38
                 },
                 {
                     "file": "",
-                    "line": 662,
+                    "line": 665,
                     "column": 20
                 }
             ],
             "symbol_name": "Ingress.act_attn_clean",
             "declaration": {
                 "file": "",
-                "line": 653,
+                "line": 656,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -475,19 +475,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 659,
+                    "line": 662,
                     "column": 21
                 },
                 {
                     "file": "",
-                    "line": 663,
+                    "line": 666,
                     "column": 20
                 }
             ],
             "symbol_name": "Ingress.act_attn_exceed",
             "declaration": {
                 "file": "",
-                "line": 652,
+                "line": 655,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -496,14 +496,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 753,
+                    "line": 756,
                     "column": 45
                 }
             ],
             "symbol_name": "Ingress.act_deliver",
             "declaration": {
                 "file": "",
-                "line": 718,
+                "line": 721,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -512,19 +512,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 753,
+                    "line": 756,
                     "column": 58
                 },
                 {
                     "file": "",
-                    "line": 755,
+                    "line": 758,
                     "column": 32
                 }
             ],
             "symbol_name": "Ingress.act_drop",
             "declaration": {
                 "file": "",
-                "line": 726,
+                "line": 729,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -533,14 +533,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 753,
+                    "line": 756,
                     "column": 21
                 }
             ],
             "symbol_name": "Ingress.act_enter",
             "declaration": {
                 "file": "",
-                "line": 692,
+                "line": 695,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -549,14 +549,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 753,
+                    "line": 756,
                     "column": 32
                 }
             ],
             "symbol_name": "Ingress.act_transit",
             "declaration": {
                 "file": "",
-                "line": 712,
+                "line": 715,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -565,19 +565,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 504,
+                    "line": 507,
                     "column": 30
                 },
                 {
                     "file": "",
-                    "line": 507,
+                    "line": 510,
                     "column": 32
                 }
             ],
             "symbol_name": "Ingress.black_hole",
             "declaration": {
                 "file": "",
-                "line": 491,
+                "line": 494,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -586,19 +586,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 640,
+                    "line": 643,
                     "column": 47
                 },
                 {
                     "file": "",
-                    "line": 642,
+                    "line": 645,
                     "column": 32
                 }
             ],
             "symbol_name": "Ingress.evid_clean",
             "declaration": {
                 "file": "",
-                "line": 636,
+                "line": 639,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -607,19 +607,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 743,
+                    "line": 746,
                     "column": 35
                 },
                 {
                     "file": "",
-                    "line": 745,
+                    "line": 748,
                     "column": 32
                 }
             ],
             "symbol_name": "Ingress.evid_drop",
             "declaration": {
                 "file": "",
-                "line": 739,
+                "line": 742,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -628,14 +628,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 640,
+                    "line": 643,
                     "column": 21
                 }
             ],
             "symbol_name": "Ingress.evid_exceed",
             "declaration": {
                 "file": "",
-                "line": 635,
+                "line": 638,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -644,14 +644,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 743,
+                    "line": 746,
                     "column": 21
                 }
             ],
             "symbol_name": "Ingress.evid_to_loop",
             "declaration": {
                 "file": "",
-                "line": 735,
+                "line": 738,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -660,14 +660,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 565,
+                    "line": 568,
                     "column": 31
                 }
             ],
             "symbol_name": "Ingress.inj_corrupt",
             "declaration": {
                 "file": "",
-                "line": 547,
+                "line": 550,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -676,14 +676,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 565,
+                    "line": 568,
                     "column": 21
                 }
             ],
             "symbol_name": "Ingress.inj_drop",
             "declaration": {
                 "file": "",
-                "line": 534,
+                "line": 537,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -692,19 +692,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 565,
+                    "line": 568,
                     "column": 44
                 },
                 {
                     "file": "",
-                    "line": 568,
+                    "line": 571,
                     "column": 32
                 }
             ],
             "symbol_name": "Ingress.inj_none",
             "declaration": {
                 "file": "",
-                "line": 556,
+                "line": 559,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -713,19 +713,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 390,
+                    "line": 393,
                     "column": 21
                 },
                 {
                     "file": "",
-                    "line": 392,
+                    "line": 395,
                     "column": 32
                 }
             ],
             "symbol_name": "Ingress.set_dst",
             "declaration": {
                 "file": "",
-                "line": 383,
+                "line": 386,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -734,14 +734,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 647,
+                    "line": 650,
                     "column": 21
                 }
             ],
             "symbol_name": "Ingress.set_exceed",
             "declaration": {
                 "file": "",
-                "line": 631,
+                "line": 634,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -750,14 +750,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 678,
+                    "line": 681,
                     "column": 21
                 }
             ],
             "symbol_name": "Ingress.set_measure",
             "declaration": {
                 "file": "",
-                "line": 669,
+                "line": 672,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -766,19 +766,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 373,
+                    "line": 376,
                     "column": 21
                 },
                 {
                     "file": "",
-                    "line": 375,
+                    "line": 378,
                     "column": 32
                 }
             ],
             "symbol_name": "Ingress.set_role",
             "declaration": {
                 "file": "",
-                "line": 365,
+                "line": 368,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -787,14 +787,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 464,
+                    "line": 467,
                     "column": 40
                 }
             ],
             "symbol_name": "Ingress.spray_from_hash",
             "declaration": {
                 "file": "",
-                "line": 458,
+                "line": 461,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -803,43 +803,11 @@
             "references": [
                 {
                     "file": "",
-                    "line": 464,
+                    "line": 467,
                     "column": 21
                 }
             ],
             "symbol_name": "Ingress.spray_from_random",
-            "declaration": {
-                "file": "",
-                "line": 457,
-                "column": 12
-            },
-            "symbol_type": "P4Action"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 464,
-                    "column": 57
-                }
-            ],
-            "symbol_name": "Ingress.spray_from_rr",
-            "declaration": {
-                "file": "",
-                "line": 459,
-                "column": 12
-            },
-            "symbol_type": "P4Action"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 464,
-                    "column": 72
-                }
-            ],
-            "symbol_name": "Ingress.spray_from_sel",
             "declaration": {
                 "file": "",
                 "line": 460,
@@ -851,14 +819,46 @@
             "references": [
                 {
                     "file": "",
-                    "line": 450,
+                    "line": 467,
+                    "column": 57
+                }
+            ],
+            "symbol_name": "Ingress.spray_from_rr",
+            "declaration": {
+                "file": "",
+                "line": 462,
+                "column": 12
+            },
+            "symbol_type": "P4Action"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 467,
+                    "column": 72
+                }
+            ],
+            "symbol_name": "Ingress.spray_from_sel",
+            "declaration": {
+                "file": "",
+                "line": 463,
+                "column": 12
+            },
+            "symbol_type": "P4Action"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 453,
                     "column": 21
                 }
             ],
             "symbol_name": "Ingress.spray_member",
             "declaration": {
                 "file": "",
-                "line": 445,
+                "line": 448,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -867,14 +867,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 504,
+                    "line": 507,
                     "column": 21
                 }
             ],
             "symbol_name": "Ingress.to_loop",
             "declaration": {
                 "file": "",
-                "line": 481,
+                "line": 484,
                 "column": 12
             },
             "symbol_type": "P4Action"
@@ -883,54 +883,54 @@
             "references": [
                 {
                     "file": "",
-                    "line": 448,
+                    "line": 451,
                     "column": 9,
-                    "end_line": 452
+                    "end_line": 455
                 },
                 {
                     "file": "",
-                    "line": 450,
+                    "line": 453,
                     "column": 20
                 },
                 {
                     "file": "",
-                    "line": 465,
+                    "line": 468,
                     "column": 34
                 },
                 {
                     "file": "",
-                    "line": 467,
+                    "line": 470,
                     "column": 32
                 },
                 {
                     "file": "",
-                    "line": 647,
+                    "line": 650,
                     "column": 46
                 },
                 {
                     "file": "",
-                    "line": 649,
+                    "line": 652,
                     "column": 32
                 },
                 {
                     "file": "",
-                    "line": 658,
+                    "line": 661,
                     "column": 9,
-                    "end_line": 664
+                    "end_line": 667
                 },
                 {
                     "file": "",
-                    "line": 659,
+                    "line": 662,
                     "column": 20
                 },
                 {
                     "file": "",
-                    "line": 678,
+                    "line": 681,
                     "column": 47
                 },
                 {
                     "file": "",
-                    "line": 680,
+                    "line": 683,
                     "column": 32
                 }
             ],
@@ -946,14 +946,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 766,
+                    "line": 769,
                     "column": 34
                 }
             ],
-            "symbol_name": "mcp_fabric766",
+            "symbol_name": "mcp_fabric769",
             "declaration": {
                 "file": "",
-                "line": 766,
+                "line": 769,
                 "column": 34
             },
             "symbol_type": "P4Action"
@@ -962,14 +962,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 773,
+                    "line": 776,
                     "column": 25
                 }
             ],
-            "symbol_name": "mcp_fabric773",
+            "symbol_name": "mcp_fabric776",
             "declaration": {
                 "file": "",
-                "line": 773,
+                "line": 776,
                 "column": 25
             },
             "symbol_type": "P4Action"
@@ -978,14 +978,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 774,
+                    "line": 777,
                     "column": 25
                 }
             ],
-            "symbol_name": "mcp_fabric774",
+            "symbol_name": "mcp_fabric777",
             "declaration": {
                 "file": "",
-                "line": 774,
+                "line": 777,
                 "column": 25
             },
             "symbol_type": "P4Action"
@@ -994,17 +994,17 @@
             "references": [
                 {
                     "file": "",
-                    "line": 780,
+                    "line": 783,
                     "column": 31,
-                    "end_line": 781
+                    "end_line": 784
                 }
             ],
-            "symbol_name": "mcp_fabric780",
+            "symbol_name": "mcp_fabric783",
             "declaration": {
                 "file": "",
-                "line": 780,
+                "line": 783,
                 "column": 31,
-                "end_line": 781
+                "end_line": 784
             },
             "symbol_type": "P4Action"
         },
@@ -1012,14 +1012,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 784,
+                    "line": 787,
                     "column": 29
                 }
             ],
-            "symbol_name": "mcp_fabric784",
+            "symbol_name": "mcp_fabric787",
             "declaration": {
                 "file": "",
-                "line": 784,
+                "line": 787,
                 "column": 29
             },
             "symbol_type": "P4Action"
@@ -1028,14 +1028,46 @@
             "references": [
                 {
                     "file": "",
-                    "line": 943,
+                    "line": 946,
                     "column": 13
                 }
             ],
             "symbol_name": "Egress.tbl_csig_diff",
             "declaration": {
                 "file": "",
-                "line": 936,
+                "line": 939,
+                "column": 11
+            },
+            "symbol_type": "P4Table"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 948,
+                    "column": 17
+                }
+            ],
+            "symbol_name": "Egress.tbl_csig_replace_a",
+            "declaration": {
+                "file": "",
+                "line": 940,
+                "column": 11
+            },
+            "symbol_type": "P4Table"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 949,
+                    "column": 17
+                }
+            ],
+            "symbol_name": "Egress.tbl_csig_replace_b",
+            "declaration": {
+                "file": "",
+                "line": 941,
                 "column": 11
             },
             "symbol_type": "P4Table"
@@ -1045,45 +1077,13 @@
                 {
                     "file": "",
                     "line": 945,
-                    "column": 17
-                }
-            ],
-            "symbol_name": "Egress.tbl_csig_replace_a",
-            "declaration": {
-                "file": "",
-                "line": 937,
-                "column": 11
-            },
-            "symbol_type": "P4Table"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 946,
-                    "column": 17
-                }
-            ],
-            "symbol_name": "Egress.tbl_csig_replace_b",
-            "declaration": {
-                "file": "",
-                "line": 938,
-                "column": 11
-            },
-            "symbol_type": "P4Table"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 942,
                     "column": 13
                 }
             ],
             "symbol_name": "Egress.tbl_eg_vlink",
             "declaration": {
                 "file": "",
-                "line": 912,
+                "line": 915,
                 "column": 11
             },
             "symbol_type": "P4Table"
@@ -1092,14 +1092,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 809,
+                    "line": 812,
                     "column": 17
                 }
             ],
             "symbol_name": "Ingress.tbl_attn",
             "declaration": {
                 "file": "",
-                "line": 657,
+                "line": 660,
                 "column": 11
             },
             "symbol_type": "P4Table"
@@ -1108,14 +1108,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 768,
+                    "line": 771,
                     "column": 13
                 }
             ],
             "symbol_name": "Ingress.tbl_dst_leaf",
             "declaration": {
                 "file": "",
-                "line": 388,
+                "line": 391,
                 "column": 11
             },
             "symbol_type": "P4Table"
@@ -1124,14 +1124,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 814,
+                    "line": 817,
                     "column": 17
                 }
             ],
             "symbol_name": "Ingress.tbl_evid_fwd",
             "declaration": {
                 "file": "",
-                "line": 741,
+                "line": 744,
                 "column": 11
             },
             "symbol_type": "P4Table"
@@ -1140,14 +1140,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 795,
+                    "line": 798,
                     "column": 17
                 }
             ],
             "symbol_name": "Ingress.tbl_exceed_csig",
             "declaration": {
                 "file": "",
-                "line": 645,
+                "line": 648,
                 "column": 11
             },
             "symbol_type": "P4Table"
@@ -1156,14 +1156,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 793,
+                    "line": 796,
                     "column": 17
                 }
             ],
             "symbol_name": "Ingress.tbl_exceed_evid",
             "declaration": {
                 "file": "",
-                "line": 638,
+                "line": 641,
                 "column": 11
             },
             "symbol_type": "P4Table"
@@ -1172,14 +1172,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 803,
+                    "line": 806,
                     "column": 17
                 }
             ],
             "symbol_name": "Ingress.tbl_fail",
             "declaration": {
                 "file": "",
-                "line": 560,
+                "line": 563,
                 "column": 11
             },
             "symbol_type": "P4Table"
@@ -1188,14 +1188,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 816,
+                    "line": 819,
                     "column": 17
                 }
             ],
             "symbol_name": "Ingress.tbl_final",
             "declaration": {
                 "file": "",
-                "line": 751,
+                "line": 754,
                 "column": 11
             },
             "symbol_type": "P4Table"
@@ -1204,14 +1204,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 810,
+                    "line": 813,
                     "column": 17
                 }
             ],
             "symbol_name": "Ingress.tbl_gate",
             "declaration": {
                 "file": "",
-                "line": 676,
+                "line": 679,
                 "column": 11
             },
             "symbol_type": "P4Table"
@@ -1220,14 +1220,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 759,
+                    "line": 762,
                     "column": 9
                 }
             ],
             "symbol_name": "Ingress.tbl_port_role",
             "declaration": {
                 "file": "",
-                "line": 371,
+                "line": 374,
                 "column": 11
             },
             "symbol_type": "P4Table"
@@ -1236,14 +1236,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 786,
+                    "line": 789,
                     "column": 17
                 }
             ],
             "symbol_name": "Ingress.tbl_spray_mode",
             "declaration": {
                 "file": "",
-                "line": 462,
+                "line": 465,
                 "column": 11
             },
             "symbol_type": "P4Table"
@@ -1252,14 +1252,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 785,
+                    "line": 788,
                     "column": 17
                 }
             ],
             "symbol_name": "Ingress.tbl_spray_sel",
             "declaration": {
                 "file": "",
-                "line": 447,
+                "line": 450,
                 "column": 11
             },
             "symbol_type": "P4Table"
@@ -1268,65 +1268,65 @@
             "references": [
                 {
                     "file": "",
-                    "line": 802,
+                    "line": 805,
                     "column": 17
                 }
             ],
             "symbol_name": "Ingress.tbl_vlink",
             "declaration": {
                 "file": "",
-                "line": 496,
+                "line": 499,
                 "column": 11
             },
             "symbol_type": "P4Table"
         },
         {
             "references": [],
-            "symbol_name": "tbl_mcp_fabric766",
+            "symbol_name": "tbl_mcp_fabric769",
             "declaration": {
                 "file": "",
-                "line": 766,
+                "line": 769,
                 "column": 34
             },
             "symbol_type": "P4Table"
         },
         {
             "references": [],
-            "symbol_name": "tbl_mcp_fabric773",
+            "symbol_name": "tbl_mcp_fabric776",
             "declaration": {
                 "file": "",
-                "line": 773,
+                "line": 776,
                 "column": 25
             },
             "symbol_type": "P4Table"
         },
         {
             "references": [],
-            "symbol_name": "tbl_mcp_fabric774",
+            "symbol_name": "tbl_mcp_fabric777",
             "declaration": {
                 "file": "",
-                "line": 774,
+                "line": 777,
                 "column": 25
             },
             "symbol_type": "P4Table"
         },
         {
             "references": [],
-            "symbol_name": "tbl_mcp_fabric780",
+            "symbol_name": "tbl_mcp_fabric783",
             "declaration": {
                 "file": "",
-                "line": 780,
+                "line": 783,
                 "column": 31,
-                "end_line": 781
+                "end_line": 784
             },
             "symbol_type": "P4Table"
         },
         {
             "references": [],
-            "symbol_name": "tbl_mcp_fabric784",
+            "symbol_name": "tbl_mcp_fabric787",
             "declaration": {
                 "file": "",
-                "line": 784,
+                "line": 787,
                 "column": 29
             },
             "symbol_type": "P4Table"
@@ -1335,14 +1335,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 954,
+                    "line": 957,
                     "column": 22
                 }
             ],
             "symbol_name": "EgDeparser.hdr.csig",
             "declaration": {
                 "file": "",
-                "line": 952,
+                "line": 955,
                 "column": 55
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -1351,14 +1351,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 954,
+                    "line": 957,
                     "column": 22
                 }
             ],
             "symbol_name": "EgDeparser.hdr.ethernet",
             "declaration": {
                 "file": "",
-                "line": 952,
+                "line": 955,
                 "column": 55
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -1367,14 +1367,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 954,
+                    "line": 957,
                     "column": 22
                 }
             ],
             "symbol_name": "EgDeparser.hdr.fabric",
             "declaration": {
                 "file": "",
-                "line": 952,
+                "line": 955,
                 "column": 55
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -1383,14 +1383,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 954,
+                    "line": 957,
                     "column": 22
                 }
             ],
             "symbol_name": "EgDeparser.hdr.mirror",
             "declaration": {
                 "file": "",
-                "line": 952,
+                "line": 955,
                 "column": 55
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -1399,14 +1399,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 954,
+                    "line": 957,
                     "column": 13
                 }
             ],
             "symbol_name": "EgDeparser.pkt",
             "declaration": {
                 "file": "",
-                "line": 952,
+                "line": 955,
                 "column": 31
             },
             "symbol_type": "Parameter_Type_Extern"
@@ -1415,14 +1415,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 848,
+                    "line": 851,
                     "column": 21
                 }
             ],
             "symbol_name": "EgParser.eg_intr_md",
             "declaration": {
                 "file": "",
-                "line": 845,
+                "line": 848,
                 "column": 49
             },
             "symbol_type": "Parameter_Type_Header"
@@ -1431,14 +1431,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 882,
+                    "line": 885,
                     "column": 21
                 }
             ],
             "symbol_name": "EgParser.hdr.csig",
             "declaration": {
                 "file": "",
-                "line": 844,
+                "line": 847,
                 "column": 49
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -1447,14 +1447,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 866,
+                    "line": 869,
                     "column": 21
                 }
             ],
             "symbol_name": "EgParser.hdr.ethernet",
             "declaration": {
                 "file": "",
-                "line": 844,
+                "line": 847,
                 "column": 49
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -1463,14 +1463,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 867,
+                    "line": 870,
                     "column": 27
                 }
             ],
             "symbol_name": "EgParser.hdr.ethernet.ether_type",
             "declaration": {
                 "file": "",
-                "line": 844,
+                "line": 847,
                 "column": 49
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -1479,14 +1479,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 874,
+                    "line": 877,
                     "column": 21
                 }
             ],
             "symbol_name": "EgParser.hdr.fabric",
             "declaration": {
                 "file": "",
-                "line": 844,
+                "line": 847,
                 "column": 49
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -1495,14 +1495,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 875,
+                    "line": 878,
                     "column": 27
                 }
             ],
             "symbol_name": "EgParser.hdr.fabric.nxt",
             "declaration": {
                 "file": "",
-                "line": 844,
+                "line": 847,
                 "column": 49
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -1511,14 +1511,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 861,
+                    "line": 864,
                     "column": 21
                 }
             ],
             "symbol_name": "EgParser.hdr.mirror",
             "declaration": {
                 "file": "",
-                "line": 844,
+                "line": 847,
                 "column": 49
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -1527,14 +1527,46 @@
             "references": [
                 {
                     "file": "",
-                    "line": 850,
+                    "line": 853,
                     "column": 9
                 }
             ],
             "symbol_name": "EgParser.md.diff",
             "declaration": {
                 "file": "",
-                "line": 844,
+                "line": 847,
+                "column": 66
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 855,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "EgParser.md.hop",
+            "declaration": {
+                "file": "",
+                "line": 847,
+                "column": 66
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 856,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "EgParser.md.tdelta",
+            "declaration": {
+                "file": "",
+                "line": 847,
                 "column": 66
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -1547,42 +1579,26 @@
                     "column": 9
                 }
             ],
-            "symbol_name": "EgParser.md.hop",
-            "declaration": {
-                "file": "",
-                "line": 844,
-                "column": 66
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 853,
-                    "column": 9
-                }
-            ],
-            "symbol_name": "EgParser.md.tdelta",
-            "declaration": {
-                "file": "",
-                "line": 844,
-                "column": 66
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 849,
-                    "column": 9
-                }
-            ],
             "symbol_name": "EgParser.md.this_q",
             "declaration": {
                 "file": "",
-                "line": 844,
+                "line": 847,
+                "column": 66
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 854,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "EgParser.md.vlink",
+            "declaration": {
+                "file": "",
+                "line": 847,
                 "column": 66
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -1593,53 +1609,37 @@
                     "file": "",
                     "line": 851,
                     "column": 9
-                }
-            ],
-            "symbol_name": "EgParser.md.vlink",
-            "declaration": {
-                "file": "",
-                "line": 844,
-                "column": 66
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 848,
-                    "column": 9
                 },
                 {
                     "file": "",
-                    "line": 854,
+                    "line": 857,
                     "column": 27
                 },
                 {
                     "file": "",
-                    "line": 861,
+                    "line": 864,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 866,
+                    "line": 869,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 874,
+                    "line": 877,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 882,
+                    "line": 885,
                     "column": 9
                 }
             ],
             "symbol_name": "EgParser.pkt",
             "declaration": {
                 "file": "",
-                "line": 844,
+                "line": 847,
                 "column": 27
             },
             "symbol_type": "Parameter_Type_Extern"
@@ -1648,14 +1648,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 907,
+                    "line": 910,
                     "column": 21
                 }
             ],
             "symbol_name": "Egress.eg_intr_md.deq_qdepth",
             "declaration": {
                 "file": "",
-                "line": 888,
+                "line": 891,
                 "column": 47
             },
             "symbol_type": "Parameter_Type_Header"
@@ -1664,14 +1664,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 909,
+                    "line": 912,
                     "column": 30
                 }
             ],
             "symbol_name": "Egress.eg_intr_md.deq_timedelta",
             "declaration": {
                 "file": "",
-                "line": 888,
+                "line": 891,
                 "column": 47
             },
             "symbol_type": "Parameter_Type_Header"
@@ -1680,14 +1680,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 913,
+                    "line": 916,
                     "column": 17
                 }
             ],
             "symbol_name": "Egress.eg_intr_md.egress_port",
             "declaration": {
                 "file": "",
-                "line": 888,
+                "line": 891,
                 "column": 47
             },
             "symbol_type": "Parameter_Type_Header"
@@ -1696,14 +1696,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 913,
+                    "line": 916,
                     "column": 49
                 }
             ],
             "symbol_name": "Egress.eg_intr_md.egress_qid",
             "declaration": {
                 "file": "",
-                "line": 888,
+                "line": 891,
                 "column": 47
             },
             "symbol_type": "Parameter_Type_Header"
@@ -1712,14 +1712,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 941,
+                    "line": 944,
                     "column": 13
                 }
             ],
             "symbol_name": "Egress.hdr.csig",
             "declaration": {
                 "file": "",
-                "line": 887,
+                "line": 890,
                 "column": 35
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -1728,14 +1728,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 928,
+                    "line": 931,
                     "column": 9
                 }
             ],
             "symbol_name": "Egress.hdr.csig.worst_hop",
             "declaration": {
                 "file": "",
-                "line": 887,
+                "line": 890,
                 "column": 35
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -1744,51 +1744,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 924,
+                    "line": 927,
                     "column": 19
                 },
-                {
-                    "file": "",
-                    "line": 929,
-                    "column": 9
-                }
-            ],
-            "symbol_name": "Egress.hdr.csig.worst_qdepth",
-            "declaration": {
-                "file": "",
-                "line": 887,
-                "column": 35
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 933,
-                    "column": 9
-                }
-            ],
-            "symbol_name": "Egress.hdr.csig.worst_tdelta",
-            "declaration": {
-                "file": "",
-                "line": 887,
-                "column": 35
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
                 {
                     "file": "",
                     "line": 932,
                     "column": 9
                 }
             ],
-            "symbol_name": "Egress.hdr.csig.worst_vlink",
+            "symbol_name": "Egress.hdr.csig.worst_qdepth",
             "declaration": {
                 "file": "",
-                "line": 887,
+                "line": 890,
                 "column": 35
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -1797,14 +1765,46 @@
             "references": [
                 {
                     "file": "",
-                    "line": 908,
+                    "line": 936,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "Egress.hdr.csig.worst_tdelta",
+            "declaration": {
+                "file": "",
+                "line": 890,
+                "column": 35
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 935,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "Egress.hdr.csig.worst_vlink",
+            "declaration": {
+                "file": "",
+                "line": 890,
+                "column": 35
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 911,
                     "column": 18
                 }
             ],
             "symbol_name": "Egress.hdr.fabric.hop",
             "declaration": {
                 "file": "",
-                "line": 887,
+                "line": 890,
                 "column": 35
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -1813,19 +1813,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 924,
+                    "line": 927,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 944,
+                    "line": 947,
                     "column": 17
                 }
             ],
             "symbol_name": "Egress.md.diff",
             "declaration": {
                 "file": "",
-                "line": 887,
+                "line": 890,
                 "column": 54
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -1834,19 +1834,66 @@
             "references": [
                 {
                     "file": "",
-                    "line": 908,
+                    "line": 911,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 928,
+                    "line": 931,
                     "column": 30
                 }
             ],
             "symbol_name": "Egress.md.hop",
             "declaration": {
                 "file": "",
-                "line": 887,
+                "line": 890,
+                "column": 54
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 912,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 936,
+                    "column": 33
+                }
+            ],
+            "symbol_name": "Egress.md.tdelta",
+            "declaration": {
+                "file": "",
+                "line": 890,
+                "column": 54
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 910,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 927,
+                    "column": 45
+                },
+                {
+                    "file": "",
+                    "line": 932,
+                    "column": 33
+                }
+            ],
+            "symbol_name": "Egress.md.this_q",
+            "declaration": {
+                "file": "",
+                "line": 890,
                 "column": 54
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -1860,61 +1907,14 @@
                 },
                 {
                     "file": "",
-                    "line": 933,
-                    "column": 33
-                }
-            ],
-            "symbol_name": "Egress.md.tdelta",
-            "declaration": {
-                "file": "",
-                "line": 887,
-                "column": 54
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 907,
-                    "column": 9
-                },
-                {
-                    "file": "",
-                    "line": 924,
-                    "column": 45
-                },
-                {
-                    "file": "",
-                    "line": 929,
-                    "column": 33
-                }
-            ],
-            "symbol_name": "Egress.md.this_q",
-            "declaration": {
-                "file": "",
-                "line": 887,
-                "column": 54
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 906,
-                    "column": 9
-                },
-                {
-                    "file": "",
-                    "line": 932,
+                    "line": 935,
                     "column": 32
                 }
             ],
             "symbol_name": "Egress.md.vlink",
             "declaration": {
                 "file": "",
-                "line": 887,
+                "line": 890,
                 "column": 54
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -1923,14 +1923,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 906,
+                    "line": 909,
                     "column": 20
                 }
             ],
             "symbol_name": "Egress.set_eg_vlink.vlink",
             "declaration": {
                 "file": "",
-                "line": 905,
+                "line": 908,
                 "column": 33
             },
             "symbol_type": "Parameter_Type_Bits"
@@ -1939,14 +1939,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 838,
+                    "line": 841,
                     "column": 18
                 }
             ],
             "symbol_name": "IgDeparser.hdr.bth",
             "declaration": {
                 "file": "",
-                "line": 822,
+                "line": 825,
                 "column": 52
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -1955,14 +1955,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 838,
+                    "line": 841,
                     "column": 18
                 }
             ],
             "symbol_name": "IgDeparser.hdr.csig",
             "declaration": {
                 "file": "",
-                "line": 822,
+                "line": 825,
                 "column": 52
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -1971,14 +1971,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 838,
+                    "line": 841,
                     "column": 18
                 }
             ],
             "symbol_name": "IgDeparser.hdr.ethernet",
             "declaration": {
                 "file": "",
-                "line": 822,
+                "line": 825,
                 "column": 52
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -1987,14 +1987,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 838,
+                    "line": 841,
                     "column": 18
                 }
             ],
             "symbol_name": "IgDeparser.hdr.evid",
             "declaration": {
                 "file": "",
-                "line": 822,
+                "line": 825,
                 "column": 52
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2003,14 +2003,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 838,
+                    "line": 841,
                     "column": 18
                 }
             ],
             "symbol_name": "IgDeparser.hdr.fabric",
             "declaration": {
                 "file": "",
-                "line": 822,
+                "line": 825,
                 "column": 52
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2019,14 +2019,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 835,
+                    "line": 838,
                     "column": 19
                 }
             ],
             "symbol_name": "IgDeparser.hdr.fabric.hop",
             "declaration": {
                 "file": "",
-                "line": 822,
+                "line": 825,
                 "column": 52
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2035,30 +2035,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 835,
-                    "column": 48
-                }
-            ],
-            "symbol_name": "IgDeparser.hdr.fabric.path_id",
-            "declaration": {
-                "file": "",
-                "line": 822,
-                "column": 52
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 838,
+                    "line": 841,
                     "column": 18
                 }
             ],
             "symbol_name": "IgDeparser.hdr.ipv4",
             "declaration": {
                 "file": "",
-                "line": 822,
+                "line": 825,
                 "column": 52
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2067,14 +2051,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 838,
+                    "line": 841,
                     "column": 18
                 }
             ],
             "symbol_name": "IgDeparser.hdr.udp",
             "declaration": {
                 "file": "",
-                "line": 822,
+                "line": 825,
                 "column": 52
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2083,14 +2067,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 827,
+                    "line": 830,
                     "column": 13
                 }
             ],
             "symbol_name": "IgDeparser.ig_dprsr_md.mirror_type",
             "declaration": {
                 "file": "",
-                "line": 823,
+                "line": 826,
                 "column": 65
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2099,14 +2083,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 835,
-                    "column": 68
+                    "line": 838,
+                    "column": 61
                 }
             ],
             "symbol_name": "IgDeparser.md.attn",
             "declaration": {
                 "file": "",
-                "line": 822,
+                "line": 825,
                 "column": 68
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2115,14 +2099,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 835,
-                    "column": 77
+                    "line": 838,
+                    "column": 70
                 }
             ],
             "symbol_name": "IgDeparser.md.flags_out",
             "declaration": {
                 "file": "",
-                "line": 822,
+                "line": 825,
                 "column": 68
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2131,14 +2115,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 834,
+                    "line": 837,
                     "column": 19
                 }
             ],
             "symbol_name": "IgDeparser.md.mir_dmac",
             "declaration": {
                 "file": "",
-                "line": 822,
+                "line": 825,
                 "column": 68
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2147,14 +2131,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 834,
+                    "line": 837,
                     "column": 45
                 }
             ],
             "symbol_name": "IgDeparser.md.mir_etype",
             "declaration": {
                 "file": "",
-                "line": 822,
+                "line": 825,
                 "column": 68
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2163,30 +2147,30 @@
             "references": [
                 {
                     "file": "",
-                    "line": 834,
+                    "line": 838,
+                    "column": 48
+                }
+            ],
+            "symbol_name": "IgDeparser.md.mir_path",
+            "declaration": {
+                "file": "",
+                "line": 825,
+                "column": 68
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 837,
                     "column": 32
                 }
             ],
             "symbol_name": "IgDeparser.md.mir_smac",
             "declaration": {
                 "file": "",
-                "line": 822,
-                "column": 68
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 833,
-                    "column": 39
-                }
-            ],
-            "symbol_name": "IgDeparser.md.mirror_sid",
-            "declaration": {
-                "file": "",
-                "line": 822,
+                "line": 825,
                 "column": 68
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2196,13 +2180,13 @@
                 {
                     "file": "",
                     "line": 836,
-                    "column": 19
+                    "column": 39
                 }
             ],
-            "symbol_name": "IgDeparser.md.tstamp",
+            "symbol_name": "IgDeparser.md.mirror_sid",
             "declaration": {
                 "file": "",
-                "line": 822,
+                "line": 825,
                 "column": 68
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2211,14 +2195,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 835,
-                    "column": 35
+                    "line": 839,
+                    "column": 19
                 }
             ],
-            "symbol_name": "IgDeparser.md.vlink_id",
+            "symbol_name": "IgDeparser.md.tstamp",
             "declaration": {
                 "file": "",
-                "line": 822,
+                "line": 825,
                 "column": 68
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2228,13 +2212,29 @@
                 {
                     "file": "",
                     "line": 838,
+                    "column": 35
+                }
+            ],
+            "symbol_name": "IgDeparser.md.vlink_id",
+            "declaration": {
+                "file": "",
+                "line": 825,
+                "column": 68
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 841,
                     "column": 9
                 }
             ],
             "symbol_name": "IgDeparser.pkt",
             "declaration": {
                 "file": "",
-                "line": 822,
+                "line": 825,
                 "column": 31
             },
             "symbol_type": "Parameter_Type_Extern"
@@ -2243,14 +2243,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 340,
+                    "line": 343,
                     "column": 21
                 }
             ],
             "symbol_name": "IgParser.hdr.bth",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 46
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2259,14 +2259,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 318,
+                    "line": 321,
                     "column": 21
                 }
             ],
             "symbol_name": "IgParser.hdr.csig",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 46
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2275,14 +2275,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 288,
+                    "line": 291,
                     "column": 21
                 }
             ],
             "symbol_name": "IgParser.hdr.ethernet",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 46
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2291,14 +2291,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 289,
+                    "line": 292,
                     "column": 27
                 }
             ],
             "symbol_name": "IgParser.hdr.ethernet.ether_type",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 46
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2307,14 +2307,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 345,
+                    "line": 348,
                     "column": 21
                 }
             ],
             "symbol_name": "IgParser.hdr.evid",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 46
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2323,14 +2323,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 297,
+                    "line": 300,
                     "column": 21
                 }
             ],
             "symbol_name": "IgParser.hdr.fabric",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 46
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2339,14 +2339,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 302,
+                    "line": 305,
                     "column": 18
                 }
             ],
             "symbol_name": "IgParser.hdr.fabric.hop",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 46
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2355,14 +2355,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 311,
+                    "line": 314,
                     "column": 27
                 }
             ],
             "symbol_name": "IgParser.hdr.fabric.nxt",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 46
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2371,14 +2371,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 310,
+                    "line": 313,
                     "column": 23
                 }
             ],
             "symbol_name": "IgParser.hdr.fabric.path_id",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 46
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2387,14 +2387,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 309,
+                    "line": 312,
                     "column": 24
                 }
             ],
             "symbol_name": "IgParser.hdr.fabric.spray",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 46
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2403,14 +2403,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 303,
+                    "line": 306,
                     "column": 21
                 }
             ],
             "symbol_name": "IgParser.hdr.fabric.vsw_id",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 46
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2419,14 +2419,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 323,
+                    "line": 326,
                     "column": 21
                 }
             ],
             "symbol_name": "IgParser.hdr.ipv4",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 46
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2435,14 +2435,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 324,
+                    "line": 327,
                     "column": 27
                 }
             ],
             "symbol_name": "IgParser.hdr.ipv4.protocol",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 46
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2451,14 +2451,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 331,
+                    "line": 334,
                     "column": 21
                 }
             ],
             "symbol_name": "IgParser.hdr.udp",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 46
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2467,14 +2467,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 332,
+                    "line": 335,
                     "column": 27
                 }
             ],
             "symbol_name": "IgParser.hdr.udp.dst_port",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 46
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2483,14 +2483,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 252,
+                    "line": 254,
                     "column": 21
                 }
             ],
             "symbol_name": "IgParser.ig_intr_md",
             "declaration": {
                 "file": "",
-                "line": 249,
+                "line": 251,
                 "column": 50
             },
             "symbol_type": "Parameter_Type_Header"
@@ -2499,14 +2499,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 269,
+                    "line": 271,
                     "column": 9
                 }
             ],
             "symbol_name": "IgParser.md.attn",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 63
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2515,78 +2515,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 310,
+                    "line": 313,
                     "column": 9
                 }
             ],
             "symbol_name": "IgParser.md.attn_idx",
             "declaration": {
                 "file": "",
-                "line": 248,
-                "column": 63
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 274,
-                    "column": 9
-                }
-            ],
-            "symbol_name": "IgParser.md.do_measure",
-            "declaration": {
-                "file": "",
-                "line": 248,
-                "column": 63
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 256,
-                    "column": 9
-                }
-            ],
-            "symbol_name": "IgParser.md.dst_leaf",
-            "declaration": {
-                "file": "",
-                "line": 248,
-                "column": 63
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 273,
-                    "column": 9
-                }
-            ],
-            "symbol_name": "IgParser.md.exceed",
-            "declaration": {
-                "file": "",
-                "line": 248,
-                "column": 63
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 275,
-                    "column": 9
-                }
-            ],
-            "symbol_name": "IgParser.md.fault",
-            "declaration": {
-                "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 63
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2599,10 +2535,10 @@
                     "column": 9
                 }
             ],
-            "symbol_name": "IgParser.md.flags_out",
+            "symbol_name": "IgParser.md.do_measure",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 63
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2611,19 +2547,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 257,
-                    "column": 9
-                },
-                {
-                    "file": "",
-                    "line": 302,
+                    "line": 258,
                     "column": 9
                 }
             ],
-            "symbol_name": "IgParser.md.hop",
+            "symbol_name": "IgParser.md.dst_leaf",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 63
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2632,46 +2563,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 281,
+                    "line": 275,
                     "column": 9
                 }
             ],
-            "symbol_name": "IgParser.md.mir_dmac",
+            "symbol_name": "IgParser.md.exceed",
             "declaration": {
                 "file": "",
-                "line": 248,
-                "column": 63
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 283,
-                    "column": 9
-                }
-            ],
-            "symbol_name": "IgParser.md.mir_etype",
-            "declaration": {
-                "file": "",
-                "line": 248,
-                "column": 63
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 282,
-                    "column": 9
-                }
-            ],
-            "symbol_name": "IgParser.md.mir_smac",
-            "declaration": {
-                "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 63
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2684,10 +2583,26 @@
                     "column": 9
                 }
             ],
-            "symbol_name": "IgParser.md.mirror_sid",
+            "symbol_name": "IgParser.md.fault",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 278,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.flags_out",
+            "declaration": {
+                "file": "",
+                "line": 250,
                 "column": 63
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2698,12 +2613,17 @@
                     "file": "",
                     "line": 259,
                     "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 305,
+                    "column": 9
                 }
             ],
-            "symbol_name": "IgParser.md.next_vsw",
+            "symbol_name": "IgParser.md.hop",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 63
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2712,14 +2632,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 260,
+                    "line": 284,
                     "column": 9
                 }
             ],
-            "symbol_name": "IgParser.md.path_id",
+            "symbol_name": "IgParser.md.mir_dmac",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 63
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2728,14 +2648,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 268,
+                    "line": 286,
                     "column": 9
                 }
             ],
-            "symbol_name": "IgParser.md.rnd_attn",
+            "symbol_name": "IgParser.md.mir_etype",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 63
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2744,14 +2664,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 267,
+                    "line": 283,
                     "column": 9
                 }
             ],
-            "symbol_name": "IgParser.md.rnd_fail",
+            "symbol_name": "IgParser.md.mir_path",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 63
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2760,14 +2680,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 254,
+                    "line": 285,
                     "column": 9
                 }
             ],
-            "symbol_name": "IgParser.md.role",
+            "symbol_name": "IgParser.md.mir_smac",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 63
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2776,14 +2696,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 263,
+                    "line": 279,
                     "column": 9
                 }
             ],
-            "symbol_name": "IgParser.md.spray_hash",
+            "symbol_name": "IgParser.md.mirror_sid",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 63
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2794,17 +2714,12 @@
                     "file": "",
                     "line": 261,
                     "column": 9
-                },
-                {
-                    "file": "",
-                    "line": 309,
-                    "column": 9
                 }
             ],
-            "symbol_name": "IgParser.md.spray_idx",
+            "symbol_name": "IgParser.md.next_vsw",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 63
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2817,10 +2732,10 @@
                     "column": 9
                 }
             ],
-            "symbol_name": "IgParser.md.spray_rand",
+            "symbol_name": "IgParser.md.path_id",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 63
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2829,14 +2744,46 @@
             "references": [
                 {
                     "file": "",
-                    "line": 264,
+                    "line": 270,
                     "column": 9
                 }
             ],
-            "symbol_name": "IgParser.md.spray_rr",
+            "symbol_name": "IgParser.md.rnd_attn",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 269,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.rnd_fail",
+            "declaration": {
+                "file": "",
+                "line": 250,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 256,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.role",
+            "declaration": {
+                "file": "",
+                "line": 250,
                 "column": 63
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2849,10 +2796,10 @@
                     "column": 9
                 }
             ],
-            "symbol_name": "IgParser.md.spray_sel",
+            "symbol_name": "IgParser.md.spray_hash",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 63
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2861,14 +2808,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 255,
+                    "line": 263,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 312,
                     "column": 9
                 }
             ],
-            "symbol_name": "IgParser.md.src_leaf",
+            "symbol_name": "IgParser.md.spray_idx",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 63
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2877,14 +2829,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 280,
+                    "line": 264,
                     "column": 9
                 }
             ],
-            "symbol_name": "IgParser.md.tstamp",
+            "symbol_name": "IgParser.md.spray_rand",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 63
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2897,10 +2849,10 @@
                     "column": 9
                 }
             ],
-            "symbol_name": "IgParser.md.vlink_id",
+            "symbol_name": "IgParser.md.spray_rr",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 63
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2909,19 +2861,83 @@
             "references": [
                 {
                     "file": "",
-                    "line": 258,
+                    "line": 267,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.spray_sel",
+            "declaration": {
+                "file": "",
+                "line": 250,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 257,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.src_leaf",
+            "declaration": {
+                "file": "",
+                "line": 250,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 282,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.tstamp",
+            "declaration": {
+                "file": "",
+                "line": 250,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 268,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "IgParser.md.vlink_id",
+            "declaration": {
+                "file": "",
+                "line": 250,
+                "column": 63
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 260,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 303,
+                    "line": 306,
                     "column": 9
                 }
             ],
             "symbol_name": "IgParser.md.vsw_id",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 63
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -2930,54 +2946,54 @@
             "references": [
                 {
                     "file": "",
-                    "line": 252,
+                    "line": 254,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 253,
+                    "line": 255,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 288,
+                    "line": 291,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 297,
+                    "line": 300,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 318,
+                    "line": 321,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 323,
+                    "line": 326,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 331,
+                    "line": 334,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 340,
+                    "line": 343,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 345,
+                    "line": 348,
                     "column": 9
                 }
             ],
             "symbol_name": "IgParser.pkt",
             "declaration": {
                 "file": "",
-                "line": 248,
+                "line": 250,
                 "column": 27
             },
             "symbol_type": "Parameter_Type_Extern"
@@ -2986,14 +3002,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 722,
+                    "line": 725,
                     "column": 38
                 }
             ],
             "symbol_name": "Ingress.act_deliver.port",
             "declaration": {
                 "file": "",
-                "line": 718,
+                "line": 721,
                 "column": 31
             },
             "symbol_type": "Parameter_Type_Bits"
@@ -3002,14 +3018,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 709,
+                    "line": 712,
                     "column": 26
                 }
             ],
             "symbol_name": "Ingress.act_enter.epoch",
             "declaration": {
                 "file": "",
-                "line": 692,
+                "line": 695,
                 "column": 48
             },
             "symbol_type": "Parameter_Type_Bits"
@@ -3018,14 +3034,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 695,
+                    "line": 698,
                     "column": 26
                 }
             ],
             "symbol_name": "Ingress.act_enter.next_hop",
             "declaration": {
                 "file": "",
-                "line": 692,
+                "line": 695,
                 "column": 30
             },
             "symbol_type": "Parameter_Type_Bits"
@@ -3034,14 +3050,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 714,
+                    "line": 717,
                     "column": 26
                 }
             ],
             "symbol_name": "Ingress.act_transit.next_hop",
             "declaration": {
                 "file": "",
-                "line": 712,
+                "line": 715,
                 "column": 32
             },
             "symbol_type": "Parameter_Type_Bits"
@@ -3050,14 +3066,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 736,
+                    "line": 739,
                     "column": 38
                 }
             ],
             "symbol_name": "Ingress.evid_to_loop.port",
             "declaration": {
                 "file": "",
-                "line": 735,
+                "line": 738,
                 "column": 32
             },
             "symbol_type": "Parameter_Type_Bits"
@@ -3066,14 +3082,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 794,
+                    "line": 797,
                     "column": 24
                 }
             ],
             "symbol_name": "Ingress.hdr.csig",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 33
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -3082,19 +3098,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 703,
+                    "line": 706,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 720,
+                    "line": 723,
                     "column": 9
                 }
             ],
             "symbol_name": "Ingress.hdr.csig.$valid",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 33
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -3103,14 +3119,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 709,
+                    "line": 712,
                     "column": 9
                 }
             ],
             "symbol_name": "Ingress.hdr.csig.epoch",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 33
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -3119,51 +3135,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 708,
+                    "line": 711,
                     "column": 9
                 }
             ],
             "symbol_name": "Ingress.hdr.csig.path_id",
             "declaration": {
                 "file": "",
-                "line": 354,
-                "column": 33
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 704,
-                    "column": 9
-                }
-            ],
-            "symbol_name": "Ingress.hdr.csig.worst_hop",
-            "declaration": {
-                "file": "",
-                "line": 354,
-                "column": 33
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 646,
-                    "column": 17
-                },
-                {
-                    "file": "",
-                    "line": 706,
-                    "column": 9
-                }
-            ],
-            "symbol_name": "Ingress.hdr.csig.worst_qdepth",
-            "declaration": {
-                "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 33
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -3176,10 +3155,63 @@
                     "column": 9
                 }
             ],
+            "symbol_name": "Ingress.hdr.csig.worst_hop",
+            "declaration": {
+                "file": "",
+                "line": 357,
+                "column": 33
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 649,
+                    "column": 17
+                },
+                {
+                    "file": "",
+                    "line": 709,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "Ingress.hdr.csig.worst_qdepth",
+            "declaration": {
+                "file": "",
+                "line": 357,
+                "column": 33
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 710,
+                    "column": 9
+                }
+            ],
             "symbol_name": "Ingress.hdr.csig.worst_tdelta",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
+                "column": 33
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 708,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "Ingress.hdr.csig.worst_vlink",
+            "declaration": {
+                "file": "",
+                "line": 357,
                 "column": 33
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -3190,33 +3222,17 @@
                     "file": "",
                     "line": 705,
                     "column": 9
-                }
-            ],
-            "symbol_name": "Ingress.hdr.csig.worst_vlink",
-            "declaration": {
-                "file": "",
-                "line": 354,
-                "column": 33
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 702,
-                    "column": 9
                 },
                 {
                     "file": "",
-                    "line": 721,
+                    "line": 724,
                     "column": 9
                 }
             ],
             "symbol_name": "Ingress.hdr.ethernet.ether_type",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 33
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -3225,29 +3241,29 @@
             "references": [
                 {
                     "file": "",
-                    "line": 792,
+                    "line": 795,
                     "column": 17
                 },
                 {
                     "file": "",
-                    "line": 801,
+                    "line": 804,
                     "column": 40
                 },
                 {
                     "file": "",
-                    "line": 808,
+                    "line": 811,
                     "column": 39
                 },
                 {
                     "file": "",
-                    "line": 813,
+                    "line": 816,
                     "column": 17
                 }
             ],
             "symbol_name": "Ingress.hdr.evid",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 33
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -3256,14 +3272,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 639,
+                    "line": 642,
                     "column": 17
                 }
             ],
             "symbol_name": "Ingress.hdr.evid.loss_q",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 33
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -3272,19 +3288,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 635,
+                    "line": 638,
                     "column": 66
                 },
                 {
                     "file": "",
-                    "line": 636,
+                    "line": 639,
                     "column": 50
                 }
             ],
             "symbol_name": "Ingress.hdr.evid.path_id",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 33
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -3293,14 +3309,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 639,
+                    "line": 642,
                     "column": 42
                 }
             ],
             "symbol_name": "Ingress.hdr.evid.rtt_q",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 33
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -3309,14 +3325,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 765,
+                    "line": 768,
                     "column": 37
                 }
             ],
             "symbol_name": "Ingress.hdr.fabric",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 33
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -3325,19 +3341,40 @@
             "references": [
                 {
                     "file": "",
-                    "line": 693,
+                    "line": 696,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 719,
+                    "line": 722,
                     "column": 9
                 }
             ],
             "symbol_name": "Ingress.hdr.fabric.$valid",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
+                "column": 33
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 701,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 718,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "Ingress.hdr.fabric.flags",
+            "declaration": {
+                "file": "",
+                "line": 357,
                 "column": 33
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -3351,67 +3388,14 @@
                 },
                 {
                     "file": "",
-                    "line": 715,
-                    "column": 9
-                }
-            ],
-            "symbol_name": "Ingress.hdr.fabric.flags",
-            "declaration": {
-                "file": "",
-                "line": 354,
-                "column": 33
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 695,
-                    "column": 9
-                },
-                {
-                    "file": "",
-                    "line": 714,
+                    "line": 717,
                     "column": 9
                 }
             ],
             "symbol_name": "Ingress.hdr.fabric.hop",
             "declaration": {
                 "file": "",
-                "line": 354,
-                "column": 33
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 697,
-                    "column": 9
-                }
-            ],
-            "symbol_name": "Ingress.hdr.fabric.loops",
-            "declaration": {
-                "file": "",
-                "line": 354,
-                "column": 33
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 699,
-                    "column": 9
-                }
-            ],
-            "symbol_name": "Ingress.hdr.fabric.nxt",
-            "declaration": {
-                "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 33
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -3424,10 +3408,10 @@
                     "column": 9
                 }
             ],
-            "symbol_name": "Ingress.hdr.fabric.pad",
+            "symbol_name": "Ingress.hdr.fabric.loops",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 33
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -3436,14 +3420,46 @@
             "references": [
                 {
                     "file": "",
-                    "line": 701,
+                    "line": 702,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "Ingress.hdr.fabric.nxt",
+            "declaration": {
+                "file": "",
+                "line": 357,
+                "column": 33
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 703,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "Ingress.hdr.fabric.pad",
+            "declaration": {
+                "file": "",
+                "line": 357,
+                "column": 33
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 704,
                     "column": 9
                 }
             ],
             "symbol_name": "Ingress.hdr.fabric.path_id",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 33
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -3452,14 +3468,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 696,
+                    "line": 699,
                     "column": 9
                 }
             ],
             "symbol_name": "Ingress.hdr.fabric.spray",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 33
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -3468,19 +3484,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 694,
+                    "line": 697,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 713,
+                    "line": 716,
                     "column": 9
                 }
             ],
             "symbol_name": "Ingress.hdr.fabric.vsw_id",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 33
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -3489,19 +3505,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 389,
+                    "line": 392,
                     "column": 17
                 },
                 {
                     "file": "",
-                    "line": 782,
+                    "line": 785,
                     "column": 47
                 }
             ],
             "symbol_name": "Ingress.hdr.ipv4.dst_addr",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 33
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -3510,14 +3526,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 781,
+                    "line": 784,
                     "column": 47
                 }
             ],
             "symbol_name": "Ingress.hdr.ipv4.src_addr",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 33
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -3526,14 +3542,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 548,
+                    "line": 551,
                     "column": 9
                 }
             ],
             "symbol_name": "Ingress.hdr.udp.checksum",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 33
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -3542,14 +3558,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 783,
+                    "line": 786,
                     "column": 47
                 }
             ],
             "symbol_name": "Ingress.hdr.udp.src_port",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 33
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -3558,290 +3574,9 @@
             "references": [
                 {
                     "file": "",
-                    "line": 492,
+                    "line": 495,
                     "column": 9
                 },
-                {
-                    "file": "",
-                    "line": 535,
-                    "column": 9
-                },
-                {
-                    "file": "",
-                    "line": 727,
-                    "column": 9
-                },
-                {
-                    "file": "",
-                    "line": 739,
-                    "column": 26
-                },
-                {
-                    "file": "",
-                    "line": 766,
-                    "column": 13
-                }
-            ],
-            "symbol_name": "Ingress.ig_dprsr_md.drop_ctl",
-            "declaration": {
-                "file": "",
-                "line": 357,
-                "column": 65
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 536,
-                    "column": 9
-                },
-                {
-                    "file": "",
-                    "line": 549,
-                    "column": 9
-                },
-                {
-                    "file": "",
-                    "line": 672,
-                    "column": 9
-                }
-            ],
-            "symbol_name": "Ingress.ig_dprsr_md.mirror_type",
-            "declaration": {
-                "file": "",
-                "line": 357,
-                "column": 65
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 368,
-                    "column": 21
-                }
-            ],
-            "symbol_name": "Ingress.ig_intr_md.ingress_mac_tstamp",
-            "declaration": {
-                "file": "",
-                "line": 355,
-                "column": 49
-            },
-            "symbol_type": "Parameter_Type_Header"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 372,
-                    "column": 17
-                }
-            ],
-            "symbol_name": "Ingress.ig_intr_md.ingress_port",
-            "declaration": {
-                "file": "",
-                "line": 355,
-                "column": 49
-            },
-            "symbol_type": "Parameter_Type_Header"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 487,
-                    "column": 9
-                },
-                {
-                    "file": "",
-                    "line": 723,
-                    "column": 9
-                },
-                {
-                    "file": "",
-                    "line": 737,
-                    "column": 9
-                }
-            ],
-            "symbol_name": "Ingress.ig_tm_md.qid",
-            "declaration": {
-                "file": "",
-                "line": 358,
-                "column": 59
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 486,
-                    "column": 9
-                },
-                {
-                    "file": "",
-                    "line": 722,
-                    "column": 9
-                },
-                {
-                    "file": "",
-                    "line": 736,
-                    "column": 9
-                }
-            ],
-            "symbol_name": "Ingress.ig_tm_md.ucast_egress_port",
-            "declaration": {
-                "file": "",
-                "line": 358,
-                "column": 59
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 652,
-                    "column": 32
-                },
-                {
-                    "file": "",
-                    "line": 653,
-                    "column": 31
-                },
-                {
-                    "file": "",
-                    "line": 677,
-                    "column": 17
-                }
-            ],
-            "symbol_name": "Ingress.md.attn",
-            "declaration": {
-                "file": "",
-                "line": 354,
-                "column": 52
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 485,
-                    "column": 9
-                },
-                {
-                    "file": "",
-                    "line": 635,
-                    "column": 43
-                },
-                {
-                    "file": "",
-                    "line": 636,
-                    "column": 27
-                },
-                {
-                    "file": "",
-                    "line": 652,
-                    "column": 65
-                },
-                {
-                    "file": "",
-                    "line": 653,
-                    "column": 63
-                },
-                {
-                    "file": "",
-                    "line": 701,
-                    "column": 30
-                },
-                {
-                    "file": "",
-                    "line": 708,
-                    "column": 28
-                }
-            ],
-            "symbol_name": "Ingress.md.attn_idx",
-            "declaration": {
-                "file": "",
-                "line": 354,
-                "column": 52
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 670,
-                    "column": 9
-                }
-            ],
-            "symbol_name": "Ingress.md.do_measure",
-            "declaration": {
-                "file": "",
-                "line": 354,
-                "column": 52
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 384,
-                    "column": 9
-                },
-                {
-                    "file": "",
-                    "line": 501,
-                    "column": 13
-                },
-                {
-                    "file": "",
-                    "line": 752,
-                    "column": 50
-                }
-            ],
-            "symbol_name": "Ingress.md.dst_leaf",
-            "declaration": {
-                "file": "",
-                "line": 354,
-                "column": 52
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 631,
-                    "column": 27
-                },
-                {
-                    "file": "",
-                    "line": 635,
-                    "column": 28
-                },
-                {
-                    "file": "",
-                    "line": 658,
-                    "column": 17
-                }
-            ],
-            "symbol_name": "Ingress.md.exceed",
-            "declaration": {
-                "file": "",
-                "line": 354,
-                "column": 52
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
                 {
                     "file": "",
                     "line": 538,
@@ -3849,15 +3584,25 @@
                 },
                 {
                     "file": "",
-                    "line": 551,
+                    "line": 730,
                     "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 742,
+                    "column": 26
+                },
+                {
+                    "file": "",
+                    "line": 769,
+                    "column": 13
                 }
             ],
-            "symbol_name": "Ingress.md.fault",
+            "symbol_name": "Ingress.ig_dprsr_md.drop_ctl",
             "declaration": {
                 "file": "",
-                "line": 354,
-                "column": 52
+                "line": 360,
+                "column": 65
             },
             "symbol_type": "Parameter_Type_Struct"
         },
@@ -3875,29 +3620,310 @@
                 },
                 {
                     "file": "",
-                    "line": 671,
+                    "line": 675,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "Ingress.ig_dprsr_md.mirror_type",
+            "declaration": {
+                "file": "",
+                "line": 360,
+                "column": 65
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 371,
+                    "column": 21
+                }
+            ],
+            "symbol_name": "Ingress.ig_intr_md.ingress_mac_tstamp",
+            "declaration": {
+                "file": "",
+                "line": 358,
+                "column": 49
+            },
+            "symbol_type": "Parameter_Type_Header"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 375,
+                    "column": 17
+                }
+            ],
+            "symbol_name": "Ingress.ig_intr_md.ingress_port",
+            "declaration": {
+                "file": "",
+                "line": 358,
+                "column": 49
+            },
+            "symbol_type": "Parameter_Type_Header"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 490,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 671,
+                    "line": 726,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 740,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "Ingress.ig_tm_md.qid",
+            "declaration": {
+                "file": "",
+                "line": 361,
+                "column": 59
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 489,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 725,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 739,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "Ingress.ig_tm_md.ucast_egress_port",
+            "declaration": {
+                "file": "",
+                "line": 361,
+                "column": 59
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 655,
+                    "column": 32
+                },
+                {
+                    "file": "",
+                    "line": 656,
+                    "column": 31
+                },
+                {
+                    "file": "",
+                    "line": 680,
+                    "column": 17
+                }
+            ],
+            "symbol_name": "Ingress.md.attn",
+            "declaration": {
+                "file": "",
+                "line": 357,
+                "column": 52
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 488,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 638,
+                    "column": 43
+                },
+                {
+                    "file": "",
+                    "line": 639,
+                    "column": 27
+                },
+                {
+                    "file": "",
+                    "line": 655,
+                    "column": 65
+                },
+                {
+                    "file": "",
+                    "line": 655,
+                    "column": 93
+                },
+                {
+                    "file": "",
+                    "line": 656,
+                    "column": 63
+                },
+                {
+                    "file": "",
+                    "line": 656,
+                    "column": 91
+                },
+                {
+                    "file": "",
+                    "line": 704,
+                    "column": 30
+                },
+                {
+                    "file": "",
+                    "line": 711,
+                    "column": 28
+                }
+            ],
+            "symbol_name": "Ingress.md.attn_idx",
+            "declaration": {
+                "file": "",
+                "line": 357,
+                "column": 52
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 673,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "Ingress.md.do_measure",
+            "declaration": {
+                "file": "",
+                "line": 357,
+                "column": 52
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 387,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 504,
+                    "column": 13
+                },
+                {
+                    "file": "",
+                    "line": 755,
+                    "column": 50
+                }
+            ],
+            "symbol_name": "Ingress.md.dst_leaf",
+            "declaration": {
+                "file": "",
+                "line": 357,
+                "column": 52
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 634,
+                    "column": 27
+                },
+                {
+                    "file": "",
+                    "line": 638,
+                    "column": 28
+                },
+                {
+                    "file": "",
+                    "line": 661,
+                    "column": 17
+                }
+            ],
+            "symbol_name": "Ingress.md.exceed",
+            "declaration": {
+                "file": "",
+                "line": 357,
+                "column": 52
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 541,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 554,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "Ingress.md.fault",
+            "declaration": {
+                "file": "",
+                "line": 357,
+                "column": 52
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 542,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 555,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 674,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 674,
                     "column": 24
                 },
                 {
                     "file": "",
-                    "line": 698,
+                    "line": 701,
                     "column": 36
                 },
                 {
                     "file": "",
-                    "line": 715,
+                    "line": 718,
                     "column": 36
                 }
             ],
             "symbol_name": "Ingress.md.flags_out",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 52
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -3906,246 +3932,8 @@
             "references": [
                 {
                     "file": "",
-                    "line": 463,
+                    "line": 466,
                     "column": 34
-                },
-                {
-                    "file": "",
-                    "line": 499,
-                    "column": 13
-                },
-                {
-                    "file": "",
-                    "line": 752,
-                    "column": 34
-                },
-                {
-                    "file": "",
-                    "line": 779,
-                    "column": 17
-                },
-                {
-                    "file": "",
-                    "line": 801,
-                    "column": 17
-                },
-                {
-                    "file": "",
-                    "line": 808,
-                    "column": 17
-                }
-            ],
-            "symbol_name": "Ingress.md.hop",
-            "declaration": {
-                "file": "",
-                "line": 354,
-                "column": 52
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 537,
-                    "column": 9
-                },
-                {
-                    "file": "",
-                    "line": 550,
-                    "column": 9
-                },
-                {
-                    "file": "",
-                    "line": 673,
-                    "column": 9
-                },
-                {
-                    "file": "",
-                    "line": 673,
-                    "column": 25
-                }
-            ],
-            "symbol_name": "Ingress.md.mirror_sid",
-            "declaration": {
-                "file": "",
-                "line": 354,
-                "column": 52
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 484,
-                    "column": 9
-                },
-                {
-                    "file": "",
-                    "line": 694,
-                    "column": 29
-                },
-                {
-                    "file": "",
-                    "line": 713,
-                    "column": 29
-                }
-            ],
-            "symbol_name": "Ingress.md.next_vsw",
-            "declaration": {
-                "file": "",
-                "line": 354,
-                "column": 52
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 385,
-                    "column": 9
-                }
-            ],
-            "symbol_name": "Ingress.md.path_id",
-            "declaration": {
-                "file": "",
-                "line": 354,
-                "column": 52
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 677,
-                    "column": 40
-                },
-                {
-                    "file": "",
-                    "line": 774,
-                    "column": 13
-                }
-            ],
-            "symbol_name": "Ingress.md.rnd_attn",
-            "declaration": {
-                "file": "",
-                "line": 354,
-                "column": 52
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 563,
-                    "column": 13
-                },
-                {
-                    "file": "",
-                    "line": 773,
-                    "column": 13
-                }
-            ],
-            "symbol_name": "Ingress.md.rnd_fail",
-            "declaration": {
-                "file": "",
-                "line": 354,
-                "column": 52
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 366,
-                    "column": 9
-                },
-                {
-                    "file": "",
-                    "line": 463,
-                    "column": 17
-                },
-                {
-                    "file": "",
-                    "line": 498,
-                    "column": 13
-                },
-                {
-                    "file": "",
-                    "line": 742,
-                    "column": 17
-                },
-                {
-                    "file": "",
-                    "line": 752,
-                    "column": 17
-                },
-                {
-                    "file": "",
-                    "line": 765,
-                    "column": 13
-                }
-            ],
-            "symbol_name": "Ingress.md.role",
-            "declaration": {
-                "file": "",
-                "line": 354,
-                "column": 52
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 449,
-                    "column": 17
-                },
-                {
-                    "file": "",
-                    "line": 458,
-                    "column": 60
-                },
-                {
-                    "file": "",
-                    "line": 781,
-                    "column": 17
-                }
-            ],
-            "symbol_name": "Ingress.md.spray_hash",
-            "declaration": {
-                "file": "",
-                "line": 354,
-                "column": 52
-            },
-            "symbol_type": "Parameter_Type_Struct"
-        },
-        {
-            "references": [
-                {
-                    "file": "",
-                    "line": 457,
-                    "column": 46
-                },
-                {
-                    "file": "",
-                    "line": 458,
-                    "column": 45
-                },
-                {
-                    "file": "",
-                    "line": 459,
-                    "column": 43
-                },
-                {
-                    "file": "",
-                    "line": 460,
-                    "column": 44
                 },
                 {
                     "file": "",
@@ -4154,14 +3942,273 @@
                 },
                 {
                     "file": "",
-                    "line": 696,
+                    "line": 755,
+                    "column": 34
+                },
+                {
+                    "file": "",
+                    "line": 782,
+                    "column": 17
+                },
+                {
+                    "file": "",
+                    "line": 804,
+                    "column": 17
+                },
+                {
+                    "file": "",
+                    "line": 811,
+                    "column": 17
+                }
+            ],
+            "symbol_name": "Ingress.md.hop",
+            "declaration": {
+                "file": "",
+                "line": 357,
+                "column": 52
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 655,
+                    "column": 79
+                },
+                {
+                    "file": "",
+                    "line": 656,
+                    "column": 77
+                }
+            ],
+            "symbol_name": "Ingress.md.mir_path",
+            "declaration": {
+                "file": "",
+                "line": 357,
+                "column": 52
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 540,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 553,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 676,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 676,
+                    "column": 25
+                }
+            ],
+            "symbol_name": "Ingress.md.mirror_sid",
+            "declaration": {
+                "file": "",
+                "line": 357,
+                "column": 52
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 487,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 697,
+                    "column": 29
+                },
+                {
+                    "file": "",
+                    "line": 716,
+                    "column": 29
+                }
+            ],
+            "symbol_name": "Ingress.md.next_vsw",
+            "declaration": {
+                "file": "",
+                "line": 357,
+                "column": 52
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 388,
+                    "column": 9
+                }
+            ],
+            "symbol_name": "Ingress.md.path_id",
+            "declaration": {
+                "file": "",
+                "line": 357,
+                "column": 52
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 680,
+                    "column": 40
+                },
+                {
+                    "file": "",
+                    "line": 777,
+                    "column": 13
+                }
+            ],
+            "symbol_name": "Ingress.md.rnd_attn",
+            "declaration": {
+                "file": "",
+                "line": 357,
+                "column": 52
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 566,
+                    "column": 13
+                },
+                {
+                    "file": "",
+                    "line": 776,
+                    "column": 13
+                }
+            ],
+            "symbol_name": "Ingress.md.rnd_fail",
+            "declaration": {
+                "file": "",
+                "line": 357,
+                "column": 52
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 369,
+                    "column": 9
+                },
+                {
+                    "file": "",
+                    "line": 466,
+                    "column": 17
+                },
+                {
+                    "file": "",
+                    "line": 501,
+                    "column": 13
+                },
+                {
+                    "file": "",
+                    "line": 745,
+                    "column": 17
+                },
+                {
+                    "file": "",
+                    "line": 755,
+                    "column": 17
+                },
+                {
+                    "file": "",
+                    "line": 768,
+                    "column": 13
+                }
+            ],
+            "symbol_name": "Ingress.md.role",
+            "declaration": {
+                "file": "",
+                "line": 357,
+                "column": 52
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 452,
+                    "column": 17
+                },
+                {
+                    "file": "",
+                    "line": 461,
+                    "column": 60
+                },
+                {
+                    "file": "",
+                    "line": 784,
+                    "column": 17
+                }
+            ],
+            "symbol_name": "Ingress.md.spray_hash",
+            "declaration": {
+                "file": "",
+                "line": 357,
+                "column": 52
+            },
+            "symbol_type": "Parameter_Type_Struct"
+        },
+        {
+            "references": [
+                {
+                    "file": "",
+                    "line": 460,
+                    "column": 46
+                },
+                {
+                    "file": "",
+                    "line": 461,
+                    "column": 45
+                },
+                {
+                    "file": "",
+                    "line": 462,
+                    "column": 43
+                },
+                {
+                    "file": "",
+                    "line": 463,
+                    "column": 44
+                },
+                {
+                    "file": "",
+                    "line": 505,
+                    "column": 13
+                },
+                {
+                    "file": "",
+                    "line": 699,
                     "column": 28
                 }
             ],
             "symbol_name": "Ingress.md.spray_idx",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 52
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -4170,19 +4217,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 457,
+                    "line": 460,
                     "column": 61
                 },
                 {
                     "file": "",
-                    "line": 780,
+                    "line": 783,
                     "column": 17
                 }
             ],
             "symbol_name": "Ingress.md.spray_rand",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 52
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -4191,19 +4238,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 459,
+                    "line": 462,
                     "column": 58
                 },
                 {
                     "file": "",
-                    "line": 784,
+                    "line": 787,
                     "column": 17
                 }
             ],
             "symbol_name": "Ingress.md.spray_rr",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 52
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -4212,19 +4259,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 445,
+                    "line": 448,
                     "column": 40
                 },
                 {
                     "file": "",
-                    "line": 460,
+                    "line": 463,
                     "column": 59
                 }
             ],
             "symbol_name": "Ingress.md.spray_sel",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 52
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -4233,29 +4280,29 @@
             "references": [
                 {
                     "file": "",
-                    "line": 367,
+                    "line": 370,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 448,
+                    "line": 451,
                     "column": 17
                 },
                 {
                     "file": "",
-                    "line": 500,
+                    "line": 503,
                     "column": 13
                 },
                 {
                     "file": "",
-                    "line": 784,
+                    "line": 787,
                     "column": 47
                 }
             ],
             "symbol_name": "Ingress.md.src_leaf",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 52
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -4264,14 +4311,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 368,
+                    "line": 371,
                     "column": 9
                 }
             ],
             "symbol_name": "Ingress.md.tstamp",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 52
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -4280,19 +4327,19 @@
             "references": [
                 {
                     "file": "",
-                    "line": 483,
+                    "line": 486,
                     "column": 9
                 },
                 {
                     "file": "",
-                    "line": 562,
+                    "line": 565,
                     "column": 13
                 }
             ],
             "symbol_name": "Ingress.md.vlink_id",
             "declaration": {
                 "file": "",
-                "line": 354,
+                "line": 357,
                 "column": 52
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -4301,24 +4348,24 @@
             "references": [
                 {
                     "file": "",
-                    "line": 427,
+                    "line": 430,
                     "column": 13
                 },
                 {
                     "file": "",
-                    "line": 613,
+                    "line": 616,
                     "column": 13
                 },
                 {
                     "file": "",
-                    "line": 627,
+                    "line": 630,
                     "column": 13
                 }
             ],
             "symbol_name": "Ingress.rv",
             "declaration": {
                 "file": "",
-                "line": 618,
+                "line": 621,
                 "column": 53
             },
             "symbol_type": "Parameter_Type_Bits"
@@ -4327,14 +4374,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 384,
+                    "line": 387,
                     "column": 23
                 }
             ],
             "symbol_name": "Ingress.set_dst.dst_leaf",
             "declaration": {
                 "file": "",
-                "line": 383,
+                "line": 386,
                 "column": 28
             },
             "symbol_type": "Parameter_Type_Bits"
@@ -4343,14 +4390,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 385,
+                    "line": 388,
                     "column": 22
                 }
             ],
             "symbol_name": "Ingress.set_dst.path_base",
             "declaration": {
                 "file": "",
-                "line": 383,
+                "line": 386,
                 "column": 46
             },
             "symbol_type": "Parameter_Type_Bits"
@@ -4359,14 +4406,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 366,
+                    "line": 369,
                     "column": 19
                 }
             ],
             "symbol_name": "Ingress.set_role.role",
             "declaration": {
                 "file": "",
-                "line": 365,
+                "line": 368,
                 "column": 29
             },
             "symbol_type": "Parameter_Type_Bits"
@@ -4375,14 +4422,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 367,
+                    "line": 370,
                     "column": 23
                 }
             ],
             "symbol_name": "Ingress.set_role.src_leaf",
             "declaration": {
                 "file": "",
-                "line": 365,
+                "line": 368,
                 "column": 43
             },
             "symbol_type": "Parameter_Type_Bits"
@@ -4391,14 +4438,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 458,
+                    "line": 461,
                     "column": 76
                 }
             ],
             "symbol_name": "Ingress.spray_from_hash.mask",
             "declaration": {
                 "file": "",
-                "line": 458,
+                "line": 461,
                 "column": 37
             },
             "symbol_type": "Parameter_Type_Bits"
@@ -4407,14 +4454,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 457,
+                    "line": 460,
                     "column": 77
                 }
             ],
             "symbol_name": "Ingress.spray_from_random.mask",
             "declaration": {
                 "file": "",
-                "line": 457,
+                "line": 460,
                 "column": 38
             },
             "symbol_type": "Parameter_Type_Bits"
@@ -4423,14 +4470,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 459,
+                    "line": 462,
                     "column": 72
                 }
             ],
             "symbol_name": "Ingress.spray_from_rr.mask",
             "declaration": {
                 "file": "",
-                "line": 459,
+                "line": 462,
                 "column": 35
             },
             "symbol_type": "Parameter_Type_Bits"
@@ -4439,14 +4486,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 460,
+                    "line": 463,
                     "column": 74
                 }
             ],
             "symbol_name": "Ingress.spray_from_sel.mask",
             "declaration": {
                 "file": "",
-                "line": 460,
+                "line": 463,
                 "column": 36
             },
             "symbol_type": "Parameter_Type_Bits"
@@ -4455,14 +4502,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 445,
+                    "line": 448,
                     "column": 55
                 }
             ],
             "symbol_name": "Ingress.spray_member.idx",
             "declaration": {
                 "file": "",
-                "line": 445,
+                "line": 448,
                 "column": 33
             },
             "symbol_type": "Parameter_Type_Bits"
@@ -4471,14 +4518,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 486,
+                    "line": 489,
                     "column": 38
                 }
             ],
             "symbol_name": "Ingress.to_loop.loop_port",
             "declaration": {
                 "file": "",
-                "line": 481,
+                "line": 484,
                 "column": 45
             },
             "symbol_type": "Parameter_Type_Bits"
@@ -4487,14 +4534,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 484,
+                    "line": 487,
                     "column": 23
                 }
             ],
             "symbol_name": "Ingress.to_loop.next_vsw",
             "declaration": {
                 "file": "",
-                "line": 481,
+                "line": 484,
                 "column": 76
             },
             "symbol_type": "Parameter_Type_Bits"
@@ -4503,14 +4550,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 485,
+                    "line": 488,
                     "column": 23
                 }
             ],
             "symbol_name": "Ingress.to_loop.path_id",
             "declaration": {
                 "file": "",
-                "line": 482,
+                "line": 485,
                 "column": 28
             },
             "symbol_type": "Parameter_Type_Bits"
@@ -4519,14 +4566,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 487,
+                    "line": 490,
                     "column": 24
                 }
             ],
             "symbol_name": "Ingress.to_loop.qid",
             "declaration": {
                 "file": "",
-                "line": 481,
+                "line": 484,
                 "column": 63
             },
             "symbol_type": "Parameter_Type_Bits"
@@ -4535,14 +4582,14 @@
             "references": [
                 {
                     "file": "",
-                    "line": 483,
+                    "line": 486,
                     "column": 23
                 }
             ],
             "symbol_name": "Ingress.to_loop.vlink_id",
             "declaration": {
                 "file": "",
-                "line": 481,
+                "line": 484,
                 "column": 28
             },
             "symbol_type": "Parameter_Type_Bits"
@@ -4551,44 +4598,44 @@
             "references": [
                 {
                     "file": "",
-                    "line": 611,
+                    "line": 614,
                     "column": 13
                 },
                 {
                     "file": "",
-                    "line": 611,
+                    "line": 614,
                     "column": 22
                 },
                 {
                     "file": "",
-                    "line": 613,
+                    "line": 616,
                     "column": 18
                 },
                 {
                     "file": "",
-                    "line": 619,
+                    "line": 622,
                     "column": 51
                 },
                 {
                     "file": "",
-                    "line": 621,
+                    "line": 624,
                     "column": 17
                 },
                 {
                     "file": "",
-                    "line": 621,
+                    "line": 624,
                     "column": 26
                 },
                 {
                     "file": "",
-                    "line": 627,
+                    "line": 630,
                     "column": 18
                 }
             ],
             "symbol_name": "Ingress.v.attn",
             "declaration": {
                 "file": "",
-                "line": 618,
+                "line": 621,
                 "column": 38
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -4597,23 +4644,13 @@
             "references": [
                 {
                     "file": "",
-                    "line": 612,
+                    "line": 615,
                     "column": 13
                 },
                 {
                     "file": "",
-                    "line": 619,
-                    "column": 17
-                },
-                {
-                    "file": "",
-                    "line": 620,
-                    "column": 17
-                },
-                {
-                    "file": "",
                     "line": 622,
-                    "column": 24
+                    "column": 17
                 },
                 {
                     "file": "",
@@ -4623,18 +4660,28 @@
                 {
                     "file": "",
                     "line": 625,
+                    "column": 24
+                },
+                {
+                    "file": "",
+                    "line": 626,
                     "column": 17
                 },
                 {
                     "file": "",
-                    "line": 625,
+                    "line": 628,
+                    "column": 17
+                },
+                {
+                    "file": "",
+                    "line": 628,
                     "column": 27
                 }
             ],
             "symbol_name": "Ingress.v.clean",
             "declaration": {
                 "file": "",
-                "line": 618,
+                "line": 621,
                 "column": 38
             },
             "symbol_type": "Parameter_Type_Struct"
@@ -4643,24 +4690,24 @@
             "references": [
                 {
                     "file": "",
-                    "line": 427,
+                    "line": 430,
                     "column": 18
                 },
                 {
                     "file": "",
-                    "line": 428,
+                    "line": 431,
                     "column": 13
                 },
                 {
                     "file": "",
-                    "line": 428,
+                    "line": 431,
                     "column": 21
                 }
             ],
             "symbol_name": "Ingress.value",
             "declaration": {
                 "file": "",
-                "line": 426,
+                "line": 429,
                 "column": 34
             },
             "symbol_type": "Parameter_Type_Bits"
@@ -4670,7 +4717,7 @@
             "symbol_name": "cond-1",
             "declaration": {
                 "file": "",
-                "line": 765,
+                "line": 768,
                 "column": 9
             },
             "symbol_type": "IfStatement"
@@ -4680,7 +4727,7 @@
             "symbol_name": "cond-2",
             "declaration": {
                 "file": "",
-                "line": 779,
+                "line": 782,
                 "column": 13
             },
             "symbol_type": "IfStatement"
@@ -4690,7 +4737,7 @@
             "symbol_name": "cond-3",
             "declaration": {
                 "file": "",
-                "line": 792,
+                "line": 795,
                 "column": 13
             },
             "symbol_type": "IfStatement"
@@ -4700,7 +4747,7 @@
             "symbol_name": "cond-4",
             "declaration": {
                 "file": "",
-                "line": 794,
+                "line": 797,
                 "column": 20
             },
             "symbol_type": "IfStatement"
@@ -4710,7 +4757,7 @@
             "symbol_name": "cond-5",
             "declaration": {
                 "file": "",
-                "line": 801,
+                "line": 804,
                 "column": 13
             },
             "symbol_type": "IfStatement"
@@ -4720,7 +4767,7 @@
             "symbol_name": "cond-6",
             "declaration": {
                 "file": "",
-                "line": 808,
+                "line": 811,
                 "column": 13
             },
             "symbol_type": "IfStatement"
@@ -4730,7 +4777,7 @@
             "symbol_name": "cond-7",
             "declaration": {
                 "file": "",
-                "line": 813,
+                "line": 816,
                 "column": 13
             },
             "symbol_type": "IfStatement"
@@ -4740,7 +4787,7 @@
             "symbol_name": "cond-8",
             "declaration": {
                 "file": "",
-                "line": 941,
+                "line": 944,
                 "column": 9
             },
             "symbol_type": "IfStatement"
@@ -4750,7 +4797,7 @@
             "symbol_name": "cond-9",
             "declaration": {
                 "file": "",
-                "line": 944,
+                "line": 947,
                 "column": 13
             },
             "symbol_type": "IfStatement"
@@ -4760,7 +4807,7 @@
             "symbol_name": "cond-10",
             "declaration": {
                 "file": "",
-                "line": 765,
+                "line": 768,
                 "column": 9
             },
             "symbol_type": "IfStatement"
@@ -4770,7 +4817,7 @@
             "symbol_name": "cond-11",
             "declaration": {
                 "file": "",
-                "line": 779,
+                "line": 782,
                 "column": 13
             },
             "symbol_type": "IfStatement"
@@ -4780,7 +4827,7 @@
             "symbol_name": "cond-12",
             "declaration": {
                 "file": "",
-                "line": 792,
+                "line": 795,
                 "column": 13
             },
             "symbol_type": "IfStatement"
@@ -4790,7 +4837,7 @@
             "symbol_name": "cond-13",
             "declaration": {
                 "file": "",
-                "line": 794,
+                "line": 797,
                 "column": 20
             },
             "symbol_type": "IfStatement"
@@ -4800,7 +4847,7 @@
             "symbol_name": "cond-14",
             "declaration": {
                 "file": "",
-                "line": 801,
+                "line": 804,
                 "column": 13
             },
             "symbol_type": "IfStatement"
@@ -4810,7 +4857,7 @@
             "symbol_name": "cond-15",
             "declaration": {
                 "file": "",
-                "line": 808,
+                "line": 811,
                 "column": 13
             },
             "symbol_type": "IfStatement"
@@ -4820,7 +4867,7 @@
             "symbol_name": "cond-16",
             "declaration": {
                 "file": "",
-                "line": 813,
+                "line": 816,
                 "column": 13
             },
             "symbol_type": "IfStatement"
@@ -4830,7 +4877,7 @@
             "symbol_name": "cond-17",
             "declaration": {
                 "file": "",
-                "line": 941,
+                "line": 944,
                 "column": 9
             },
             "symbol_type": "IfStatement"
@@ -4840,7 +4887,7 @@
             "symbol_name": "cond-18",
             "declaration": {
                 "file": "",
-                "line": 944,
+                "line": 947,
                 "column": 13
             },
             "symbol_type": "IfStatement"

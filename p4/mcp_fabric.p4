@@ -228,6 +228,8 @@ struct ig_md_t {
     bit<16> flags_out;   // fabric_h.flags to write: fault | measured
     MirrorId_t mirror_sid;   // bit<10>: Mirror.emit() wants a plain field, no cast/slice
     bit<48> tstamp;          // ig_intr_md.ingress_mac_tstamp copied by set_role (MAU-written = emit-safe)
+    bit<16> mir_path;        // md.attn_idx copied by tbl_attn's actions: evidence packets have no
+                             // shim, so hdr.fabric.path_id reads 0 in their copies (silicon, h7-F1)
     bit<48> mir_dmac;        // mirror header constants, from the parser start state
     bit<48> mir_smac;
     bit<16> mir_etype;
@@ -278,6 +280,7 @@ parser IgParser(packet_in pkt, out headers_t hdr, out ig_md_t md,
         /* Mirror header Ethernet fields: constants are free in the parser, forbidden in
          * the emit field list, and expensive as MAU action data (112 immediate bits). */
         md.tstamp     = 0;
+        md.mir_path   = 0;
         md.mir_dmac   = 48w0xA5A5A5A5A5A5;
         md.mir_smac   = 48w0x020000004D43;
         md.mir_etype  = ETYPE_MCP_MIRROR;
@@ -649,8 +652,8 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
         const default_action = NoAction();
     }
 
-    action act_attn_exceed() { md.attn = attn_on_exceed.execute(md.attn_idx); }
-    action act_attn_clean()  { md.attn = attn_on_clean.execute(md.attn_idx);  }
+    action act_attn_exceed() { md.attn = attn_on_exceed.execute(md.attn_idx); md.mir_path = md.attn_idx; }
+    action act_attn_clean()  { md.attn = attn_on_clean.execute(md.attn_idx);  md.mir_path = md.attn_idx; }
 
     /* A stateful action with a computed index cannot be a table default ("requires
      * the hash distribution unit"), hence const entries. */
@@ -832,7 +835,7 @@ control IgDeparser(packet_out pkt, inout headers_t hdr, in ig_md_t md,
              * that can mirror (act_enter sets it at hop 0). */
             mcp_mirror.emit<mirror_h>(md.mirror_sid,
                 { md.mir_dmac, md.mir_smac, md.mir_etype,
-                  hdr.fabric.hop, md.vlink_id, hdr.fabric.path_id, md.attn, md.flags_out,
+                  hdr.fabric.hop, md.vlink_id, md.mir_path, md.attn, md.flags_out,
                   md.tstamp });
         }
         pkt.emit(hdr);

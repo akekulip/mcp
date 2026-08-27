@@ -1,5 +1,5 @@
 {
-  "build_date": "Wed Aug 26 19:22:39 2026",
+  "build_date": "Wed Aug 26 20:07:37 2026",
   "schema_version": "1.12.4",
   "compiler_version": "9.13.1 (e558d01)",
   "target": "tofino",
@@ -320,8 +320,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 63,
-              "field_name": "hdr.ipv4.dst_addr",
+              "position_offset": 22,
+              "field_name": "hdr.csig.worst_tdelta",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -341,8 +341,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 76,
-              "field_name": "hdr.ipv4.src_addr",
+              "position_offset": 63,
+              "field_name": "hdr.ipv4.dst_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -362,8 +362,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 22,
-              "field_name": "hdr.csig.worst_tdelta",
+              "position_offset": 76,
+              "field_name": "hdr.ipv4.src_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -404,7 +404,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 31,
               "field_lsb": 0,
@@ -526,7 +526,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 70,
+          "phv_number": 71,
           "container_type": "normal",
           "records": [
             {
@@ -547,7 +547,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 71,
+          "phv_number": 72,
           "container_type": "normal",
           "records": [
             {
@@ -568,7 +568,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 72,
+          "phv_number": 73,
           "container_type": "normal",
           "records": [
             {
@@ -589,7 +589,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 73,
+          "phv_number": 75,
           "container_type": "normal",
           "records": [
             {
@@ -605,7 +605,7 @@
               "pov_headers": [
                 {
                   "bit_index": 5,
-                  "position_offset": 161,
+                  "position_offset": 163,
                   "header_name": "hdr.bth.$valid",
                   "hidden": false
                 }
@@ -627,7 +627,7 @@
               "pov_headers": [
                 {
                   "bit_index": 2,
-                  "position_offset": 162,
+                  "position_offset": 164,
                   "header_name": "hdr.csig.$valid",
                   "hidden": false
                 }
@@ -649,7 +649,7 @@
               "pov_headers": [
                 {
                   "bit_index": 0,
-                  "position_offset": 163,
+                  "position_offset": 165,
                   "header_name": "hdr.ethernet.$valid",
                   "hidden": false
                 }
@@ -671,7 +671,7 @@
               "pov_headers": [
                 {
                   "bit_index": 6,
-                  "position_offset": 164,
+                  "position_offset": 166,
                   "header_name": "hdr.evid.$valid",
                   "hidden": false
                 }
@@ -693,7 +693,7 @@
               "pov_headers": [
                 {
                   "bit_index": 1,
-                  "position_offset": 165,
+                  "position_offset": 167,
                   "header_name": "hdr.fabric.$valid",
                   "hidden": false
                 }
@@ -715,7 +715,7 @@
               "pov_headers": [
                 {
                   "bit_index": 3,
-                  "position_offset": 166,
+                  "position_offset": 168,
                   "header_name": "hdr.ipv4.$valid",
                   "hidden": false
                 }
@@ -737,7 +737,7 @@
               "pov_headers": [
                 {
                   "bit_index": 4,
-                  "position_offset": 167,
+                  "position_offset": 169,
                   "header_name": "hdr.udp.$valid",
                   "hidden": false
                 }
@@ -796,7 +796,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 143,
+              "position_offset": 145,
               "field_name": "md.spray_idx",
               "field_msb": 15,
               "field_lsb": 0,
@@ -1111,7 +1111,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 47,
               "field_lsb": 32,
@@ -1204,86 +1204,6 @@
           "container_type": "tagalong",
           "records": [
             {
-              "position_offset": 70,
-              "field_name": "hdr.ipv4.hdr_checksum",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 15,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 75,
-              "field_name": "hdr.ipv4.protocol",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 23,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 82,
-              "field_name": "hdr.ipv4.ttl",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 31,
-              "phv_lsb": 24,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 262,
-          "container_type": "tagalong",
-          "records": [
-            {
-              "position_offset": 67,
-              "field_name": "hdr.ipv4.flags",
-              "field_msb": 2,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 15,
-              "phv_lsb": 13,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 68,
-              "field_name": "hdr.ipv4.frag_offset",
-              "field_msb": 12,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 12,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 72,
-              "field_name": "hdr.ipv4.identification",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 31,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 263,
-          "container_type": "tagalong",
-          "records": [
-            {
               "position_offset": 10,
               "field_name": "hdr.bth.w2",
               "field_msb": 31,
@@ -1324,6 +1244,86 @@
               "field_width": 2,
               "phv_msb": 15,
               "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 262,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 70,
+              "field_name": "hdr.ipv4.hdr_checksum",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 15,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 75,
+              "field_name": "hdr.ipv4.protocol",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 23,
+              "phv_lsb": 16,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 82,
+              "field_name": "hdr.ipv4.ttl",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 31,
+              "phv_lsb": 24,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 263,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 67,
+              "field_name": "hdr.ipv4.flags",
+              "field_msb": 2,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 15,
+              "phv_lsb": 13,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 68,
+              "field_name": "hdr.ipv4.frag_offset",
+              "field_msb": 12,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 12,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 72,
+              "field_name": "hdr.ipv4.identification",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 31,
+              "phv_lsb": 16,
               "is_compiler_generated": false,
               "is_pov": false
             }
@@ -2640,7 +2640,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 153,
+              "position_offset": 155,
               "field_name": "md.tstamp",
               "field_msb": 31,
               "field_lsb": 0,
@@ -2696,8 +2696,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 63,
-              "field_name": "hdr.ipv4.dst_addr",
+              "position_offset": 22,
+              "field_name": "hdr.csig.worst_tdelta",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -2717,8 +2717,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 76,
-              "field_name": "hdr.ipv4.src_addr",
+              "position_offset": 63,
+              "field_name": "hdr.ipv4.dst_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -2738,8 +2738,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 22,
-              "field_name": "hdr.csig.worst_tdelta",
+              "position_offset": 76,
+              "field_name": "hdr.ipv4.src_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -2780,7 +2780,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 31,
               "field_lsb": 0,
@@ -2815,7 +2815,7 @@
               "mutually_exclusive_with": []
             },
             {
-              "position_offset": 139,
+              "position_offset": 141,
               "field_name": "md.role",
               "field_msb": 15,
               "field_lsb": 0,
@@ -2836,7 +2836,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 151,
+              "position_offset": 153,
               "field_name": "md.src_leaf",
               "field_msb": 15,
               "field_lsb": 0,
@@ -2937,7 +2937,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 70,
+          "phv_number": 71,
           "container_type": "normal",
           "records": [
             {
@@ -2958,7 +2958,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 71,
+          "phv_number": 72,
           "container_type": "normal",
           "records": [
             {
@@ -2979,7 +2979,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 72,
+          "phv_number": 73,
           "container_type": "normal",
           "records": [
             {
@@ -3000,7 +3000,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 73,
+          "phv_number": 75,
           "container_type": "normal",
           "records": [
             {
@@ -3016,7 +3016,7 @@
               "pov_headers": [
                 {
                   "bit_index": 5,
-                  "position_offset": 161,
+                  "position_offset": 163,
                   "header_name": "hdr.bth.$valid",
                   "hidden": false
                 }
@@ -3038,7 +3038,7 @@
               "pov_headers": [
                 {
                   "bit_index": 2,
-                  "position_offset": 162,
+                  "position_offset": 164,
                   "header_name": "hdr.csig.$valid",
                   "hidden": false
                 }
@@ -3060,7 +3060,7 @@
               "pov_headers": [
                 {
                   "bit_index": 0,
-                  "position_offset": 163,
+                  "position_offset": 165,
                   "header_name": "hdr.ethernet.$valid",
                   "hidden": false
                 }
@@ -3082,7 +3082,7 @@
               "pov_headers": [
                 {
                   "bit_index": 6,
-                  "position_offset": 164,
+                  "position_offset": 166,
                   "header_name": "hdr.evid.$valid",
                   "hidden": false
                 }
@@ -3104,7 +3104,7 @@
               "pov_headers": [
                 {
                   "bit_index": 1,
-                  "position_offset": 165,
+                  "position_offset": 167,
                   "header_name": "hdr.fabric.$valid",
                   "hidden": false
                 }
@@ -3126,7 +3126,7 @@
               "pov_headers": [
                 {
                   "bit_index": 3,
-                  "position_offset": 166,
+                  "position_offset": 168,
                   "header_name": "hdr.ipv4.$valid",
                   "hidden": false
                 }
@@ -3148,7 +3148,7 @@
               "pov_headers": [
                 {
                   "bit_index": 4,
-                  "position_offset": 167,
+                  "position_offset": 169,
                   "header_name": "hdr.udp.$valid",
                   "hidden": false
                 }
@@ -3207,7 +3207,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 143,
+              "position_offset": 145,
               "field_name": "md.spray_idx",
               "field_msb": 15,
               "field_lsb": 0,
@@ -3305,7 +3305,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 153,
+              "position_offset": 155,
               "field_name": "md.tstamp",
               "field_msb": 47,
               "field_lsb": 32,
@@ -3543,7 +3543,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 47,
               "field_lsb": 32,
@@ -3636,86 +3636,6 @@
           "container_type": "tagalong",
           "records": [
             {
-              "position_offset": 70,
-              "field_name": "hdr.ipv4.hdr_checksum",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 15,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 75,
-              "field_name": "hdr.ipv4.protocol",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 23,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 82,
-              "field_name": "hdr.ipv4.ttl",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 31,
-              "phv_lsb": 24,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 262,
-          "container_type": "tagalong",
-          "records": [
-            {
-              "position_offset": 67,
-              "field_name": "hdr.ipv4.flags",
-              "field_msb": 2,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 15,
-              "phv_lsb": 13,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 68,
-              "field_name": "hdr.ipv4.frag_offset",
-              "field_msb": 12,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 12,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 72,
-              "field_name": "hdr.ipv4.identification",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 31,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 263,
-          "container_type": "tagalong",
-          "records": [
-            {
               "position_offset": 10,
               "field_name": "hdr.bth.w2",
               "field_msb": 31,
@@ -3756,6 +3676,86 @@
               "field_width": 2,
               "phv_msb": 15,
               "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 262,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 70,
+              "field_name": "hdr.ipv4.hdr_checksum",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 15,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 75,
+              "field_name": "hdr.ipv4.protocol",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 23,
+              "phv_lsb": 16,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 82,
+              "field_name": "hdr.ipv4.ttl",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 31,
+              "phv_lsb": 24,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 263,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 67,
+              "field_name": "hdr.ipv4.flags",
+              "field_msb": 2,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 15,
+              "phv_lsb": 13,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 68,
+              "field_name": "hdr.ipv4.frag_offset",
+              "field_msb": 12,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 12,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 72,
+              "field_name": "hdr.ipv4.identification",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 31,
+              "phv_lsb": 16,
               "is_compiler_generated": false,
               "is_pov": false
             }
@@ -5156,7 +5156,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 153,
+              "position_offset": 155,
               "field_name": "md.tstamp",
               "field_msb": 31,
               "field_lsb": 0,
@@ -5212,8 +5212,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 63,
-              "field_name": "hdr.ipv4.dst_addr",
+              "position_offset": 22,
+              "field_name": "hdr.csig.worst_tdelta",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -5233,8 +5233,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 76,
-              "field_name": "hdr.ipv4.src_addr",
+              "position_offset": 63,
+              "field_name": "hdr.ipv4.dst_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -5254,8 +5254,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 22,
-              "field_name": "hdr.csig.worst_tdelta",
+              "position_offset": 76,
+              "field_name": "hdr.ipv4.src_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -5296,7 +5296,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 31,
               "field_lsb": 0,
@@ -5331,7 +5331,7 @@
               "mutually_exclusive_with": []
             },
             {
-              "position_offset": 139,
+              "position_offset": 141,
               "field_name": "md.role",
               "field_msb": 15,
               "field_lsb": 0,
@@ -5352,7 +5352,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 151,
+              "position_offset": 153,
               "field_name": "md.src_leaf",
               "field_msb": 15,
               "field_lsb": 0,
@@ -5394,7 +5394,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 135,
+              "position_offset": 137,
               "field_name": "md.rnd_attn",
               "field_msb": 15,
               "field_lsb": 0,
@@ -5516,7 +5516,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 70,
+          "phv_number": 71,
           "container_type": "normal",
           "records": [
             {
@@ -5537,7 +5537,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 71,
+          "phv_number": 72,
           "container_type": "normal",
           "records": [
             {
@@ -5558,7 +5558,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 72,
+          "phv_number": 73,
           "container_type": "normal",
           "records": [
             {
@@ -5579,7 +5579,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 73,
+          "phv_number": 75,
           "container_type": "normal",
           "records": [
             {
@@ -5595,7 +5595,7 @@
               "pov_headers": [
                 {
                   "bit_index": 5,
-                  "position_offset": 161,
+                  "position_offset": 163,
                   "header_name": "hdr.bth.$valid",
                   "hidden": false
                 }
@@ -5617,7 +5617,7 @@
               "pov_headers": [
                 {
                   "bit_index": 2,
-                  "position_offset": 162,
+                  "position_offset": 164,
                   "header_name": "hdr.csig.$valid",
                   "hidden": false
                 }
@@ -5639,7 +5639,7 @@
               "pov_headers": [
                 {
                   "bit_index": 0,
-                  "position_offset": 163,
+                  "position_offset": 165,
                   "header_name": "hdr.ethernet.$valid",
                   "hidden": false
                 }
@@ -5661,7 +5661,7 @@
               "pov_headers": [
                 {
                   "bit_index": 6,
-                  "position_offset": 164,
+                  "position_offset": 166,
                   "header_name": "hdr.evid.$valid",
                   "hidden": false
                 }
@@ -5683,7 +5683,7 @@
               "pov_headers": [
                 {
                   "bit_index": 1,
-                  "position_offset": 165,
+                  "position_offset": 167,
                   "header_name": "hdr.fabric.$valid",
                   "hidden": false
                 }
@@ -5705,7 +5705,7 @@
               "pov_headers": [
                 {
                   "bit_index": 3,
-                  "position_offset": 166,
+                  "position_offset": 168,
                   "header_name": "hdr.ipv4.$valid",
                   "hidden": false
                 }
@@ -5727,7 +5727,7 @@
               "pov_headers": [
                 {
                   "bit_index": 4,
-                  "position_offset": 167,
+                  "position_offset": 169,
                   "header_name": "hdr.udp.$valid",
                   "hidden": false
                 }
@@ -5786,7 +5786,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 145,
+              "position_offset": 147,
               "field_name": "md.spray_rand",
               "field_msb": 15,
               "field_lsb": 0,
@@ -5807,7 +5807,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 141,
+              "position_offset": 143,
               "field_name": "md.spray_hash",
               "field_msb": 15,
               "field_lsb": 0,
@@ -5828,7 +5828,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 147,
+              "position_offset": 149,
               "field_name": "md.spray_rr",
               "field_msb": 15,
               "field_lsb": 0,
@@ -5849,7 +5849,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 143,
+              "position_offset": 145,
               "field_name": "md.spray_idx",
               "field_msb": 15,
               "field_lsb": 0,
@@ -5947,7 +5947,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 153,
+              "position_offset": 155,
               "field_name": "md.tstamp",
               "field_msb": 47,
               "field_lsb": 32,
@@ -6157,7 +6157,7 @@
               "mutually_exclusive_with": []
             },
             {
-              "position_offset": 133,
+              "position_offset": 135,
               "field_name": "md.next_vsw",
               "field_msb": 15,
               "field_lsb": 0,
@@ -6199,7 +6199,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 47,
               "field_lsb": 32,
@@ -6292,86 +6292,6 @@
           "container_type": "tagalong",
           "records": [
             {
-              "position_offset": 70,
-              "field_name": "hdr.ipv4.hdr_checksum",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 15,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 75,
-              "field_name": "hdr.ipv4.protocol",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 23,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 82,
-              "field_name": "hdr.ipv4.ttl",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 31,
-              "phv_lsb": 24,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 262,
-          "container_type": "tagalong",
-          "records": [
-            {
-              "position_offset": 67,
-              "field_name": "hdr.ipv4.flags",
-              "field_msb": 2,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 15,
-              "phv_lsb": 13,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 68,
-              "field_name": "hdr.ipv4.frag_offset",
-              "field_msb": 12,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 12,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 72,
-              "field_name": "hdr.ipv4.identification",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 31,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 263,
-          "container_type": "tagalong",
-          "records": [
-            {
               "position_offset": 10,
               "field_name": "hdr.bth.w2",
               "field_msb": 31,
@@ -6412,6 +6332,86 @@
               "field_width": 2,
               "phv_msb": 15,
               "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 262,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 70,
+              "field_name": "hdr.ipv4.hdr_checksum",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 15,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 75,
+              "field_name": "hdr.ipv4.protocol",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 23,
+              "phv_lsb": 16,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 82,
+              "field_name": "hdr.ipv4.ttl",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 31,
+              "phv_lsb": 24,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 263,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 67,
+              "field_name": "hdr.ipv4.flags",
+              "field_msb": 2,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 15,
+              "phv_lsb": 13,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 68,
+              "field_name": "hdr.ipv4.frag_offset",
+              "field_msb": 12,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 12,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 72,
+              "field_name": "hdr.ipv4.identification",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 31,
+              "phv_lsb": 16,
               "is_compiler_generated": false,
               "is_pov": false
             }
@@ -7833,7 +7833,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 153,
+              "position_offset": 155,
               "field_name": "md.tstamp",
               "field_msb": 31,
               "field_lsb": 0,
@@ -7889,8 +7889,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 63,
-              "field_name": "hdr.ipv4.dst_addr",
+              "position_offset": 22,
+              "field_name": "hdr.csig.worst_tdelta",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -7910,8 +7910,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 76,
-              "field_name": "hdr.ipv4.src_addr",
+              "position_offset": 63,
+              "field_name": "hdr.ipv4.dst_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -7931,8 +7931,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 22,
-              "field_name": "hdr.csig.worst_tdelta",
+              "position_offset": 76,
+              "field_name": "hdr.ipv4.src_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -7973,7 +7973,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 31,
               "field_lsb": 0,
@@ -8008,7 +8008,7 @@
               "mutually_exclusive_with": []
             },
             {
-              "position_offset": 139,
+              "position_offset": 141,
               "field_name": "md.role",
               "field_msb": 15,
               "field_lsb": 0,
@@ -8029,7 +8029,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 151,
+              "position_offset": 153,
               "field_name": "md.src_leaf",
               "field_msb": 15,
               "field_lsb": 0,
@@ -8071,7 +8071,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 135,
+              "position_offset": 137,
               "field_name": "md.rnd_attn",
               "field_msb": 15,
               "field_lsb": 0,
@@ -8193,7 +8193,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 70,
+          "phv_number": 71,
           "container_type": "normal",
           "records": [
             {
@@ -8214,7 +8214,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 71,
+          "phv_number": 72,
           "container_type": "normal",
           "records": [
             {
@@ -8235,7 +8235,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 72,
+          "phv_number": 73,
           "container_type": "normal",
           "records": [
             {
@@ -8256,7 +8256,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 73,
+          "phv_number": 75,
           "container_type": "normal",
           "records": [
             {
@@ -8272,7 +8272,7 @@
               "pov_headers": [
                 {
                   "bit_index": 5,
-                  "position_offset": 161,
+                  "position_offset": 163,
                   "header_name": "hdr.bth.$valid",
                   "hidden": false
                 }
@@ -8294,7 +8294,7 @@
               "pov_headers": [
                 {
                   "bit_index": 2,
-                  "position_offset": 162,
+                  "position_offset": 164,
                   "header_name": "hdr.csig.$valid",
                   "hidden": false
                 }
@@ -8316,7 +8316,7 @@
               "pov_headers": [
                 {
                   "bit_index": 0,
-                  "position_offset": 163,
+                  "position_offset": 165,
                   "header_name": "hdr.ethernet.$valid",
                   "hidden": false
                 }
@@ -8338,7 +8338,7 @@
               "pov_headers": [
                 {
                   "bit_index": 6,
-                  "position_offset": 164,
+                  "position_offset": 166,
                   "header_name": "hdr.evid.$valid",
                   "hidden": false
                 }
@@ -8360,7 +8360,7 @@
               "pov_headers": [
                 {
                   "bit_index": 1,
-                  "position_offset": 165,
+                  "position_offset": 167,
                   "header_name": "hdr.fabric.$valid",
                   "hidden": false
                 }
@@ -8382,7 +8382,7 @@
               "pov_headers": [
                 {
                   "bit_index": 3,
-                  "position_offset": 166,
+                  "position_offset": 168,
                   "header_name": "hdr.ipv4.$valid",
                   "hidden": false
                 }
@@ -8404,7 +8404,7 @@
               "pov_headers": [
                 {
                   "bit_index": 4,
-                  "position_offset": 167,
+                  "position_offset": 169,
                   "header_name": "hdr.udp.$valid",
                   "hidden": false
                 }
@@ -8463,7 +8463,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 145,
+              "position_offset": 147,
               "field_name": "md.spray_rand",
               "field_msb": 15,
               "field_lsb": 0,
@@ -8484,7 +8484,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 141,
+              "position_offset": 143,
               "field_name": "md.spray_hash",
               "field_msb": 15,
               "field_lsb": 0,
@@ -8505,7 +8505,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 147,
+              "position_offset": 149,
               "field_name": "md.spray_rr",
               "field_msb": 15,
               "field_lsb": 0,
@@ -8526,7 +8526,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 143,
+              "position_offset": 145,
               "field_name": "md.spray_idx",
               "field_msb": 15,
               "field_lsb": 0,
@@ -8568,7 +8568,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 149,
+              "position_offset": 151,
               "field_name": "md.spray_sel",
               "field_msb": 15,
               "field_lsb": 0,
@@ -8645,7 +8645,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 153,
+              "position_offset": 155,
               "field_name": "md.tstamp",
               "field_msb": 47,
               "field_lsb": 32,
@@ -8855,7 +8855,7 @@
               "mutually_exclusive_with": []
             },
             {
-              "position_offset": 133,
+              "position_offset": 135,
               "field_name": "md.next_vsw",
               "field_msb": 15,
               "field_lsb": 0,
@@ -8897,7 +8897,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 47,
               "field_lsb": 32,
@@ -8990,86 +8990,6 @@
           "container_type": "tagalong",
           "records": [
             {
-              "position_offset": 70,
-              "field_name": "hdr.ipv4.hdr_checksum",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 15,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 75,
-              "field_name": "hdr.ipv4.protocol",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 23,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 82,
-              "field_name": "hdr.ipv4.ttl",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 31,
-              "phv_lsb": 24,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 262,
-          "container_type": "tagalong",
-          "records": [
-            {
-              "position_offset": 67,
-              "field_name": "hdr.ipv4.flags",
-              "field_msb": 2,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 15,
-              "phv_lsb": 13,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 68,
-              "field_name": "hdr.ipv4.frag_offset",
-              "field_msb": 12,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 12,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 72,
-              "field_name": "hdr.ipv4.identification",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 31,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 263,
-          "container_type": "tagalong",
-          "records": [
-            {
               "position_offset": 10,
               "field_name": "hdr.bth.w2",
               "field_msb": 31,
@@ -9110,6 +9030,86 @@
               "field_width": 2,
               "phv_msb": 15,
               "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 262,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 70,
+              "field_name": "hdr.ipv4.hdr_checksum",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 15,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 75,
+              "field_name": "hdr.ipv4.protocol",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 23,
+              "phv_lsb": 16,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 82,
+              "field_name": "hdr.ipv4.ttl",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 31,
+              "phv_lsb": 24,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 263,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 67,
+              "field_name": "hdr.ipv4.flags",
+              "field_msb": 2,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 15,
+              "phv_lsb": 13,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 68,
+              "field_name": "hdr.ipv4.frag_offset",
+              "field_msb": 12,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 12,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 72,
+              "field_name": "hdr.ipv4.identification",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 31,
+              "phv_lsb": 16,
               "is_compiler_generated": false,
               "is_pov": false
             }
@@ -10447,7 +10447,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 153,
+              "position_offset": 155,
               "field_name": "md.tstamp",
               "field_msb": 31,
               "field_lsb": 0,
@@ -10503,8 +10503,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 63,
-              "field_name": "hdr.ipv4.dst_addr",
+              "position_offset": 22,
+              "field_name": "hdr.csig.worst_tdelta",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -10524,8 +10524,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 76,
-              "field_name": "hdr.ipv4.src_addr",
+              "position_offset": 63,
+              "field_name": "hdr.ipv4.dst_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -10545,8 +10545,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 22,
-              "field_name": "hdr.csig.worst_tdelta",
+              "position_offset": 76,
+              "field_name": "hdr.ipv4.src_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -10587,7 +10587,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 31,
               "field_lsb": 0,
@@ -10622,7 +10622,7 @@
               "mutually_exclusive_with": []
             },
             {
-              "position_offset": 139,
+              "position_offset": 141,
               "field_name": "md.role",
               "field_msb": 15,
               "field_lsb": 0,
@@ -10657,7 +10657,7 @@
               "mutually_exclusive_with": []
             },
             {
-              "position_offset": 151,
+              "position_offset": 153,
               "field_name": "md.src_leaf",
               "field_msb": 15,
               "field_lsb": 0,
@@ -10692,7 +10692,7 @@
               "mutually_exclusive_with": []
             },
             {
-              "position_offset": 137,
+              "position_offset": 139,
               "field_name": "md.rnd_fail",
               "field_msb": 15,
               "field_lsb": 0,
@@ -10713,7 +10713,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 135,
+              "position_offset": 137,
               "field_name": "md.rnd_attn",
               "field_msb": 15,
               "field_lsb": 0,
@@ -10835,7 +10835,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 70,
+          "phv_number": 71,
           "container_type": "normal",
           "records": [
             {
@@ -10856,7 +10856,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 71,
+          "phv_number": 72,
           "container_type": "normal",
           "records": [
             {
@@ -10877,7 +10877,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 72,
+          "phv_number": 73,
           "container_type": "normal",
           "records": [
             {
@@ -10898,7 +10898,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 73,
+          "phv_number": 75,
           "container_type": "normal",
           "records": [
             {
@@ -10914,7 +10914,7 @@
               "pov_headers": [
                 {
                   "bit_index": 5,
-                  "position_offset": 161,
+                  "position_offset": 163,
                   "header_name": "hdr.bth.$valid",
                   "hidden": false
                 }
@@ -10936,7 +10936,7 @@
               "pov_headers": [
                 {
                   "bit_index": 2,
-                  "position_offset": 162,
+                  "position_offset": 164,
                   "header_name": "hdr.csig.$valid",
                   "hidden": false
                 }
@@ -10958,7 +10958,7 @@
               "pov_headers": [
                 {
                   "bit_index": 0,
-                  "position_offset": 163,
+                  "position_offset": 165,
                   "header_name": "hdr.ethernet.$valid",
                   "hidden": false
                 }
@@ -10980,7 +10980,7 @@
               "pov_headers": [
                 {
                   "bit_index": 6,
-                  "position_offset": 164,
+                  "position_offset": 166,
                   "header_name": "hdr.evid.$valid",
                   "hidden": false
                 }
@@ -11002,7 +11002,7 @@
               "pov_headers": [
                 {
                   "bit_index": 1,
-                  "position_offset": 165,
+                  "position_offset": 167,
                   "header_name": "hdr.fabric.$valid",
                   "hidden": false
                 }
@@ -11024,7 +11024,7 @@
               "pov_headers": [
                 {
                   "bit_index": 3,
-                  "position_offset": 166,
+                  "position_offset": 168,
                   "header_name": "hdr.ipv4.$valid",
                   "hidden": false
                 }
@@ -11046,7 +11046,7 @@
               "pov_headers": [
                 {
                   "bit_index": 4,
-                  "position_offset": 167,
+                  "position_offset": 169,
                   "header_name": "hdr.udp.$valid",
                   "hidden": false
                 }
@@ -11105,7 +11105,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 143,
+              "position_offset": 145,
               "field_name": "md.spray_idx",
               "field_msb": 15,
               "field_lsb": 0,
@@ -11147,7 +11147,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 149,
+              "position_offset": 151,
               "field_name": "md.spray_sel",
               "field_msb": 15,
               "field_lsb": 0,
@@ -11224,7 +11224,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 153,
+              "position_offset": 155,
               "field_name": "md.tstamp",
               "field_msb": 47,
               "field_lsb": 32,
@@ -11434,7 +11434,7 @@
               "mutually_exclusive_with": []
             },
             {
-              "position_offset": 133,
+              "position_offset": 135,
               "field_name": "md.next_vsw",
               "field_msb": 15,
               "field_lsb": 0,
@@ -11476,7 +11476,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 47,
               "field_lsb": 32,
@@ -11569,86 +11569,6 @@
           "container_type": "tagalong",
           "records": [
             {
-              "position_offset": 70,
-              "field_name": "hdr.ipv4.hdr_checksum",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 15,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 75,
-              "field_name": "hdr.ipv4.protocol",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 23,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 82,
-              "field_name": "hdr.ipv4.ttl",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 31,
-              "phv_lsb": 24,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 262,
-          "container_type": "tagalong",
-          "records": [
-            {
-              "position_offset": 67,
-              "field_name": "hdr.ipv4.flags",
-              "field_msb": 2,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 15,
-              "phv_lsb": 13,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 68,
-              "field_name": "hdr.ipv4.frag_offset",
-              "field_msb": 12,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 12,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 72,
-              "field_name": "hdr.ipv4.identification",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 31,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 263,
-          "container_type": "tagalong",
-          "records": [
-            {
               "position_offset": 10,
               "field_name": "hdr.bth.w2",
               "field_msb": 31,
@@ -11689,6 +11609,86 @@
               "field_width": 2,
               "phv_msb": 15,
               "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 262,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 70,
+              "field_name": "hdr.ipv4.hdr_checksum",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 15,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 75,
+              "field_name": "hdr.ipv4.protocol",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 23,
+              "phv_lsb": 16,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 82,
+              "field_name": "hdr.ipv4.ttl",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 31,
+              "phv_lsb": 24,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 263,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 67,
+              "field_name": "hdr.ipv4.flags",
+              "field_msb": 2,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 15,
+              "phv_lsb": 13,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 68,
+              "field_name": "hdr.ipv4.frag_offset",
+              "field_msb": 12,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 12,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 72,
+              "field_name": "hdr.ipv4.identification",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 31,
+              "phv_lsb": 16,
               "is_compiler_generated": false,
               "is_pov": false
             }
@@ -13026,7 +13026,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 153,
+              "position_offset": 155,
               "field_name": "md.tstamp",
               "field_msb": 31,
               "field_lsb": 0,
@@ -13082,8 +13082,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 63,
-              "field_name": "hdr.ipv4.dst_addr",
+              "position_offset": 22,
+              "field_name": "hdr.csig.worst_tdelta",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -13103,8 +13103,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 76,
-              "field_name": "hdr.ipv4.src_addr",
+              "position_offset": 63,
+              "field_name": "hdr.ipv4.dst_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -13124,8 +13124,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 22,
-              "field_name": "hdr.csig.worst_tdelta",
+              "position_offset": 76,
+              "field_name": "hdr.ipv4.src_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -13166,7 +13166,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 31,
               "field_lsb": 0,
@@ -13201,7 +13201,7 @@
               "mutually_exclusive_with": []
             },
             {
-              "position_offset": 139,
+              "position_offset": 141,
               "field_name": "md.role",
               "field_msb": 15,
               "field_lsb": 0,
@@ -13257,7 +13257,7 @@
               "mutually_exclusive_with": []
             },
             {
-              "position_offset": 137,
+              "position_offset": 139,
               "field_name": "md.rnd_fail",
               "field_msb": 15,
               "field_lsb": 0,
@@ -13278,7 +13278,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 135,
+              "position_offset": 137,
               "field_name": "md.rnd_attn",
               "field_msb": 15,
               "field_lsb": 0,
@@ -13414,7 +13414,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 70,
+          "phv_number": 71,
           "container_type": "normal",
           "records": [
             {
@@ -13435,7 +13435,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 71,
+          "phv_number": 72,
           "container_type": "normal",
           "records": [
             {
@@ -13456,7 +13456,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 72,
+          "phv_number": 73,
           "container_type": "normal",
           "records": [
             {
@@ -13477,7 +13477,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 73,
+          "phv_number": 75,
           "container_type": "normal",
           "records": [
             {
@@ -13493,7 +13493,7 @@
               "pov_headers": [
                 {
                   "bit_index": 5,
-                  "position_offset": 161,
+                  "position_offset": 163,
                   "header_name": "hdr.bth.$valid",
                   "hidden": false
                 }
@@ -13515,7 +13515,7 @@
               "pov_headers": [
                 {
                   "bit_index": 2,
-                  "position_offset": 162,
+                  "position_offset": 164,
                   "header_name": "hdr.csig.$valid",
                   "hidden": false
                 }
@@ -13537,7 +13537,7 @@
               "pov_headers": [
                 {
                   "bit_index": 0,
-                  "position_offset": 163,
+                  "position_offset": 165,
                   "header_name": "hdr.ethernet.$valid",
                   "hidden": false
                 }
@@ -13559,7 +13559,7 @@
               "pov_headers": [
                 {
                   "bit_index": 6,
-                  "position_offset": 164,
+                  "position_offset": 166,
                   "header_name": "hdr.evid.$valid",
                   "hidden": false
                 }
@@ -13581,7 +13581,7 @@
               "pov_headers": [
                 {
                   "bit_index": 1,
-                  "position_offset": 165,
+                  "position_offset": 167,
                   "header_name": "hdr.fabric.$valid",
                   "hidden": false
                 }
@@ -13603,7 +13603,7 @@
               "pov_headers": [
                 {
                   "bit_index": 3,
-                  "position_offset": 166,
+                  "position_offset": 168,
                   "header_name": "hdr.ipv4.$valid",
                   "hidden": false
                 }
@@ -13625,7 +13625,7 @@
               "pov_headers": [
                 {
                   "bit_index": 4,
-                  "position_offset": 167,
+                  "position_offset": 169,
                   "header_name": "hdr.udp.$valid",
                   "hidden": false
                 }
@@ -13705,7 +13705,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 143,
+              "position_offset": 145,
               "field_name": "md.spray_idx",
               "field_msb": 15,
               "field_lsb": 0,
@@ -13747,7 +13747,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 149,
+              "position_offset": 151,
               "field_name": "md.spray_sel",
               "field_msb": 15,
               "field_lsb": 0,
@@ -13824,7 +13824,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 153,
+              "position_offset": 155,
               "field_name": "md.tstamp",
               "field_msb": 47,
               "field_lsb": 32,
@@ -14020,7 +14020,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 159,
+              "position_offset": 161,
               "field_name": "md.vlink_id",
               "field_msb": 15,
               "field_lsb": 0,
@@ -14055,7 +14055,7 @@
               "mutually_exclusive_with": []
             },
             {
-              "position_offset": 133,
+              "position_offset": 135,
               "field_name": "md.next_vsw",
               "field_msb": 15,
               "field_lsb": 0,
@@ -14097,7 +14097,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 47,
               "field_lsb": 32,
@@ -14190,86 +14190,6 @@
           "container_type": "tagalong",
           "records": [
             {
-              "position_offset": 70,
-              "field_name": "hdr.ipv4.hdr_checksum",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 15,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 75,
-              "field_name": "hdr.ipv4.protocol",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 23,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 82,
-              "field_name": "hdr.ipv4.ttl",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 31,
-              "phv_lsb": 24,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 262,
-          "container_type": "tagalong",
-          "records": [
-            {
-              "position_offset": 67,
-              "field_name": "hdr.ipv4.flags",
-              "field_msb": 2,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 15,
-              "phv_lsb": 13,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 68,
-              "field_name": "hdr.ipv4.frag_offset",
-              "field_msb": 12,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 12,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 72,
-              "field_name": "hdr.ipv4.identification",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 31,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 263,
-          "container_type": "tagalong",
-          "records": [
-            {
               "position_offset": 10,
               "field_name": "hdr.bth.w2",
               "field_msb": 31,
@@ -14310,6 +14230,86 @@
               "field_width": 2,
               "phv_msb": 15,
               "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 262,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 70,
+              "field_name": "hdr.ipv4.hdr_checksum",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 15,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 75,
+              "field_name": "hdr.ipv4.protocol",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 23,
+              "phv_lsb": 16,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 82,
+              "field_name": "hdr.ipv4.ttl",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 31,
+              "phv_lsb": 24,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 263,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 67,
+              "field_name": "hdr.ipv4.flags",
+              "field_msb": 2,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 15,
+              "phv_lsb": 13,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 68,
+              "field_name": "hdr.ipv4.frag_offset",
+              "field_msb": 12,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 12,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 72,
+              "field_name": "hdr.ipv4.identification",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 31,
+              "phv_lsb": 16,
               "is_compiler_generated": false,
               "is_pov": false
             }
@@ -15647,7 +15647,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 153,
+              "position_offset": 155,
               "field_name": "md.tstamp",
               "field_msb": 31,
               "field_lsb": 0,
@@ -15703,8 +15703,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 63,
-              "field_name": "hdr.ipv4.dst_addr",
+              "position_offset": 22,
+              "field_name": "hdr.csig.worst_tdelta",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -15724,8 +15724,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 76,
-              "field_name": "hdr.ipv4.src_addr",
+              "position_offset": 63,
+              "field_name": "hdr.ipv4.dst_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -15745,8 +15745,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 22,
-              "field_name": "hdr.csig.worst_tdelta",
+              "position_offset": 76,
+              "field_name": "hdr.ipv4.src_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -15787,7 +15787,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 31,
               "field_lsb": 0,
@@ -15822,7 +15822,7 @@
               "mutually_exclusive_with": []
             },
             {
-              "position_offset": 139,
+              "position_offset": 141,
               "field_name": "md.role",
               "field_msb": 15,
               "field_lsb": 0,
@@ -15864,7 +15864,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 135,
+              "position_offset": 137,
               "field_name": "md.rnd_attn",
               "field_msb": 15,
               "field_lsb": 0,
@@ -16025,6 +16025,27 @@
           "container_type": "normal",
           "records": [
             {
+              "position_offset": 125,
+              "field_name": "md.mir_path",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 7,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false,
+              "live_start": 6,
+              "live_end": "deparser",
+              "mutually_exclusive_with": []
+            }
+          ],
+          "word_bit_width": 8
+        },
+        {
+          "phv_number": 71,
+          "container_type": "normal",
+          "records": [
+            {
               "position_offset": 107,
               "field_name": "md.attn_idx",
               "field_msb": 15,
@@ -16042,7 +16063,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 71,
+          "phv_number": 72,
           "container_type": "normal",
           "records": [
             {
@@ -16063,7 +16084,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 72,
+          "phv_number": 73,
           "container_type": "normal",
           "records": [
             {
@@ -16084,7 +16105,28 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 73,
+          "phv_number": 74,
+          "container_type": "normal",
+          "records": [
+            {
+              "position_offset": 125,
+              "field_name": "md.mir_path",
+              "field_msb": 15,
+              "field_lsb": 8,
+              "field_width": 2,
+              "phv_msb": 7,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false,
+              "live_start": 6,
+              "live_end": "deparser",
+              "mutually_exclusive_with": []
+            }
+          ],
+          "word_bit_width": 8
+        },
+        {
+          "phv_number": 75,
           "container_type": "normal",
           "records": [
             {
@@ -16100,7 +16142,7 @@
               "pov_headers": [
                 {
                   "bit_index": 5,
-                  "position_offset": 161,
+                  "position_offset": 163,
                   "header_name": "hdr.bth.$valid",
                   "hidden": false
                 }
@@ -16122,7 +16164,7 @@
               "pov_headers": [
                 {
                   "bit_index": 2,
-                  "position_offset": 162,
+                  "position_offset": 164,
                   "header_name": "hdr.csig.$valid",
                   "hidden": false
                 }
@@ -16144,7 +16186,7 @@
               "pov_headers": [
                 {
                   "bit_index": 0,
-                  "position_offset": 163,
+                  "position_offset": 165,
                   "header_name": "hdr.ethernet.$valid",
                   "hidden": false
                 }
@@ -16166,7 +16208,7 @@
               "pov_headers": [
                 {
                   "bit_index": 6,
-                  "position_offset": 164,
+                  "position_offset": 166,
                   "header_name": "hdr.evid.$valid",
                   "hidden": false
                 }
@@ -16188,7 +16230,7 @@
               "pov_headers": [
                 {
                   "bit_index": 1,
-                  "position_offset": 165,
+                  "position_offset": 167,
                   "header_name": "hdr.fabric.$valid",
                   "hidden": false
                 }
@@ -16210,7 +16252,7 @@
               "pov_headers": [
                 {
                   "bit_index": 3,
-                  "position_offset": 166,
+                  "position_offset": 168,
                   "header_name": "hdr.ipv4.$valid",
                   "hidden": false
                 }
@@ -16232,7 +16274,7 @@
               "pov_headers": [
                 {
                   "bit_index": 4,
-                  "position_offset": 167,
+                  "position_offset": 169,
                   "header_name": "hdr.udp.$valid",
                   "hidden": false
                 }
@@ -16270,7 +16312,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 131,
+              "position_offset": 133,
               "field_name": "md.mirror_sid",
               "field_msb": 9,
               "field_lsb": 0,
@@ -16333,7 +16375,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 143,
+              "position_offset": 145,
               "field_name": "md.spray_idx",
               "field_msb": 15,
               "field_lsb": 0,
@@ -16375,7 +16417,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 149,
+              "position_offset": 151,
               "field_name": "md.spray_sel",
               "field_msb": 15,
               "field_lsb": 0,
@@ -16473,7 +16515,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 153,
+              "position_offset": 155,
               "field_name": "md.tstamp",
               "field_msb": 47,
               "field_lsb": 32,
@@ -16690,7 +16732,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 159,
+              "position_offset": 161,
               "field_name": "md.vlink_id",
               "field_msb": 15,
               "field_lsb": 0,
@@ -16725,7 +16767,7 @@
               "mutually_exclusive_with": []
             },
             {
-              "position_offset": 133,
+              "position_offset": 135,
               "field_name": "md.next_vsw",
               "field_msb": 15,
               "field_lsb": 0,
@@ -16767,7 +16809,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 47,
               "field_lsb": 32,
@@ -16860,86 +16902,6 @@
           "container_type": "tagalong",
           "records": [
             {
-              "position_offset": 70,
-              "field_name": "hdr.ipv4.hdr_checksum",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 15,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 75,
-              "field_name": "hdr.ipv4.protocol",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 23,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 82,
-              "field_name": "hdr.ipv4.ttl",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 31,
-              "phv_lsb": 24,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 262,
-          "container_type": "tagalong",
-          "records": [
-            {
-              "position_offset": 67,
-              "field_name": "hdr.ipv4.flags",
-              "field_msb": 2,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 15,
-              "phv_lsb": 13,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 68,
-              "field_name": "hdr.ipv4.frag_offset",
-              "field_msb": 12,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 12,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 72,
-              "field_name": "hdr.ipv4.identification",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 31,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 263,
-          "container_type": "tagalong",
-          "records": [
-            {
               "position_offset": 10,
               "field_name": "hdr.bth.w2",
               "field_msb": 31,
@@ -16980,6 +16942,86 @@
               "field_width": 2,
               "phv_msb": 15,
               "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 262,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 70,
+              "field_name": "hdr.ipv4.hdr_checksum",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 15,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 75,
+              "field_name": "hdr.ipv4.protocol",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 23,
+              "phv_lsb": 16,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 82,
+              "field_name": "hdr.ipv4.ttl",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 31,
+              "phv_lsb": 24,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 263,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 67,
+              "field_name": "hdr.ipv4.flags",
+              "field_msb": 2,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 15,
+              "phv_lsb": 13,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 68,
+              "field_name": "hdr.ipv4.frag_offset",
+              "field_msb": 12,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 12,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 72,
+              "field_name": "hdr.ipv4.identification",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 31,
+              "phv_lsb": 16,
               "is_compiler_generated": false,
               "is_pov": false
             }
@@ -18317,7 +18359,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 153,
+              "position_offset": 155,
               "field_name": "md.tstamp",
               "field_msb": 31,
               "field_lsb": 0,
@@ -18373,8 +18415,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 63,
-              "field_name": "hdr.ipv4.dst_addr",
+              "position_offset": 22,
+              "field_name": "hdr.csig.worst_tdelta",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -18394,8 +18436,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 76,
-              "field_name": "hdr.ipv4.src_addr",
+              "position_offset": 63,
+              "field_name": "hdr.ipv4.dst_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -18415,8 +18457,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 22,
-              "field_name": "hdr.csig.worst_tdelta",
+              "position_offset": 76,
+              "field_name": "hdr.ipv4.src_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -18457,7 +18499,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 31,
               "field_lsb": 0,
@@ -18492,7 +18534,7 @@
               "mutually_exclusive_with": []
             },
             {
-              "position_offset": 139,
+              "position_offset": 141,
               "field_name": "md.role",
               "field_msb": 15,
               "field_lsb": 0,
@@ -18674,6 +18716,27 @@
           "container_type": "normal",
           "records": [
             {
+              "position_offset": 125,
+              "field_name": "md.mir_path",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 7,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false,
+              "live_start": 6,
+              "live_end": "deparser",
+              "mutually_exclusive_with": []
+            }
+          ],
+          "word_bit_width": 8
+        },
+        {
+          "phv_number": 71,
+          "container_type": "normal",
+          "records": [
+            {
               "position_offset": 107,
               "field_name": "md.attn_idx",
               "field_msb": 15,
@@ -18691,7 +18754,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 71,
+          "phv_number": 72,
           "container_type": "normal",
           "records": [
             {
@@ -18712,7 +18775,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 72,
+          "phv_number": 73,
           "container_type": "normal",
           "records": [
             {
@@ -18733,7 +18796,28 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 73,
+          "phv_number": 74,
+          "container_type": "normal",
+          "records": [
+            {
+              "position_offset": 125,
+              "field_name": "md.mir_path",
+              "field_msb": 15,
+              "field_lsb": 8,
+              "field_width": 2,
+              "phv_msb": 7,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false,
+              "live_start": 6,
+              "live_end": "deparser",
+              "mutually_exclusive_with": []
+            }
+          ],
+          "word_bit_width": 8
+        },
+        {
+          "phv_number": 75,
           "container_type": "normal",
           "records": [
             {
@@ -18749,7 +18833,7 @@
               "pov_headers": [
                 {
                   "bit_index": 5,
-                  "position_offset": 161,
+                  "position_offset": 163,
                   "header_name": "hdr.bth.$valid",
                   "hidden": false
                 }
@@ -18771,7 +18855,7 @@
               "pov_headers": [
                 {
                   "bit_index": 2,
-                  "position_offset": 162,
+                  "position_offset": 164,
                   "header_name": "hdr.csig.$valid",
                   "hidden": false
                 }
@@ -18793,7 +18877,7 @@
               "pov_headers": [
                 {
                   "bit_index": 0,
-                  "position_offset": 163,
+                  "position_offset": 165,
                   "header_name": "hdr.ethernet.$valid",
                   "hidden": false
                 }
@@ -18815,7 +18899,7 @@
               "pov_headers": [
                 {
                   "bit_index": 6,
-                  "position_offset": 164,
+                  "position_offset": 166,
                   "header_name": "hdr.evid.$valid",
                   "hidden": false
                 }
@@ -18837,7 +18921,7 @@
               "pov_headers": [
                 {
                   "bit_index": 1,
-                  "position_offset": 165,
+                  "position_offset": 167,
                   "header_name": "hdr.fabric.$valid",
                   "hidden": false
                 }
@@ -18859,7 +18943,7 @@
               "pov_headers": [
                 {
                   "bit_index": 3,
-                  "position_offset": 166,
+                  "position_offset": 168,
                   "header_name": "hdr.ipv4.$valid",
                   "hidden": false
                 }
@@ -18881,7 +18965,7 @@
               "pov_headers": [
                 {
                   "bit_index": 4,
-                  "position_offset": 167,
+                  "position_offset": 169,
                   "header_name": "hdr.udp.$valid",
                   "hidden": false
                 }
@@ -18919,7 +19003,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 131,
+              "position_offset": 133,
               "field_name": "md.mirror_sid",
               "field_msb": 9,
               "field_lsb": 0,
@@ -18982,7 +19066,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 143,
+              "position_offset": 145,
               "field_name": "md.spray_idx",
               "field_msb": 15,
               "field_lsb": 0,
@@ -19024,7 +19108,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 149,
+              "position_offset": 151,
               "field_name": "md.spray_sel",
               "field_msb": 15,
               "field_lsb": 0,
@@ -19122,7 +19206,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 153,
+              "position_offset": 155,
               "field_name": "md.tstamp",
               "field_msb": 47,
               "field_lsb": 32,
@@ -19339,7 +19423,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 159,
+              "position_offset": 161,
               "field_name": "md.vlink_id",
               "field_msb": 15,
               "field_lsb": 0,
@@ -19374,7 +19458,7 @@
               "mutually_exclusive_with": []
             },
             {
-              "position_offset": 133,
+              "position_offset": 135,
               "field_name": "md.next_vsw",
               "field_msb": 15,
               "field_lsb": 0,
@@ -19416,7 +19500,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 47,
               "field_lsb": 32,
@@ -19509,86 +19593,6 @@
           "container_type": "tagalong",
           "records": [
             {
-              "position_offset": 70,
-              "field_name": "hdr.ipv4.hdr_checksum",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 15,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 75,
-              "field_name": "hdr.ipv4.protocol",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 23,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 82,
-              "field_name": "hdr.ipv4.ttl",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 31,
-              "phv_lsb": 24,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 262,
-          "container_type": "tagalong",
-          "records": [
-            {
-              "position_offset": 67,
-              "field_name": "hdr.ipv4.flags",
-              "field_msb": 2,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 15,
-              "phv_lsb": 13,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 68,
-              "field_name": "hdr.ipv4.frag_offset",
-              "field_msb": 12,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 12,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 72,
-              "field_name": "hdr.ipv4.identification",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 31,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 263,
-          "container_type": "tagalong",
-          "records": [
-            {
               "position_offset": 10,
               "field_name": "hdr.bth.w2",
               "field_msb": 31,
@@ -19629,6 +19633,86 @@
               "field_width": 2,
               "phv_msb": 15,
               "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 262,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 70,
+              "field_name": "hdr.ipv4.hdr_checksum",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 15,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 75,
+              "field_name": "hdr.ipv4.protocol",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 23,
+              "phv_lsb": 16,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 82,
+              "field_name": "hdr.ipv4.ttl",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 31,
+              "phv_lsb": 24,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 263,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 67,
+              "field_name": "hdr.ipv4.flags",
+              "field_msb": 2,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 15,
+              "phv_lsb": 13,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 68,
+              "field_name": "hdr.ipv4.frag_offset",
+              "field_msb": 12,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 12,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 72,
+              "field_name": "hdr.ipv4.identification",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 31,
+              "phv_lsb": 16,
               "is_compiler_generated": false,
               "is_pov": false
             }
@@ -20966,7 +21050,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 153,
+              "position_offset": 155,
               "field_name": "md.tstamp",
               "field_msb": 31,
               "field_lsb": 0,
@@ -21022,8 +21106,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 63,
-              "field_name": "hdr.ipv4.dst_addr",
+              "position_offset": 22,
+              "field_name": "hdr.csig.worst_tdelta",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -21043,8 +21127,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 76,
-              "field_name": "hdr.ipv4.src_addr",
+              "position_offset": 63,
+              "field_name": "hdr.ipv4.dst_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -21064,8 +21148,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 22,
-              "field_name": "hdr.csig.worst_tdelta",
+              "position_offset": 76,
+              "field_name": "hdr.ipv4.src_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -21106,7 +21190,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 31,
               "field_lsb": 0,
@@ -21242,7 +21326,28 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 71,
+          "phv_number": 70,
+          "container_type": "normal",
+          "records": [
+            {
+              "position_offset": 125,
+              "field_name": "md.mir_path",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 7,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false,
+              "live_start": 6,
+              "live_end": "deparser",
+              "mutually_exclusive_with": []
+            }
+          ],
+          "word_bit_width": 8
+        },
+        {
+          "phv_number": 72,
           "container_type": "normal",
           "records": [
             {
@@ -21263,7 +21368,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 72,
+          "phv_number": 73,
           "container_type": "normal",
           "records": [
             {
@@ -21284,7 +21389,28 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 73,
+          "phv_number": 74,
+          "container_type": "normal",
+          "records": [
+            {
+              "position_offset": 125,
+              "field_name": "md.mir_path",
+              "field_msb": 15,
+              "field_lsb": 8,
+              "field_width": 2,
+              "phv_msb": 7,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false,
+              "live_start": 6,
+              "live_end": "deparser",
+              "mutually_exclusive_with": []
+            }
+          ],
+          "word_bit_width": 8
+        },
+        {
+          "phv_number": 75,
           "container_type": "normal",
           "records": [
             {
@@ -21300,7 +21426,7 @@
               "pov_headers": [
                 {
                   "bit_index": 5,
-                  "position_offset": 161,
+                  "position_offset": 163,
                   "header_name": "hdr.bth.$valid",
                   "hidden": false
                 }
@@ -21322,7 +21448,7 @@
               "pov_headers": [
                 {
                   "bit_index": 2,
-                  "position_offset": 162,
+                  "position_offset": 164,
                   "header_name": "hdr.csig.$valid",
                   "hidden": false
                 }
@@ -21344,7 +21470,7 @@
               "pov_headers": [
                 {
                   "bit_index": 0,
-                  "position_offset": 163,
+                  "position_offset": 165,
                   "header_name": "hdr.ethernet.$valid",
                   "hidden": false
                 }
@@ -21366,7 +21492,7 @@
               "pov_headers": [
                 {
                   "bit_index": 6,
-                  "position_offset": 164,
+                  "position_offset": 166,
                   "header_name": "hdr.evid.$valid",
                   "hidden": false
                 }
@@ -21388,7 +21514,7 @@
               "pov_headers": [
                 {
                   "bit_index": 1,
-                  "position_offset": 165,
+                  "position_offset": 167,
                   "header_name": "hdr.fabric.$valid",
                   "hidden": false
                 }
@@ -21410,7 +21536,7 @@
               "pov_headers": [
                 {
                   "bit_index": 3,
-                  "position_offset": 166,
+                  "position_offset": 168,
                   "header_name": "hdr.ipv4.$valid",
                   "hidden": false
                 }
@@ -21432,7 +21558,7 @@
               "pov_headers": [
                 {
                   "bit_index": 4,
-                  "position_offset": 167,
+                  "position_offset": 169,
                   "header_name": "hdr.udp.$valid",
                   "hidden": false
                 }
@@ -21470,7 +21596,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 131,
+              "position_offset": 133,
               "field_name": "md.mirror_sid",
               "field_msb": 9,
               "field_lsb": 0,
@@ -21554,7 +21680,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 149,
+              "position_offset": 151,
               "field_name": "md.spray_sel",
               "field_msb": 15,
               "field_lsb": 0,
@@ -21652,7 +21778,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 153,
+              "position_offset": 155,
               "field_name": "md.tstamp",
               "field_msb": 47,
               "field_lsb": 32,
@@ -21869,7 +21995,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 159,
+              "position_offset": 161,
               "field_name": "md.vlink_id",
               "field_msb": 15,
               "field_lsb": 0,
@@ -21932,7 +22058,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 47,
               "field_lsb": 32,
@@ -22025,86 +22151,6 @@
           "container_type": "tagalong",
           "records": [
             {
-              "position_offset": 70,
-              "field_name": "hdr.ipv4.hdr_checksum",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 15,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 75,
-              "field_name": "hdr.ipv4.protocol",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 23,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 82,
-              "field_name": "hdr.ipv4.ttl",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 31,
-              "phv_lsb": 24,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 262,
-          "container_type": "tagalong",
-          "records": [
-            {
-              "position_offset": 67,
-              "field_name": "hdr.ipv4.flags",
-              "field_msb": 2,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 15,
-              "phv_lsb": 13,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 68,
-              "field_name": "hdr.ipv4.frag_offset",
-              "field_msb": 12,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 12,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 72,
-              "field_name": "hdr.ipv4.identification",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 31,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 263,
-          "container_type": "tagalong",
-          "records": [
-            {
               "position_offset": 10,
               "field_name": "hdr.bth.w2",
               "field_msb": 31,
@@ -22145,6 +22191,86 @@
               "field_width": 2,
               "phv_msb": 15,
               "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 262,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 70,
+              "field_name": "hdr.ipv4.hdr_checksum",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 15,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 75,
+              "field_name": "hdr.ipv4.protocol",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 23,
+              "phv_lsb": 16,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 82,
+              "field_name": "hdr.ipv4.ttl",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 31,
+              "phv_lsb": 24,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 263,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 67,
+              "field_name": "hdr.ipv4.flags",
+              "field_msb": 2,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 15,
+              "phv_lsb": 13,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 68,
+              "field_name": "hdr.ipv4.frag_offset",
+              "field_msb": 12,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 12,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 72,
+              "field_name": "hdr.ipv4.identification",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 31,
+              "phv_lsb": 16,
               "is_compiler_generated": false,
               "is_pov": false
             }
@@ -23482,7 +23608,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 153,
+              "position_offset": 155,
               "field_name": "md.tstamp",
               "field_msb": 31,
               "field_lsb": 0,
@@ -23538,8 +23664,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 63,
-              "field_name": "hdr.ipv4.dst_addr",
+              "position_offset": 22,
+              "field_name": "hdr.csig.worst_tdelta",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -23559,8 +23685,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 76,
-              "field_name": "hdr.ipv4.src_addr",
+              "position_offset": 63,
+              "field_name": "hdr.ipv4.dst_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -23580,8 +23706,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 22,
-              "field_name": "hdr.csig.worst_tdelta",
+              "position_offset": 76,
+              "field_name": "hdr.ipv4.src_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -23622,7 +23748,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 31,
               "field_lsb": 0,
@@ -23758,7 +23884,28 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 71,
+          "phv_number": 70,
+          "container_type": "normal",
+          "records": [
+            {
+              "position_offset": 125,
+              "field_name": "md.mir_path",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 7,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false,
+              "live_start": 6,
+              "live_end": "deparser",
+              "mutually_exclusive_with": []
+            }
+          ],
+          "word_bit_width": 8
+        },
+        {
+          "phv_number": 72,
           "container_type": "normal",
           "records": [
             {
@@ -23779,7 +23926,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 72,
+          "phv_number": 73,
           "container_type": "normal",
           "records": [
             {
@@ -23800,7 +23947,28 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 73,
+          "phv_number": 74,
+          "container_type": "normal",
+          "records": [
+            {
+              "position_offset": 125,
+              "field_name": "md.mir_path",
+              "field_msb": 15,
+              "field_lsb": 8,
+              "field_width": 2,
+              "phv_msb": 7,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false,
+              "live_start": 6,
+              "live_end": "deparser",
+              "mutually_exclusive_with": []
+            }
+          ],
+          "word_bit_width": 8
+        },
+        {
+          "phv_number": 75,
           "container_type": "normal",
           "records": [
             {
@@ -23816,7 +23984,7 @@
               "pov_headers": [
                 {
                   "bit_index": 5,
-                  "position_offset": 161,
+                  "position_offset": 163,
                   "header_name": "hdr.bth.$valid",
                   "hidden": false
                 }
@@ -23838,7 +24006,7 @@
               "pov_headers": [
                 {
                   "bit_index": 2,
-                  "position_offset": 162,
+                  "position_offset": 164,
                   "header_name": "hdr.csig.$valid",
                   "hidden": false
                 }
@@ -23860,7 +24028,7 @@
               "pov_headers": [
                 {
                   "bit_index": 0,
-                  "position_offset": 163,
+                  "position_offset": 165,
                   "header_name": "hdr.ethernet.$valid",
                   "hidden": false
                 }
@@ -23882,7 +24050,7 @@
               "pov_headers": [
                 {
                   "bit_index": 6,
-                  "position_offset": 164,
+                  "position_offset": 166,
                   "header_name": "hdr.evid.$valid",
                   "hidden": false
                 }
@@ -23904,7 +24072,7 @@
               "pov_headers": [
                 {
                   "bit_index": 1,
-                  "position_offset": 165,
+                  "position_offset": 167,
                   "header_name": "hdr.fabric.$valid",
                   "hidden": false
                 }
@@ -23926,7 +24094,7 @@
               "pov_headers": [
                 {
                   "bit_index": 3,
-                  "position_offset": 166,
+                  "position_offset": 168,
                   "header_name": "hdr.ipv4.$valid",
                   "hidden": false
                 }
@@ -23948,7 +24116,7 @@
               "pov_headers": [
                 {
                   "bit_index": 4,
-                  "position_offset": 167,
+                  "position_offset": 169,
                   "header_name": "hdr.udp.$valid",
                   "hidden": false
                 }
@@ -23986,7 +24154,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 131,
+              "position_offset": 133,
               "field_name": "md.mirror_sid",
               "field_msb": 9,
               "field_lsb": 0,
@@ -24070,7 +24238,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 149,
+              "position_offset": 151,
               "field_name": "md.spray_sel",
               "field_msb": 15,
               "field_lsb": 0,
@@ -24168,7 +24336,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 153,
+              "position_offset": 155,
               "field_name": "md.tstamp",
               "field_msb": 47,
               "field_lsb": 32,
@@ -24385,7 +24553,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 159,
+              "position_offset": 161,
               "field_name": "md.vlink_id",
               "field_msb": 15,
               "field_lsb": 0,
@@ -24448,7 +24616,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 47,
               "field_lsb": 32,
@@ -24541,86 +24709,6 @@
           "container_type": "tagalong",
           "records": [
             {
-              "position_offset": 70,
-              "field_name": "hdr.ipv4.hdr_checksum",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 15,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 75,
-              "field_name": "hdr.ipv4.protocol",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 23,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 82,
-              "field_name": "hdr.ipv4.ttl",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 31,
-              "phv_lsb": 24,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 262,
-          "container_type": "tagalong",
-          "records": [
-            {
-              "position_offset": 67,
-              "field_name": "hdr.ipv4.flags",
-              "field_msb": 2,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 15,
-              "phv_lsb": 13,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 68,
-              "field_name": "hdr.ipv4.frag_offset",
-              "field_msb": 12,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 12,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 72,
-              "field_name": "hdr.ipv4.identification",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 31,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 263,
-          "container_type": "tagalong",
-          "records": [
-            {
               "position_offset": 10,
               "field_name": "hdr.bth.w2",
               "field_msb": 31,
@@ -24661,6 +24749,86 @@
               "field_width": 2,
               "phv_msb": 15,
               "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 262,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 70,
+              "field_name": "hdr.ipv4.hdr_checksum",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 15,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 75,
+              "field_name": "hdr.ipv4.protocol",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 23,
+              "phv_lsb": 16,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 82,
+              "field_name": "hdr.ipv4.ttl",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 31,
+              "phv_lsb": 24,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 263,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 67,
+              "field_name": "hdr.ipv4.flags",
+              "field_msb": 2,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 15,
+              "phv_lsb": 13,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 68,
+              "field_name": "hdr.ipv4.frag_offset",
+              "field_msb": 12,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 12,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 72,
+              "field_name": "hdr.ipv4.identification",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 31,
+              "phv_lsb": 16,
               "is_compiler_generated": false,
               "is_pov": false
             }
@@ -25998,7 +26166,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 153,
+              "position_offset": 155,
               "field_name": "md.tstamp",
               "field_msb": 31,
               "field_lsb": 0,
@@ -26054,8 +26222,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 63,
-              "field_name": "hdr.ipv4.dst_addr",
+              "position_offset": 22,
+              "field_name": "hdr.csig.worst_tdelta",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -26075,8 +26243,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 76,
-              "field_name": "hdr.ipv4.src_addr",
+              "position_offset": 63,
+              "field_name": "hdr.ipv4.dst_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -26096,8 +26264,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 22,
-              "field_name": "hdr.csig.worst_tdelta",
+              "position_offset": 76,
+              "field_name": "hdr.ipv4.src_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -26138,7 +26306,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 31,
               "field_lsb": 0,
@@ -26274,7 +26442,28 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 71,
+          "phv_number": 70,
+          "container_type": "normal",
+          "records": [
+            {
+              "position_offset": 125,
+              "field_name": "md.mir_path",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 7,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false,
+              "live_start": 6,
+              "live_end": "deparser",
+              "mutually_exclusive_with": []
+            }
+          ],
+          "word_bit_width": 8
+        },
+        {
+          "phv_number": 72,
           "container_type": "normal",
           "records": [
             {
@@ -26295,7 +26484,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 72,
+          "phv_number": 73,
           "container_type": "normal",
           "records": [
             {
@@ -26316,7 +26505,28 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 73,
+          "phv_number": 74,
+          "container_type": "normal",
+          "records": [
+            {
+              "position_offset": 125,
+              "field_name": "md.mir_path",
+              "field_msb": 15,
+              "field_lsb": 8,
+              "field_width": 2,
+              "phv_msb": 7,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false,
+              "live_start": 6,
+              "live_end": "deparser",
+              "mutually_exclusive_with": []
+            }
+          ],
+          "word_bit_width": 8
+        },
+        {
+          "phv_number": 75,
           "container_type": "normal",
           "records": [
             {
@@ -26332,7 +26542,7 @@
               "pov_headers": [
                 {
                   "bit_index": 5,
-                  "position_offset": 161,
+                  "position_offset": 163,
                   "header_name": "hdr.bth.$valid",
                   "hidden": false
                 }
@@ -26354,7 +26564,7 @@
               "pov_headers": [
                 {
                   "bit_index": 2,
-                  "position_offset": 162,
+                  "position_offset": 164,
                   "header_name": "hdr.csig.$valid",
                   "hidden": false
                 }
@@ -26376,7 +26586,7 @@
               "pov_headers": [
                 {
                   "bit_index": 0,
-                  "position_offset": 163,
+                  "position_offset": 165,
                   "header_name": "hdr.ethernet.$valid",
                   "hidden": false
                 }
@@ -26398,7 +26608,7 @@
               "pov_headers": [
                 {
                   "bit_index": 6,
-                  "position_offset": 164,
+                  "position_offset": 166,
                   "header_name": "hdr.evid.$valid",
                   "hidden": false
                 }
@@ -26420,7 +26630,7 @@
               "pov_headers": [
                 {
                   "bit_index": 1,
-                  "position_offset": 165,
+                  "position_offset": 167,
                   "header_name": "hdr.fabric.$valid",
                   "hidden": false
                 }
@@ -26442,7 +26652,7 @@
               "pov_headers": [
                 {
                   "bit_index": 3,
-                  "position_offset": 166,
+                  "position_offset": 168,
                   "header_name": "hdr.ipv4.$valid",
                   "hidden": false
                 }
@@ -26464,7 +26674,7 @@
               "pov_headers": [
                 {
                   "bit_index": 4,
-                  "position_offset": 167,
+                  "position_offset": 169,
                   "header_name": "hdr.udp.$valid",
                   "hidden": false
                 }
@@ -26502,7 +26712,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 131,
+              "position_offset": 133,
               "field_name": "md.mirror_sid",
               "field_msb": 9,
               "field_lsb": 0,
@@ -26586,7 +26796,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 149,
+              "position_offset": 151,
               "field_name": "md.spray_sel",
               "field_msb": 15,
               "field_lsb": 0,
@@ -26684,7 +26894,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 153,
+              "position_offset": 155,
               "field_name": "md.tstamp",
               "field_msb": 47,
               "field_lsb": 32,
@@ -26901,7 +27111,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 159,
+              "position_offset": 161,
               "field_name": "md.vlink_id",
               "field_msb": 15,
               "field_lsb": 0,
@@ -26964,7 +27174,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 47,
               "field_lsb": 32,
@@ -27057,86 +27267,6 @@
           "container_type": "tagalong",
           "records": [
             {
-              "position_offset": 70,
-              "field_name": "hdr.ipv4.hdr_checksum",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 15,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 75,
-              "field_name": "hdr.ipv4.protocol",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 23,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 82,
-              "field_name": "hdr.ipv4.ttl",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 31,
-              "phv_lsb": 24,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 262,
-          "container_type": "tagalong",
-          "records": [
-            {
-              "position_offset": 67,
-              "field_name": "hdr.ipv4.flags",
-              "field_msb": 2,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 15,
-              "phv_lsb": 13,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 68,
-              "field_name": "hdr.ipv4.frag_offset",
-              "field_msb": 12,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 12,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 72,
-              "field_name": "hdr.ipv4.identification",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 31,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 263,
-          "container_type": "tagalong",
-          "records": [
-            {
               "position_offset": 10,
               "field_name": "hdr.bth.w2",
               "field_msb": 31,
@@ -27177,6 +27307,86 @@
               "field_width": 2,
               "phv_msb": 15,
               "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 262,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 70,
+              "field_name": "hdr.ipv4.hdr_checksum",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 15,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 75,
+              "field_name": "hdr.ipv4.protocol",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 23,
+              "phv_lsb": 16,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 82,
+              "field_name": "hdr.ipv4.ttl",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 31,
+              "phv_lsb": 24,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 263,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 67,
+              "field_name": "hdr.ipv4.flags",
+              "field_msb": 2,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 15,
+              "phv_lsb": 13,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 68,
+              "field_name": "hdr.ipv4.frag_offset",
+              "field_msb": 12,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 12,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 72,
+              "field_name": "hdr.ipv4.identification",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 31,
+              "phv_lsb": 16,
               "is_compiler_generated": false,
               "is_pov": false
             }
@@ -28514,7 +28724,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 153,
+              "position_offset": 155,
               "field_name": "md.tstamp",
               "field_msb": 31,
               "field_lsb": 0,
@@ -28570,8 +28780,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 63,
-              "field_name": "hdr.ipv4.dst_addr",
+              "position_offset": 22,
+              "field_name": "hdr.csig.worst_tdelta",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -28591,8 +28801,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 76,
-              "field_name": "hdr.ipv4.src_addr",
+              "position_offset": 63,
+              "field_name": "hdr.ipv4.dst_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -28612,8 +28822,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 22,
-              "field_name": "hdr.csig.worst_tdelta",
+              "position_offset": 76,
+              "field_name": "hdr.ipv4.src_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -28654,7 +28864,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 31,
               "field_lsb": 0,
@@ -28790,7 +29000,28 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 71,
+          "phv_number": 70,
+          "container_type": "normal",
+          "records": [
+            {
+              "position_offset": 125,
+              "field_name": "md.mir_path",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 7,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false,
+              "live_start": 6,
+              "live_end": "deparser",
+              "mutually_exclusive_with": []
+            }
+          ],
+          "word_bit_width": 8
+        },
+        {
+          "phv_number": 72,
           "container_type": "normal",
           "records": [
             {
@@ -28811,7 +29042,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 72,
+          "phv_number": 73,
           "container_type": "normal",
           "records": [
             {
@@ -28832,7 +29063,28 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 73,
+          "phv_number": 74,
+          "container_type": "normal",
+          "records": [
+            {
+              "position_offset": 125,
+              "field_name": "md.mir_path",
+              "field_msb": 15,
+              "field_lsb": 8,
+              "field_width": 2,
+              "phv_msb": 7,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false,
+              "live_start": 6,
+              "live_end": "deparser",
+              "mutually_exclusive_with": []
+            }
+          ],
+          "word_bit_width": 8
+        },
+        {
+          "phv_number": 75,
           "container_type": "normal",
           "records": [
             {
@@ -28848,7 +29100,7 @@
               "pov_headers": [
                 {
                   "bit_index": 5,
-                  "position_offset": 161,
+                  "position_offset": 163,
                   "header_name": "hdr.bth.$valid",
                   "hidden": false
                 }
@@ -28870,7 +29122,7 @@
               "pov_headers": [
                 {
                   "bit_index": 2,
-                  "position_offset": 162,
+                  "position_offset": 164,
                   "header_name": "hdr.csig.$valid",
                   "hidden": false
                 }
@@ -28892,7 +29144,7 @@
               "pov_headers": [
                 {
                   "bit_index": 0,
-                  "position_offset": 163,
+                  "position_offset": 165,
                   "header_name": "hdr.ethernet.$valid",
                   "hidden": false
                 }
@@ -28914,7 +29166,7 @@
               "pov_headers": [
                 {
                   "bit_index": 6,
-                  "position_offset": 164,
+                  "position_offset": 166,
                   "header_name": "hdr.evid.$valid",
                   "hidden": false
                 }
@@ -28936,7 +29188,7 @@
               "pov_headers": [
                 {
                   "bit_index": 1,
-                  "position_offset": 165,
+                  "position_offset": 167,
                   "header_name": "hdr.fabric.$valid",
                   "hidden": false
                 }
@@ -28958,7 +29210,7 @@
               "pov_headers": [
                 {
                   "bit_index": 3,
-                  "position_offset": 166,
+                  "position_offset": 168,
                   "header_name": "hdr.ipv4.$valid",
                   "hidden": false
                 }
@@ -28980,7 +29232,7 @@
               "pov_headers": [
                 {
                   "bit_index": 4,
-                  "position_offset": 167,
+                  "position_offset": 169,
                   "header_name": "hdr.udp.$valid",
                   "hidden": false
                 }
@@ -29018,7 +29270,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 131,
+              "position_offset": 133,
               "field_name": "md.mirror_sid",
               "field_msb": 9,
               "field_lsb": 0,
@@ -29102,7 +29354,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 149,
+              "position_offset": 151,
               "field_name": "md.spray_sel",
               "field_msb": 15,
               "field_lsb": 0,
@@ -29200,7 +29452,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 153,
+              "position_offset": 155,
               "field_name": "md.tstamp",
               "field_msb": 47,
               "field_lsb": 32,
@@ -29417,7 +29669,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 159,
+              "position_offset": 161,
               "field_name": "md.vlink_id",
               "field_msb": 15,
               "field_lsb": 0,
@@ -29480,7 +29732,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 47,
               "field_lsb": 32,
@@ -29573,86 +29825,6 @@
           "container_type": "tagalong",
           "records": [
             {
-              "position_offset": 70,
-              "field_name": "hdr.ipv4.hdr_checksum",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 15,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 75,
-              "field_name": "hdr.ipv4.protocol",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 23,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 82,
-              "field_name": "hdr.ipv4.ttl",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 31,
-              "phv_lsb": 24,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 262,
-          "container_type": "tagalong",
-          "records": [
-            {
-              "position_offset": 67,
-              "field_name": "hdr.ipv4.flags",
-              "field_msb": 2,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 15,
-              "phv_lsb": 13,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 68,
-              "field_name": "hdr.ipv4.frag_offset",
-              "field_msb": 12,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 12,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 72,
-              "field_name": "hdr.ipv4.identification",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 31,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 263,
-          "container_type": "tagalong",
-          "records": [
-            {
               "position_offset": 10,
               "field_name": "hdr.bth.w2",
               "field_msb": 31,
@@ -29693,6 +29865,86 @@
               "field_width": 2,
               "phv_msb": 15,
               "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 262,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 70,
+              "field_name": "hdr.ipv4.hdr_checksum",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 15,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 75,
+              "field_name": "hdr.ipv4.protocol",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 23,
+              "phv_lsb": 16,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 82,
+              "field_name": "hdr.ipv4.ttl",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 31,
+              "phv_lsb": 24,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 263,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 67,
+              "field_name": "hdr.ipv4.flags",
+              "field_msb": 2,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 15,
+              "phv_lsb": 13,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 68,
+              "field_name": "hdr.ipv4.frag_offset",
+              "field_msb": 12,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 12,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 72,
+              "field_name": "hdr.ipv4.identification",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 31,
+              "phv_lsb": 16,
               "is_compiler_generated": false,
               "is_pov": false
             }
@@ -31030,7 +31282,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 153,
+              "position_offset": 155,
               "field_name": "md.tstamp",
               "field_msb": 31,
               "field_lsb": 0,
@@ -31086,8 +31338,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 63,
-              "field_name": "hdr.ipv4.dst_addr",
+              "position_offset": 22,
+              "field_name": "hdr.csig.worst_tdelta",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -31107,8 +31359,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 76,
-              "field_name": "hdr.ipv4.src_addr",
+              "position_offset": 63,
+              "field_name": "hdr.ipv4.dst_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -31128,8 +31380,8 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 22,
-              "field_name": "hdr.csig.worst_tdelta",
+              "position_offset": 76,
+              "field_name": "hdr.ipv4.src_addr",
               "field_msb": 31,
               "field_lsb": 0,
               "field_width": 4,
@@ -31170,7 +31422,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 31,
               "field_lsb": 0,
@@ -31306,7 +31558,28 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 71,
+          "phv_number": 70,
+          "container_type": "normal",
+          "records": [
+            {
+              "position_offset": 125,
+              "field_name": "md.mir_path",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 7,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false,
+              "live_start": 6,
+              "live_end": "deparser",
+              "mutually_exclusive_with": []
+            }
+          ],
+          "word_bit_width": 8
+        },
+        {
+          "phv_number": 72,
           "container_type": "normal",
           "records": [
             {
@@ -31327,7 +31600,7 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 72,
+          "phv_number": 73,
           "container_type": "normal",
           "records": [
             {
@@ -31348,7 +31621,28 @@
           "word_bit_width": 8
         },
         {
-          "phv_number": 73,
+          "phv_number": 74,
+          "container_type": "normal",
+          "records": [
+            {
+              "position_offset": 125,
+              "field_name": "md.mir_path",
+              "field_msb": 15,
+              "field_lsb": 8,
+              "field_width": 2,
+              "phv_msb": 7,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false,
+              "live_start": 6,
+              "live_end": "deparser",
+              "mutually_exclusive_with": []
+            }
+          ],
+          "word_bit_width": 8
+        },
+        {
+          "phv_number": 75,
           "container_type": "normal",
           "records": [
             {
@@ -31364,7 +31658,7 @@
               "pov_headers": [
                 {
                   "bit_index": 5,
-                  "position_offset": 161,
+                  "position_offset": 163,
                   "header_name": "hdr.bth.$valid",
                   "hidden": false
                 }
@@ -31386,7 +31680,7 @@
               "pov_headers": [
                 {
                   "bit_index": 2,
-                  "position_offset": 162,
+                  "position_offset": 164,
                   "header_name": "hdr.csig.$valid",
                   "hidden": false
                 }
@@ -31408,7 +31702,7 @@
               "pov_headers": [
                 {
                   "bit_index": 0,
-                  "position_offset": 163,
+                  "position_offset": 165,
                   "header_name": "hdr.ethernet.$valid",
                   "hidden": false
                 }
@@ -31430,7 +31724,7 @@
               "pov_headers": [
                 {
                   "bit_index": 6,
-                  "position_offset": 164,
+                  "position_offset": 166,
                   "header_name": "hdr.evid.$valid",
                   "hidden": false
                 }
@@ -31452,7 +31746,7 @@
               "pov_headers": [
                 {
                   "bit_index": 1,
-                  "position_offset": 165,
+                  "position_offset": 167,
                   "header_name": "hdr.fabric.$valid",
                   "hidden": false
                 }
@@ -31474,7 +31768,7 @@
               "pov_headers": [
                 {
                   "bit_index": 3,
-                  "position_offset": 166,
+                  "position_offset": 168,
                   "header_name": "hdr.ipv4.$valid",
                   "hidden": false
                 }
@@ -31496,7 +31790,7 @@
               "pov_headers": [
                 {
                   "bit_index": 4,
-                  "position_offset": 167,
+                  "position_offset": 169,
                   "header_name": "hdr.udp.$valid",
                   "hidden": false
                 }
@@ -31534,7 +31828,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 131,
+              "position_offset": 133,
               "field_name": "md.mirror_sid",
               "field_msb": 9,
               "field_lsb": 0,
@@ -31639,7 +31933,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 149,
+              "position_offset": 151,
               "field_name": "md.spray_sel",
               "field_msb": 15,
               "field_lsb": 0,
@@ -31737,7 +32031,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 153,
+              "position_offset": 155,
               "field_name": "md.tstamp",
               "field_msb": 47,
               "field_lsb": 32,
@@ -31954,7 +32248,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 159,
+              "position_offset": 161,
               "field_name": "md.vlink_id",
               "field_msb": 15,
               "field_lsb": 0,
@@ -32017,7 +32311,7 @@
           "container_type": "normal",
           "records": [
             {
-              "position_offset": 125,
+              "position_offset": 127,
               "field_name": "md.mir_smac",
               "field_msb": 47,
               "field_lsb": 32,
@@ -32110,86 +32404,6 @@
           "container_type": "tagalong",
           "records": [
             {
-              "position_offset": 70,
-              "field_name": "hdr.ipv4.hdr_checksum",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 15,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 75,
-              "field_name": "hdr.ipv4.protocol",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 23,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 82,
-              "field_name": "hdr.ipv4.ttl",
-              "field_msb": 7,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 31,
-              "phv_lsb": 24,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 262,
-          "container_type": "tagalong",
-          "records": [
-            {
-              "position_offset": 67,
-              "field_name": "hdr.ipv4.flags",
-              "field_msb": 2,
-              "field_lsb": 0,
-              "field_width": 1,
-              "phv_msb": 15,
-              "phv_lsb": 13,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 68,
-              "field_name": "hdr.ipv4.frag_offset",
-              "field_msb": 12,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 12,
-              "phv_lsb": 0,
-              "is_compiler_generated": false,
-              "is_pov": false
-            },
-            {
-              "position_offset": 72,
-              "field_name": "hdr.ipv4.identification",
-              "field_msb": 15,
-              "field_lsb": 0,
-              "field_width": 2,
-              "phv_msb": 31,
-              "phv_lsb": 16,
-              "is_compiler_generated": false,
-              "is_pov": false
-            }
-          ],
-          "word_bit_width": 32
-        },
-        {
-          "phv_number": 263,
-          "container_type": "tagalong",
-          "records": [
-            {
               "position_offset": 10,
               "field_name": "hdr.bth.w2",
               "field_msb": 31,
@@ -32230,6 +32444,86 @@
               "field_width": 2,
               "phv_msb": 15,
               "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 262,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 70,
+              "field_name": "hdr.ipv4.hdr_checksum",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 15,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 75,
+              "field_name": "hdr.ipv4.protocol",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 23,
+              "phv_lsb": 16,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 82,
+              "field_name": "hdr.ipv4.ttl",
+              "field_msb": 7,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 31,
+              "phv_lsb": 24,
+              "is_compiler_generated": false,
+              "is_pov": false
+            }
+          ],
+          "word_bit_width": 32
+        },
+        {
+          "phv_number": 263,
+          "container_type": "tagalong",
+          "records": [
+            {
+              "position_offset": 67,
+              "field_name": "hdr.ipv4.flags",
+              "field_msb": 2,
+              "field_lsb": 0,
+              "field_width": 1,
+              "phv_msb": 15,
+              "phv_lsb": 13,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 68,
+              "field_name": "hdr.ipv4.frag_offset",
+              "field_msb": 12,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 12,
+              "phv_lsb": 0,
+              "is_compiler_generated": false,
+              "is_pov": false
+            },
+            {
+              "position_offset": 72,
+              "field_name": "hdr.ipv4.identification",
+              "field_msb": 15,
+              "field_lsb": 0,
+              "field_width": 2,
+              "phv_msb": 31,
+              "phv_lsb": 16,
               "is_compiler_generated": false,
               "is_pov": false
             }
@@ -33924,7 +34218,7 @@
                 "vliw_instruction_full": 65,
                 "next_tables": [
                   {
-                    "next_table_name": "tbl_mcp_fabric774",
+                    "next_table_name": "tbl_mcp_fabric777",
                     "next_table_logical_id": 0,
                     "next_table_stage_no": 1
                   }
@@ -36501,7 +36795,7 @@
     {
       "direction": "ingress",
       "handle": 16777219,
-      "name": "tbl_mcp_fabric774",
+      "name": "tbl_mcp_fabric777",
       "table_type": "match",
       "size": 1,
       "p4_hidden": true,
@@ -36526,7 +36820,7 @@
             "result_physical_buses": [ 1 ],
             "action_format": [
               {
-                "action_name": "mcp_fabric774",
+                "action_name": "mcp_fabric777",
                 "action_handle": 536870917,
                 "table_name": "--END_OF_PIPELINE--",
                 "next_table": 0,
@@ -36535,7 +36829,7 @@
                 "vliw_instruction_full": 65,
                 "next_tables": [
                   {
-                    "next_table_name": "tbl_mcp_fabric766",
+                    "next_table_name": "tbl_mcp_fabric769",
                     "next_table_logical_id": 5,
                     "next_table_stage_no": 1
                   }
@@ -36549,7 +36843,7 @@
       },
       "actions": [
         {
-          "name": "mcp_fabric774",
+          "name": "mcp_fabric777",
           "handle": 536870917,
           "primitives": [
             {
@@ -36603,14 +36897,14 @@
     },
     {
       "direction": "ingress",
-      "attached_to": "tbl_mcp_fabric774",
+      "attached_to": "tbl_mcp_fabric777",
       "handle": 1879048193,
       "name": "cond-10",
       "table_type": "condition",
       "stage_tables": [
         {
           "next_tables": { "false": "17", "true": "21" },
-          "next_table_names": { "false": "Ingress.tbl_dst_leaf", "true": "tbl_mcp_fabric766" },
+          "next_table_names": { "false": "Ingress.tbl_dst_leaf", "true": "tbl_mcp_fabric769" },
           "memory_resource_allocation": { "memory_unit": 0, "memory_type": "gateway", "payload_buses": [] },
           "pack_format": [],
           "logical_table_id": 0,
@@ -40287,7 +40581,7 @@
                 "vliw_instruction_full": 66,
                 "next_tables": [
                   {
-                    "next_table_name": "tbl_mcp_fabric780",
+                    "next_table_name": "tbl_mcp_fabric783",
                     "next_table_logical_id": 2,
                     "next_table_stage_no": 1
                   }
@@ -41306,7 +41600,7 @@
     {
       "direction": "ingress",
       "handle": 16777222,
-      "name": "tbl_mcp_fabric780",
+      "name": "tbl_mcp_fabric783",
       "table_type": "match",
       "size": 65536,
       "p4_hidden": true,
@@ -41331,7 +41625,7 @@
             "result_physical_buses": [ 0 ],
             "action_format": [
               {
-                "action_name": "mcp_fabric780",
+                "action_name": "mcp_fabric783",
                 "action_handle": 536870918,
                 "table_name": "--END_OF_PIPELINE--",
                 "next_table": 0,
@@ -41354,7 +41648,7 @@
       },
       "actions": [
         {
-          "name": "mcp_fabric780",
+          "name": "mcp_fabric783",
           "handle": 536870918,
           "primitives": [
             {
@@ -41411,14 +41705,14 @@
     },
     {
       "direction": "ingress",
-      "attached_to": "tbl_mcp_fabric780",
+      "attached_to": "tbl_mcp_fabric783",
       "handle": 1879048194,
       "name": "cond-11",
       "table_type": "condition",
       "stage_tables": [
         {
           "next_tables": { "false": "49", "true": "19" },
-          "next_table_names": { "false": "Ingress.tbl_exceed_evid", "true": "tbl_mcp_fabric784" },
+          "next_table_names": { "false": "Ingress.tbl_exceed_evid", "true": "tbl_mcp_fabric787" },
           "memory_resource_allocation": { "memory_unit": 14, "memory_type": "gateway", "payload_buses": [] },
           "pack_format": [],
           "logical_table_id": 2,
@@ -41437,7 +41731,7 @@
     {
       "direction": "ingress",
       "handle": 16777223,
-      "name": "tbl_mcp_fabric784",
+      "name": "tbl_mcp_fabric787",
       "table_type": "match",
       "size": 65536,
       "p4_hidden": true,
@@ -41462,7 +41756,7 @@
             "result_physical_buses": [ 2 ],
             "action_format": [
               {
-                "action_name": "mcp_fabric784",
+                "action_name": "mcp_fabric787",
                 "action_handle": 536870919,
                 "table_name": "--END_OF_PIPELINE--",
                 "next_table": 0,
@@ -41479,7 +41773,7 @@
       },
       "actions": [
         {
-          "name": "mcp_fabric784",
+          "name": "mcp_fabric787",
           "handle": 536870919,
           "primitives": [
             {
@@ -41549,9 +41843,9 @@
     },
     {
       "direction": "ingress",
-      "attached_to": "tbl_mcp_fabric784",
+      "attached_to": "tbl_mcp_fabric787",
       "handle": 1879048195,
-      "name": "tbl_mcp_fabric784-gateway",
+      "name": "tbl_mcp_fabric787-gateway",
       "table_type": "condition",
       "stage_tables": [
         {
@@ -42612,7 +42906,7 @@
     {
       "direction": "ingress",
       "handle": 16777220,
-      "name": "tbl_mcp_fabric766",
+      "name": "tbl_mcp_fabric769",
       "table_type": "match",
       "size": 0,
       "p4_hidden": true,
@@ -43543,7 +43837,7 @@
               "memory_resource_allocation": null,
               "action_format": [
                 {
-                  "action_name": "mcp_fabric766",
+                  "action_name": "mcp_fabric769",
                   "action_handle": 536870914,
                   "table_name": "--END_OF_PIPELINE--",
                   "next_table": 0,
@@ -43566,7 +43860,7 @@
       "stateful_table_refs": [],
       "actions": [
         {
-          "name": "mcp_fabric766",
+          "name": "mcp_fabric769",
           "handle": 536870914,
           "primitives": [
             {
@@ -54763,7 +55057,7 @@
                   "vliw_instruction_full": 69,
                   "next_tables": [
                     {
-                      "next_table_name": "tbl_mcp_fabric773",
+                      "next_table_name": "tbl_mcp_fabric776",
                       "next_table_logical_id": 3,
                       "next_table_stage_no": 3
                     }
@@ -54780,7 +55074,7 @@
                   "vliw_instruction_full": 67,
                   "next_tables": [
                     {
-                      "next_table_name": "tbl_mcp_fabric773",
+                      "next_table_name": "tbl_mcp_fabric776",
                       "next_table_logical_id": 3,
                       "next_table_stage_no": 3
                     }
@@ -56048,7 +56342,7 @@
                   "vliw_instruction_full": 64,
                   "next_tables": [
                     {
-                      "next_table_name": "tbl_mcp_fabric773",
+                      "next_table_name": "tbl_mcp_fabric776",
                       "next_table_logical_id": 3,
                       "next_table_stage_no": 3
                     }
@@ -56065,7 +56359,7 @@
                   "vliw_instruction_full": 71,
                   "next_tables": [
                     {
-                      "next_table_name": "tbl_mcp_fabric773",
+                      "next_table_name": "tbl_mcp_fabric776",
                       "next_table_logical_id": 3,
                       "next_table_stage_no": 3
                     }
@@ -56169,7 +56463,7 @@
       "stage_tables": [
         {
           "next_tables": { "false": "51", "true": "50" },
-          "next_table_names": { "false": "tbl_mcp_fabric773", "true": "Ingress.tbl_exceed_csig" },
+          "next_table_names": { "false": "tbl_mcp_fabric776", "true": "Ingress.tbl_exceed_csig" },
           "memory_resource_allocation": { "memory_unit": 14, "memory_type": "gateway", "payload_buses": [] },
           "pack_format": [],
           "logical_table_id": 2,
@@ -56185,7 +56479,7 @@
     {
       "direction": "ingress",
       "handle": 16777228,
-      "name": "tbl_mcp_fabric773",
+      "name": "tbl_mcp_fabric776",
       "table_type": "match",
       "size": 1,
       "p4_hidden": true,
@@ -56210,7 +56504,7 @@
             "result_physical_buses": [ 0 ],
             "action_format": [
               {
-                "action_name": "mcp_fabric773",
+                "action_name": "mcp_fabric776",
                 "action_handle": 536870916,
                 "table_name": "--END_OF_PIPELINE--",
                 "next_table": 0,
@@ -56227,7 +56521,7 @@
       },
       "actions": [
         {
-          "name": "mcp_fabric773",
+          "name": "mcp_fabric776",
           "handle": 536870916,
           "primitives": [
             {
@@ -56274,9 +56568,9 @@
     },
     {
       "direction": "ingress",
-      "attached_to": "tbl_mcp_fabric773",
+      "attached_to": "tbl_mcp_fabric776",
       "handle": 1879048199,
-      "name": "tbl_mcp_fabric773-gateway",
+      "name": "tbl_mcp_fabric776-gateway",
       "table_type": "condition",
       "stage_tables": [
         {
@@ -72956,6 +73250,13 @@
                 "output_value": { "operand_1_type": "memory", "operand_1_value": "memory_lo" },
                 "output_dst": "md.attn"
               }
+            },
+            {
+              "name": "ModifyFieldPrimitive",
+              "operation": "set",
+              "dst": { "type": "phv", "name": "md.mir_path" },
+              "dst_mask": { "type": "immediate", "name": "65535" },
+              "src1": { "type": "phv", "name": "md.attn_idx" }
             }
           ],
           "direct_resources": [],
@@ -72995,6 +73296,13 @@
                 "output_value": { "operand_1_type": "memory", "operand_1_value": "memory_lo" },
                 "output_dst": "md.attn"
               }
+            },
+            {
+              "name": "ModifyFieldPrimitive",
+              "operation": "set",
+              "dst": { "type": "phv", "name": "md.mir_path" },
+              "dst_mask": { "type": "immediate", "name": "65535" },
+              "src1": { "type": "phv", "name": "md.attn_idx" }
             }
           ],
           "direct_resources": [],
@@ -83822,7 +84130,7 @@
     {
       "fully_qualified_name": "mau[1].dp.match_input_xbar_din_power_ctl",
       "name": "stage_1_match_input_xbar_din_power_ctl",
-      "value": "0000001800000003000000000000000000000000000000020000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+      "value": "0000003000000003000000000000000000000000000000080000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
     },
     {
       "fully_qualified_name": "mau[1].dp.xbar_hash.hash.hash_seed",
@@ -83852,7 +84160,7 @@
     {
       "fully_qualified_name": "mau[3].dp.match_input_xbar_din_power_ctl",
       "name": "stage_3_match_input_xbar_din_power_ctl",
-      "value": "0000000400000001000000000000000000000000000000020000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+      "value": "0000000400000001000000000000000000000000000000080000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
     },
     {
       "fully_qualified_name": "mau[3].dp.xbar_hash.hash.hash_seed",
@@ -83872,7 +84180,7 @@
     {
       "fully_qualified_name": "mau[4].dp.match_input_xbar_din_power_ctl",
       "name": "stage_4_match_input_xbar_din_power_ctl",
-      "value": "0000000000000007000000000000000000000000000000020000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+      "value": "0000000000000007000000000000000000000000000000080000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
     },
     {
       "fully_qualified_name": "mau[4].dp.xbar_hash.hash.hash_seed",
@@ -83892,7 +84200,7 @@
     {
       "fully_qualified_name": "mau[5].dp.match_input_xbar_din_power_ctl",
       "name": "stage_5_match_input_xbar_din_power_ctl",
-      "value": "0000000000000007000000000000000000000048000000020000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+      "value": "0000000000000007000000000000000000000088000000080000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
     },
     {
       "fully_qualified_name": "mau[5].dp.xbar_hash.hash.hash_seed",
@@ -83907,7 +84215,7 @@
     {
       "fully_qualified_name": "mau[6].dp.match_input_xbar_din_power_ctl",
       "name": "stage_6_match_input_xbar_din_power_ctl",
-      "value": "0000000000000009000000000000000000000000000000020000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+      "value": "0000000000000009000000000000000000000000000000080000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
     },
     {
       "fully_qualified_name": "mau[6].dp.xbar_hash.hash.hash_seed",
@@ -84505,7 +84813,7 @@
       "hash_bit_width": 16
     }
   ],
-  "run_id": "c2d5ccb9675d4b99",
+  "run_id": "248d44bb672d4b84",
   "driver_options": {
     "hash_parity_enabled": false,
     "high_availability_enabled": true,

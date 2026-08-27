@@ -1,6 +1,6 @@
 version:
   version: 1.0.1
-  run_id: "c2d5ccb9675d4b99"
+  run_id: "248d44bb672d4b84"
   target: Tofino
 error_mode: propagate_and_disable
 phv ingress:
@@ -22,12 +22,14 @@ phv ingress:
   md.rnd_attn: {  stage 2..6: W11(0..15) } 
   md.attn: {  stage 6..12: H33 } 
   md.attn_idx.0-7: {  stage 0..7: B3 } 
-  md.attn_idx.8-15: {  stage 0..7: B6 } 
+  md.attn_idx.8-15: {  stage 0..7: B7 } 
   md.exceed: {  stage 4..5: W9(0..15) } 
   md.flags_out: {  stage 6..12: H12 } 
   md.mirror_sid: {  stage 6..12: H1(0..9) } 
   md.tstamp.0-31: {  stage 1..12: W1 } 
   md.tstamp.32-47: {  stage 1..12: H14 } 
+  md.mir_path.0-7: {  stage 6..12: B6 } 
+  md.mir_path.8-15: {  stage 6..12: B10 } 
   md.mir_dmac.0-31: W6
   md.mir_dmac.32-47: H41
   md.mir_smac.0-31: W7
@@ -44,7 +46,7 @@ phv ingress:
   hdr.fabric.hop: H36
   hdr.fabric.spray: H9
   hdr.fabric.path_id.0-7: B4
-  hdr.fabric.path_id.8-15: B7
+  hdr.fabric.path_id.8-15: B8
   hdr.fabric.loops: H11(8..15)
   hdr.fabric.flags: H11(0..7)
   hdr.fabric.nxt: H15(8..15)
@@ -52,22 +54,22 @@ phv ingress:
   hdr.csig.worst_hop: H38
   hdr.csig.worst_vlink: W2(16..31)
   hdr.csig.worst_qdepth: W2(0..15)
-  hdr.csig.worst_tdelta: W5
+  hdr.csig.worst_tdelta: W3
   hdr.csig.path_id.0-7: B5
-  hdr.csig.path_id.8-15: B8
+  hdr.csig.path_id.8-15: B9
   hdr.csig.epoch: H37
   hdr.ipv4.version: TW4(28..31)
   hdr.ipv4.ihl: TW4(24..27)
   hdr.ipv4.diffserv: TW4(16..23)
   hdr.ipv4.total_len: TW4(0..15)
-  hdr.ipv4.identification: TW6(16..31)
-  hdr.ipv4.flags: TW6(13..15)
-  hdr.ipv4.frag_offset: TW6(0..12)
-  hdr.ipv4.ttl: TW5(24..31)
-  hdr.ipv4.protocol: TW5(16..23)
-  hdr.ipv4.hdr_checksum: TW5(0..15)
-  hdr.ipv4.src_addr: W4
-  hdr.ipv4.dst_addr: W3
+  hdr.ipv4.identification: TW7(16..31)
+  hdr.ipv4.flags: TW7(13..15)
+  hdr.ipv4.frag_offset: TW7(0..12)
+  hdr.ipv4.ttl: TW6(24..31)
+  hdr.ipv4.protocol: TW6(16..23)
+  hdr.ipv4.hdr_checksum: TW6(0..15)
+  hdr.ipv4.src_addr: W5
+  hdr.ipv4.dst_addr: W4
   hdr.udp.src_port: H4
   hdr.udp.dst_port: TH7
   hdr.udp.len: TH6
@@ -77,26 +79,26 @@ phv ingress:
   hdr.bth.w1.8-15: TB5
   hdr.bth.w1.16-23: TB6
   hdr.bth.w1.24-31: TB7
-  hdr.bth.w2: TW7
+  hdr.bth.w2: TW5
   hdr.evid.magic: TB4
   hdr.evid.path_id: B2
   hdr.evid.rtt_q: H32(8..15)
   hdr.evid.loss_q: H32(0..7)
-  hdr.evid.ecn_q: TW7(24..31)
-  hdr.evid.flags: TW7(16..23)
-  hdr.evid.seq: TW7(0..15)
+  hdr.evid.ecn_q: TW5(24..31)
+  hdr.evid.flags: TW5(16..23)
+  hdr.evid.seq: TW5(0..15)
   ig_intr_md_for_dprsr.drop_ctl: {  stage 2..12: B1(5..7) } 
   ig_intr_md_for_dprsr.mirror_type: {  stage 6..12: B0(0..2) } 
   ig_intr_md_for_tm.ucast_egress_port: {  stage 5..12: H0(0..8) } 
   ig_intr_md_for_tm.qid: {  stage 5..12: B1(0..4) } 
   $tmp2: {  stage 12: H2(0..9) } 
-  hdr.ethernet.$valid: B9(0)
-  hdr.fabric.$valid: B9(1)
-  hdr.csig.$valid: B9(2)
-  hdr.ipv4.$valid: B9(3)
-  hdr.udp.$valid: B9(4)
-  hdr.bth.$valid: B9(5)
-  hdr.evid.$valid: B9(6)
+  hdr.ethernet.$valid: B11(0)
+  hdr.fabric.$valid: B11(1)
+  hdr.csig.$valid: B11(2)
+  hdr.ipv4.$valid: B11(3)
+  hdr.udp.$valid: B11(4)
+  hdr.bth.$valid: B11(5)
+  hdr.evid.$valid: B11(6)
   context_json:
     B0:
     - { name : ig_intr_md_for_dprsr.mirror_type, live_start : 6, live_end : deparser, mutually_exclusive_with: [  ] }
@@ -112,12 +114,16 @@ phv ingress:
     B5:
     - { name : hdr.csig.path_id, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
     B6:
-    - { name : md.attn_idx, live_start : parser, live_end : 7, mutually_exclusive_with: [  ] }
+    - { name : md.mir_path, live_start : 6, live_end : deparser, mutually_exclusive_with: [  ] }
     B7:
-    - { name : hdr.fabric.path_id, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
+    - { name : md.attn_idx, live_start : parser, live_end : 7, mutually_exclusive_with: [  ] }
     B8:
-    - { name : hdr.csig.path_id, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
+    - { name : hdr.fabric.path_id, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
     B9:
+    - { name : hdr.csig.path_id, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
+    B10:
+    - { name : md.mir_path, live_start : 6, live_end : deparser, mutually_exclusive_with: [  ] }
+    B11:
     - { name : hdr.ethernet.$valid, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
     - { name : hdr.fabric.$valid, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
     - { name : hdr.csig.$valid, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
@@ -193,11 +199,11 @@ phv ingress:
     - { name : hdr.csig.worst_vlink, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
     - { name : hdr.csig.worst_qdepth, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
     W3:
-    - { name : hdr.ipv4.dst_addr, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
-    W4:
-    - { name : hdr.ipv4.src_addr, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
-    W5:
     - { name : hdr.csig.worst_tdelta, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
+    W4:
+    - { name : hdr.ipv4.dst_addr, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
+    W5:
+    - { name : hdr.ipv4.src_addr, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
     W6:
     - { name : md.mir_dmac, live_start : parser, live_end : deparser, mutually_exclusive_with: [  ] }
     W7:
@@ -325,8 +331,8 @@ phv egress:
     - { name : eg_intr_md.egress_qid, live_start : parser, live_end : 0, mutually_exclusive_with: [  ] }
 parser ingress:
   start: $entry_point.start
-  init_zero: [ W8, W9, W10, H8, H5, H6, H7, H10, H39, W11, H33, B3, B6, H12, H1, W1, H14, W6, H41, W7, H42, H43, B1, B0, H2, B9 ]
-  bitwise_or: [ B9 ]
+  init_zero: [ W8, W9, W10, H8, H5, H6, H7, H10, H39, W11, H33, B3, B7, H12, H1, W1, H14, B6, B10, W6, H41, W7, H42, H43, B1, B0, H2, B11 ]
+  bitwise_or: [ B11 ]
   hdr_len_adj: 16
   states:
     $entry_point.start:
@@ -363,17 +369,17 @@ parser ingress:
       match: [ half ]
       0x88f0:
         H43: 35057  # value 35057 -> H43 bit[15..0]: ingress::md.mir_etype
-        B9: 1  # value 1 -> B9 bit[0]: ingress::hdr.ethernet.$valid
+        B11: 1  # value 1 -> B11 bit[0]: ingress::hdr.ethernet.$valid
         buf_req: 0
         next: parse_fabric
       0x0800:
         H43: 35057  # value 35057 -> H43 bit[15..0]: ingress::md.mir_etype
-        B9: 1  # value 1 -> B9 bit[0]: ingress::hdr.ethernet.$valid
+        B11: 1  # value 1 -> B11 bit[0]: ingress::hdr.ethernet.$valid
         buf_req: 0
         next: parse_ipv4
       0x****:
         H43: 35057  # value 35057 -> H43 bit[15..0]: ingress::md.mir_etype
-        B9: 1  # value 1 -> B9 bit[0]: ingress::hdr.ethernet.$valid
+        B11: 1  # value 1 -> B11 bit[0]: ingress::hdr.ethernet.$valid
         buf_req: 0
         next: end
     parse_fabric:
@@ -383,8 +389,8 @@ parser ingress:
         2..3: H36  # ingress::hdr.fabric.hop
         4..5: H8  # ingress::md.spray_idx
         4..5: H9  # ingress::hdr.fabric.spray
-        6: B6  # ingress::md.attn_idx[15:8].8-15
-        6: B7  # ingress::hdr.fabric.path_id[15:8].8-15
+        6: B7  # ingress::md.attn_idx[15:8].8-15
+        6: B8  # ingress::hdr.fabric.path_id[15:8].8-15
         7: B3  # ingress::md.attn_idx[7:0].0-7
         7: B4  # ingress::hdr.fabric.path_id[7:0].0-7
         load: { byte1 : 10 }
@@ -400,7 +406,7 @@ parser ingress:
         2..3: H15
             # - bit[16..23] -> H15 bit[15..8]: ingress::hdr.fabric.nxt
             # - bit[24..31] -> H15 bit[7..0]: ingress::hdr.fabric.pad
-        B9: 2  # value 1 -> B9 bit[1]: ingress::hdr.fabric.$valid
+        B11: 2  # value 1 -> B11 bit[1]: ingress::hdr.fabric.$valid
         shift: 4
         buf_req: 4
         next: parse_csig
@@ -411,7 +417,7 @@ parser ingress:
         2..3: H15
             # - bit[16..23] -> H15 bit[15..8]: ingress::hdr.fabric.nxt
             # - bit[24..31] -> H15 bit[7..0]: ingress::hdr.fabric.pad
-        B9: 2  # value 1 -> B9 bit[1]: ingress::hdr.fabric.$valid
+        B11: 2  # value 1 -> B11 bit[1]: ingress::hdr.fabric.$valid
         shift: 4
         buf_req: 4
         next: parse_ipv4
@@ -421,11 +427,11 @@ parser ingress:
         2..5: W2
             # - bit[16..31] -> W2 bit[31..16]: ingress::hdr.csig.worst_vlink
             # - bit[32..47] -> W2 bit[15..0]: ingress::hdr.csig.worst_qdepth
-        6..9: W5  # ingress::hdr.csig.worst_tdelta
-        10: B8  # ingress::hdr.csig.path_id[15:8].8-15
+        6..9: W3  # ingress::hdr.csig.worst_tdelta
+        10: B9  # ingress::hdr.csig.path_id[15:8].8-15
         11: B5  # ingress::hdr.csig.path_id[7:0].0-7
         12..13: H37  # ingress::hdr.csig.epoch
-        B9: 4  # value 1 -> B9 bit[2]: ingress::hdr.csig.$valid
+        B11: 4  # value 1 -> B11 bit[2]: ingress::hdr.csig.$valid
         shift: 14
         buf_req: 14
         next: parse_ipv4
@@ -436,16 +442,16 @@ parser ingress:
             # - bit[4..7] -> TW4 bit[27..24]: ingress::hdr.ipv4.ihl
             # - bit[8..15] -> TW4 bit[23..16]: ingress::hdr.ipv4.diffserv
             # - bit[16..31] -> TW4 bit[15..0]: ingress::hdr.ipv4.total_len
-        4..7: TW6
-            # - bit[32..47] -> TW6 bit[31..16]: ingress::hdr.ipv4.identification
-            # - bit[48..50] -> TW6 bit[15..13]: ingress::hdr.ipv4.flags
-            # - bit[51..63] -> TW6 bit[12..0]: ingress::hdr.ipv4.frag_offset
-        8..11: TW5
-            # - bit[64..71] -> TW5 bit[31..24]: ingress::hdr.ipv4.ttl
-            # - bit[72..79] -> TW5 bit[23..16]: ingress::hdr.ipv4.protocol
-            # - bit[80..95] -> TW5 bit[15..0]: ingress::hdr.ipv4.hdr_checksum
-        12..15: W4  # ingress::hdr.ipv4.src_addr
-        B9: 8  # value 1 -> B9 bit[3]: ingress::hdr.ipv4.$valid
+        4..7: TW7
+            # - bit[32..47] -> TW7 bit[31..16]: ingress::hdr.ipv4.identification
+            # - bit[48..50] -> TW7 bit[15..13]: ingress::hdr.ipv4.flags
+            # - bit[51..63] -> TW7 bit[12..0]: ingress::hdr.ipv4.frag_offset
+        8..11: TW6
+            # - bit[64..71] -> TW6 bit[31..24]: ingress::hdr.ipv4.ttl
+            # - bit[72..79] -> TW6 bit[23..16]: ingress::hdr.ipv4.protocol
+            # - bit[80..95] -> TW6 bit[15..0]: ingress::hdr.ipv4.hdr_checksum
+        12..15: W5  # ingress::hdr.ipv4.src_addr
+        B11: 8  # value 1 -> B11 bit[3]: ingress::hdr.ipv4.$valid
         load: { byte1 : 9 }
         shift: 16
         buf_req: 16
@@ -453,18 +459,18 @@ parser ingress:
     parse_ipv4.$split_0:
       match: [ byte1 ]
       0x11:
-        0..3: W3  # ingress::hdr.ipv4.dst_addr
+        0..3: W4  # ingress::hdr.ipv4.dst_addr
         4..5: H4  # ingress::hdr.udp.src_port
         6..7: TH7  # ingress::hdr.udp.dst_port
         8..9: TH6  # ingress::hdr.udp.len
         10..11: H3  # ingress::hdr.udp.checksum
-        B9: 16  # value 1 -> B9 bit[4]: ingress::hdr.udp.$valid
+        B11: 16  # value 1 -> B11 bit[4]: ingress::hdr.udp.$valid
         load: { half : 6..7 }
         shift: 12
         buf_req: 12
         next: parse_udp
       0x**:
-        0..3: W3  # ingress::hdr.ipv4.dst_addr
+        0..3: W4  # ingress::hdr.ipv4.dst_addr
         shift: 4
         buf_req: 4
         next: end
@@ -476,7 +482,7 @@ parser ingress:
         5: TB6  # ingress::hdr.bth.w1[23:16].16-23
         6: TB5  # ingress::hdr.bth.w1[15:8].8-15
         7: TB4  # ingress::hdr.bth.w1[7:0].0-7
-        8..11: TW7  # ingress::hdr.bth.w2
+        8..11: TW5  # ingress::hdr.bth.w2
         shift: 12
         buf_req: 12
         next: parse_bth.$split_0
@@ -486,11 +492,11 @@ parser ingress:
         2..3: H32
             # - bit[16..23] -> H32 bit[15..8]: ingress::hdr.evid.rtt_q
             # - bit[24..31] -> H32 bit[7..0]: ingress::hdr.evid.loss_q
-        4..7: TW7
-            # - bit[32..39] -> TW7 bit[31..24]: ingress::hdr.evid.ecn_q
-            # - bit[40..47] -> TW7 bit[23..16]: ingress::hdr.evid.flags
-            # - bit[48..63] -> TW7 bit[15..0]: ingress::hdr.evid.seq
-        B9: 64  # value 1 -> B9 bit[6]: ingress::hdr.evid.$valid
+        4..7: TW5
+            # - bit[32..39] -> TW5 bit[31..24]: ingress::hdr.evid.ecn_q
+            # - bit[40..47] -> TW5 bit[23..16]: ingress::hdr.evid.flags
+            # - bit[48..63] -> TW5 bit[15..0]: ingress::hdr.evid.seq
+        B11: 64  # value 1 -> B11 bit[6]: ingress::hdr.evid.$valid
         shift: 8
         buf_req: 8
         next: end
@@ -499,68 +505,68 @@ parser ingress:
         next: end
     parse_bth.$split_0:
       *:
-        B9: 32  # value 1 -> B9 bit[5]: ingress::hdr.bth.$valid
+        B11: 32  # value 1 -> B11 bit[5]: ingress::hdr.bth.$valid
         buf_req: 0
         next: end
 deparser ingress:
   dictionary:
-    TH13: B9(0)  # ingress::hdr.ethernet.dst_addr.32-47 if ingress::hdr.ethernet.$valid
-    TH11: B9(0)  # ingress::hdr.ethernet.dst_addr.16-31 if ingress::hdr.ethernet.$valid
-    TH10: B9(0)  # ingress::hdr.ethernet.dst_addr.0-15 if ingress::hdr.ethernet.$valid
-    TH12: B9(0)  # ingress::hdr.ethernet.src_addr.32-47 if ingress::hdr.ethernet.$valid
-    TH9: B9(0)  # ingress::hdr.ethernet.src_addr.16-31 if ingress::hdr.ethernet.$valid
-    TH8: B9(0)  # ingress::hdr.ethernet.src_addr.0-15 if ingress::hdr.ethernet.$valid
-    H34: B9(0)  # ingress::hdr.ethernet.ether_type if ingress::hdr.ethernet.$valid
-    H35: B9(1)  # ingress::hdr.fabric.vsw_id if ingress::hdr.fabric.$valid
-    H36: B9(1)  # ingress::hdr.fabric.hop if ingress::hdr.fabric.$valid
-    H9: B9(1)  # ingress::hdr.fabric.spray if ingress::hdr.fabric.$valid
-    B7: B9(1)  # ingress::hdr.fabric.path_id.8-15 if ingress::hdr.fabric.$valid
-    B4: B9(1)  # ingress::hdr.fabric.path_id.0-7 if ingress::hdr.fabric.$valid
-    H11: B9(1)
+    TH13: B11(0)  # ingress::hdr.ethernet.dst_addr.32-47 if ingress::hdr.ethernet.$valid
+    TH11: B11(0)  # ingress::hdr.ethernet.dst_addr.16-31 if ingress::hdr.ethernet.$valid
+    TH10: B11(0)  # ingress::hdr.ethernet.dst_addr.0-15 if ingress::hdr.ethernet.$valid
+    TH12: B11(0)  # ingress::hdr.ethernet.src_addr.32-47 if ingress::hdr.ethernet.$valid
+    TH9: B11(0)  # ingress::hdr.ethernet.src_addr.16-31 if ingress::hdr.ethernet.$valid
+    TH8: B11(0)  # ingress::hdr.ethernet.src_addr.0-15 if ingress::hdr.ethernet.$valid
+    H34: B11(0)  # ingress::hdr.ethernet.ether_type if ingress::hdr.ethernet.$valid
+    H35: B11(1)  # ingress::hdr.fabric.vsw_id if ingress::hdr.fabric.$valid
+    H36: B11(1)  # ingress::hdr.fabric.hop if ingress::hdr.fabric.$valid
+    H9: B11(1)  # ingress::hdr.fabric.spray if ingress::hdr.fabric.$valid
+    B8: B11(1)  # ingress::hdr.fabric.path_id.8-15 if ingress::hdr.fabric.$valid
+    B4: B11(1)  # ingress::hdr.fabric.path_id.0-7 if ingress::hdr.fabric.$valid
+    H11: B11(1)
         # - bit[15..8]: ingress::hdr.fabric.loops if ingress::hdr.fabric.$valid
         # - bit[7..0]: ingress::hdr.fabric.flags if ingress::hdr.fabric.$valid
-    H15: B9(1)
+    H15: B11(1)
         # - bit[15..8]: ingress::hdr.fabric.nxt if ingress::hdr.fabric.$valid
         # - bit[7..0]: ingress::hdr.fabric.pad if ingress::hdr.fabric.$valid
-    H38: B9(2)  # ingress::hdr.csig.worst_hop if ingress::hdr.csig.$valid
-    W2: B9(2)
+    H38: B11(2)  # ingress::hdr.csig.worst_hop if ingress::hdr.csig.$valid
+    W2: B11(2)
         # - bit[31..16]: ingress::hdr.csig.worst_vlink if ingress::hdr.csig.$valid
         # - bit[15..0]: ingress::hdr.csig.worst_qdepth if ingress::hdr.csig.$valid
-    W5: B9(2)  # ingress::hdr.csig.worst_tdelta if ingress::hdr.csig.$valid
-    B8: B9(2)  # ingress::hdr.csig.path_id.8-15 if ingress::hdr.csig.$valid
-    B5: B9(2)  # ingress::hdr.csig.path_id.0-7 if ingress::hdr.csig.$valid
-    H37: B9(2)  # ingress::hdr.csig.epoch if ingress::hdr.csig.$valid
-    TW4: B9(3)
+    W3: B11(2)  # ingress::hdr.csig.worst_tdelta if ingress::hdr.csig.$valid
+    B9: B11(2)  # ingress::hdr.csig.path_id.8-15 if ingress::hdr.csig.$valid
+    B5: B11(2)  # ingress::hdr.csig.path_id.0-7 if ingress::hdr.csig.$valid
+    H37: B11(2)  # ingress::hdr.csig.epoch if ingress::hdr.csig.$valid
+    TW4: B11(3)
         # - bit[31..28]: ingress::hdr.ipv4.version if ingress::hdr.ipv4.$valid
         # - bit[27..24]: ingress::hdr.ipv4.ihl if ingress::hdr.ipv4.$valid
         # - bit[23..16]: ingress::hdr.ipv4.diffserv if ingress::hdr.ipv4.$valid
         # - bit[15..0]: ingress::hdr.ipv4.total_len if ingress::hdr.ipv4.$valid
-    TW6: B9(3)
+    TW7: B11(3)
         # - bit[31..16]: ingress::hdr.ipv4.identification if ingress::hdr.ipv4.$valid
         # - bit[15..13]: ingress::hdr.ipv4.flags if ingress::hdr.ipv4.$valid
         # - bit[12..0]: ingress::hdr.ipv4.frag_offset if ingress::hdr.ipv4.$valid
-    TW5: B9(3)
+    TW6: B11(3)
         # - bit[31..24]: ingress::hdr.ipv4.ttl if ingress::hdr.ipv4.$valid
         # - bit[23..16]: ingress::hdr.ipv4.protocol if ingress::hdr.ipv4.$valid
         # - bit[15..0]: ingress::hdr.ipv4.hdr_checksum if ingress::hdr.ipv4.$valid
-    W4: B9(3)  # ingress::hdr.ipv4.src_addr if ingress::hdr.ipv4.$valid
-    W3: B9(3)  # ingress::hdr.ipv4.dst_addr if ingress::hdr.ipv4.$valid
-    H4: B9(4)  # ingress::hdr.udp.src_port if ingress::hdr.udp.$valid
-    TH7: B9(4)  # ingress::hdr.udp.dst_port if ingress::hdr.udp.$valid
-    TH6: B9(4)  # ingress::hdr.udp.len if ingress::hdr.udp.$valid
-    H3: B9(4)  # ingress::hdr.udp.checksum if ingress::hdr.udp.$valid
-    TW8: B9(5)  # ingress::hdr.bth.w0 if ingress::hdr.bth.$valid
-    TB7: B9(5)  # ingress::hdr.bth.w1.24-31 if ingress::hdr.bth.$valid
-    TB6: B9(5)  # ingress::hdr.bth.w1.16-23 if ingress::hdr.bth.$valid
-    TB5: B9(5)  # ingress::hdr.bth.w1.8-15 if ingress::hdr.bth.$valid
-    TB4: B9(5)  # ingress::hdr.bth.w1.0-7 if ingress::hdr.bth.$valid
-    TW7: B9(5)  # ingress::hdr.bth.w2 if ingress::hdr.bth.$valid
-    TB4: B9(6)  # ingress::hdr.evid.magic if ingress::hdr.evid.$valid
-    B2: B9(6)  # ingress::hdr.evid.path_id if ingress::hdr.evid.$valid
-    H32: B9(6)
+    W5: B11(3)  # ingress::hdr.ipv4.src_addr if ingress::hdr.ipv4.$valid
+    W4: B11(3)  # ingress::hdr.ipv4.dst_addr if ingress::hdr.ipv4.$valid
+    H4: B11(4)  # ingress::hdr.udp.src_port if ingress::hdr.udp.$valid
+    TH7: B11(4)  # ingress::hdr.udp.dst_port if ingress::hdr.udp.$valid
+    TH6: B11(4)  # ingress::hdr.udp.len if ingress::hdr.udp.$valid
+    H3: B11(4)  # ingress::hdr.udp.checksum if ingress::hdr.udp.$valid
+    TW8: B11(5)  # ingress::hdr.bth.w0 if ingress::hdr.bth.$valid
+    TB7: B11(5)  # ingress::hdr.bth.w1.24-31 if ingress::hdr.bth.$valid
+    TB6: B11(5)  # ingress::hdr.bth.w1.16-23 if ingress::hdr.bth.$valid
+    TB5: B11(5)  # ingress::hdr.bth.w1.8-15 if ingress::hdr.bth.$valid
+    TB4: B11(5)  # ingress::hdr.bth.w1.0-7 if ingress::hdr.bth.$valid
+    TW5: B11(5)  # ingress::hdr.bth.w2 if ingress::hdr.bth.$valid
+    TB4: B11(6)  # ingress::hdr.evid.magic if ingress::hdr.evid.$valid
+    B2: B11(6)  # ingress::hdr.evid.path_id if ingress::hdr.evid.$valid
+    H32: B11(6)
         # - bit[15..8]: ingress::hdr.evid.rtt_q if ingress::hdr.evid.$valid
         # - bit[7..0]: ingress::hdr.evid.loss_q if ingress::hdr.evid.$valid
-    TW7: B9(6)
+    TW5: B11(6)
         # - bit[31..24]: ingress::hdr.evid.ecn_q if ingress::hdr.evid.$valid
         # - bit[23..16]: ingress::hdr.evid.flags if ingress::hdr.evid.$valid
         # - bit[15..0]: ingress::hdr.evid.seq if ingress::hdr.evid.$valid
@@ -580,8 +586,8 @@ deparser ingress:
       - H43  # ingress::md.mir_etype
       - H36  # ingress::hdr.fabric.hop
       - H39  # ingress::md.vlink_id
-      - B7  # ingress::hdr.fabric.path_id.8-15
-      - B4  # ingress::hdr.fabric.path_id.0-7
+      - B10  # ingress::md.mir_path.8-15
+      - B6  # ingress::md.mir_path.0-7
       - H33  # ingress::md.attn
       - H12  # ingress::md.flags_out
       - H14  # ingress::md.tstamp.32-47
@@ -874,8 +880,8 @@ stage 0 ingress:
         seed: 0x0
     format: { immediate(0): 0..31, version(0): 112..115 }
     match_group_map: [ [ 0 ] ]
-    hit: [  tbl_mcp_fabric774 ]
-    miss:  tbl_mcp_fabric774
+    hit: [  tbl_mcp_fabric777 ]
+    miss:  tbl_mcp_fabric777
     action_bus: { 96..99 : immediate(0..31) }
     instruction: tbl_port_role_0($DEFAULT, $DEFAULT)
     actions:
@@ -896,8 +902,8 @@ stage 0 ingress:
       src_leaf: "0x0"
 stage 1 ingress:
   dependency: match
-  hash_action tbl_mcp_fabric774 0:
-    p4: { name: tbl_mcp_fabric774, hidden: true }
+  hash_action tbl_mcp_fabric777 0:
+    p4: { name: tbl_mcp_fabric777, hidden: true }
     row: 0
     result_bus: 1
     gateway:
@@ -918,38 +924,38 @@ stage 1 ingress:
         next:  tbl_dst_leaf_0
       condition: 
         expression: "(md.role == 1 && hdr.fabric.$valid == 1)"
-        true:  tbl_mcp_fabric766
+        true:  tbl_mcp_fabric769
         false:  tbl_dst_leaf_0
-    next:  tbl_mcp_fabric766
+    next:  tbl_mcp_fabric769
     action_bus: { 96..99 : rng(0, 0..31) }
-    instruction: tbl_mcp_fabric774(action, $DEFAULT)
+    instruction: tbl_mcp_fabric777(action, $DEFAULT)
     actions:
-      mcp_fabric774(1, 1):
+      mcp_fabric777(1, 1):
       - hit_allowed: { allowed: true }
       - default_action: { allowed: true, is_constant: true }
       - handle: 0x20000005
       - next_table: 0
       - set md.next_vsw, 0
       - set W11(0..15), rng(0, 0..15)
-    default_action: mcp_fabric774
-  ternary_match tbl_mcp_fabric766 5:
-    p4: { name: tbl_mcp_fabric766, hidden: true }
+    default_action: mcp_fabric777
+  ternary_match tbl_mcp_fabric769 5:
+    p4: { name: tbl_mcp_fabric769, hidden: true }
     hit: [  END ]
     miss:  END
-    indirect: tbl_mcp_fabric766$tind
-  ternary_indirect tbl_mcp_fabric766$tind:
+    indirect: tbl_mcp_fabric769$tind
+  ternary_indirect tbl_mcp_fabric769$tind:
     row: 1
     bus: 0
     format: { action: 0..0 }
-    instruction: tbl_mcp_fabric766$tind(action, $DEFAULT)
+    instruction: tbl_mcp_fabric769$tind(action, $DEFAULT)
     actions:
-      mcp_fabric766(0, 5):
+      mcp_fabric769(0, 5):
       - hit_allowed: { allowed: true }
       - default_action: { allowed: true, is_constant: true }
       - handle: 0x20000002
       - next_table: 0
       - set ig_intr_md_for_dprsr.drop_ctl, 1
-    default_action: mcp_fabric766
+    default_action: mcp_fabric769
   exact_match tbl_dst_leaf_0 1:
     p4: { name: Ingress.tbl_dst_leaf, size: 1024 }
     p4_param_order: 
@@ -986,8 +992,8 @@ stage 1 ingress:
     format: { immediate(0): 0..15, version(0): 112..115, match(0): [ 50..55, 32..47 ], immediate(1): 16..31, version(1): 116..119, match(1): [ 74..79, 56..71 ] }
     match: [ hdr.ipv4.dst_addr(10..15), hdr.ipv4.dst_addr(16..23), hdr.ipv4.dst_addr(24..31) ]
     match_group_map: [ [ 0, 1 ] ]
-    hit: [  tbl_mcp_fabric780 ]
-    miss:  tbl_mcp_fabric780
+    hit: [  tbl_mcp_fabric783 ]
+    miss:  tbl_mcp_fabric783
     action_bus: { 100..103 : immediate(0..15) }
     instruction: tbl_dst_leaf_0($DEFAULT, $DEFAULT)
     actions:
@@ -1003,8 +1009,8 @@ stage 1 ingress:
     default_action_parameters:
       dst_leaf: "0x0"
       path_base: "0x0"
-  hash_action tbl_mcp_fabric780 2:
-    p4: { name: tbl_mcp_fabric780, hidden: true }
+  hash_action tbl_mcp_fabric783 2:
+    p4: { name: tbl_mcp_fabric783, hidden: true }
     row: 0
     result_bus: 0
     hash_dist:
@@ -1031,27 +1037,27 @@ stage 1 ingress:
       format: { action: 0..0 }
       match: { 0: md.hop(0..7), 8: md.hop(8..15) }
       0x0000:
-        next:  tbl_mcp_fabric784
+        next:  tbl_mcp_fabric787
       miss:
         run_table : true
       condition: 
         expression: "(md.hop == 0)"
-        true:  tbl_mcp_fabric784
+        true:  tbl_mcp_fabric787
         false:  tbl_exceed_evid_0
     next:  tbl_exceed_evid_0
     action_bus: { 64..65 : rng(1, 0..15), 66..67 : hash_dist(0, hi) }
-    instruction: tbl_mcp_fabric780(action, $DEFAULT)
+    instruction: tbl_mcp_fabric783(action, $DEFAULT)
     actions:
-      mcp_fabric780(1, 3):
+      mcp_fabric783(1, 3):
       - hit_allowed: { allowed: true }
       - default_action: { allowed: true, is_constant: true }
       - handle: 0x20000006
       - next_table: 0
       - set H5(0..15), rng(1, 0..15)
       - set H6(0..15), hash_dist(0, 0..15)
-    default_action: mcp_fabric780
-  hash_action tbl_mcp_fabric784 3:
-    p4: { name: tbl_mcp_fabric784, hidden: true }
+    default_action: mcp_fabric783
+  hash_action tbl_mcp_fabric787 3:
+    p4: { name: tbl_mcp_fabric787, hidden: true }
     row: 1
     result_bus: 0
     hash_dist:
@@ -1064,7 +1070,7 @@ stage 1 ingress:
         table: [3]
         seed: 0x0
     gateway:
-      name: tbl_mcp_fabric784-gateway
+      name: tbl_mcp_fabric787-gateway
       row: 0
       bus: 0
       unit: 1
@@ -1075,19 +1081,19 @@ stage 1 ingress:
         true:  tbl_spray_sel_0
         false:  tbl_spray_sel_0
     next: []
-    action_bus: { 32..33 : tbl_mcp_fabric784$salu.Ingress.reg_spray_rr(0..15) }
-    stateful: tbl_mcp_fabric784$salu.Ingress.reg_spray_rr(hash_dist 1, $DEFAULT, $DEFAULT)
-    instruction: tbl_mcp_fabric784($DEFAULT, $DEFAULT)
+    action_bus: { 32..33 : tbl_mcp_fabric787$salu.Ingress.reg_spray_rr(0..15) }
+    stateful: tbl_mcp_fabric787$salu.Ingress.reg_spray_rr(hash_dist 1, $DEFAULT, $DEFAULT)
+    instruction: tbl_mcp_fabric787($DEFAULT, $DEFAULT)
     actions:
-      mcp_fabric784(0, 4):
+      mcp_fabric787(0, 4):
       - hit_allowed: { allowed: true }
       - default_action: { allowed: true, is_constant: true }
       - handle: 0x20000007
       - next_table: 0
-      - set H7(0..15), tbl_mcp_fabric784$salu.Ingress.reg_spray_rr
-      - tbl_mcp_fabric784$salu.Ingress.reg_spray_rr(rr_next_0, $hash_dist)
-    default_action: mcp_fabric784
-  stateful tbl_mcp_fabric784$salu.Ingress.reg_spray_rr:
+      - set H7(0..15), tbl_mcp_fabric787$salu.Ingress.reg_spray_rr
+      - tbl_mcp_fabric787$salu.Ingress.reg_spray_rr(rr_next_0, $hash_dist)
+    default_action: mcp_fabric787
+  stateful tbl_mcp_fabric787$salu.Ingress.reg_spray_rr:
     p4: { name: Ingress.reg_spray_rr, size: 64 }
     row: 15
     logical_bus: S
@@ -1313,8 +1319,8 @@ stage 3 ingress:
         expression: "(hdr.evid.$valid == 1)"
         true:  tbl_exceed_evid_0
         false:  tbl_exceed_csig_0
-    hit: [  tbl_mcp_fabric773 ]
-    miss:  tbl_mcp_fabric773
+    hit: [  tbl_mcp_fabric776 ]
+    miss:  tbl_mcp_fabric776
     indirect: tbl_exceed_evid_0$tind
   ternary_indirect tbl_exceed_evid_0$tind:
     row: 1
@@ -1368,13 +1374,13 @@ stage 3 ingress:
       0x1:
         run_table: true
       miss:
-        next:  tbl_mcp_fabric773
+        next:  tbl_mcp_fabric776
       condition: 
         expression: "(hdr.csig.$valid == 1)"
         true:  tbl_exceed_csig_0
-        false:  tbl_mcp_fabric773
-    hit: [  tbl_mcp_fabric773 ]
-    miss:  tbl_mcp_fabric773
+        false:  tbl_mcp_fabric776
+    hit: [  tbl_mcp_fabric776 ]
+    miss:  tbl_mcp_fabric776
     indirect: tbl_exceed_csig_0$tind
   ternary_indirect tbl_exceed_csig_0$tind:
     row: 0
@@ -1398,12 +1404,12 @@ stage 3 ingress:
       - handle: 0x20000012
       - next_table: 0
     default_only_action: NoAction
-  hash_action tbl_mcp_fabric773 3:
-    p4: { name: tbl_mcp_fabric773, hidden: true }
+  hash_action tbl_mcp_fabric776 3:
+    p4: { name: tbl_mcp_fabric776, hidden: true }
     row: 0
     result_bus: 0
     gateway:
-      name: tbl_mcp_fabric773-gateway
+      name: tbl_mcp_fabric776-gateway
       row: 0
       bus: 0
       unit: 1
@@ -1415,15 +1421,15 @@ stage 3 ingress:
         false:  tbl_vlink_0
     next: []
     action_bus: { 96..99 : rng(0, 0..31) }
-    instruction: tbl_mcp_fabric773($DEFAULT, $DEFAULT)
+    instruction: tbl_mcp_fabric776($DEFAULT, $DEFAULT)
     actions:
-      mcp_fabric773(0, 8):
+      mcp_fabric776(0, 8):
       - hit_allowed: { allowed: true }
       - default_action: { allowed: true, is_constant: true }
       - handle: 0x20000004
       - next_table: 0
       - set W10(16..31), rng(0, 16..31)
-    default_action: mcp_fabric773
+    default_action: mcp_fabric776
 stage 4 ingress:
   dependency: match
   exact_match tbl_vlink_0 0:
@@ -1700,6 +1706,8 @@ stage 5 ingress:
       - default_action: { allowed: true }
       - handle: 0x20000018
       - next_table: 0
+      - set md.mir_path.0-7, md.attn_idx.0-7
+      - set md.mir_path.8-15, md.attn_idx.8-15
       - set H33(0..15), tbl_attn_0$salu.Ingress.reg_attn
       - tbl_attn_0$salu.Ingress.reg_attn(attn_on_exceed_0, $hash_dist)
       Ingress.act_attn_clean(2, 4):
@@ -1707,6 +1715,8 @@ stage 5 ingress:
       - default_action: { allowed: true }
       - handle: 0x20000019
       - next_table: 0
+      - set md.mir_path.0-7, md.attn_idx.0-7
+      - set md.mir_path.8-15, md.attn_idx.8-15
       - set H33(0..15), tbl_attn_0$salu.Ingress.reg_attn
       - tbl_attn_0$salu.Ingress.reg_attn(attn_on_clean_0, $hash_dist)
       NoAction(-1, 0):
@@ -1910,7 +1920,7 @@ stage 7 ingress:
       - set hdr.csig.path_id.0-7, md.attn_idx.0-7
       - set hdr.csig.path_id.8-15, md.attn_idx.8-15
       - set hdr.csig.epoch, epoch
-      - set B9(1..2), 3
+      - set B11(1..2), 3
       - deposit-field H11(8..15), 0, H12
       - set H15(0..15), 256
       - set W2(0..31), 0
@@ -1934,7 +1944,7 @@ stage 7 ingress:
       - set hdr.ethernet.ether_type, 2048
       - set ig_intr_md_for_tm.ucast_egress_port, port
       - set ig_intr_md_for_tm.qid, 0
-      - set B9(1..2), 0
+      - set B11(1..2), 0
       Ingress.act_drop(3, 4):
       - hit_allowed: { allowed: true }
       - default_action: { allowed: true, is_constant: true }
