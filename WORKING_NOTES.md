@@ -299,6 +299,8 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   (conf only). Pooled mode verified synthetically (alarm epoch 20, 20/20 on fault); per_element
   test iv fails (prior-mass baseline) -> builder making p0 prior-free. LULESH rehearsal numbers
   were at delta 1e-3 (recorded as such). Pilot restarted ~11:00, ~4 h.
+  (First relaunch doubled the workers: `pkill -f run_tier1_cosim.sh` killed the ssh shell itself.
+  Use `pgrep -f "run_tier1_cosim[.]sh"`. Cleaned and relaunched once at ~11:10: 10 + 5 workers.)
 - 08-27 ~05:45 SLOW LOOP ON SILICON (p4/reports/slow-loop-silicon.md): adapter correct first try;
   copies 117/epoch (attn decays to <4096 -> 5.86 %), counters exact, frozen mode 0 writes, uniform
   policy rotates exactly (bfrt readback), fault -> vlink 0/9 top (identifiable only as a pair with
