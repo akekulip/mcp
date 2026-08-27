@@ -1,7 +1,7 @@
 # Frozen parameters of the common inference layer (PREREG section 3.3).
 # Flat key: value lines only -- parsed by controller.infer.load_frozen_config (no PyYAML).
 # Any edit to controller/infer.py requires `python3 controller/freeze.py` to refresh the hash.
-delta_loss: 1e-3            # minimum detectable loss shift: p1 = p0 + delta_loss (binomial LLR CUSUM)
+delta_loss: 1e-4            # minimum detectable loss shift = the F1 rate of the frozen §14 point (was 1e-3: at a 1e-4 fault the LLR drift is negative and the fault can never alarm)
 p_floor: 1e-6               # floor on the baseline rate p0 so log(p1/p0) is finite
 k_cusum_latency_us: 10.0    # CUSUM slack for posterior-mean latency (microseconds)
 h_default: 6.5              # CUSUM threshold (nats for loss, units of k for latency); per-arm knob. 5.0 gives 3/20 false-alarm seeds at 1e-4 background

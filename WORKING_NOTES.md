@@ -294,6 +294,11 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   alpha 0, floor 0.75 — a PILOT config, Tier-1 tuning not run) and cusum (explore 0), same 30
   seeds/faults/onsets as the gate -> paired with uniform/random/oracle. Vision seeds 1000-1019
   (10-wide), Hulk 1020-1029 (5-wide); ~4 h. results_tier1_cosim/ on each host.
+- 08-27 ~11:00 PILOT RELAUNCHED: first 5 Hulk runs showed the localizer could not alarm at a 1e-4
+  fault (delta_loss 1e-3 -> negative LLR drift; fault top by mean, stat 0). delta_loss := 1e-4
+  (conf only). Pooled mode verified synthetically (alarm epoch 20, 20/20 on fault); per_element
+  test iv fails (prior-mass baseline) -> builder making p0 prior-free. LULESH rehearsal numbers
+  were at delta 1e-3 (recorded as such). Pilot restarted ~11:00, ~4 h.
 - 08-27 ~05:45 SLOW LOOP ON SILICON (p4/reports/slow-loop-silicon.md): adapter correct first try;
   copies 117/epoch (attn decays to <4096 -> 5.86 %), counters exact, frozen mode 0 writes, uniform
   policy rotates exactly (bfrt readback), fault -> vlink 0/9 top (identifiable only as a pair with
