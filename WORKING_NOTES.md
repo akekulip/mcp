@@ -269,6 +269,10 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   loss CUSUM increment = binomial LLR (x log(p1/p0) + (n-x) log((1-p1)/(1-p0)), delta_loss 1e-3,
   h 5 nats) — count-aware, clean probes give negative increments. Lesson for §3.3: "CUSUM on the
   posterior mean" is the wrong statistic for counts; PREREG text to be amended when frozen.
+- 08-27 ~06:15 LOCALIZER CLEAN (361a729, hash 116ffc9f, h=6.5 nats): co-sim alarms now ALL on the
+  faulty link, 0 false alarms in 50 runs. cusum == uniform TTL (first post-onset probe decides);
+  mcp v0 untuned: b32 median 11 vs 9, b4 4/5 censored. Next per PREREG = §3.2 tuning block on the
+  tuning split (seeds 6-10, LULESH-128): sim/gate/run_tuning.sh (64 mcp configs, 9 cusum).
 - 08-27 ~05:45 SLOW LOOP ON SILICON (p4/reports/slow-loop-silicon.md): adapter correct first try;
   copies 117/epoch (attn decays to <4096 -> 5.86 %), counters exact, frozen mode 0 writes, uniform
   policy rotates exactly (bfrt readback), fault -> vlink 0/9 top (identifiable only as a pair with
