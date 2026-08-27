@@ -252,6 +252,10 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   candidate localizer constants (not frozen yet). Remaining MCP pieces: shadow-price budgeted
   bandit (H3) + context vector (H4) on top of the bridge; the hardware epoch loop is code-complete
   but untested on silicon.
+- 08-27 ~04:30 MCP v0 LEARNER (controller/mcp_policy.py) + co-sim mini-gate (run_cosim.sh): on
+  LULESH-128 mcp v0 is WORSE than uniform; root cause = localizer false alarms (anomaly on in
+  46/55 epochs every run: two-sided loss CUSUM trips on healthy links in pooled mode). Fix: loss
+  CUSUM upper-sided only (builder). Learner untuned; results interim, not for the paper.
 
 ## Next action
 1. Vision/Hulk: check Netronome SDK, rxe, kernel, perftest, DPDK availability (M4 prep).
