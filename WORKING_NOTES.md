@@ -273,6 +273,14 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   faulty link, 0 false alarms in 50 runs. cusum == uniform TTL (first post-onset probe decides);
   mcp v0 untuned: b32 median 11 vs 9, b4 4/5 censored. Next per PREREG = §3.2 tuning block on the
   tuning split (seeds 6-10, LULESH-128): sim/gate/run_tuning.sh (64 mcp configs, 9 cusum).
+- 08-27 ~07:15 TUNING + EVAL DONE (730 + 40 runs, 0 failures): all arms tie at equal budget on
+  LULESH-128 single-fault (b32 medians 9/8/9/9; b4 31/22/31/34). Learner selects coverage-like
+  configs (floor 0.75). sim/gate/COSIM-RESULTS.md. Conclusion: pipeline validated; H1 on this
+  rehearsal trace would be falsified; the Tier-1 environment (MoE bursty load = context, multi-
+  fault, background loss, non-stationarity) is where MCP must show its 30 %. Next research
+  moves for Philip: (a) co-sim on MoE-64 @1024 (1 h/run, on Vision/Hulk after the gate);
+  (b) hook flags for background loss (-mcp_bg_loss p) and multi-fault; (c) load context is
+  already in the learner's features.
 - 08-27 ~05:45 SLOW LOOP ON SILICON (p4/reports/slow-loop-silicon.md): adapter correct first try;
   copies 117/epoch (attn decays to <4096 -> 5.86 %), counters exact, frozen mode 0 writes, uniform
   policy rotates exactly (bfrt readback), fault -> vlink 0/9 top (identifiable only as a pair with

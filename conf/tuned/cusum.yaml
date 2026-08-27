@@ -1,0 +1,18 @@
+# selected on the tuning split (seeds 6-10, LULESH-128) by analyze_tuning.py
+arm: cusum
+b32:
+  cfg: cfg1
+  args: "--explore 0"
+  median_ttl: 15
+  censored: 0.00
+  mean_ttl: 14.00
+  n_seeds: 5
+  n_configs: 9
+b4:
+  cfg: cfg1
+  args: "--explore 0"
+  median_ttl: 26
+  censored: 0.20
+  mean_ttl: 27.40
+  n_seeds: 5
+  n_configs: 9
