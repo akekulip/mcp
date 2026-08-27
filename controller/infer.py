@@ -23,8 +23,10 @@ Pipeline per epoch (:func:`update`):
    the CUSUM below sees a change rather than a 1/n-diluted average.
 3. **Change detection.** Loss: an upper-sided Page/binomial log-likelihood-ratio CUSUM per
    element on this epoch's counts (``n`` trials, ``x`` losses) against the baseline rate
-   ``p0`` (the element's own running baseline of the posterior mean, or the pooled rate,
-   floored at ``p_floor``) for a shift to ``p1 = p0 + delta_loss``:
+   ``p0`` — the *prior-free* loss rate ``(alpha-alpha0)/((alpha-alpha0)+(beta-beta0))`` of
+   the forgotten pseudo-counts (the element's own EWMA of it, or the pool's), floored at
+   ``p_floor``; the Beta posterior mean keeps its prior and serves ranking tie-breaks and the
+   reward for a shift to ``p1 = p0 + delta_loss``:
    ``S+ <- max(0, S+ + x*log(p1/p0) + (n-x)*log((1-p1)/(1-p0)))`` (nats).  A clean probe of
    any size gives a negative increment, so light clean probes never alarm.  Latency: a
    two-sided CUSUM on the posterior-mean latency against its running baseline (an
@@ -130,7 +132,7 @@ class ElementState:
     ng_kappa: float = PRIOR_NG_KAPPA
     ng_alpha: float = PRIOR_NG_ALPHA
     ng_beta: float = PRIOR_NG_BETA
-    # Running baselines of the posterior means (None until first observation)
+    # Running baselines: prior-free loss rate / posterior-mean latency (None until observed)
     base_loss: Optional[float] = None
     base_lat: Optional[float] = None
     n_obs_loss: int = 0
@@ -152,6 +154,13 @@ class ElementState:
         """Posterior variance of the loss rate."""
         s = self.loss_alpha + self.loss_beta
         return self.loss_alpha * self.loss_beta / (s * s * (s + 1.0))
+
+    @property
+    def loss_rate(self) -> float:
+        """Prior-free loss rate from the (forgotten) pseudo-counts; 0.0 if none."""
+        lost = self.loss_alpha - PRIOR_BETA_ALPHA
+        n = lost + (self.loss_beta - PRIOR_BETA_BETA)
+        return lost / n if n > 0.0 else 0.0
 
     @property
     def latency_mean(self) -> float:
@@ -224,14 +233,17 @@ def _deaggregate(samples: Iterable[Sample], path_to_links: Dict[str, List[str]]
 
 
 def _loss_llr_step(pos: float, n: float, x: float, base: Optional[float], n_obs: int,
-                   x_mean: float, gamma: float, pooled: bool) -> Tuple[float, float]:
-    """Upper-sided binomial LLR CUSUM step on counts; returns (S+, new baseline)."""
+                   rate: float, gamma: float, pooled: bool) -> Tuple[float, float]:
+    """Upper-sided binomial LLR CUSUM step on counts; returns (S+, new baseline).
+
+    ``base`` and ``rate`` are prior-free loss rates (see ``ElementState.loss_rate``).
+    """
     if base is None or n_obs < BASELINE_WARMUP:
-        return 0.0, (base if pooled and base is not None else x_mean)
+        return 0.0, (base if pooled and base is not None else rate)
     p0 = min(max(base, P_FLOOR), 1.0 - 2.0 * DELTA_LOSS)
     p1 = p0 + DELTA_LOSS
     inc = x * math.log(p1 / p0) + (n - x) * math.log((1.0 - p1) / (1.0 - p0))
-    new_base = base if pooled else (1.0 - gamma) * base + gamma * x_mean
+    new_base = base if pooled else (1.0 - gamma) * base + gamma * rate
     return max(0.0, pos + inc), new_base
 
 
@@ -293,10 +305,10 @@ def _update_element(st: ElementState, delivered: float, lost: float, lats: Seque
     pooled = pool is not None
     clp, cln, base_loss = st.cusum_loss_pos, st.cusum_loss_neg, st.base_loss
     if delivered + lost > 0.0:
-        b_loss, n_loss = ((pool.loss_mean, pool.n_obs_loss) if pooled
+        b_loss, n_loss = ((pool.loss_rate, pool.n_obs_loss) if pooled
                           else (st.base_loss, st.n_obs_loss))
         clp, base_loss = _loss_llr_step(clp, delivered + lost, lost, b_loss, n_loss,
-                                        new.loss_mean, gamma, pooled)
+                                        new.loss_rate, gamma, pooled)
     base_lat, cap, can = st.base_lat, st.cusum_lat_pos, st.cusum_lat_neg
     if n:
         b_lat, n_lat = (pool.latency_mean, pool.n_obs_lat) if pooled else (st.base_lat, st.n_obs_lat)

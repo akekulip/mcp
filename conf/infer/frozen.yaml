@@ -17,4 +17,4 @@ prior_ng_kappa: 1e-3
 prior_ng_alpha: 1e-3
 prior_ng_beta: 1e-3
 deaggregation: uniform_prior_fractional   # path counts split evenly over links, no rounding
-module_sha256: 116ffc9f4246897b75eddee1e103b9bcd5baeec78a34b5b7f754ce83651c76d2
+module_sha256: be12e7b2ecef75be652d06262f8ddefdb0d05cb9880d37a889512480dfe278fd
