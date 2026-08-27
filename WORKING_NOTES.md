@@ -281,6 +281,9 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   moves for Philip: (a) co-sim on MoE-64 @1024 (1 h/run, on Vision/Hulk after the gate);
   (b) hook flags for background loss (-mcp_bg_loss p) and multi-fault; (c) load context is
   already in the learner's features.
+- 08-27 ~07:30 `-mcp_bg_loss <p>` added to the hook (sim/htsim 4a9ad8b): F0 background loss on all
+  uplinks, per-link RNG, fault spec overrides its link (verified: 34/128 uplinks dropped at 1e-4).
+  Multi-fault already works (repeatable -mcp_loss). run_cosim/run_tuning need a BG_LOSS knob.
 - 08-27 ~05:45 SLOW LOOP ON SILICON (p4/reports/slow-loop-silicon.md): adapter correct first try;
   copies 117/epoch (attn decays to <4096 -> 5.86 %), counters exact, frozen mode 0 writes, uniform
   policy rotates exactly (bfrt readback), fault -> vlink 0/9 top (identifiable only as a pair with
