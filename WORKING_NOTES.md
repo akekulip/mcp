@@ -311,6 +311,12 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   Mechanism: 31 RR slots sweep 1024 links in 33 epochs vs uniform's 25; the 10 learned slots
   don't pay for the coverage they displace. => the learner must beat coverage PER SLOT; a Tier-1
   tuning block (§3.2) and context that predicts loss visibility (load bursts, H27) are the levers.
+- 08-27 ~16:30 PILOT FINAL (60/60): cusum == uniform per seed; MCP 18 vs uniform 15, slower 23/30
+  (p=0.005); H1 not met by the pilot config. PREREG §14 row (pilot, not main block). DECISIONS
+  FOR PHILIP: (a) run the Tier-1 §3.2 tuning block (~21 h on both servers) or (b) design first —
+  a per-slot-value policy (probe where loss would be VISIBLE: load-bursty links, H27) before
+  spending tuning compute; (c) multi-fault / background-loss (F0) block where coverage alone
+  is weaker. Servers idle, chip idle (mcp_fabric loaded, attn 4096).
 - 08-27 ~05:45 SLOW LOOP ON SILICON (p4/reports/slow-loop-silicon.md): adapter correct first try;
   copies 117/epoch (attn decays to <4096 -> 5.86 %), counters exact, frozen mode 0 writes, uniform
   policy rotates exactly (bfrt readback), fault -> vlink 0/9 top (identifiable only as a pair with
