@@ -304,6 +304,13 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
 - 08-27 ~11:20 prior-free p0 landed (hash be12e7b2). PROVENANCE: the running pilot loaded infer.py
   hash 116ffc9f with delta 1e-4 (pooled mode; p0 = pool posterior mean, prior mass negligible at
   pool scale) — record this hash with the pilot results; rerun only if numbers are for the paper.
+- 08-27 ~13:30 PILOT INTERIM (mcp 30/30 done, cusum running): paired on identical seeds/faults —
+  oracle 8 [5,9]; uniform 15 [10,22] 1/30 cens.; random 23 [16,27] 11/30; MCP (LULESH-tuned
+  pilot config: dlinucb, alpha 0, floor 0.75) 18 [14,24] 1/30 — slower than uniform in 23/30
+  seeds (median 7 epochs). Localizer clean (alarms only on the fault, at the sim-verdict epoch).
+  Mechanism: 31 RR slots sweep 1024 links in 33 epochs vs uniform's 25; the 10 learned slots
+  don't pay for the coverage they displace. => the learner must beat coverage PER SLOT; a Tier-1
+  tuning block (§3.2) and context that predicts loss visibility (load bursts, H27) are the levers.
 - 08-27 ~05:45 SLOW LOOP ON SILICON (p4/reports/slow-loop-silicon.md): adapter correct first try;
   copies 117/epoch (attn decays to <4096 -> 5.86 %), counters exact, frozen mode 0 writes, uniform
   policy rotates exactly (bfrt readback), fault -> vlink 0/9 top (identifiable only as a pair with
