@@ -359,3 +359,10 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   aligned to `pooled` (runs authoritative); COSIM-RESULTS.md marked superseded. 36 tests OK.
   NEXT: M1 replay harness (sim/gate/replay.py) — decomposition + scoped negative result, minutes of
   compute; then M2 in-band per-link evidence on silicon (needs Philip's chip sessions from ~7 Sep).
+- 08-27 M1 DONE (sim/gate/replay.py + M1-REPLAY.md): replay validated against the recorded arm
+  (every uncensored seed matches to the epoch; candidate order is agg-major, not lexicographic).
+  3 min for 6 schedules x 5 budgets x 30 seeds vs 64 min per htsim run. C1 measured: evidence 8 +
+  coverage 10 (uniform) / 16 (load-gated) / 1 (oracle) epochs. H9 gate NOT tripped: 0% of the
+  oracle gap closed at the frozen budget under single, double, triple and moving faults; the one
+  real effect is load-gating at budget 82 (22/8, p=0.016) worth 20% of the gap. Open: F0 logs for
+  the ADD-vs-false-alarm sweep. NEXT: M2 in-band per-link evidence on silicon (Philip's chip time).
