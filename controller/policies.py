@@ -11,6 +11,9 @@ elements at high attention per epoch); everything else sits at low attention.
               (sim OracleScheduler, B12) — GROUND TRUTH, flagged in the log
     mcp_stub  keeps attention as the data plane left it: choose() returns None and the
               loop writes nothing (fast loop alone = ablation A6)
+    mcp       the learned slow loop (controller/mcp_policy.py): elements = path slots,
+              cost = mirror bytes at high attention; chosen paths -> a_hi, others -> a_lo.
+              Needs the localizer state each epoch: call set_state(state, loc) before choose().
 
 `choose()` returns the full attention vector to write (attn per slot, 16-bit) or None.
 """
@@ -102,6 +105,37 @@ class OraclePolicy(Policy):
         return out[:self.budget]
 
 
+class McpLearnedPolicy(Policy):
+    """Full MCP slow loop on hardware.  The loop must call ``set_state(state, loc)`` after
+    ``infer.update``/``infer.localize`` and ``observe(loads)`` after the epoch's samples."""
+    name = "mcp"
+
+    def __init__(self, budget: int, n: int = N_SLOTS, seed: int = 1, cfg=None, **kw: int) -> None:
+        super().__init__(budget, n, **kw)
+        from controller.mcp_policy import McpConfig, McpPolicy
+        els = ["path:%d" % i for i in range(n)]
+        cfg = cfg or McpConfig()
+        # one resource: mirror bytes at high attention, unit cost per path; cap = budget paths
+        cfg.caps = {"mirror": float(self.budget)}
+        self.pol = McpPolicy(els, {e: {"mirror": 1.0} for e in els}, cfg)
+        self._state = None
+        self._loc = None
+
+    def set_state(self, state, loc) -> None:
+        self._state, self._loc = state, loc
+
+    def observe(self, loads) -> float:
+        if self._state is None:
+            return 0.0
+        return self.pol.observe(self._state, self._loc, loads)
+
+    def select(self, epoch: int) -> List[int]:
+        from controller import infer
+        st = self._state if self._state is not None else infer.InferState()
+        chosen = self.pol.choose(st, self._loc)
+        return sorted(int(e.split(":")[1]) for e in chosen)[: self.budget]
+
+
 class McpStubPolicy(Policy):
     """Placeholder for the learned slow loop: never overrides the data plane."""
     name = "mcp_stub"
@@ -153,4 +187,6 @@ def make_policy(name: str, budget: int, seed: int = 1, manifest: Optional[str] =
         return OraclePolicy(budget, load_manifest_faults(manifest), n, **kw)
     if name == "mcp_stub":
         return McpStubPolicy(budget, n, **kw)
+    if name == "mcp":
+        return McpLearnedPolicy(budget, n, seed=seed, **kw)
     raise ValueError("unknown policy %r" % name)

@@ -163,6 +163,13 @@ class EpochLoop:
         loc = self.infer.localize(self.state, self.k, self.h)
         t_infer = int((time.perf_counter() - t0) * 1e6)
 
+        # learned slow loop (policies.McpLearnedPolicy): feed it the localizer state and the
+        # epoch's per-element loads (delivered counts) before it chooses
+        if hasattr(self.policy, "set_state"):
+            self.policy.set_state(self.state, loc)
+            loads = {s.element: float(s.delivered + s.lost) for s in obs.samples}
+            self.policy.observe(loads)
+
         current = [a[0] if a else 0 for a in obs.attn]
         vec = self.policy.choose(epoch, current)
         t0 = time.perf_counter()
