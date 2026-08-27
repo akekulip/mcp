@@ -1,0 +1,6 @@
+# Slow-loop reward constants (PREREG section 7.2).
+# PLACEHOLDER VALUES -- to be fixed before evaluation (PREREG 7.2: "final constants fixed in
+# conf/mcp/reward.yaml before evaluation").  Flat key: value lines; parsed without PyYAML.
+beta: 1.0           # weight of the anomaly-evidence term      [PLACEHOLDER, fix before eval]
+kappa: 4.0          # CUSUM saturation, min(1, C_p / kappa)    [PLACEHOLDER, fix before eval]
+sigma2_floor: 1e-12 # floor inside log(sigma^2) to keep the term finite

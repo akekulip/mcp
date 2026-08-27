@@ -1,0 +1,17 @@
+# Frozen parameters of the common inference layer (PREREG section 3.3).
+# Flat key: value lines only -- parsed by controller.infer.load_frozen_config (no PyYAML).
+# Any edit to controller/infer.py requires `python3 controller/freeze.py` to refresh the hash.
+k_cusum_loss: 2.5e-4         # CUSUM slack for posterior-mean loss rate (fraction)
+k_cusum_latency_us: 10.0    # CUSUM slack for posterior-mean latency (microseconds)
+h_default: 4.0              # CUSUM threshold (dimensionless, in units of k); per-arm knob
+baseline_gamma: 0.05        # EMA rate of each element's running baseline
+baseline_warmup_epochs: 10  # per-element observed epochs before CUSUM starts
+forget_rho: 0.9             # posterior pseudo-count discount per observed epoch (~10-epoch window)
+prior_beta_alpha: 1.0       # Beta(1,1) prior on loss rate (alpha = losses)
+prior_beta_beta: 1.0
+prior_ng_mu: 0.0            # Normal-Gamma weakly informative prior on latency (us)
+prior_ng_kappa: 1e-3
+prior_ng_alpha: 1e-3
+prior_ng_beta: 1e-3
+deaggregation: uniform_prior_fractional   # path counts split evenly over links, no rounding
+module_sha256: f1957bc94bc2c11db2e1c88683152d921b856a0ee6df947d829367f0f2b2f63e
