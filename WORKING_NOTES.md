@@ -226,6 +226,8 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   claimed 100x must name the epoch (full sweep vs minimal); (iii) H7 needs F1 -> nic/ producer.
   Anomalies: 0.15-0.22 % collector-side frame drops at saturation; `shape` unit is Gb/s (fixed
   usage text). Chip idle, attn 4096, PID 26316.
+- 08-27 Philip: tau_fast = ramp back-extrapolation; tau_slow = full-sweep epoch -> PREREG amendment
+  v1.4 appended (F6 post-hoc, F1 pre-registered). Agent building nic/evidence_probe.py then H7-F1.
 
 ## Next action
 1. Vision/Hulk: check Netronome SDK, rxe, kernel, perftest, DPDK availability (M4 prep).

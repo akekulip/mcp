@@ -735,6 +735,7 @@ Every reported number is traceable to (config, seed, commit). The following are 
 | 2026-08-25 | §11 | Run counts updated for the added arms and blocks (≈ 18,400 runs) | consequence of the above |
 | 2026-08-26 | §10 (v1.2) | Gate as run: ATLAHS MoE8x8B-64 trace, 1024-NIC htsim fat tree, 100 ms epoch / one-iteration horizon, budget 4 % after 2 % was TOO HARD, faulty uplink randomized per seed, TTL_obs from first observable drop (H27), probe evidence window and transport RTO stated | see Amendment v1.2 below |
 | 2026-08-26 | §7.4 (v1.3) | In-switch attention update rule FROZEN (H22): per-path {attn, clean} SALU word, saturating exceedance bump by k_up (a_max = 65535), decay by 1 every n_clean clean samples down to a_min, probabilistic gate attn/65536 quantized to attn[15:8]/256 via a 256-row TCAM table (a gateway cannot compare two runtime fields); exceedance sources = NIC evidence (loss_q/rtt_q thresholds) and previous-hop CSIG worst_qdepth threshold; P4 source sha256 232b7355fe58c67c (p4/reports/step5.md) | see Amendment v1.3 below |
+| 2026-08-27 | §1 H7 (v1.4) | τ_fast redefined as the ramp back-extrapolation (attention rises exactly k_up per exceeding packet, so the first exceeding packet's time is recovered from the attn-vs-time ramp in the mirrored copies); τ_slow = a FULL-SWEEP epoch (read all reg_attn slots from hw + counter sync/read + write all slots). The v1.1 τ_fast ("first gated mirror after the first dropped/exceeding packet") is 0 by construction for CSIG evidence because the evidence packet is itself gated post-update. **Post-hoc for F6** (12 reps already collected under v1.1 and re-analysed); pre-registered for F1 (not yet run) | see Amendment v1.4 below |
 
 Amendments are appended only. An amendment after the corresponding block has started running
 is flagged "post-hoc" in the paper.
@@ -793,4 +794,34 @@ Open decisions (i)–(iv) of §7.4 are thereby closed: (i) signals = NIC evidenc
 CSIG queue depth (Tofino 1 has no ingress queue depth); (ii) packing = one 32-bit word, two
 16-bit halves; (iii) constants as above; (iv) ungated. Ablation A6 and hypothesis H7 are now
 defined against this rule.
+
+### Amendment v1.4 — 2026-08-27 — H7 timing definitions (Philip's decision; F6 post-hoc, F1 pre-registered)
+
+**Reason.** The first silicon run of H7 for F6 (`p4/reports/h7-timing-F6.md`, 12 reps) showed the
+v1.1 definition of $\tau_{fast}$ to be degenerate on the implemented pipeline: the ingress order is
+`tbl_exceed_csig → tbl_attn → tbl_gate`, so the packet carrying threshold-exceedance evidence is
+gated under the attention its own evidence just raised — evidence and reaction are the same packet
+and $t_{react} - t_{evid} \le 0$ in 12/12 reps.
+
+**Definitions from v1.4 on.**
+
+- $\tau_{fast}$ **(ramp back-extrapolation).** Attention on a path rises by exactly `k_up` per
+  exceeding packet (§7.4), so `mirror_h.attn` in the switch-timestamped mirrored copies is a
+  counter of exceeding packets. Fit the attn-vs-`tstamp` ramp on the faulty path between the first
+  copy with `attn > A0` and saturation; $t_{evid}$ is the back-extrapolated time at which the ramp
+  crosses $A_0$ (the first exceeding packet); $t_{react}$ is the first copy with `attn > A0`;
+  $\tau_{fast} = t_{react} - t_{evid}$. All timestamps are the switch's `ingress_mac_tstamp`
+  (no host-clock calibration). For F1 the first dropped packet's fault-mirror timestamp (sid 3)
+  is reported alongside as a check.
+- $\tau_{slow}$ **(full-sweep epoch).** From the switch's own control plane: read every
+  `reg_attn` slot from hardware (all pipes) + `SyncCounters` and read of `tbl_vlink`/`tbl_fail`
+  + the decision + write every `reg_attn` slot, timed end to end. The minimal single-slot
+  read/write latency is reported as a secondary figure but is not the H7 comparator.
+- Success criterion, reps, specificity and the sign test are unchanged from v1.1.
+
+**Status.** F6: supported under v1.4 — median $\tau_{fast}$ 97.4 µs (BCa 95 % CI 67.9–215.1 µs),
+$\tau_{slow}$ 88.8 ms (86.4–92.1), paired ratio median 907 (452–1143), sign test 12/12
+($p = 2.4\times10^{-4}$), specificity 0/13 healthy path-instances reacted. **Post-hoc**: these 12
+reps were collected before this amendment. F1: pending the NIC evidence producer (`nic/`), to be
+run under v1.4.
 
