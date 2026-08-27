@@ -1,0 +1,114 @@
+moe8x8b_n16,oracle,seed1000,fault=US55->CS15,onset_epoch=3,first_drop_epoch=16,ttl_epochs=13,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58628 s,wall_s=3903.32 maxrss_kb=21469472
+moe8x8b_n16,oracle,seed1001,fault=US63->CS39,onset_epoch=5,first_drop_epoch=8,ttl_epochs=3,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.59031 s,wall_s=3825.86 maxrss_kb=21472612
+moe8x8b_n16,oracle,seed1002,fault=US45->CS61,onset_epoch=3,first_drop_epoch=15,ttl_epochs=12,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58473 s,wall_s=3946.75 maxrss_kb=21468600
+moe8x8b_n16,oracle,seed1003,fault=US29->CS29,onset_epoch=4,first_drop_epoch=8,ttl_epochs=4,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58861 s,wall_s=3904.43 maxrss_kb=21472160
+moe8x8b_n16,oracle,seed1004,fault=US75->CS27,onset_epoch=4,first_drop_epoch=15,ttl_epochs=11,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58367 s,wall_s=3880.03 maxrss_kb=21469096
+moe8x8b_n16,oracle,seed1005,fault=US107->CS43,onset_epoch=4,first_drop_epoch=10,ttl_epochs=6,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58521 s,wall_s=3972.12 maxrss_kb=21471364
+moe8x8b_n16,oracle,seed1006,fault=US88->CS32,onset_epoch=4,first_drop_epoch=16,ttl_epochs=12,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58593 s,wall_s=3885.71 maxrss_kb=21470992
+moe8x8b_n16,oracle,seed1007,fault=US4->CS44,onset_epoch=7,first_drop_epoch=16,ttl_epochs=9,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58556 s,wall_s=3889.96 maxrss_kb=21469976
+moe8x8b_n16,oracle,seed1008,fault=US109->CS45,onset_epoch=5,first_drop_epoch=10,ttl_epochs=5,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58501 s,wall_s=3871.98 maxrss_kb=21472328
+moe8x8b_n16,oracle,seed1009,fault=US44->CS52,onset_epoch=8,first_drop_epoch=16,ttl_epochs=8,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58795 s,wall_s=3855.69 maxrss_kb=21471848
+moe8x8b_n16,oracle,seed1010,fault=US1->CS17,onset_epoch=5,first_drop_epoch=14,ttl_epochs=9,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58826 s,wall_s=3888.02 maxrss_kb=21153284
+moe8x8b_n16,oracle,seed1011,fault=US95->CS23,onset_epoch=6,first_drop_epoch=15,ttl_epochs=9,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58664 s,wall_s=3857.70 maxrss_kb=21189256
+moe8x8b_n16,oracle,seed1012,fault=US93->CS5,onset_epoch=6,first_drop_epoch=14,ttl_epochs=8,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58886 s,wall_s=3847.54 maxrss_kb=21456836
+moe8x8b_n16,oracle,seed1013,fault=US64->CS32,onset_epoch=8,first_drop_epoch=11,ttl_epochs=3,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58688 s,wall_s=3884.14 maxrss_kb=21458360
+moe8x8b_n16,oracle,seed1014,fault=US77->CS29,onset_epoch=6,first_drop_epoch=15,ttl_epochs=9,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58926 s,wall_s=3873.84 maxrss_kb=21413616
+moe8x8b_n16,oracle,seed1015,fault=US64->CS8,onset_epoch=3,first_drop_epoch=11,ttl_epochs=8,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58747 s,wall_s=3859.60 maxrss_kb=21459216
+moe8x8b_n16,oracle,seed1016,fault=US88->CS40,onset_epoch=8,first_drop_epoch=16,ttl_epochs=8,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58783 s,wall_s=3871.31 maxrss_kb=21456168
+moe8x8b_n16,oracle,seed1017,fault=US117->CS5,onset_epoch=5,first_drop_epoch=16,ttl_epochs=11,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58808 s,wall_s=3911.15 maxrss_kb=21455432
+moe8x8b_n16,oracle,seed1018,fault=US88->CS24,onset_epoch=4,first_drop_epoch=8,ttl_epochs=4,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58624 s,wall_s=3863.24 maxrss_kb=21456008
+moe8x8b_n16,oracle,seed1019,fault=US101->CS29,onset_epoch=8,first_drop_epoch=9,ttl_epochs=1,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58575 s,wall_s=3846.00 maxrss_kb=21457612
+moe8x8b_n16,oracle,seed1020,fault=US78->CS6,onset_epoch=7,first_drop_epoch=15,ttl_epochs=8,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58412 s,wall_s=3302.36 maxrss_kb=21472508
+moe8x8b_n16,oracle,seed1021,fault=US89->CS49,onset_epoch=6,first_drop_epoch=15,ttl_epochs=9,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58693 s,wall_s=3413.50 maxrss_kb=21470948
+moe8x8b_n16,oracle,seed1022,fault=US17->CS57,onset_epoch=8,first_drop_epoch=13,ttl_epochs=5,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58901 s,wall_s=3225.27 maxrss_kb=21471436
+moe8x8b_n16,oracle,seed1023,fault=US75->CS35,onset_epoch=7,first_drop_epoch=15,ttl_epochs=8,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58927 s,wall_s=3395.40 maxrss_kb=21471568
+moe8x8b_n16,oracle,seed1024,fault=US42->CS18,onset_epoch=8,first_drop_epoch=15,ttl_epochs=7,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58889 s,wall_s=3416.44 maxrss_kb=21469836
+moe8x8b_n16,oracle,seed1025,fault=US43->CS51,onset_epoch=4,first_drop_epoch=15,ttl_epochs=11,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58597 s,wall_s=3490.18 maxrss_kb=21470072
+moe8x8b_n16,oracle,seed1026,fault=US4->CS44,onset_epoch=6,first_drop_epoch=16,ttl_epochs=10,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.5842 s,wall_s=3381.83 maxrss_kb=21471520
+moe8x8b_n16,oracle,seed1027,fault=US69->CS61,onset_epoch=7,first_drop_epoch=11,ttl_epochs=4,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58578 s,wall_s=3376.20 maxrss_kb=21471948
+moe8x8b_n16,oracle,seed1028,fault=US44->CS44,onset_epoch=6,first_drop_epoch=15,ttl_epochs=9,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58507 s,wall_s=3382.53 maxrss_kb=21471964
+moe8x8b_n16,oracle,seed1029,fault=US119->CS15,onset_epoch=8,first_drop_epoch=16,ttl_epochs=8,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58909 s,wall_s=3231.22 maxrss_kb=21472228
+moe8x8b_n16,random,seed1000,fault=US55->CS15,onset_epoch=3,first_drop_epoch=16,ttl_epochs=16,censored=0,ttl_obs=3,censored_obs=0,horizon=35,finish=3.58628 s,wall_s=3909.78 maxrss_kb=21471808
+moe8x8b_n16,random,seed1001,fault=US63->CS39,onset_epoch=5,first_drop_epoch=8,ttl_epochs=27,censored=0,ttl_obs=24,censored_obs=0,horizon=35,finish=3.59031 s,wall_s=3876.03 maxrss_kb=21471328
+moe8x8b_n16,random,seed1002,fault=US45->CS61,onset_epoch=3,first_drop_epoch=15,ttl_epochs=15,censored=0,ttl_obs=3,censored_obs=0,horizon=35,finish=3.58473 s,wall_s=3897.97 maxrss_kb=21472524
+moe8x8b_n16,random,seed1003,fault=US29->CS29,onset_epoch=4,first_drop_epoch=8,ttl_epochs=16,censored=0,ttl_obs=12,censored_obs=0,horizon=35,finish=3.58861 s,wall_s=3898.98 maxrss_kb=21471380
+moe8x8b_n16,random,seed1004,fault=US75->CS27,onset_epoch=4,first_drop_epoch=15,ttl_epochs=17,censored=0,ttl_obs=6,censored_obs=0,horizon=35,finish=3.58367 s,wall_s=3921.72 maxrss_kb=21472608
+moe8x8b_n16,random,seed1005,fault=US107->CS43,onset_epoch=4,first_drop_epoch=10,ttl_epochs=31,censored=1,ttl_obs=25,censored_obs=1,horizon=35,finish=3.58521 s,wall_s=3953.81 maxrss_kb=21471560
+moe8x8b_n16,random,seed1006,fault=US88->CS32,onset_epoch=4,first_drop_epoch=16,ttl_epochs=19,censored=0,ttl_obs=7,censored_obs=0,horizon=35,finish=3.58593 s,wall_s=3891.03 maxrss_kb=21470292
+moe8x8b_n16,random,seed1007,fault=US4->CS44,onset_epoch=7,first_drop_epoch=16,ttl_epochs=24,censored=0,ttl_obs=15,censored_obs=0,horizon=35,finish=3.58556 s,wall_s=3898.57 maxrss_kb=21470612
+moe8x8b_n16,random,seed1008,fault=US109->CS45,onset_epoch=5,first_drop_epoch=10,ttl_epochs=26,censored=0,ttl_obs=21,censored_obs=0,horizon=35,finish=3.58501 s,wall_s=3883.73 maxrss_kb=21472024
+moe8x8b_n16,random,seed1009,fault=US44->CS52,onset_epoch=8,first_drop_epoch=16,ttl_epochs=27,censored=1,ttl_obs=19,censored_obs=1,horizon=35,finish=3.58795 s,wall_s=4004.81 maxrss_kb=21469260
+moe8x8b_n16,random,seed1010,fault=US1->CS17,onset_epoch=5,first_drop_epoch=14,ttl_epochs=11,censored=0,ttl_obs=2,censored_obs=0,horizon=35,finish=3.58826 s,wall_s=3895.52 maxrss_kb=21471224
+moe8x8b_n16,random,seed1011,fault=US95->CS23,onset_epoch=6,first_drop_epoch=15,ttl_epochs=15,censored=0,ttl_obs=6,censored_obs=0,horizon=35,finish=3.58664 s,wall_s=3901.61 maxrss_kb=21471296
+moe8x8b_n16,random,seed1012,fault=US93->CS5,onset_epoch=6,first_drop_epoch=14,ttl_epochs=23,censored=0,ttl_obs=15,censored_obs=0,horizon=35,finish=3.58886 s,wall_s=3892.79 maxrss_kb=21471612
+moe8x8b_n16,random,seed1013,fault=US64->CS32,onset_epoch=8,first_drop_epoch=11,ttl_epochs=27,censored=1,ttl_obs=24,censored_obs=1,horizon=35,finish=3.58688 s,wall_s=3854.08 maxrss_kb=21471164
+moe8x8b_n16,random,seed1014,fault=US77->CS29,onset_epoch=6,first_drop_epoch=15,ttl_epochs=16,censored=0,ttl_obs=7,censored_obs=0,horizon=35,finish=3.58926 s,wall_s=3860.76 maxrss_kb=21472424
+moe8x8b_n16,random,seed1015,fault=US64->CS8,onset_epoch=3,first_drop_epoch=11,ttl_epochs=15,censored=0,ttl_obs=7,censored_obs=0,horizon=35,finish=3.58747 s,wall_s=3994.72 maxrss_kb=21472440
+moe8x8b_n16,random,seed1016,fault=US88->CS40,onset_epoch=8,first_drop_epoch=16,ttl_epochs=8,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58783 s,wall_s=3865.48 maxrss_kb=21472448
+moe8x8b_n16,random,seed1017,fault=US117->CS5,onset_epoch=5,first_drop_epoch=16,ttl_epochs=30,censored=1,ttl_obs=19,censored_obs=1,horizon=35,finish=3.58808 s,wall_s=3832.27 maxrss_kb=21471892
+moe8x8b_n16,random,seed1018,fault=US88->CS24,onset_epoch=4,first_drop_epoch=8,ttl_epochs=31,censored=1,ttl_obs=27,censored_obs=1,horizon=35,finish=3.58624 s,wall_s=3854.87 maxrss_kb=21471284
+moe8x8b_n16,random,seed1019,fault=US101->CS29,onset_epoch=8,first_drop_epoch=9,ttl_epochs=27,censored=1,ttl_obs=26,censored_obs=1,horizon=35,finish=3.58575 s,wall_s=3839.07 maxrss_kb=21471072
+moe8x8b_n16,random,seed1020,fault=US78->CS6,onset_epoch=7,first_drop_epoch=15,ttl_epochs=28,censored=1,ttl_obs=20,censored_obs=1,horizon=35,finish=3.58412 s,wall_s=3309.37 maxrss_kb=21471564
+moe8x8b_n16,random,seed1021,fault=US89->CS49,onset_epoch=6,first_drop_epoch=15,ttl_epochs=15,censored=0,ttl_obs=6,censored_obs=0,horizon=35,finish=3.58693 s,wall_s=3325.89 maxrss_kb=21469728
+moe8x8b_n16,random,seed1022,fault=US17->CS57,onset_epoch=8,first_drop_epoch=13,ttl_epochs=27,censored=1,ttl_obs=22,censored_obs=1,horizon=35,finish=3.58901 s,wall_s=3398.37 maxrss_kb=21470464
+moe8x8b_n16,random,seed1023,fault=US75->CS35,onset_epoch=7,first_drop_epoch=15,ttl_epochs=18,censored=0,ttl_obs=10,censored_obs=0,horizon=35,finish=3.58927 s,wall_s=3389.39 maxrss_kb=21472112
+moe8x8b_n16,random,seed1024,fault=US42->CS18,onset_epoch=8,first_drop_epoch=15,ttl_epochs=17,censored=0,ttl_obs=10,censored_obs=0,horizon=35,finish=3.58889 s,wall_s=3462.44 maxrss_kb=21471848
+moe8x8b_n16,random,seed1025,fault=US43->CS51,onset_epoch=4,first_drop_epoch=15,ttl_epochs=23,censored=0,ttl_obs=12,censored_obs=0,horizon=35,finish=3.58597 s,wall_s=3487.31 maxrss_kb=21471252
+moe8x8b_n16,random,seed1026,fault=US4->CS44,onset_epoch=6,first_drop_epoch=16,ttl_epochs=17,censored=0,ttl_obs=7,censored_obs=0,horizon=35,finish=3.5842 s,wall_s=3401.03 maxrss_kb=21472496
+moe8x8b_n16,random,seed1027,fault=US69->CS61,onset_epoch=7,first_drop_epoch=11,ttl_epochs=28,censored=1,ttl_obs=24,censored_obs=1,horizon=35,finish=3.58578 s,wall_s=3306.11 maxrss_kb=21471780
+moe8x8b_n16,random,seed1028,fault=US44->CS44,onset_epoch=6,first_drop_epoch=15,ttl_epochs=29,censored=1,ttl_obs=20,censored_obs=1,horizon=35,finish=3.58507 s,wall_s=3254.95 maxrss_kb=21471536
+moe8x8b_n16,random,seed1029,fault=US119->CS15,onset_epoch=8,first_drop_epoch=16,ttl_epochs=27,censored=1,ttl_obs=19,censored_obs=1,horizon=35,finish=3.58909 s,wall_s=3420.80 maxrss_kb=21472520
+moe8x8b_n16,uniform,seed1000,fault=US55->CS15,onset_epoch=3,first_drop_epoch=16,ttl_epochs=32,censored=1,ttl_obs=19,censored_obs=1,horizon=35,finish=3.58628 s,wall_s=3867.60 maxrss_kb=21471384
+moe8x8b_n16,uniform,seed1001,fault=US63->CS39,onset_epoch=5,first_drop_epoch=8,ttl_epochs=8,censored=0,ttl_obs=5,censored_obs=0,horizon=35,finish=3.59031 s,wall_s=3904.41 maxrss_kb=21472140
+moe8x8b_n16,uniform,seed1002,fault=US45->CS61,onset_epoch=3,first_drop_epoch=15,ttl_epochs=31,censored=0,ttl_obs=19,censored_obs=0,horizon=35,finish=3.58473 s,wall_s=3865.14 maxrss_kb=21473312
+moe8x8b_n16,uniform,seed1003,fault=US29->CS29,onset_epoch=4,first_drop_epoch=8,ttl_epochs=27,censored=0,ttl_obs=23,censored_obs=0,horizon=35,finish=3.58861 s,wall_s=3861.99 maxrss_kb=21470072
+moe8x8b_n16,uniform,seed1004,fault=US75->CS27,onset_epoch=4,first_drop_epoch=15,ttl_epochs=11,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58367 s,wall_s=3844.27 maxrss_kb=21471872
+moe8x8b_n16,uniform,seed1005,fault=US107->CS43,onset_epoch=4,first_drop_epoch=10,ttl_epochs=18,censored=0,ttl_obs=12,censored_obs=0,horizon=35,finish=3.58521 s,wall_s=3948.73 maxrss_kb=21471120
+moe8x8b_n16,uniform,seed1006,fault=US88->CS32,onset_epoch=4,first_drop_epoch=16,ttl_epochs=14,censored=0,ttl_obs=2,censored_obs=0,horizon=35,finish=3.58593 s,wall_s=3877.99 maxrss_kb=21470896
+moe8x8b_n16,uniform,seed1007,fault=US4->CS44,onset_epoch=7,first_drop_epoch=16,ttl_epochs=19,censored=0,ttl_obs=10,censored_obs=0,horizon=35,finish=3.58556 s,wall_s=3951.86 maxrss_kb=21471992
+moe8x8b_n16,uniform,seed1008,fault=US109->CS45,onset_epoch=5,first_drop_epoch=10,ttl_epochs=17,censored=0,ttl_obs=12,censored_obs=0,horizon=35,finish=3.58501 s,wall_s=3905.48 maxrss_kb=21471776
+moe8x8b_n16,uniform,seed1009,fault=US44->CS52,onset_epoch=8,first_drop_epoch=16,ttl_epochs=26,censored=0,ttl_obs=18,censored_obs=0,horizon=35,finish=3.58795 s,wall_s=3898.34 maxrss_kb=21468772
+moe8x8b_n16,uniform,seed1010,fault=US1->CS17,onset_epoch=5,first_drop_epoch=14,ttl_epochs=21,censored=0,ttl_obs=12,censored_obs=0,horizon=35,finish=3.58826 s,wall_s=3835.80 maxrss_kb=21472468
+moe8x8b_n16,uniform,seed1011,fault=US95->CS23,onset_epoch=6,first_drop_epoch=15,ttl_epochs=13,censored=0,ttl_obs=4,censored_obs=0,horizon=35,finish=3.58664 s,wall_s=3914.62 maxrss_kb=21472092
+moe8x8b_n16,uniform,seed1012,fault=US93->CS5,onset_epoch=6,first_drop_epoch=14,ttl_epochs=13,censored=0,ttl_obs=5,censored_obs=0,horizon=35,finish=3.58886 s,wall_s=3911.79 maxrss_kb=21469912
+moe8x8b_n16,uniform,seed1013,fault=US64->CS32,onset_epoch=8,first_drop_epoch=11,ttl_epochs=5,censored=0,ttl_obs=2,censored_obs=0,horizon=35,finish=3.58688 s,wall_s=3881.75 maxrss_kb=21472020
+moe8x8b_n16,uniform,seed1014,fault=US77->CS29,onset_epoch=6,first_drop_epoch=15,ttl_epochs=10,censored=0,ttl_obs=1,censored_obs=0,horizon=35,finish=3.58926 s,wall_s=3894.28 maxrss_kb=21471620
+moe8x8b_n16,uniform,seed1015,fault=US64->CS8,onset_epoch=3,first_drop_epoch=11,ttl_epochs=10,censored=0,ttl_obs=2,censored_obs=0,horizon=35,finish=3.58747 s,wall_s=3891.69 maxrss_kb=21470428
+moe8x8b_n16,uniform,seed1016,fault=US88->CS40,onset_epoch=8,first_drop_epoch=16,ttl_epochs=10,censored=0,ttl_obs=2,censored_obs=0,horizon=35,finish=3.58783 s,wall_s=3951.41 maxrss_kb=21473364
+moe8x8b_n16,uniform,seed1017,fault=US117->CS5,onset_epoch=5,first_drop_epoch=16,ttl_epochs=18,censored=0,ttl_obs=7,censored_obs=0,horizon=35,finish=3.58808 s,wall_s=3934.33 maxrss_kb=21472268
+moe8x8b_n16,uniform,seed1018,fault=US88->CS24,onset_epoch=4,first_drop_epoch=8,ttl_epochs=14,censored=0,ttl_obs=10,censored_obs=0,horizon=35,finish=3.58624 s,wall_s=3910.67 maxrss_kb=21472176
+moe8x8b_n16,uniform,seed1019,fault=US101->CS29,onset_epoch=8,first_drop_epoch=9,ttl_epochs=12,censored=0,ttl_obs=11,censored_obs=0,horizon=35,finish=3.58575 s,wall_s=3940.10 maxrss_kb=21470324
+moe8x8b_n16,uniform,seed1020,fault=US78->CS6,onset_epoch=7,first_drop_epoch=15,ttl_epochs=9,censored=0,ttl_obs=1,censored_obs=0,horizon=35,finish=3.58412 s,wall_s=3434.39 maxrss_kb=21473504
+moe8x8b_n16,uniform,seed1021,fault=US89->CS49,onset_epoch=6,first_drop_epoch=15,ttl_epochs=12,censored=0,ttl_obs=3,censored_obs=0,horizon=35,finish=3.58693 s,wall_s=3272.28 maxrss_kb=21471956
+moe8x8b_n16,uniform,seed1022,fault=US17->CS57,onset_epoch=8,first_drop_epoch=13,ttl_epochs=21,censored=0,ttl_obs=16,censored_obs=0,horizon=35,finish=3.58901 s,wall_s=3412.91 maxrss_kb=21471808
+moe8x8b_n16,uniform,seed1023,fault=US75->CS35,onset_epoch=7,first_drop_epoch=15,ttl_epochs=8,censored=0,ttl_obs=0,censored_obs=0,horizon=35,finish=3.58927 s,wall_s=3276.84 maxrss_kb=21471768
+moe8x8b_n16,uniform,seed1024,fault=US42->CS18,onset_epoch=8,first_drop_epoch=15,ttl_epochs=26,censored=0,ttl_obs=19,censored_obs=0,horizon=35,finish=3.58889 s,wall_s=3419.38 maxrss_kb=21471332
+moe8x8b_n16,uniform,seed1025,fault=US43->CS51,onset_epoch=4,first_drop_epoch=15,ttl_epochs=30,censored=0,ttl_obs=19,censored_obs=0,horizon=35,finish=3.58597 s,wall_s=3490.53 maxrss_kb=21471900
+moe8x8b_n16,uniform,seed1026,fault=US4->CS44,onset_epoch=6,first_drop_epoch=16,ttl_epochs=20,censored=0,ttl_obs=10,censored_obs=0,horizon=35,finish=3.5842 s,wall_s=3377.22 maxrss_kb=21472332
+moe8x8b_n16,uniform,seed1027,fault=US69->CS61,onset_epoch=7,first_drop_epoch=11,ttl_epochs=7,censored=0,ttl_obs=3,censored_obs=0,horizon=35,finish=3.58578 s,wall_s=3324.08 maxrss_kb=21472852
+moe8x8b_n16,uniform,seed1028,fault=US44->CS44,onset_epoch=6,first_drop_epoch=15,ttl_epochs=28,censored=0,ttl_obs=19,censored_obs=0,horizon=35,finish=3.58507 s,wall_s=3349.17 maxrss_kb=21472516
+moe8x8b_n16,uniform,seed1029,fault=US119->CS15,onset_epoch=8,first_drop_epoch=16,ttl_epochs=16,censored=0,ttl_obs=8,censored_obs=0,horizon=35,finish=3.58909 s,wall_s=3343.07 maxrss_kb=21471900
+
+### TTL from onset
+| trace | policy | n | median TTL (epochs) | IQR | censored | CV(log TTL, uncens.) |
+|---|---|---|---|---|---|---|
+| moe8x8b_n16 | oracle | 30 | 8 | [5, 9] | 0% | 0.28 |
+  KM moe8x8b_n16/oracle: t=1:S=0.97(n=30,d=1), t=3:S=0.90(n=29,d=2), t=4:S=0.80(n=27,d=3), t=5:S=0.73(n=24,d=2), t=6:S=0.70(n=22,d=1), t=7:S=0.67(n=21,d=1), t=8:S=0.43(n=20,d=7), t=9:S=0.23(n=13,d=6), t=10:S=0.20(n=7,d=1), t=11:S=0.10(n=6,d=3), t=12:S=0.03(n=3,d=2), t=13:S=0.00(n=1,d=1)
+| moe8x8b_n16 | random | 30 | 23 | [16, 27] | 37% | 0.10 |
+  KM moe8x8b_n16/random: t=8:S=0.97(n=30,d=1), t=11:S=0.93(n=29,d=1), t=15:S=0.80(n=28,d=4), t=16:S=0.70(n=24,d=3), t=17:S=0.60(n=21,d=3), t=18:S=0.57(n=18,d=1), t=19:S=0.53(n=17,d=1), t=23:S=0.47(n=16,d=2), t=24:S=0.43(n=14,d=1), t=26:S=0.40(n=13,d=1), t=27:S=0.37(n=12,d=1)
+| moe8x8b_n16 | uniform | 30 | 15 | [10, 22] | 3% | 0.18 |
+  KM moe8x8b_n16/uniform: t=5:S=0.97(n=30,d=1), t=7:S=0.93(n=29,d=1), t=8:S=0.87(n=28,d=2), t=9:S=0.83(n=26,d=1), t=10:S=0.73(n=25,d=3), t=11:S=0.70(n=22,d=1), t=12:S=0.63(n=21,d=2), t=13:S=0.57(n=19,d=2), t=14:S=0.50(n=17,d=2), t=16:S=0.47(n=15,d=1), t=17:S=0.43(n=14,d=1), t=18:S=0.37(n=13,d=2), t=19:S=0.33(n=11,d=1), t=20:S=0.30(n=10,d=1), t=21:S=0.23(n=9,d=2), t=26:S=0.17(n=7,d=2), t=27:S=0.13(n=5,d=1), t=28:S=0.10(n=4,d=1), t=30:S=0.07(n=3,d=1), t=31:S=0.03(n=2,d=1)
+rho(uniform,random) log-TTL [moe8x8b_n16]: 0.052 on n=18 seeds uncensored in both
+PREREG verdict [moe8x8b_n16] (from onset): OK (uniform median TTL >= 5 epochs)
+
+### TTL from first observable drop (TTL_obs)
+| trace | policy | n | median TTL (epochs) | IQR | censored | CV(log TTL, uncens.) |
+|---|---|---|---|---|---|---|
+| moe8x8b_n16 | oracle | 30 | 0 | [0, 0] | 0% | nan |
+  KM moe8x8b_n16/oracle: t=0:S=0.00(n=30,d=30)
+| moe8x8b_n16 | random | 30 | 14 | [7, 21] | 37% | 0.32 |
+  KM moe8x8b_n16/random: t=0:S=0.97(n=30,d=1), t=2:S=0.93(n=29,d=1), t=3:S=0.87(n=28,d=2), t=6:S=0.77(n=26,d=3), t=7:S=0.63(n=23,d=4), t=10:S=0.57(n=19,d=2), t=12:S=0.50(n=17,d=2), t=15:S=0.43(n=15,d=2), t=21:S=0.38(n=8,d=1), t=24:S=0.32(n=6,d=1)
+| moe8x8b_n16 | uniform | 30 | 9 | [2, 16] | 3% | 0.51 |
+  KM moe8x8b_n16/uniform: t=0:S=0.93(n=30,d=2), t=1:S=0.87(n=28,d=2), t=2:S=0.73(n=26,d=4), t=3:S=0.67(n=22,d=2), t=4:S=0.63(n=20,d=1), t=5:S=0.57(n=19,d=2), t=7:S=0.53(n=17,d=1), t=8:S=0.50(n=16,d=1), t=10:S=0.40(n=15,d=3), t=11:S=0.37(n=12,d=1), t=12:S=0.27(n=11,d=3), t=16:S=0.23(n=8,d=1), t=18:S=0.20(n=7,d=1), t=19:S=0.07(n=6,d=4), t=23:S=0.00(n=1,d=1)
+rho(uniform,random) log-TTL [moe8x8b_n16]: 0.057 on n=15 seeds uncensored in both
+PREREG verdict [moe8x8b_n16] (from first observable drop (TTL_obs)): OK (uniform median TTL >= 5 epochs)

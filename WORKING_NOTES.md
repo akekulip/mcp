@@ -284,6 +284,12 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
 - 08-27 ~07:30 `-mcp_bg_loss <p>` added to the hook (sim/htsim 4a9ad8b): F0 background loss on all
   uplinks, per-link RNG, fault spec overrides its link (verified: 34/128 uplinks dropped at 1e-4).
   Multi-fault already works (repeatable -mcp_loss). run_cosim/run_tuning need a BG_LOSS knob.
+- 08-27 ~09:30 V1.2 GATE DONE 90/90 (0 stalls, 29 distinct faulty links): oracle 8, uniform 15
+  [10,22] 3 % cens., random 23 [16,27] 37 % cens.; TTL_obs 0 / 9 / 14; CV(log TTL) uniform 0.18
+  (onset) / 0.51 (obs); rho(uniform,random) 0.05. Verdict OK; operating point FROZEN in PREREG
+  §14 (4 %, 1e-4, 100 ms, MoE-64, random uplink, onset U[0.3,0.9] s). Summary:
+  sim/gate/results_real_v12_summary.txt. Tier-1 next: MCP + baselines at this point via co-sim
+  (1 h/run; 15 concurrent on Vision+Hulk).
 - 08-27 ~05:45 SLOW LOOP ON SILICON (p4/reports/slow-loop-silicon.md): adapter correct first try;
   copies 117/epoch (attn decays to <4096 -> 5.86 %), counters exact, frozen mode 0 writes, uniform
   policy rotates exactly (bfrt readback), fault -> vlink 0/9 top (identifiable only as a pair with
