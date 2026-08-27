@@ -264,6 +264,11 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   and the CUSUM explodes (~2000/epoch). Builder making zero-count samples no-ops. Hardware loop
   now has --policy mcp (McpLearnedPolicy, ed81082/0b59db6). Pending: zero-count fix -> rerun
   run_cosim.sh; slow-loop silicon report; v1.2 gate.
+- 08-27 ~05:30 zero-count fix landed (af5e858) but alarms still 46/55: third source = prior mass
+  on light probes (500 clean packets -> Beta mean 2e-3 -> stat 6.96 > h). Fix in progress:
+  loss CUSUM increment = binomial LLR (x log(p1/p0) + (n-x) log((1-p1)/(1-p0)), delta_loss 1e-3,
+  h 5 nats) — count-aware, clean probes give negative increments. Lesson for §3.3: "CUSUM on the
+  posterior mean" is the wrong statistic for counts; PREREG text to be amended when frozen.
 
 ## Next action
 1. Vision/Hulk: check Netronome SDK, rxe, kernel, perftest, DPDK availability (M4 prep).
