@@ -237,9 +237,12 @@ class TestPooledBaseline(unittest.TestCase):
         self.assertEqual(state.get("vlink:new").cusum, 0.0)
         self.assertEqual(dict(loc.ranked)["vlink:new"], 0.0)
 
-    def test_default_mode_is_per_element_and_bad_mode_rejected(self):
-        self.assertEqual(infer.load_frozen_config()["baseline_mode"], "per_element")
-        self.assertEqual(infer.BASELINE_MODE, "per_element")
+    def test_frozen_mode_matches_the_runs_and_bad_mode_rejected(self):
+        # PREREG v1.5 §7: every run passes `pooled`, so the frozen file records `pooled`
+        # (the runs are authoritative). Both modes stay supported; anything else is rejected.
+        frozen = infer.load_frozen_config()["baseline_mode"]
+        self.assertEqual(frozen, "pooled")
+        self.assertEqual(infer.BASELINE_MODE, frozen)
         with self.assertRaises(ValueError):
             infer.update(InferState(), [], {}, baseline_mode="global")
 

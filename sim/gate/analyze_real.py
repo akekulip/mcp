@@ -27,6 +27,39 @@ def first_drop_epoch(counters_path: Path, link: str):
     return None
 
 
+def read_run_localizer(csv_path: Path, onset_us: float, epoch_us: float):
+    """TTL from the FROZEN localizer (PREREG §3.3), not the simulator's ratio rule.
+
+    Reads ``<seed>.bridge.csv`` (controller/sim_bridge.py: epoch, anomaly, top, ...) and
+    ``<seed>.fault`` (the injected link).  Localized = anomaly bit set AND the top-ranked
+    element is the faulty link.  Returns (ttl, censored, horizon, onset_epoch) or None when
+    the run has no bridge log (open-loop arms; replay is needed — see the M1 harness).
+    """
+    bridge = csv_path.with_suffix(".bridge.csv")
+    fault_file = csv_path.with_suffix(".fault")
+    if not bridge.exists() or not fault_file.exists():
+        return None
+    want = "vlink:" + fault_file.read_text().strip()
+    onset_epoch = int(onset_us // epoch_us)
+    horizon = 0
+    with open(bridge) as f:
+        for row in csv.DictReader(f):
+            e = int(row["epoch"])
+            horizon = e
+            if e >= onset_epoch and row["anomaly"] == "1" and row["top"] == want:
+                return e - onset_epoch, False, horizon, onset_epoch
+    return max(horizon - onset_epoch, 0), True, horizon, onset_epoch
+
+
+def km_median(times, censored):
+    """Median read off the Kaplan-Meier curve (PREREG §2.1), not the raw median."""
+    tab = km_table(times, censored)
+    for t, _n, _d, s in tab:
+        if s <= 0.5:
+            return float(t)
+    return float("nan")
+
+
 def read_run(csv_path: Path, onset_us: float, epoch_us: float, onset_epoch=None):
     if onset_epoch is None:
         onset_epoch = int(onset_us // epoch_us)
@@ -86,16 +119,22 @@ def main():
     ap.add_argument("results", nargs="?", default=str(Path(__file__).resolve().parent / "results_real"))
     ap.add_argument("--epoch-us", type=float, default=100000.0)
     ap.add_argument("--km", action="store_true", help="print Kaplan–Meier tables")
+    ap.add_argument("--detector", choices=("ratio", "localizer", "both"), default="both",
+                    help="ratio = the simulator's own verdict column (mcp.cpp argmax drop/tx); "
+                         "localizer = the frozen controller/infer.py verdict from <seed>.bridge.csv "
+                         "(PREREG §3.3). Arms with no bridge log are reported as ratio-only.")
     a = ap.parse_args()
     root = Path(a.results)
     if not root.is_dir():
         sys.exit(f"no results dir {root}")
 
-    per = {}  # (trace, policy) -> {seed: (ttl, censored)}   TTL from onset
+    per = {}  # (trace, policy) -> {seed: (ttl, censored)}   TTL from onset, ratio rule
     per_obs = {}  # same, TTL from the first observable drop (needs counters + .fault)
+    per_loc = {}  # same, TTL from the FROZEN localizer (PREREG §3.3); arms with a bridge log only
     for trace_dir in sorted(p for p in root.iterdir() if p.is_dir()):
         for pol_dir in sorted(p for p in trace_dir.iterdir() if p.is_dir()):
-            for f in sorted(p for p in pol_dir.glob("seed*.csv") if not p.name.endswith(".counters.csv")):
+            for f in sorted(p for p in pol_dir.glob("seed*.csv")
+                            if not p.name.endswith((".counters.csv", ".bridge.csv"))):
                 onset_file = f.with_suffix(".onset")
                 onset_us = float(onset_file.read_text().strip()) * 1000.0 if onset_file.exists() else 0.0
                 ttl, cens, hor, oe = read_run(f, onset_us, a.epoch_us)
@@ -112,17 +151,29 @@ def main():
                 wall = tim.read_text().strip() if tim.exists() else ""
                 per.setdefault((trace_dir.name, pol_dir.name), {})[f.stem] = (ttl, cens)
                 per_obs.setdefault((trace_dir.name, pol_dir.name), {})[f.stem] = (ttl_obs, cens_obs)
+                loc = read_run_localizer(f, onset_us, a.epoch_us)
+                if loc is not None:
+                    per_loc.setdefault((trace_dir.name, pol_dir.name), {})[f.stem] = (loc[0], loc[1])
                 print(f"{trace_dir.name},{pol_dir.name},{f.stem},fault={link},onset_epoch={oe},first_drop_epoch={fde},"
                       f"ttl_epochs={ttl},censored={int(cens)},ttl_obs={ttl_obs},censored_obs={int(cens_obs)},"
                       f"horizon={hor},finish={fin_s},{wall}")
 
-    for label, per_x in (("from onset", per), ("from first observable drop (TTL_obs)", per_obs)):
+    tables = []
+    if a.detector in ("ratio", "both"):
+        tables += [("from onset [detector: simulator ratio rule]", per),
+                   ("from first observable drop (TTL_obs) [detector: simulator ratio rule]", per_obs)]
+    if a.detector in ("localizer", "both") and per_loc:
+        tables += [("from onset [detector: FROZEN localizer, PREREG §3.3]", per_loc)]
+    elif a.detector == "localizer":
+        print("\nNo bridge logs found: the frozen localizer's verdict is only recorded for arms driven "
+              "through controller/sim_bridge.py. Open-loop arms need offline replay (M1 harness).")
+    for label, per_x in tables:
         summarize(per_x, label, a)
 
 
 def summarize(per, label, a):
-    print(f"\n### TTL {label}\n| trace | policy | n | median TTL (epochs) | IQR | censored | CV(log TTL, uncens.) |")
-    print("|---|---|---|---|---|---|---|")
+    print(f"\n### TTL {label}\n| trace | policy | n | KM median | raw median | IQR | censored | CV(log TTL, uncens.) |")
+    print("|---|---|---|---|---|---|---|---|")
     rows = {}
     for (trace, pol), d in sorted(per.items()):
         ts = [t for t, _ in d.values()]
@@ -132,8 +183,9 @@ def summarize(per, label, a):
               if len(unc) >= 2 and statistics.mean([math.log(t) for t in unc]) != 0 else float("nan"))
         lo, hi = iqr(ts)
         cens_frac = sum(cs) / len(cs)
-        rows[(trace, pol)] = (statistics.median(ts), cens_frac)
-        print(f"| {trace} | {pol} | {len(ts)} | {statistics.median(ts):.0f} | [{lo:.0f}, {hi:.0f}] | "
+        kmm = km_median(ts, cs)
+        rows[(trace, pol)] = (kmm if kmm == kmm else statistics.median(ts), cens_frac)
+        print(f"| {trace} | {pol} | {len(ts)} | {kmm:.1f} | {statistics.median(ts):.1f} | [{lo:.0f}, {hi:.0f}] | "
               f"{cens_frac:.0%} | {cv:.2f} |")
         if a.km:
             print(f"  KM {trace}/{pol}: " + ", ".join(f"t={t}:S={s:.2f}(n={n},d={dd})" for t, n, dd, s in km_table(ts, cs)))

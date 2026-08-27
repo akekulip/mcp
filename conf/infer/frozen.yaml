@@ -8,7 +8,7 @@ h_default: 6.5              # CUSUM threshold (nats for loss, units of k for lat
 alarm_min_observations: 1   # observations an element needs before it may raise the alarm
 baseline_gamma: 0.05        # EMA rate of each element's running baseline
 baseline_warmup_epochs: 10  # observed epochs (per element, or of the pool in pooled mode) before CUSUM starts
-baseline_mode: per_element  # per_element | pooled (fabric-wide pooled posterior-mean baseline)
+baseline_mode: pooled       # per_element | pooled — every run passes pooled (PREREG v1.5 §7); the runs are authoritative
 forget_rho: 0.9             # posterior pseudo-count discount per observed epoch (~10-epoch window)
 prior_beta_alpha: 1.0       # Beta(1,1) prior on loss rate (alpha = losses)
 prior_beta_beta: 1.0

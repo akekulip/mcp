@@ -1,5 +1,10 @@
 # Co-simulation results on the rehearsal trace (LULESH-8, 128-node fat tree) — 2026-08-27
 
+> **SUPERSEDED (PREREG v1.5 §7, 2026-08-27).** These runs used localizer hash `116ffc9f` with
+> `delta_loss = 1e-3`, neither reproducible from HEAD (current frozen hash `be12e7b2`, `delta_loss = 1e-4`),
+> and TTL here comes from the simulator's ratio rule, not the frozen localizer. Kept for the record;
+> not cited in the paper. See `results_tier1_cosim_summary.md` for the re-issued Tier-1 table.
+
 Setup: htsim `-mcp_policy extern:` ↔ `controller/sim_bridge.py`; frozen localizer
 `controller/infer.py` (hash `116ffc9f…`: upper-sided binomial-LLR loss CUSUM, pooled baseline,
 zero-count probes = no information, h = 6.5 nats); one uplink drawn per seed with 1e-3 silent

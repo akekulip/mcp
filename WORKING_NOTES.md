@@ -348,3 +348,14 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
 - sim/: spcl/HTSIM built; UEC oblivious spraying + GOAL chain verified (incast, LULESH). Llama-7B >10 min/seed (H18).
 - Running: builder → htsim gate hooks (sim/htsim branch mcp-hooks, sim/gate/); p4-dataplane-engineer → p4/mcp_fabric.p4 steps 1–4 compiled locally.
 - OPEN for Philip (from P4 design §12): which host is on dp9 (map says Vision, testbed.md says Hulk); is dp65 still the Agilio leg; fabric shape 2 leaves×4 spines (recommended) vs 4×2; docker group for SDE-container check; bf_switchd restart window (defense4_caseA loaded).
+- 08-27 PANEL (25 agents, docs/review/): unanimous PIVOT. Verified myself: (a) counters.csv are
+  byte-identical across all 5 arms x 30 seeds (120/120) -> the Tier-1 measurement policy never
+  perturbs the fabric and offline replay is EXACT; (b) every published TTL used the simulator's
+  ratio rule, not the frozen localizer -> re-issued: MCP KM 19.0 vs uniform-schedule 20.0, paired
+  11/19, p=0.20 (was 7/23, p=0.005). No arm meets H1 under either detector.
+  M0 DONE: analyze_real.py --detector {ratio,localizer,both} + KM medians; PREREG v1.5 (detector
+  provenance, one budget currency, replay soundness, retirements H1/H3/H5/H7-F1/the 18.4k matrix,
+  new H8 coverage-gap attainment / H9 no-counter-schedule / H7' restated); frozen.yaml baseline_mode
+  aligned to `pooled` (runs authoritative); COSIM-RESULTS.md marked superseded. 36 tests OK.
+  NEXT: M1 replay harness (sim/gate/replay.py) — decomposition + scoped negative result, minutes of
+  compute; then M2 in-band per-link evidence on silicon (needs Philip's chip sessions from ~7 Sep).

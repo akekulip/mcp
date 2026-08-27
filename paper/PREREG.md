@@ -741,6 +741,7 @@ Every reported number is traceable to (config, seed, commit). The following are 
 | 2026-08-27 | §10 → §14 operating point FROZEN (v1.2 gate, 90/90 runs) | MoE8x8B-64 on the 1024-NIC fat tree, 100 ms epochs, one-iteration horizon (36 epochs), budget 4 % (41/1024), F1 = 1e-4 silent loss on a per-seed random agg→core uplink, onset U[0.3, 0.9] s, seeds 1000–1029. Results: oracle TTL 8 [5, 9] (TTL_obs 0), uniform 15 [10, 22] 3 % censored (TTL_obs 9 [2, 16]), random 23 [16, 27] 37 % censored (TTL_obs 14 [7, 21]); §6.5 inputs: CV(log TTL) uniform 0.18 (onset) / 0.51 (obs), ρ(uniform, random) = 0.05 (n = 18 / 15). Verdict OK under both TTL definitions; this point is the Tier-1 default until the tuning block | sim/gate/results_real_v12_summary.txt; runs at 62 min / 21.5 GB each |
 | 2026-08-27 | §3.3 localizer constants (pre-freeze) | Loss change detector = upper-sided binomial-LLR CUSUM; `delta_loss` (minimum detectable shift) set to the frozen F1 rate 1e-4 (a larger delta makes the LLR drift negative at the fault rate and the fault can never alarm; measured on the Tier-1 pilot); h = 6.5 nats; pooled baseline. Consequence: a single observed drop (4.6 nats) cannot alarm — ≥ 2 drops in a probe window are required, which busy Tier-1 links provide (~3 expected per 30k-packet epoch). The LULESH-128 rehearsal (COSIM-RESULTS.md) was run at delta 1e-3 and is not comparable | pre-tuning, not yet frozen |
 | 2026-08-27 | Tier-1 PILOT at the frozen §14 point (NOT the pre-registered main block; 30 seeds paired with the gate arms) | cusum (localizer suspects + round-robin) ≡ uniform per seed (15 [10, 22]); MCP with the LULESH-tuned configuration (dlinucb, α 0, coverage floor 0.75; no Tier-1 tuning) 18 [14, 24], slower than uniform in 23/30 seeds (sign test p = 0.005); oracle 8. H1 (≥ 30 % lower median TTL than the best baseline) is NOT met by this configuration. Reading: with one stationary silent-loss fault, time-to-localize is decided by the first probe of the faulty link after onset; a learner must beat coverage per probe slot. The §3.2 Tier-1 tuning block has not been run (≈ 64 configs × 5 seeds × 1 h). Localizer provenance: infer.py 116ffc9f with delta_loss 1e-4, pooled | sim/gate/results_tier1_cosim_summary.md; reported, not suppressed |
+| 2026-08-27 | v1.5 — detector provenance, budget currency, retirements, replacement hypotheses H8/H9 (panel review, docs/review/) | Every published TTL was computed by the simulator's ratio rule (`mcp.cpp:133-152`), not the frozen localizer §3.3 names; re-issued under the pre-registered detector (MCP 19.0 KM vs cusum/uniform-schedule 20.0, paired 11/19, p = 0.20 — the arms are indistinguishable and no arm meets H1). Medians now read off the KM curve (§2.1). One budget currency. H1, H3, H5, H7-for-F1 and the 18,400-run matrix retired on the record; H8/H9 added | see Amendment v1.5 below |
 
 Amendments are appended only. An amendment after the corresponding block has started running
 is flagged "post-hoc" in the paper.
@@ -829,4 +830,82 @@ $\tau_{slow}$ 88.8 ms (86.4–92.1), paired ratio median 907 (452–1143), sign 
 ($p = 2.4\times10^{-4}$), specificity 0/13 healthy path-instances reacted. **Post-hoc**: these 12
 reps were collected before this amendment. F1: pending the NIC evidence producer (`nic/`), to be
 run under v1.4.
+
+### Amendment v1.5 — 2026-08-27 — detector provenance, budget currency, retirements, replacement hypotheses
+
+Following an eight-reviewer panel with a literature sweep and an adversarial pass
+(`docs/review/PANEL-REPORT.md`, `PLAN.md`, `EDITOR-NOTES.md`, `LITERATURE.md`), the following
+are amended **before** any further data collection.
+
+**1. Detector provenance (defect, corrected).** §3.3 requires one frozen localizer for every arm.
+That held for what the *policies* consumed and failed for what the *metric* used: `analyze_real.py`
+read the simulator's `correct` column, written by an argmax(drop/tx) ratio rule in
+`sim/htsim/htsim/sim/mcp.cpp:133-152`. `analyze_real.py` now computes TTL from the frozen
+localizer's own verdict (`--detector localizer`, from `<seed>.bridge.csv`), and reports the ratio
+rule beside it. Re-issued pilot (`sim/gate/results_tier1_cosim_summary.md`, 30 paired seeds):
+
+| arm | ratio rule (as published) | frozen localizer (§3.3) |
+|---|---|---|
+| MCP | KM 19.0, 1/30 censored | **KM 19.0, 2/30** |
+| cusum (≡ uniform schedule) | KM 16.0, 1/30 | **KM 20.0, 6/30** |
+| paired MCP vs uniform schedule | 7 faster / 23 slower, p = 0.005 | **11 / 19, p = 0.20** |
+
+The correct statement is that the arms are **statistically indistinguishable** and **no arm meets
+H1**; the earlier "MCP is significantly slower" was an artifact of the wrong detector. Open-loop
+arms (uniform, random, oracle) have no localizer verdict recorded and require offline replay.
+
+**2. Medians.** All medians are now read off the Kaplan–Meier curve as §2.1 requires; the raw
+median is reported beside it (they differ by up to 1 epoch here).
+
+**3. Budget currency.** The tested budget is **one** unit: $\beta_{probe} + \beta_{tag}$ in bytes
+over fabric capacity (§2.3). SRAM KB, MAU stages, mirror/collector bytes and control-plane reads/s
+are reported beside every arm as side constraints. "4 % = 41 of 1024 uplinks" (v1.2) is retired as a
+*budget*: link count is not one of the §2.3 units. Arms that inject no packets report zero.
+
+**4. Replay soundness (new finding, verified).** The per-link counter logs are byte-identical
+across all five arms for every seed (120/120 arm-seed pairs). At Tier-1 the measurement policy does
+not perturb the fabric: $\beta_{probe} = \beta_{tag} = 0$ for every budgeted arm, H6 (CCT overhead)
+is untestable for probe-free arms at Tier-1, and **offline replay of any read schedule against the
+recorded counters is exact**, not an approximation. The 18,400-run matrix therefore existed largely
+to regenerate a trace that is identical for every arm.
+
+**5. Retired on the record** (reported as outcomes, per §0's "outcomes (a)–(d) are reported, not
+suppressed"):
+- **H1 as stated** — not met by any arm under either detector at the frozen point; the operating
+  point is evidence- and coverage-bound (§0 outcome (a) applies).
+- **H3** — the shadow price is provably pinned at zero in htsim (usage ≤ cap is enforced before the
+  dual step) and there is no multi-resource wiring on the hardware path: no valid test exists on
+  either tier.
+- **H5** (already descriptive) and the **18,400-run matrix** (§11), superseded by replay + one
+  measured figure.
+- **H7 for F1** — structural: silent loss has no in-band evidence in the built system, so its "fast
+  loop" is a host timer (10.115 ms, ratio 8.8). H7 stands **only** for the congestion class, and
+  the run labelled F6 was a TM max-rate shaper, i.e. §5.2's **F5 congestion hotspot** — the
+  supported result is relabelled accordingly.
+- From the **contribution set**: "attention", "bandit", "shadow prices", the CSIG-style tag and the
+  NIC evidence producer. They remain in the artifact and the appendix, not in the claims.
+
+**6. Replacement hypotheses.** The H1–H7 namespace is full; these are **H8** and **H9** (the
+HURDLES file's H-numbers are a separate namespace):
+- **H8 (coverage-gap attainment).** Detection delay decomposes into evidence time plus coverage
+  time. A link-local in-band invariant (per-link sequence gap, or an RFC 9341 alternate-marking
+  counter diff) removes the coverage term: median TTL_obs ≤ 1 epoch and packets-on-the-faulty-link
+  to localization within a factor 2 of the $1/p$ information floor, at $p \in \{10^{-4}, 10^{-3},
+  5\times10^{-3}, 1.5\times10^{-2}\}$, with false-localization rate below the fault event rate.
+  *Fails if* the false-gap rate at F0 exceeds the fault event rate, or the invariant needs more than
+  the §8 stage/SRAM budget.
+- **H9 (no counter-computable schedule closes the gap).** Over the recorded per-link counters, no
+  schedule computable from those counters (uniform, load-gated, threshold-gated, greedy-information,
+  LinUCB, Thompson/random) reaches within 30 % of the oracle's delay, across a five-point budget
+  sweep and under single, multiple and moving faults. *Fails if* any such schedule closes ≥ 30 % of
+  the oracle gap with paired p < 0.05 — in which case the allocation thesis is revived and H1 reopens.
+- **H7′ (reaction, restated).** The in-switch gate's reaction is one pipeline pass; the reported
+  metrics are ADD versus pre-change duty cycle at a fixed false-alarm rate, with $\tau_{slow}$
+  reported for **both** the minimal single-slot controller path (2.20 ms) and the full-sweep epoch
+  (88.8 ms). The v1.4 ratio is retained only with both denominators stated.
+
+**7. Hygiene.** `conf/infer/frozen.yaml` records `baseline_mode: per_element` while every run passes
+`pooled`; the runs' mode is authoritative and the file is corrected. The LULESH rehearsal
+(`sim/gate/COSIM-RESULTS.md`) was produced with localizer hash `116ffc9f` and `delta_loss = 1e-3`,
+neither reproducible from HEAD: those results are marked **superseded** and are not cited in the paper.
 
