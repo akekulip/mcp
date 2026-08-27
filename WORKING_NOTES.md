@@ -244,6 +244,14 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   PREREG §14. Defect: evidence-packet copies had path_id 0 -> P4 emits md.mir_path (MAU copy of
   attn_idx) now. NOTE for the paper: "fast where the data plane can see, host-bound where it
   cannot" is the honest H7 story.
+- 08-27 ~03:45 CONTROLLER LANDED (5a1892f) + CO-SIM BRIDGE: htsim `-mcp_policy extern:obs:act`
+  (sim/htsim ef6d591) <-> controller/sim_bridge.py; extern-uniform reproduces C++ uniform
+  IDENTICALLY (LULESH-128 seed 1). cusum arm (MCP v0 = localizer suspects + round-robin explore):
+  budget 32 -> anomaly at epoch 49, locks on US0->CS0; budget 4 -> blind (per-element 10-obs
+  warm-up needs 320 epochs). Builder adding baseline_mode=pooled. PREREG §14 row for the
+  candidate localizer constants (not frozen yet). Remaining MCP pieces: shadow-price budgeted
+  bandit (H3) + context vector (H4) on top of the bridge; the hardware epoch loop is code-complete
+  but untested on silicon.
 
 ## Next action
 1. Vision/Hulk: check Netronome SDK, rxe, kernel, perftest, DPDK availability (M4 prep).
