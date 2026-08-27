@@ -269,6 +269,12 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   loss CUSUM increment = binomial LLR (x log(p1/p0) + (n-x) log((1-p1)/(1-p0)), delta_loss 1e-3,
   h 5 nats) — count-aware, clean probes give negative increments. Lesson for §3.3: "CUSUM on the
   posterior mean" is the wrong statistic for counts; PREREG text to be amended when frozen.
+- 08-27 ~05:45 SLOW LOOP ON SILICON (p4/reports/slow-loop-silicon.md): adapter correct first try;
+  copies 117/epoch (attn decays to <4096 -> 5.86 %), counters exact, frozen mode 0 writes, uniform
+  policy rotates exactly (bfrt readback), fault -> vlink 0/9 top (identifiable only as a pair with
+  one host). tau_slow 96.2 ms observe / 116.6 ms with writes -> epoch default 200 ms. No-fault
+  false alarms 90/100 before af5e858, 0/100 after. GRPC_ADDR localhost-only: copies captured on
+  Vision and replayed on the switch.
 
 ## Next action
 1. Vision/Hulk: check Netronome SDK, rxe, kernel, perftest, DPDK availability (M4 prep).

@@ -241,7 +241,7 @@ class EpochLoop:
 # ----------------------------------------------------------------------------- cli
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--epoch-ms", type=int, default=100)
+    ap.add_argument("--epoch-ms", type=int, default=200)
     ap.add_argument("--epochs", type=int, default=None, help="stop after N epochs (default: run forever)")
     ap.add_argument("--out", default="epoch_log.csv")
     ap.add_argument("--policy", choices=("uniform", "random", "oracle", "mcp_stub", "mcp"), default="mcp_stub")

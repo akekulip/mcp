@@ -72,3 +72,14 @@ the register; everything else moves per packet.
    (`controller/epoch_loop.py`).
 4. Latency inflation (§7.4 L1/L2) and black-hole-with-reroute (§7.5, ActionSelector group edit)
    are implemented in the control plane but not yet exercised on silicon.
+5. **Slow-loop cadence on this SDE (measured, `p4/reports/slow-loop-silicon.md`):** observe = 94.7 ms
+   (bfrt counter sync + full `reg_attn` read + Python decode; independent of traffic load),
+   write of 256 slots = 20.5 ms, inference 0.4 ms → τ_slow 96–117 ms. A 100 ms epoch cannot be
+   held when the controller writes; the hardware default is now 200 ms. Levers: write only changed
+   slots, drop the counter sync when copies alone suffice, or move the collector so copies and bfrt
+   run on one host (`GRPC_ADDR` is localhost-only today).
+6. **Identifiability with one source leaf:** all evidence is path-level and a path is (uplink,
+   downlink); with a single host the two links of a path get identical de-aggregated evidence, so
+   `vlink:0` and `vlink:9` track each other within 1 %. Separating them needs traffic from a second
+   leaf (Hulk) or link-level probes.
+
