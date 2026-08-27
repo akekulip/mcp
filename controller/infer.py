@@ -21,10 +21,14 @@ Pipeline per epoch (:func:`update`):
    are discounted toward the prior by the frozen factor ``forget_rho`` (an exponential
    forgetting window of ``1/(1-rho)`` epochs), so the posterior tracks the *recent* state and
    the CUSUM below sees a change rather than a 1/n-diluted average.
-3. **Change detection.** A CUSUM per element on the posterior-mean loss (upper-sided only:
-   an increase in loss is the only loss anomaly) and a two-sided CUSUM on the posterior-mean
-   latency against the element's own running baseline (an exponential moving
-   average of the posterior mean).  For the element's first ``baseline_warmup_epochs``
+3. **Change detection.** Loss: an upper-sided Page/binomial log-likelihood-ratio CUSUM per
+   element on this epoch's counts (``n`` trials, ``x`` losses) against the baseline rate
+   ``p0`` (the element's own running baseline of the posterior mean, or the pooled rate,
+   floored at ``p_floor``) for a shift to ``p1 = p0 + delta_loss``:
+   ``S+ <- max(0, S+ + x*log(p1/p0) + (n-x)*log((1-p1)/(1-p0)))`` (nats).  A clean probe of
+   any size gives a negative increment, so light clean probes never alarm.  Latency: a
+   two-sided CUSUM on the posterior-mean latency against its running baseline (an
+   exponential moving average of the posterior mean).  For the element's first ``baseline_warmup_epochs``
    observed epochs the baseline simply follows the posterior mean and no CUSUM increment is
    taken, so that the decay of the prior pseudo-counts is not read as a change.
    ``baseline_mode: pooled`` replaces the per-element baseline with the fabric-wide pooled
@@ -32,10 +36,9 @@ Pipeline per epoch (:func:`update`):
    forgetting, one pool update per epoch); warm-up then counts pool updates, not per-element
    observations, so a sparsely probed outlier is compared against its peers at its first
    observation.  Per-element posteriors are unchanged in both modes.
-   Increments are normalised by the slack ``k`` so that the statistic is dimensionless and
-   the single threshold ``h`` is shared between loss and latency:
-   ``S+ <- max(0, S+ + (x - b)/k - 1)``, ``S- <- max(0, S- + (b - x)/k - 1)`` (latency only;
-   ``S-`` of loss is identically 0).
+   Latency increments are normalised by the slack ``k``:
+   ``S+ <- max(0, S+ + (x - b)/k - 1)``, ``S- <- max(0, S- + (b - x)/k - 1)``
+   (``S-`` of loss is identically 0).
 4. **Ranking** (:func:`localize`): elements ordered by CUSUM statistic (max of loss and
    latency, max of the two sides), ties broken by posterior-mean loss then element id; the
    anomaly bit is 1 iff some element with at least ``alarm_min_observations`` observations
@@ -94,9 +97,10 @@ try:
 except OSError:  # config absent (e.g. first freeze) -> code defaults below
     _FROZEN = {}
 
-K_CUSUM_LOSS = _cfg_float(_FROZEN, "k_cusum_loss", 5e-4)
+DELTA_LOSS = _cfg_float(_FROZEN, "delta_loss", 1e-3)
+P_FLOOR = _cfg_float(_FROZEN, "p_floor", 1e-6)
 K_CUSUM_LATENCY_US = _cfg_float(_FROZEN, "k_cusum_latency_us", 20.0)
-H_DEFAULT = _cfg_float(_FROZEN, "h_default", 4.0)
+H_DEFAULT = _cfg_float(_FROZEN, "h_default", 6.5)
 BASELINE_GAMMA = _cfg_float(_FROZEN, "baseline_gamma", 0.05)
 FORGET_RHO = _cfg_float(_FROZEN, "forget_rho", 0.9)
 BASELINE_WARMUP = int(_cfg_float(_FROZEN, "baseline_warmup_epochs", 10))
@@ -210,8 +214,8 @@ def _deaggregate(samples: Iterable[Sample], path_to_links: Dict[str, List[str]]
     for s in samples:
         _accumulate(acc, lats, t_max, s.element, float(s.delivered), float(s.lost),
                     s.latency_us, s.t_us)
-        links = path_to_links.get(s.element)
-        if links:
+        links = [l for l in path_to_links.get(s.element, ()) if l != s.element]
+        if links:  # never re-attribute a sample to its own element (identity map guard)
             n = float(len(links))
             link_lats = [x / n for x in s.latency_us]
             for link in links:
@@ -219,12 +223,21 @@ def _deaggregate(samples: Iterable[Sample], path_to_links: Dict[str, List[str]]
     return acc, lats, t_max
 
 
-def _track(pos: float, neg: float, x: float, base: Optional[float], n_obs: int, k: float,
-           gamma: float, pooled: bool = False, two_sided: bool = True
-           ) -> Tuple[float, float, float]:
-    """One CUSUM + baseline step; returns (S+, S-, new baseline).
+def _loss_llr_step(pos: float, n: float, x: float, base: Optional[float], n_obs: int,
+                   x_mean: float, gamma: float, pooled: bool) -> Tuple[float, float]:
+    """Upper-sided binomial LLR CUSUM step on counts; returns (S+, new baseline)."""
+    if base is None or n_obs < BASELINE_WARMUP:
+        return 0.0, (base if pooled and base is not None else x_mean)
+    p0 = min(max(base, P_FLOOR), 1.0 - 2.0 * DELTA_LOSS)
+    p1 = p0 + DELTA_LOSS
+    inc = x * math.log(p1 / p0) + (n - x) * math.log((1.0 - p1) / (1.0 - p0))
+    new_base = base if pooled else (1.0 - gamma) * base + gamma * x_mean
+    return max(0.0, pos + inc), new_base
 
-    ``two_sided=False`` keeps only the upper side (``S-`` returned as 0).
+
+def _track(pos: float, neg: float, x: float, base: Optional[float], n_obs: int, k: float,
+           gamma: float, pooled: bool = False) -> Tuple[float, float, float]:
+    """One two-sided latency CUSUM + baseline step; returns (S+, S-, new baseline).
 
     During the first ``BASELINE_WARMUP`` observations the baseline follows ``x`` and the
     CUSUM stays at zero.  In pooled mode ``base``/``n_obs`` are the pool's and the returned
@@ -234,8 +247,7 @@ def _track(pos: float, neg: float, x: float, base: Optional[float], n_obs: int, 
         return 0.0, 0.0, (base if pooled and base is not None else x)
     z = (x - base) / k
     new_base = base if pooled else (1.0 - gamma) * base + gamma * x
-    neg_new = max(0.0, neg - z - 1.0) if two_sided else 0.0
-    return max(0.0, pos + z - 1.0), neg_new, new_base
+    return max(0.0, pos + z - 1.0), max(0.0, neg - z - 1.0), new_base
 
 
 def _forget(x: float, prior: float, rho: float) -> float:
@@ -283,8 +295,8 @@ def _update_element(st: ElementState, delivered: float, lost: float, lats: Seque
     if delivered + lost > 0.0:
         b_loss, n_loss = ((pool.loss_mean, pool.n_obs_loss) if pooled
                           else (st.base_loss, st.n_obs_loss))
-        clp, cln, base_loss = _track(clp, cln, new.loss_mean, b_loss, n_loss, K_CUSUM_LOSS,
-                                     gamma, pooled, two_sided=False)
+        clp, base_loss = _loss_llr_step(clp, delivered + lost, lost, b_loss, n_loss,
+                                        new.loss_mean, gamma, pooled)
     base_lat, cap, can = st.base_lat, st.cusum_lat_pos, st.cusum_lat_neg
     if n:
         b_lat, n_lat = (pool.latency_mean, pool.n_obs_lat) if pooled else (st.base_lat, st.n_obs_lat)

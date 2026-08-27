@@ -117,7 +117,7 @@ class TestCommonInference(unittest.TestCase):
 
 # --- sparse-probe reproduction (co-sim finding: budget 4 of 128 links per epoch) ---------------
 SPARSE_LINKS = ["vlink:%d" % i for i in range(128)]
-SPARSE_PATHS = {l: [l] for l in SPARSE_LINKS}  # direct link probes, no de-aggregation needed
+SPARSE_PATHS: Dict[str, List[str]] = {}  # direct link probes, no de-aggregation
 SPARSE_FAULTY = "vlink:48"  # round-robin budget 4 -> probed at epochs 12, 44 (both >= warm-up)
 
 
@@ -221,6 +221,21 @@ class TestPooledBaseline(unittest.TestCase):
             # de-aggregated path sample with zero counts is dropped too
             z = infer.update(InferState(), [Sample("path:0", 0, 0, (), 1)], PATH_TO_LINKS)
             self.assertEqual(z.elements, {})
+
+    def test_light_clean_probe_after_pooled_warmup_never_alarms(self):
+        """Pooled warm-up on clean 50000-packet links, then one clean 500-packet probe of a
+        new link: anomaly False and that link's statistic exactly 0 (LLR of a clean probe < 0)."""
+        state = InferState()
+        for e in range(infer.BASELINE_WARMUP + 5):
+            samples = [Sample(SPARSE_LINKS[(4 * e + j) % 64], 50000, 0, (50.0,), e) for j in range(4)]
+            state = infer.update(state, samples, SPARSE_PATHS, baseline_mode="pooled")
+        self.assertGreaterEqual(state.pool.n_obs_loss, infer.BASELINE_WARMUP)
+        state = infer.update(state, [Sample("vlink:new", 500, 0, (50.0,), 99)], SPARSE_PATHS,
+                             baseline_mode="pooled")
+        loc = infer.localize(state, 1, infer.H_DEFAULT)
+        self.assertFalse(loc.anomaly)
+        self.assertEqual(state.get("vlink:new").cusum, 0.0)
+        self.assertEqual(dict(loc.ranked)["vlink:new"], 0.0)
 
     def test_default_mode_is_per_element_and_bad_mode_rejected(self):
         self.assertEqual(infer.load_frozen_config()["baseline_mode"], "per_element")
