@@ -244,7 +244,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--epoch-ms", type=int, default=100)
     ap.add_argument("--epochs", type=int, default=None, help="stop after N epochs (default: run forever)")
     ap.add_argument("--out", default="epoch_log.csv")
-    ap.add_argument("--policy", choices=("uniform", "random", "oracle", "mcp_stub"), default="mcp_stub")
+    ap.add_argument("--policy", choices=("uniform", "random", "oracle", "mcp_stub", "mcp"), default="mcp_stub")
     ap.add_argument("--budget", type=int, default=16, help="elements at high attention per epoch (sim -mcp_budget)")
     ap.add_argument("--a-hi", type=int, default=policies.A_HI_DEFAULT)
     ap.add_argument("--a-lo", type=int, default=policies.A_LO_DEFAULT)
