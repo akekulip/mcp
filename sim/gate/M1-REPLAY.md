@@ -248,6 +248,44 @@ rsync -a --include="*.counters.csv" --include="*.onset" --include="*.fault" --ex
 ./replay.py --results <dir> --budgets 41 --schedules uniform,confirm,inband --no-fault --h 6.5
 ```
 
+## C9 — fault and background loss together: the pre-registered hard case
+
+12 seeds with a genuine 2x fault on a 1e-4 background (`sim/htsim` `3cf9a15` composes the two
+instead of overwriting; verified in the data — the faulty link measures 1.3–2.0x the uplink
+median, not the 0.72x that exposed the earlier injector bug, H32). Frozen h = 6.5, budget 41.
+
+| arm | KM median TTL | censored | wrong-link alarms /100 epochs | clean-background comparison |
+|---|---|---|---|---|
+| oracle | **20.0** | 0/12 | 0 | was 9.0 |
+| in-band (B = n) | **20.0** | 0/12 | 7.4 | was 9.0 |
+| in-band sync/4 | 25.0 | 5/12 | 8.3 | was 10.0 |
+| confirm | 30.0 | 7/12 | 0 | was 18.0 |
+| thompson | 31.0 | 6/12 | 0 | was 19.0 |
+| uniform | >32 | **8/12** | 0 | was 18.0 |
+| threshold-gated | >32 | **10/12** | 0 | was 20.0 |
+
+**Coexistence roughly doubles the oracle's delay and pushes the budgeted arms past the horizon.**
+Evidence time falls (5.0 epochs, against 8.0 on a clean fabric, because a 2e-4 link drops sooner)
+but coverage time rises sharply: 18 epochs even for an oracle that reads the faulty link every
+single epoch. The ordering survives — unbudgeted per-link evidence ties the oracle and the
+budgeted arms trail — but the margins are much tighter and the majority of uniform's runs never
+localize at all within a 36-epoch horizon.
+
+**A prediction I made and got wrong, by about 9x.** Before the data landed I predicted detection in
+"roughly two reads of the faulty link after onset", reasoning that a read carries ~150k packets and
+so ~30 drops against ~15 for a healthy link, i.e. +5.8 nats per read against a 6.5-nat threshold.
+The arithmetic was right and the premise was wrong: an arm that reads a link *every epoch* gets one
+epoch of traffic per read (~5k packets on a busy link), so roughly one expected drop against half
+of one — a tiny per-read increment, and the CUSUM needs ~18 of them. Reads are only large when
+they are *infrequent*, because the counter is cumulative. The same property that makes the coverage
+lemma bind (§C2) makes a high-cadence arm's individual reads weak, and I had been applying the
+low-cadence arithmetic to the high-cadence arm.
+
+**In-band's false alarms return here**: 7.4 per 100 epochs at h = 6.5, against 0 for every budgeted
+arm, for the C6 reason — 25x more link-epochs observed under fabric-wide background loss. At its own
+false-alarm-free operating point the comparison would need re-running; on 12 seeds that is not yet
+worth reporting.
+
 ## C7 — the forgetting confound: real in principle, inert in fact
 
 The localizer's forgetting factor is applied per *observation*, not per epoch, so at rho = 0.9 an
