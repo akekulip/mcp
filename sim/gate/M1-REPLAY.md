@@ -217,9 +217,22 @@ figure (0/20 → 13.9 % upper bound) is arithmetically fine and answers a differ
 the one pre-registered. Reaching < 6/hour with zero events needs **1800 s ≈ 0.5 h aggregate**,
 i.e. about 500 seeds of this trace or a proportionally longer horizon.
 
-**The thresholds were selected on the same data they are evaluated on.** Each arm's operating
-point is the lowest h giving 0/20 here, which is calibration, not evaluation. They must be frozen
-on a calibration split and re-measured on held-out controls.
+**Threshold selection is now split, and it generalises.** Choosing each arm's operating point as
+the lowest h giving 0/20 on the same 20 seeds was calibration dressed as evaluation, so the 20
+background-loss seeds are split into a **calibration half (2000–2009)** and a **held-out half
+(2010–2019)**. Calibration alone picks exactly the same thresholds — h = 6.5 for every budgeted
+arm, 8.0 for in-band sync/4, 10.0 for in-band — and at those frozen values the held-out half
+gives **0 alarms for every arm**:
+
+| half | uniform | threshold-gated | confirm | thompson | in-band sync/4 (h=8) | in-band (h=10) |
+|---|---|---|---|---|---|---|
+| calibration 2000–2009 (selection) | 0/10 | 0/10 | 0/10 | 0/10 | 0/10 | 0/10 |
+| **held out 2010–2019 (evaluation)** | **0/10** | **0/10** | **0/10** | **0/10** | **0/10** | **0/10** |
+
+So the operating points are not artefacts of the set they were chosen on. What the split cannot
+fix is exposure: the held-out half is 10 seeds = **36 s**, and zero events over 36 s is a 95 %
+upper bound of **300 alarms/hour** on its own. Generalisation is shown; the pre-registered rate is
+still far out of reach without orders of magnitude more no-fault time.
 
 **The two cohorts do not share a background regime.** The controls run at b = 1e-4 while the
 fault traces have b = 0, so this pairs specificity-under-background with
