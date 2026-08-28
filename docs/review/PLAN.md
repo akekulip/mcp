@@ -63,8 +63,18 @@ by the scheduler unless a separate theory gate proves more.
 
 ### Still open
 
-- W4 model/PTF semantics: initialization, reset, wrap, duplicates, allowed reorder, consecutive
-  loss, multi-queue traffic, stale headers, and exact gap counting.
+- **DONE 2026-08-28 — W4 model/PTF semantics** (`p4/ptf/PTF-MODEL.md`): 13 asserted tests plus one
+  diagnostic, all passing on the SDE 9.13.1 model against the variant `gen_variants.py` emits.
+  Covers initialization, reset/re-seed, modulo wrap, duplicates, reorder, consecutive loss, exact
+  gap counting (`act_attn_exceed` fires exactly once per nonzero `md.wit_gap`), per-link
+  independence, and three end-to-end cases: upstream stamping, the `(port, qid) → vlink` map
+  driving both the stamped id and the sequence space, and a post-stamp wire loss reported as one
+  gap. It also found and fixed a real defect — bf-p4c folds a const-entry/const-default table into
+  a gateway that SKIPS the table on a miss, so the arming default action never ran.
+  Still open within it: two simultaneously live queues on one port (the model's `egress_qid` does
+  not reliably follow the TM qid, so this is a silicon check), an in-pipeline post-TM drop via
+  `mcp_fabric_w4_egdrop.p4` (compiles, not yet exercised), stale/forged witness headers, and
+  re-measurement of every placement on 9.13.2.
 - W4 silicon validation and correct directed-link report path.
 - The old `QUIET -> SUSPECT -> ZOOM -> COOLDOWN` hard cap is planned but not implemented.
 - No quarantine, evidence lease, counterfactual audit, probation, restoration, or audit scheduler
@@ -126,6 +136,11 @@ Add PTF/model tests for contiguous delivery, wrap, duplicate, reorder, consecuti
 explicit link identity, and multiple traffic classes. Regenerate variants through
 `p4/witness/gen_variants.py`, recompile, update the cost table, and run W4 on silicon only after the
 semantic suite passes.
+
+**Status 2026-08-28:** the model half is done and green (`p4/ptf/PTF-MODEL.md`), the generator now
+emits the working arming shape for every armed variant, and the remaining M2 work is the silicon
+half: recompile on 9.13.2, re-measure placement, exercise `w4_egdrop` for an in-pipeline post-TM
+drop, and prove two live queues on one port.
 
 **Gate:** exact directed-link attribution, declared ordering scope, zero unexplained false gaps, and
 post-stamp fault injection. If W4 fails, use a published alternate-marking/paired-counter surface;
