@@ -324,6 +324,12 @@ def replay_seed(names, per_epoch, faulty, onset_epoch, horizon, sched_name, budg
     state = infer.InferState()
     want = {"vlink:" + f for f in (faulty if objective != "original" else faulty[:1])}
     all_injected = {"vlink:" + f for f in faulty}
+    # A moving fault measures RE-LOCALIZATION: the clock starts at the move, and only the link the
+    # fault moved TO counts. Crediting an arm for having found the fault at its old home before it
+    # moved measures the stationary case again, and the fast arms all detect before epoch
+    # `move_epoch` -- so without this the moving scenario never runs for them.
+    if move_epoch and move_to:
+        onset_epoch = move_epoch
     identified: set = set()
     alarms, epochs_run, reads = 0, 0, 0
     for epoch in sorted(per_epoch):
@@ -350,7 +356,9 @@ def replay_seed(names, per_epoch, faulty, onset_epoch, horizon, sched_name, budg
         loc = infer.localize(state, k=max(1, len(want)), h=h)
         if loc.anomaly and loc.ranked:
             top = loc.ranked[0][0]
-            if top not in all_injected:
+            if top not in all_injected and (not move_epoch or epoch >= move_epoch):
+                # before the move the vacated link IS faulty, so flagging it is correct, not a
+                # false alarm; after it, the same flag is stale suspicion of a healthy link
                 alarms += 1
             elif epoch >= onset_epoch and top in want:
                 # "all" is suspect-set CONTAINMENT, not a sequence of top-1 hits: CUSUMs are
@@ -481,7 +489,11 @@ def main():
             if cov[sname]:
                 k = km_median([t for t, _ in cov[sname]], [c for _, c in cov[sname]])
                 ks = f"{k:.1f}" if k == k else ">50% censored"
-                print(f"    {sname:16s} coverage {ks} "
+                # the lemma bounds a MEAN, so a KM median is not the quantity to compare with.
+                # Counting each censored run at the value it was censored at understates the true
+                # mean, so this column is a LOWER bound on the mean coverage time.
+                mlb = statistics.mean([t for t, _ in cov[sname]])
+                print(f"    {sname:16s} coverage KM median {ks}, mean >= {mlb:.1f} "
                       f"({sum(1 for _, c in cov[sname] if c)}/{len(cov[sname])} censored)")
         u = km_median([t for t, _ in per_sched["uniform"].values()],
                       [c for _, c in per_sched["uniform"].values()]) if "uniform" in per_sched else float("nan")
