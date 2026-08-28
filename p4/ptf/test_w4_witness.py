@@ -29,7 +29,7 @@ import bfrt_grpc.client as gc
 from scapy.all import Ether, IP, UDP, Raw, bind_layers, Packet
 from scapy.fields import ShortField, ByteField, IntField
 
-PROG = "mcp_fabric_w4_arm2"
+PROG = "mcp_fabric_w4_arm3"
 
 ETYPE_MCP_FABRIC = 0x88F0
 NXT_IPV4, NXT_CSIG = 0, 1
@@ -223,12 +223,16 @@ class Test03SingleLossIsOneEvent(WitnessBase):
         link = 5
         for s in range(3):
             self.send_seq(link, s)
+        a_before = self.attn_of(link)[0]
         self.send_seq(link, 4)                       # seq 3 was lost
+        a_gap = self.attn_of(link)[0]
+        self.assertEqual(a_gap, a_before + K_UP, "a gap must bump attention exactly once")
         self.assertEqual(self.expect_of(link), 5, "the check must re-synchronise on the survivor")
-        for s in (5, 6, 7):                          # and stay synchronised afterwards
+        for s in (5, 6, 7):                          # and stay synchronised, raising nothing
             self.send_seq(link, s)
-            self.assertEqual(self.expect_of(link), s + 1,
-                             "one discontinuity must not desynchronise every later packet")
+            self.assertEqual(self.expect_of(link), s + 1)
+        self.assertEqual(self.attn_of(link)[0], a_gap,
+                         "exactly one event per discontinuity, not one per later packet")
 
 
 class Test04ConsecutiveLosses(WitnessBase):
@@ -244,9 +248,11 @@ class Test04ConsecutiveLosses(WitnessBase):
         for s in range(2):
             self.send_seq(link, s)
         exp_before = self.expect_of(link)
+        a_before = self.attn_of(link)[0]
         self.send_seq(link, exp_before + k)          # k packets lost
+        self.assertEqual(self.attn_of(link)[0], a_before + K_UP, "a burst is a single event")
         self.assertEqual(self.expect_of(link), (exp_before + k + 1) % WRAP,
-                         "a burst re-synchronises on the survivor like a single loss")
+                         "and re-synchronises on the survivor like a single loss")
         self.assertEqual((exp_before - (exp_before + k)) % WRAP, WRAP - k,
                          "the loss count must be recoverable as 2^16 - gap")
 
@@ -262,8 +268,11 @@ class Test05Duplicate(WitnessBase):
         link = 7
         self.send_seq(link, 0)
         self.send_seq(link, 1)
+        a_before = self.attn_of(link)[0]
         self.send_seq(link, 1)                       # duplicate of the packet just seen
-        self.assertEqual(self.expect_of(link), 2, "a duplicate re-synchronises to observed+1")
+        self.assertEqual(self.attn_of(link)[0], a_before + K_UP,
+                         "a duplicate is reported as a discontinuity")
+        self.assertEqual(self.expect_of(link), 2, "and re-synchronises to observed+1")
 
 
 class Test06Reorder(WitnessBase):
@@ -273,8 +282,11 @@ class Test06Reorder(WitnessBase):
         link = 8
         self.send_seq(link, 0)
         self.send_seq(link, 2)                       # gap event: seq 1 missing
+        a_before = self.attn_of(link)[0]
         self.send_seq(link, 1)                       # the late arrival
-        self.assertEqual(self.expect_of(link), 2, "the late packet re-synchronises the state")
+        self.assertEqual(self.attn_of(link)[0], a_before + K_UP,
+                         "a late packet is a discontinuity too")
+        self.assertEqual(self.expect_of(link), 2, "and re-synchronises the state")
 
 
 class Test07ModuloWrap(WitnessBase):
@@ -310,46 +322,39 @@ class Test09PerLinkIndependence(WitnessBase):
     """
     def runTest(self):
         a, b = 11, 12
+        aa0, ab0 = self.attn_of(a)[0], self.attn_of(b)[0]
         for s in range(5):                           # interleave two links on one port
             self.send_seq(a, s)
             self.send_seq(b, s)
+        self.assertEqual(self.attn_of(a)[0], aa0, "interleaving must not create events")
+        self.assertEqual(self.attn_of(b)[0], ab0)
         self.assertEqual(self.expect_of(a), 5)
         self.assertEqual(self.expect_of(b), 5)
         self.send_seq(a, 6)                          # a loses one; b must be unaffected
         self.send_seq(b, 5)
+        self.assertEqual(self.attn_of(a)[0], aa0 + K_UP, "the gap link raises exactly one event")
+        self.assertEqual(self.attn_of(b)[0], ab0, "the healthy link raises none")
         self.assertEqual(self.expect_of(a), 7)
         self.assertEqual(self.expect_of(b), 6)
 
 
-class Test10AttentionArmingIsBrokenCanary(WitnessBase):
-    """CANARY for a real defect: a sequence gap does NOT arm the attention machinery.
+class Test10ArmingReachesTheFastLoop(WitnessBase):
+    """The fix: a gap arms tbl_attn, so the fast loop sees a discontinuity as path evidence.
 
-    `mcp_fabric_w4.p4:731` claims "A gap sets md.exceed, so the existing tbl_attn/tbl_gate
-    machinery treats a post-TM sequence discontinuity as path evidence with no new gate."
-    On the model that is false, and the per-packet trace says exactly why:
-
-        md.wit_gap = 0xffff                                    <- the gap IS computed
-        Ingress : Gateway table condition () not matched.
-        Ingress : Table Ingress.tbl_wit_verdict is inhibited by a gateway condition
-        Ingress : Table Ingress.tbl_attn is hit
-        Execute Action: Ingress.act_attn_clean                  <- clean, not exceed
-
-    bf-p4c folds tbl_wit_verdict (one const entry + const default) into a GATEWAY: on
-    gap == 0 it supplies the wit_ok payload, and on a miss it SKIPS the table, so the
-    `const default_action = wit_loss()` never runs and md.exceed is never set. Arming from
-    wit_measure instead (mcp_fabric_w4_arm2.p4) does not reach tbl_attn either --
-    `act_attn_exceed` executes zero times in a whole run.
-
-    This test asserts the DEFECT so the suite stays green while it stands, and fails loudly
-    the day the arming is fixed. Whoever fixes it: delete this class and restore the
-    attention assertions in Test03-Test06 and Test09.
+    This replaces a canary that asserted the DEFECT. bf-p4c folds a table with one const entry
+    and a const default into a gateway and SKIPS it on a miss, so `default_action = wit_loss()`
+    never ran and md.exceed was never set; arming from wit_measure and clearing in wit_ok failed
+    the same way. Arming from an explicit `if (md.wit_gap != 0)` gives the gateway a condition
+    that runs the table exactly when there is a gap. See p4/ptf/PTF-MODEL.md.
     """
     def runTest(self):
         link = 13
         self.send_seq(link, 0)
-        a_before = self.attn_of(link)[0]
+        a_before, c_before = self.attn_of(link)
         self.send_seq(link, 5)                       # a five-packet gap
-        self.assertEqual(self.expect_of(link), 6, "the gap itself is detected and re-synced")
-        self.assertEqual(self.attn_of(link)[0], a_before,
-                         "KNOWN DEFECT: the gap does not bump attention. If this fails, the "
-                         "arming was fixed -- delete this canary and restore the real assertions.")
+        a_after, _ = self.attn_of(link)
+        self.assertEqual(self.expect_of(link), 6, "the gap is detected and re-synchronised")
+        self.assertEqual(a_after, a_before + K_UP, "and it arms the fast loop")
+        self.send_seq(link, 6)                       # contiguous again: no further arming
+        self.assertEqual(self.attn_of(link)[0], a_after,
+                         "a contiguous packet after the gap must not re-arm")
