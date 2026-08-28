@@ -394,3 +394,14 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   804 MB/s (6.4 Gb/s) over 4 QPs. All of it is runtime-only (no rxe unit, netplan lists a stale
   iface name) -> nic/lab_link_setup.sh added, deployed to both hosts, idempotent, --check audits.
   Connectivity map updated with the verified table and the MAC-near-loopback trap.
+- 08-28 NETRONOME: toolchain installed on Vision (clang 18.1.3, llvm, libbpf-dev, headers).
+  Firmware app switched nic -> bpf (device symlink pci-0000:af:00.0.nffw.zst; .orig kept), driver
+  reloaded, and an eBPF per-path counter was **offloaded to the card**: bpftool shows
+  offloaded_to enp175s0np1s0, jited 864 B, map on-card; 160 UDP packets over 16 source ports gave
+  exactly 10 per bin. H7 CLOSED (XDP route real). Native P4-on-NFP stays impossible: no SDK on any
+  machine and nfp4build is behind a Corigine support account.
+  Card left on the **nic** app (day-to-day RoCE testbed); flip to bpf per nic/README-xdp.md.
+  Link/RoCE restored and verified: ping 0.5 ms, ib_write_bw 515 MB/s over 4 QPs.
+  Traps recorded: NM strips runtime IPs on a link flap; rxe takes its GID from the PRIMARY address
+  (a stale 10.0.2.10/16 made it advertise the wrong GID -> 0 bytes moved); `-x 1` on perftest also
+  gives 0 iterations here; `pkill -f` from ssh kills the ssh session.
