@@ -429,3 +429,16 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   NOTE: my first launch used an unsaved patch (a later assert aborted the write) so both batches ran
   the WRONG experiment (F1 with new seeds); killed within a minute, results deleted, relaunched.
   Verify the intended flags in the run log before trusting a batch.
+- 08-28 H8 IN REPLAY (the paper's core claim, no chip needed): added `inband` / `inband_sync` arms to
+  sim/gate/replay.py. The in-band invariant (per-link sequence gap / RFC 9341 alternate marking =
+  read every link's tx/drop delta every epoch, zero probe bytes) gives KM median TTL **10.0, 0/30
+  censored, coverage time 1.0 epoch** vs uniform 20.0 (coverage 10.0) and oracle 10.0 --
+  i.e. it **closes 100 % of the oracle gap** and reduces detection delay to evidence time.
+  H8 supported in simulation; the hardware version is M2.
+- 08-28 LOCALIZER ARTIFACT FOUND (do not read inband_sync as a result): the periodic-collection
+  variant (read every link every 4th epoch) never alarms -- at epoch 16 the faulty link had 11 drops
+  in 99,704 packets and cusum was still 0.00. Cause: `baseline_warmup_epochs` counts POOL UPDATE
+  CALLS, not evidence, so an arm that reads 4x less often stays in warm-up for the whole 36-epoch
+  run (pool_n 4 vs 16). Warm-up should be defined in observed packets (or pooled counts), not update
+  calls -- otherwise every low-frequency arm is penalised by construction. Fix before any arm is
+  compared at different read cadences.

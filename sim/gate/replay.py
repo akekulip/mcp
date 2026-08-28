@@ -129,6 +129,36 @@ class Greedy(Schedule):
         return sorted(self.names, key=lambda n: (-gain[n], self.last_epoch[n], n))[: self.budget]
 
 
+class InBand(Schedule):
+    """The link-local in-band invariant (PREREG v1.5 **H8**), replayed.
+
+    A per-link sequence gap checked at the next hop (or an RFC 9341 alternate-marking counter
+    diff) makes every drop a *localized event at the moment it happens*: no element has to be
+    chosen, because the evidence is carried by the data plane itself. In replay that is exactly
+    "read every link's (tx, drop) delta every epoch", which the recorded counters support.
+
+    It spends **zero probe bytes**; its cost is per-packet header state (2 B of sequence, or one
+    marking bit) plus a counter pair per link, which is priced separately in the paper's cost
+    table -- it is NOT free, it is charged in different units (PREREG §2.3).
+    """
+    name = "inband"
+
+    def pick(self, epoch, cum, state):
+        return list(self.names)        # every link, every epoch: no schedule at all
+
+
+class InBandSync(Schedule):
+    """The same invariant, but the controller only *collects* the per-link verdicts every
+    `SYNC` epochs -- the realistic version where the data plane detects continuously and the
+    collection is periodic. Detection latency is then bounded by the sync period, not by
+    coverage."""
+    name = "inband_sync"
+    SYNC = 4
+
+    def pick(self, epoch, cum, state):
+        return list(self.names) if epoch % self.SYNC == 0 else []
+
+
 class Oracle(Schedule):
     """Upper bound: always read the faulty link(s), fill with round-robin."""
     name = "oracle"
@@ -137,7 +167,8 @@ class Oracle(Schedule):
         return out + self._rr(self.budget - len(out), exclude=out)
 
 
-SCHEDULES = {c.name: c for c in (Uniform, Random_, LoadGated, ThresholdGated, Greedy, Oracle)}
+SCHEDULES = {c.name: c for c in (Uniform, Random_, LoadGated, ThresholdGated, Greedy, Oracle,
+                                 InBand, InBandSync)}
 
 
 def first_drop_epoch_of(counters: Path, link: str):
@@ -180,6 +211,7 @@ def replay_seed(counters: Path, faulty: List[str], onset_ms: float, sched_name: 
             sch.faulty = [move_to]; want = {"vlink:" + move_to}
         chosen = sch.pick(epoch, cum, state)
         samples = []
+        # the in-band arms are not budgeted: their evidence is carried by the packets themselves
         for n in chosen:
             tx, drop = cum.get(n, (0, 0))
             tx0, drop0 = sch.last_seen.get(n, (0, 0))
