@@ -1,4 +1,10 @@
-# Counterfactual-observability gate — VERDICT: **FAIL as a novelty claim, NARROW as engineering**
+# Counterfactual-observability gate — VERDICT (revised 2026-08-28, second pass)
+
+> **FAIL the original lease / cap / lifecycle novelty claims. PASS a redesigned
+> production-conditioned recovery primitive to a focused novelty gate.**
+
+The first pass of this verdict (below, kept intact) killed the wording. It also overreached, and
+the overreach is recorded here rather than quietly edited away.
 
 2026-08-28. `docs/superpowers/plans/2026-08-28-counterfactual-observability.md` requires a
 PASS / NARROW / FAIL literature gate *before* lifecycle implementation. Three independent reviews
@@ -6,7 +12,42 @@ ran against the spec's §3 (thesis, contributions) and §4 (system contract). Th
 the verdict. Nothing in `controller/audit_*`, `sim/audit/` or `p4/audit/` should be written on the
 strength of the claim as it stands.
 
-## Verdict by contribution
+## Where the first pass overreached
+
+The 67 ms figure in `GATE2-AUDIT-BUDGET.md` is arithmetically right and **only valid for
+stationary IID loss under the audit's own packet distribution**. It was then used to conclude that
+recovery evidence is cheap in general, which the evidence does not support. Formally, an audit
+measures
+
+    L_audit = E_{x ~ Q} [ loss(x) ]
+
+while restoration needs
+
+    L_production = E_{x ~ P} [ loss(x) ]
+
+where x carries packet size, traffic class, timing, offered load, queue occupancy and switch
+configuration. **If Q does not cover P, no number of cheap probes yields a production-loss
+guarantee** — the cost axis is not the binding constraint, *coverage* is. This file's own §5
+already conceded it ("an audit that uses small packets on an empty queue is not testing what
+production will meet"), and Aegis reports the failure in production: their 64-byte Pingmesh probes
+missed a fault that only dropped packets larger than 1 KB.
+
+Five specific corrections:
+
+| first-pass claim | what the evidence supports |
+|---|---|
+| a fixed full audit train suffices | only for stationary IID loss under the audit distribution |
+| Aegis published the same solution | Aegis published the *problem*, dramatically — the 64 B/1 KB miss. It does not implement directed-link recovery certification |
+| CorrOpt has the same directed-link lifecycle | CorrOpt disables **both directions** because its hardware cannot disable one independently, and never safely exercises an isolated sprayed link before readmission |
+| steering is the surviving novelty | unsafe: OPP already does full-path active measurement under spraying, UET supports entropy-selected path probes, Everflow supports guided probes and replay |
+| dual control / positivity occupies the problem | they supply the vocabulary, not a line-rate mechanism that restores overlap for an internal sprayed link |
+| the budget is vacuous | mostly vacuous for an isolated IID physical-link audit; it returns for concurrent links, production-conditioned faults, control links, probation, and load-dependent behaviour |
+
+The reframed question is therefore **not** "how few packets certify a link" but "**how does a
+switch obtain evidence drawn from the production distribution on a link production no longer
+uses**". That is a different problem and the prior art above does not answer it.
+
+## Verdict by contribution (first pass — the wording that stays dead)
 
 | spec §3.2 contribution | verdict | what occupies it |
 |---|---|---|
