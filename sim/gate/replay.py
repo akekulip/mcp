@@ -408,6 +408,10 @@ def main():
     ap.add_argument("--seeds", default="")
     ap.add_argument("--objective", default="any", choices=["any", "all", "original"],
                     help="multi-fault success semantics (PREREG v1.6 §14)")
+    ap.add_argument("--no-fault", action="store_true",
+                    help="F0 control logs: no fault was injected, so EVERY alarm is a false alarm. "
+                         "Needs no .fault/.onset files; TTL is meaningless and the run always goes "
+                         "to the horizon. Sweep --h over these to get the false-alarm axis.")
     a = ap.parse_args()
     root = Path(a.results)
     runs = sorted(root.glob("seed*.counters.csv"))
@@ -430,10 +434,19 @@ def main():
         load: Dict[str, List[float]] = {s: [] for s in scheds}
         for c in runs:
             stem = c.name.split(".")[0]
+            names, raw = load_counters(c)
+            if a.no_fault:
+                eff, horizon, fd, injected, move_to = raw, max(raw), None, [], ""
+                for sname in scheds:
+                    r = replay_seed(names, eff, injected, 0, horizon, sname, b,
+                                    int(stem.replace("seed", "")), a.h, a.objective, 0, "")
+                    per_sched[sname][stem] = (r[0], r[1])
+                    alarm[sname].append((r[3], r[4]))
+                    load[sname].append(r[5] / max(r[4], 1))
+                continue
             fault = (root / f"{stem}.fault").read_text().strip()
             onset = float((root / f"{stem}.onset").read_text().strip())
             onset_epoch = int(onset * 1000 // EPOCH_US)
-            names, raw = load_counters(c)
             extra: Dict[str, float] = {}
             if a.faults > 1:
                 rng = random.Random(scenario_seed(stem, "extra"))
@@ -476,6 +489,15 @@ def main():
             print(f"| {b} | {sname} | {len(ts)} | {kms} | {statistics.median(ts):.1f} | "
                   f"{sum(cs)}/{len(cs)} | {statistics.mean(load[sname]):.1f} | "
                   f"{al} ({100.0 * al / max(ep, 1):.2f}) | {cmp_} |")
+        if a.no_fault:
+            print(f"\n  F0 (no fault injected): every alarm is a FALSE alarm, h={a.h}")
+            for sname in scheds:
+                seeds_hit = sum(1 for x, _ in alarm[sname] if x)
+                al = sum(x for x, _ in alarm[sname]); ep = sum(e for _, e in alarm[sname])
+                print(f"    {sname:16s} {seeds_hit}/{len(alarm[sname])} seeds raised >=1 alarm; "
+                      f"{al} alarm epochs = {100.0 * al / max(ep, 1):.2f} per 100 epochs")
+            print()
+            continue
         bound = (len(names) - b) / (2.0 * b)
         print(f"\n  coverage time (localization - first observable drop), KM median WITH censored "
               f"runs; classical search bound (n-B)/2B = {bound:.1f} epochs at n={len(names)}, B={b}:")
