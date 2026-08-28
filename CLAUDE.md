@@ -21,6 +21,39 @@ RALPLAN-DR record in `.omx/plans/high-novelty-telemetry-plan.md`; the pre-regist
   the first minutes; verify the flags actually reached the run log before walking away.
 - Simulation blocks are memory-bound: one htsim gate run is ~62 min and ~21.5 GB (H26).
 
+## Cross-check before concluding — a standing role, not a nicety
+
+Four times on 2026-08-28 a dramatic result turned out to be an artifact of the harness rather than
+a finding, and every one of them would have been published if it had not been checked. They share
+a shape, so the check is mechanical:
+
+1. **An upper-bound arm that fails is a bug until proven otherwise.** The oracle losing to a
+   baseline (H29) meant the oracle was not handed the synthetic faults. Every arm censored
+   including the oracle (H32) meant the fault injector had *overwritten* the background rate
+   instead of composing with it, so there was no fault to find. If the arm that is handed the
+   answer cannot find it, stop and audit the harness.
+2. **Verify the injected quantity in the DATA, not in the flags.** `-mcp_loss` was on the command
+   line and the run log said so. The faulty link's measured rate was 0.72x the healthy mean, and
+   that is what settled it. Read out what the experiment actually did.
+3. **Print each arm's realised parameters before believing any row.** In the audit gate, twins were
+   modelled as carrying production's load onto a link that by definition carries no production,
+   and separately a clone ratio of 0.02 was normalised to induce *full* load. Both flattered the
+   arm being argued for. A three-line dump of packets sent, mean load, and the fraction of each
+   stratum covered exposed both instantly.
+4. **Report safety AND usefulness together.** "0 % unsafe restorations" was scored by an arm that
+   could never certify anything at that budget — it always returned INCONCLUSIVE and so was
+   perfectly safe and perfectly useless. A rule that never fires is not a safe rule. Any
+   false-positive metric must be reported next to the rate at which the mechanism actually acts.
+5. **Cheap, clean and decisive is the suspicious combination.** Real measurements of a hard problem
+   are rarely all-or-nothing. A column of 0.0 % and 100.0 % is a hypothesis about the harness
+   before it is a result about the system.
+
+The same discipline applies to arguments, not just experiments: the first-pass gate-2 verdict took
+a cost calculation that was valid only for IID loss under the audit's own packet distribution and
+generalised it into "recovery evidence is cheap". The correction is recorded in
+`docs/review/GATE2-VERDICT.md` rather than edited away, because the failure mode — a correct number
+carried outside the regime where it holds — is worth keeping visible.
+
 ## Testbed (verified 2026-08-28)
 
 | host | mgmt | access |
