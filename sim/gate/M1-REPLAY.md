@@ -153,7 +153,7 @@ in-band arm is not free: it is 1024 reads/epoch here against 41, and the honest 
 byte currency — per-link data-plane state and one exception report per loss event — which is what
 the M2 cost table must produce.
 
-## C6 — the false-alarm axis (F0 complete: 20 background-loss + 10 clean seeds)
+## C6 — the false-alarm axis: an OBSERVATION-CLASS PILOT, not an equal-cost H8' result
 
 The F0 control block finished. Background loss is genuinely distributed (`-mcp_bg_loss 1e-4`,
 `.fault` = NONE): **1024 of 2048 links carry drops**, up to 47 cumulative each. This is the
@@ -193,16 +193,41 @@ in-band included. The alarms are background loss observed more often, not detect
 | **in-band (B = n)** | **10.0** | **9.0** | **0/30** | **100 %** |
 
 At matched zero false-alarm rate on real background loss, unbudgeted per-link evidence **halves
-detection delay — 9.0 epochs against 18.0 — and ties the oracle**. Buying that false-alarm
-freedom costs the in-band arm nothing: it localizes in 9.0 epochs at h = 6.5, 8.0 and 10.0 alike,
-because its evidence per read is large enough to clear any of those thresholds on the same epoch.
-This is the first version of H8′ (equal-cost frontier, PREREG v1.7) that survives the false-alarm
-objection.
+detection delay — 9.0 epochs against 18.0 — and ties the oracle**, and buying that false-alarm
+freedom costs it nothing (9.0 epochs at h = 6.5, 8.0 and 10.0 alike, because its evidence per read
+clears any of those thresholds on the same epoch).
 
-**Limits.** 0/20 seeds is a one-sided 95 % upper bound of 13.9 % per seed on the per-seed
-false-alarm rate — tighter than the 26 % from the first ten, still not small. The in-band arm here
-is B = n counter reading, not the order witness: what it bounds is the observation class, and the
-witness's own false-gap floor on silicon is M2's question. Reproduce with:
+### What this is NOT
+
+**It is not H8′.** H8′ (PREREG v1.7) asks whether the *post-TM order witness* moves the frontier
+against the strongest scheduled-counter baseline **at matched cost in the §2.3 byte currency**.
+The arm measured here is not the witness: it is counter reading at B = n, 1024 link-reads per
+epoch against uniform's 41, and it is charged nothing on any of the five §2.3 units. What it
+establishes is an **upper bound on the observation class** — if per-link evidence arrives without
+being scheduled, the coverage term goes to zero. Nothing here prices the witness's own cost: 4
+header bytes on every production packet, per-link state, exception reports, controller
+operations, and the counter collection it would replace. Until those are on one axis, this is a
+pilot, not a frontier result.
+
+**The false-alarm exposure is far short of the pre-registered bound.** PREREG §5 sets a limit of
+six false alarms per hour. These are 36-epoch, 100 ms traces, so 20 seeds is **72 seconds of
+aggregate no-fault exposure**. Zero observed events over 72 s gives a one-sided 95 % upper bound
+of 3/72 s ≈ **150 alarms per hour** — twenty-five times the pre-registered limit. The per-seed
+figure (0/20 → 13.9 % upper bound) is arithmetically fine and answers a different question than
+the one pre-registered. Reaching < 6/hour with zero events needs **1800 s ≈ 0.5 h aggregate**,
+i.e. about 500 seeds of this trace or a proportionally longer horizon.
+
+**The thresholds were selected on the same data they are evaluated on.** Each arm's operating
+point is the lowest h giving 0/20 here, which is calibration, not evaluation. They must be frozen
+on a calibration split and re-measured on held-out controls.
+
+**The two cohorts do not share a background regime.** The controls run at b = 1e-4 while the
+fault traces have b = 0, so this pairs specificity-under-background with
+sensitivity-under-fault-only and never measures the pre-registered hard case where both are
+present. A fault-plus-background cohort (`FAULT=1 BG_LOSS=1e-4`, seeds 3000+) is running now;
+these numbers must be re-issued against it.
+
+**Reproduce** (the F0 counter logs are ~2 MB/seed and live on the hosts, not in the repo):
 
 ```
 rsync -a --include="*.counters.csv" --include="*.onset" --include="*.fault" --exclude="*" \
