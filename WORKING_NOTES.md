@@ -383,3 +383,14 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   (frame counters reset to 0 — unavoidable). bf_switchd was NOT restarted; defense4 untouched
   otherwise. LESSON: check `/proc/<pid>/cmdline` of bf_switchd for the loaded program BEFORE any
   port or table write, not just `gc-switchd`.
+- 08-28 HOUSEKEEPING (no fabric loaded, chip still owned by defense4): Vision inventory — Agilio CX
+  at af:00.0 (nfp), 2 cages x 4 lanes, only np1s0 cabled (10G to Hulk f0); no /opt/netronome (no
+  SDK) but bpf/flower/nic firmware present => XDP offload possible, P4-on-NFP not (H7).
+  The re-cable had left the addressing and Soft-RoCE on the wrong ports: Hulk's direct-link port
+  held a stale 10.0.2.10/16 while 192.168.100.2/24 (the direct-link subnet) sat on the down
+  switch-facing port, and Hulk's rxe0 was bound to that dead port (DOWN/POLLING) while Vision's was
+  on the Agilio. Fixed: direct link 192.168.100.1 <-> .2 (ping 0.41 ms), fabric addresses 10.0.1.1
+  (Vision) / 10.0.1.2 (Hulk f1), rxe0 on each host's direct-link port -> both ACTIVE, ib_write_bw
+  804 MB/s (6.4 Gb/s) over 4 QPs. All of it is runtime-only (no rxe unit, netplan lists a stale
+  iface name) -> nic/lab_link_setup.sh added, deployed to both hosts, idempotent, --check audits.
+  Connectivity map updated with the verified table and the MAC-near-loopback trap.
