@@ -405,3 +405,14 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   Traps recorded: NM strips runtime IPs on a link flap; rxe takes its GID from the PRIMARY address
   (a stale 10.0.2.10/16 made it advertise the wrong GID -> 0 bytes moved); `-x 1` on perftest also
   gives 0 iterations here; `pkill -f` from ssh kills the ssh session.
+- 08-28 NETRONOME SDK RESEARCH (docs/NETRONOME-SDK.md): nfp4build/nfp4c = Agilio P4C SDK 6.x,
+  /opt/netronome/p4/bin. NOT on GitHub (only usage: P4STA, AccelTCP, open-nfpsw, P4RROT,
+  template-netronome-p4) and NOT in any public repo. deb.netronome.com/apt IS live (built
+  2021-05-11) but carries BSP + firmware only; open-nfp.org (the old academic route) is dead (503),
+  downloads.netronome.com is gone; help.netronome.com is live. Vendor's stated licence: third-party
+  constraints bar a non-proprietary release and bar supplying the tooling independently of their
+  hardware -> owners get it on request. Route today = Corigine (smartnic-support@corigine.com,
+  corigine.com/DPUDownload.html); draft request with our board/serial in
+  docs/netronome-sdk-request.txt for Philip to send. A 2018 Docker image appears to bundle an SDK;
+  flagged as unlicensed redistribution and NOT used. Judgement: request in the background, do not
+  block — XDP offload already covers the NIC arm.

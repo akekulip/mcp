@@ -1,0 +1,33 @@
+To: smartnic-support@corigine.com
+Cc: help@netronome.com
+Subject: Agilio P4C SDK (nfp4build/nfp4c) access request — AMDA0097-0001, academic research
+
+Hello,
+
+I am a researcher working on programmable data planes for AI-training fabrics. Our lab owns an
+Agilio CX SmartNIC and I would like to request access to the Agilio P4C SDK (the hosted toolchain
+with nfp4build/nfp4c, plus the RTE) so that we can compile P4 for the card.
+
+Hardware in hand:
+  Board            AMDA0097-0001, rev 13, manufacturer SMC, model "beryllium"
+  Serial           SMCAMDA0097-000117291655
+  Device           NFP-4000, PCI 19ee:4000 at 0000:af:00.0
+  Configuration    2 x 40G cages, currently running the 8x10G breakout firmware
+  Host             Ubuntu 24.04, kernel 6.8.0-138-generic, nfp driver in-tree
+  Current firmware 0.0.3.5 0.31 nic-2.1.16.1 (also verified the ebpf app: bpf-2.0.6.124)
+
+We already run eBPF/XDP with hardware offload on this card successfully; the P4 toolchain would let
+us implement the same NIC-side logic in P4 for a research comparison against a P4 switch target.
+
+Could you tell me:
+  1. whether the Agilio P4C SDK is still distributed for NFP-4000 cards, and which version supports
+     this board;
+  2. what is required on our side (an account on the download portal, a licence agreement, proof of
+     hardware ownership) — happy to provide purchase details or a photo of the board label;
+  3. whether an academic/research licence is available.
+
+The work is non-commercial academic research and results are intended for publication; we are glad
+to acknowledge Corigine and to share findings.
+
+Thank you,
+Philip
