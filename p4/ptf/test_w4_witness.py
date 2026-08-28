@@ -13,10 +13,11 @@ packet that arrived on a LOOP port:
 
 and `tbl_wit_verdict` turns gap==0 into `wit_ok` and everything else into `wit_loss`.
 
-WHY THE TESTS INJECT WITNESS HEADERS DIRECTLY. Driving the whole emulated fabric would make
-the sequence numbers a function of the fabric's own forwarding, which is precisely what these
-tests must control. Injecting a chosen (link_id, seq) on a loop port exercises the downstream
-state machine exactly, and `test_00_stamp_increments` covers the upstream stamp separately.
+TWO LAYERS OF TEST. Test01-Test10 inject chosen (link_id, seq) values on a loop port: driving
+the whole fabric would make the sequence numbers a function of its own forwarding, which is
+exactly what those tests must control. Test11 onward then close the loop for real -- the
+upstream egress stamps, PTF plays the wire, and a packet it declines to re-inject becomes a
+genuine post-stamp loss that the downstream must report.
 
 CAVEAT, carried from the old skeleton and still true: the software model accepts some
 control-plane writes the ASIC rejects, so a model PASS is necessary, not sufficient. These
@@ -29,7 +30,7 @@ import bfrt_grpc.client as gc
 from scapy.all import Ether, IP, UDP, Raw, bind_layers, Packet
 from scapy.fields import ShortField, ByteField, IntField
 
-PROG = "mcp_fabric_w4_arm3"
+PROG = "mcp_fabric_w4_arm"
 
 ETYPE_MCP_FABRIC = 0x88F0
 NXT_IPV4, NXT_CSIG = 0, 1
@@ -358,3 +359,171 @@ class Test10ArmingReachesTheFastLoop(WitnessBase):
         self.send_seq(link, 6)                       # contiguous again: no further arming
         self.assertEqual(self.attn_of(link)[0], a_after,
                          "a contiguous packet after the gap must not re-arm")
+
+
+# ---------------------------------------------------------------------------------------------
+# End-to-end: the upstream egress stamps, PTF plays the wire, the downstream reports the gap.
+# ---------------------------------------------------------------------------------------------
+STAMP_VLINK_Q0 = 20         # (LOOP_DN_PORT, qid 0) -> directed vlink 20
+STAMP_VLINK_Q1 = 21         # (LOOP_DN_PORT, qid 1) -> directed vlink 21, same physical port
+NXT_CSIG_NEXT_HOP = NXT_CSIG
+
+
+class EndToEndBase(WitnessBase):
+    """Programs one forwarding path so an injected pass leaves through a stamping egress.
+
+    A packet enters on LOOP_UP_PORT as a fabric pass, tbl_vlink sends it out LOOP_DN_PORT on a
+    chosen queue, tbl_eg_vlink maps that (port, qid) to a directed vlink, and tbl_wit_stamp /
+    tbl_wit_link write the witness before deparse. PTF captures it on the far veth, so the
+    stamped sequence is observable on the wire rather than inferred.
+    """
+    def setUp(self):
+        WitnessBase.setUp(self)
+        self._program_path()
+
+    def _upsert(self, t, k, d):
+        try:
+            t.entry_add(self.tgt, [k], [d])
+        except Exception:
+            t.entry_mod(self.tgt, [k], [d])
+
+    def _program_path(self):
+        b = self.bfrt
+        # NOTE: on a loop pass the parser stops after the witness, so hdr.ipv4 is NOT valid and
+        # tbl_dst_leaf always misses -- md.dst_leaf stays 0 whatever the IP header says. The only
+        # keys a test can drive from the wire on this pass are the shim's own fields, so the two
+        # queues below are selected by `hop`, not by destination.
+        t = b.table_get("pipe.Ingress.tbl_vlink")
+        # one entry per destination leaf, each pinned to its own queue on the SAME port; the
+        # spray index is not a usable knob here because the spray tables rewrite it on this path
+        for qid, vlink in ((0, STAMP_VLINK_Q0), (1, STAMP_VLINK_Q1)):
+            self._upsert(t, t.make_key([gc.KeyTuple("md.role", ROLE_LOOP),
+                                        gc.KeyTuple("md.hop", 1 - qid),
+                                        gc.KeyTuple("md.src_leaf", 0),
+                                        gc.KeyTuple("md.dst_leaf", 0),
+                                        gc.KeyTuple("md.spray_idx", 0)]),
+                         t.make_data([gc.DataTuple("vlink_id", vlink),
+                                      gc.DataTuple("loop_port", LOOP_DN_PORT),
+                                      gc.DataTuple("qid", qid),
+                                      gc.DataTuple("next_vsw", 16),
+                                      gc.DataTuple("path_id", vlink)], "Ingress.to_loop"))
+        t = b.table_get("pipe.Egress.tbl_eg_vlink")
+        for qid, vlink in ((0, STAMP_VLINK_Q0), (1, STAMP_VLINK_Q1)):
+            self._upsert(t, t.make_key([gc.KeyTuple("eg_intr_md.egress_port", LOOP_DN_PORT),
+                                        gc.KeyTuple("eg_intr_md.egress_qid", qid)]),
+                         t.make_data([gc.DataTuple("vlink", vlink)], "Egress.set_eg_vlink"))
+        t = b.table_get("pipe.Ingress.tbl_final")
+        for hop in (0, 1):
+            self._upsert(t, t.make_key([gc.KeyTuple("md.role", ROLE_LOOP),
+                                        gc.KeyTuple("md.hop", hop),
+                                        gc.KeyTuple("md.dst_leaf", 0)]),
+                         t.make_data([gc.DataTuple("next_hop", NXT_CSIG_NEXT_HOP)],
+                                     "Ingress.act_transit"))
+
+    def send_quiet(self, link, seq):
+        """send_seq without the no-other-packets assertion: this class programs forwarding, so
+        the pass under test legitimately leaves by a port."""
+        send_packet(self, LOOP_UP_PORT, witness_pkt(link, seq, path_id=link))
+        testutils.dp_poll(self, timeout=1)        # drain whatever the fabric forwarded
+
+    def send_and_capture(self, link, seq, hop=1, port_in=LOOP_UP_PORT):
+        """Send one pass in and return the witness (link_id, seq) the egress stamped on it.
+
+        `hop` selects which tbl_vlink entry matches, and therefore which queue of the shared
+        egress port the pass leaves by -- hop 1 -> qid 0, hop 0 -> qid 1.
+        """
+        pkt = witness_pkt(link, seq, path_id=link)
+        pkt[FabricShim].hop = hop
+        send_packet(self, port_in, pkt)
+        (_, rcv_port, rcv_pkt, _) = testutils.dp_poll(self, timeout=2)
+        assert rcv_pkt is not None, "nothing came out of the stamping egress"
+        w = Ether(rcv_pkt)[Wit]
+        return rcv_port, w.link_id, w.seq, Ether(rcv_pkt)
+
+
+class Test11UpstreamStampIncrements(EndToEndBase):
+    """The upstream egress stamps a per-directed-link sequence that increases by one per packet.
+
+    This is the half of the mechanism Test01-Test10 could not see: they fabricate the header,
+    this one reads what the pipeline actually wrote on the wire.
+    """
+    def runTest(self):
+        seen = []
+        for i in range(6):
+            port, link_id, seq, _ = self.send_and_capture(link=40, seq=i)
+            self.assertEqual(port, LOOP_DN_PORT, "the pass must leave by the programmed port")
+            self.assertEqual(link_id, STAMP_VLINK_Q0,
+                             "the stamp must carry the directed vlink of the (port, qid) it left by")
+            seen.append(seq)
+        self.assertEqual(seen, list(range(seen[0], seen[0] + 6)),
+                         "the stamped sequence must increase by exactly one per packet: %s" % seen)
+
+
+class Test12StampNamesTheDirectedLink(EndToEndBase):
+    """The stamped link_id and the sequence counter both follow the (port, qid) -> vlink map.
+
+    This is the concrete reason W4 carries an explicit link id rather than inferring one from
+    the ingress port, as W2 would: `setup_skeleton.py` maps leaf->spine onto (port, qid), so one
+    physical loop port carries N_SPINE directed links (p4/witness/COMPILE-GATE.md).
+
+    The test drives the mapping rather than the queue. Re-pointing (LOOP_DN_PORT, qid 0) at a
+    different vlink must change BOTH the stamped link_id and which sequence counter advances --
+    `reg_wit_seq` is indexed by md.vlink, so a second directed link has its own sequence space.
+
+    Why not two queues at once: on the software model `eg_intr_md.egress_qid` did not reliably
+    follow `ig_intr_md_for_tm.qid` (16 of 17 passes came out on queue 0 even when tbl_vlink set
+    qid 1), which is the class of TM behaviour the old skeleton already flagged as
+    model-divergent. Two live queues on one port is therefore a SILICON check, listed in
+    p4/ptf/PTF-MODEL.md as still open.
+    """
+    def _map_egress(self, vlink, qid=0):
+        t = self.bfrt.table_get("pipe.Egress.tbl_eg_vlink")
+        self._upsert(t, t.make_key([gc.KeyTuple("eg_intr_md.egress_port", LOOP_DN_PORT),
+                                    gc.KeyTuple("eg_intr_md.egress_qid", qid)]),
+                     t.make_data([gc.DataTuple("vlink", vlink)], "Egress.set_eg_vlink"))
+
+    def runTest(self):
+        self._map_egress(STAMP_VLINK_Q0)
+        first = [self.send_and_capture(link=41, seq=i)[1:3] for i in range(3)]
+        self.assertTrue(all(l == STAMP_VLINK_Q0 for l, _ in first),
+                        "the stamp must name the vlink the (port, qid) map gives: %s" % first)
+        seqs_a = [q for _, q in first]
+        self.assertEqual(seqs_a, list(range(seqs_a[0], seqs_a[0] + 3)),
+                         "vlink %d's sequence: %s" % (STAMP_VLINK_Q0, seqs_a))
+
+        self._map_egress(STAMP_VLINK_Q1)          # same port and queue, different directed link
+        second = [self.send_and_capture(link=42, seq=i)[1:3] for i in range(3)]
+        self.assertTrue(all(l == STAMP_VLINK_Q1 for l, _ in second),
+                        "re-pointing the map must change the stamped link id: %s" % second)
+        seqs_b = [q for _, q in second]
+        self.assertEqual(seqs_b, list(range(seqs_b[0], seqs_b[0] + 3)),
+                         "vlink %d's sequence: %s" % (STAMP_VLINK_Q1, seqs_b))
+        self.assertNotEqual(seqs_a[-1] + 1, seqs_b[0],
+                            "the two directed links must not share one sequence counter "
+                            "(reg_wit_seq is indexed by vlink): %s then %s" % (seqs_a, seqs_b))
+
+
+class Test13EndToEndPostStampLoss(EndToEndBase):
+    """The real loop: stamp upstream, drop ONE stamped packet on the wire, report it downstream.
+
+    PTF is the wire. Every stamped packet is re-injected on a loop port except one, so the loss
+    happens strictly AFTER the upstream sequence was allocated -- which is what a post-TM
+    witness is supposed to catch, and what a pre-stamp ingress drop (tbl_fail) cannot test.
+    """
+    def runTest(self):
+        stamped = []
+        for i in range(5):
+            _, link_id, seq, pkt = self.send_and_capture(link=43, seq=i)
+            stamped.append((link_id, seq, pkt))
+        dut = stamped[0][0]                       # the directed link the stamps name
+        self.set_expect(dut, stamped[0][1])       # downstream starts in step with the stamps
+        a0 = self.attn_of(dut)[0]
+
+        for idx, (link_id, seq, _pkt) in enumerate(stamped):
+            if idx == 2:
+                continue                          # THIS packet is lost on the wire
+            self.send_quiet(dut, seq)
+        self.assertEqual(self.attn_of(dut)[0], a0 + K_UP,
+                         "exactly one gap event for one packet lost after stamping")
+        self.assertEqual(self.expect_of(dut), stamped[-1][1] + 1,
+                         "and the downstream ends in step with the last survivor")

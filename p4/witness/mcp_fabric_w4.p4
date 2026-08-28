@@ -759,6 +759,7 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
     action wit_ok()   { wit_ctr.count(); }
     action wit_loss() { wit_ctr.count(); }
 
+
     table tbl_wit_verdict {
         key      = { md.wit_gap : exact; }
         actions  = { wit_ok; wit_loss; }

@@ -757,7 +757,22 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
      * the counter is on-chip and, per PREREG, unread by the detector. */
     DirectCounter<bit<64>>(CounterType_t.PACKETS_AND_BYTES) wit_ctr;
     action wit_ok()   { wit_ctr.count(); }
-    action wit_loss() { md.exceed = 1; wit_ctr.count(); }
+    action wit_loss() { wit_ctr.count(); }
+
+    /* A sequence discontinuity arms the fast loop: md.exceed feeds the existing
+     * tbl_attn / tbl_gate machinery, so a post-TM gap becomes path evidence with no
+     * new gate. Verified on the model: act_attn_exceed fires exactly once per nonzero
+     * md.wit_gap (p4/ptf/PTF-MODEL.md). */
+    action wit_arm() { md.exceed = 1; }
+
+    table tbl_wit_arm {
+        key     = { md.role : exact; }
+        actions = { wit_arm; @defaultonly NoAction; }
+        size    = 4;
+        const default_action = NoAction();
+        const entries = { ROLE_LOOP : wit_arm(); }
+    }
+
 
     table tbl_wit_verdict {
         key      = { md.wit_gap : exact; }
@@ -904,6 +919,9 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
             if (hdr.witness.isValid()) {
                 tbl_wit_check.apply();
                 tbl_wit_verdict.apply();
+                if (md.wit_gap != 0) {          /* a discontinuity arms the fast loop */
+                    tbl_wit_arm.apply();
+                }
             }
 
             /* Evidence packets terminate here: they update attention and are never

@@ -232,7 +232,8 @@ WIT_INGRESS = '''
      * the counter is on-chip and, per PREREG, unread by the detector. */
     DirectCounter<bit<64>>(CounterType_t.PACKETS_AND_BYTES) wit_ctr;
     action wit_ok()   { wit_ctr.count(); }
-    action wit_loss() { %ARM%wit_ctr.count(); }
+    action wit_loss() { wit_ctr.count(); }
+%ARM_TABLE%
 
     table tbl_wit_verdict {
         key      = { md.wit_gap : exact; }
@@ -243,6 +244,27 @@ WIT_INGRESS = '''
         const entries = { 16w0 : wit_ok(); }
     }
 '''
+
+ARM_TABLE = """
+    /* A sequence discontinuity arms the fast loop: md.exceed feeds the existing
+     * tbl_attn / tbl_gate machinery, so a post-TM gap becomes path evidence with no
+     * new gate. Verified on the model: act_attn_exceed fires exactly once per nonzero
+     * md.wit_gap (p4/ptf/PTF-MODEL.md). */
+    action wit_arm() { md.exceed = 1; }
+
+    table tbl_wit_arm {
+        key     = { md.role : exact; }
+        actions = { wit_arm; @defaultonly NoAction; }
+        size    = 4;
+        const default_action = NoAction();
+        const entries = { ROLE_LOOP : wit_arm(); }
+    }
+"""
+
+ARM_APPLY = """                if (md.wit_gap != 0) {          /* a discontinuity arms the fast loop */
+                    tbl_wit_arm.apply();
+                }
+"""
 
 ANCHOR_IG_INSERT = "    /* ---- S8: final forward, shim write / strip"
 
@@ -292,7 +314,7 @@ NEW_APPLY = """            /* M2: did the directed link this packet arrived on s
             if (hdr.witness.isValid()) {
                 tbl_wit_check.apply();
                 tbl_wit_verdict.apply();
-            }
+%ARM_APPLY%            }
 
             /* Evidence packets terminate here:"""
 
@@ -435,13 +457,26 @@ def build(variant, arm=False, egdrop=False):
             "parser start zeroes")
     if variant == "w2":
         t = sub(t, OLD_SET_ROLE, NEW_SET_ROLE_W2, "tbl_port_role")
-    wit_ig = WIT_INGRESS.replace("%ARM%", "md.exceed = 1; " if arm else "")
+    # ARMING. The obvious shape -- md.exceed = 1 inside wit_loss, reached via
+    # `const default_action` -- DOES NOT WORK on bf-p4c 9.13.x: the compiler folds
+    # tbl_wit_verdict (one const entry + a const default) into a gateway that supplies the
+    # wit_ok payload on a match and SKIPS the table on a miss, so the default action never
+    # executes and md.exceed is never set. Setting it in wit_measure and clearing it in
+    # wit_ok fails identically, because the clear rides the same folded gateway. Both were
+    # measured on the model; see p4/ptf/PTF-MODEL.md.
+    #
+    # So arm from an EXPLICIT control-flow test, which gives the gateway a condition that
+    # runs the table exactly when there is a gap. tbl_wit_arm is keyed (Class 11: a keyless
+    # table cannot carry this as a default) and only ever SETS md.exceed -- never clears it --
+    # so it cannot cancel a CSIG or NIC exceedance raised earlier in the pipeline.
+    wit_ig = WIT_INGRESS.replace("%ARM_TABLE%", ARM_TABLE if arm else "")
     t = sub(t, ANCHOR_IG_INSERT, wit_ig.lstrip("\n") + "\n" + ANCHOR_IG_INSERT,
             "ingress witness block")
     t = sub(t, OLD_ENTER_TAIL_W2 if variant == "w2" else OLD_ENTER_TAIL_W2,
             NEW_ENTER_TAIL_W2 if variant == "w2" else NEW_ENTER_TAIL_W4, "act_enter")
     t = sub(t, OLD_DELIVER, NEW_DELIVER, "act_deliver")
-    t = sub(t, OLD_APPLY, NEW_APPLY, "ingress apply")
+    t = sub(t, OLD_APPLY, NEW_APPLY.replace("%ARM_APPLY%", ARM_APPLY if arm else ""),
+            "ingress apply")
     t = sub(t, ANCHOR_EG_INSERT,
             (WIT_EGRESS_W2 if variant == "w2" else WIT_EGRESS_W4).lstrip("\n")
             + "\n" + ANCHOR_EG_INSERT, "egress witness block")
@@ -466,6 +501,10 @@ VARIANTS = [
     ("mcp_fabric_w4_arm",    dict(variant="w4", arm=True)),
     ("mcp_fabric_w4_egdrop", dict(variant="w4", arm=True, egdrop=True)),
 ]
+# NOTE: *_arm now means the WORKING arming shape (explicit gap test). The two shapes that
+# compile but do not arm -- md.exceed in wit_loss, and arm-in-wit_measure/clear-in-wit_ok --
+# were validated as broken on the model and are recorded in p4/ptf/PTF-MODEL.md; their source
+# files were removed so nothing regenerates or builds them by accident.
 for name, kw in VARIANTS:
     src = build(**kw)
     (HERE / (name + ".p4")).write_text(src)

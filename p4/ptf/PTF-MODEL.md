@@ -1,10 +1,14 @@
-# W4 order witness: model validation (M2 step (b)) — 11/11 PASS, arming defect found AND fixed
+# W4 order witness: model validation (M2 step (b)) — 13 asserted tests + 1 diagnostic, all pass;
+# arming defect found and fixed
 
 Ran 2026-08-28 on the laptop's SDE 9.13.1 software model. **The shared Tofino was never
 touched**: no chip access, no `bf_switchd` on the switch, no ports written. The switch stayed
 on `defense4_rrc_bor_unified12` (pid 36630) throughout.
 
-Suite: `p4/ptf/test_w4_witness.py` (11 tests). Harness: `p4/ptf/model/`.
+Suite: `p4/ptf/test_w4_witness.py` — **13 asserted tests plus `Test00Probe`, which is
+diagnostic only and asserts nothing**, so the honest count is 13, not 14. Harness:
+`p4/ptf/model/`, which drives the variant the generator emits (`mcp_fabric_w4_arm`), not a
+hand-edited copy.
 
 ## Result
 
@@ -20,6 +24,15 @@ Suite: `p4/ptf/test_w4_witness.py` (11 tests). Harness: `p4/ptf/model/`.
 | 08 | controller re-seed: the next packet at the seeded value is contiguous | PASS |
 | 09 | per-link independence — interleaved links keep separate state (the multi-queue prerequisite) | PASS |
 | 10 | a gap arms the fast loop, and a contiguous packet after it does not re-arm | PASS |
+| 11 | **end to end**: the upstream egress stamps a per-directed-link sequence increasing by one per packet | PASS |
+| 12 | **end to end**: the stamped link id and the sequence counter both follow the (port, qid) → vlink map | PASS |
+| 13 | **end to end**: a packet dropped on the wire *after* stamping is reported downstream as exactly one gap | PASS |
+
+Tests 11–13 close the gap an earlier version of this file wrongly claimed was covered: 01–10
+fabricate the witness header, so they exercise only the downstream check. In 11–13 the pipeline
+writes the sequence itself and PTF plays the wire — the packet it declines to re-inject is a
+genuine post-stamp loss, which is what a post-TM witness is supposed to catch and what a
+pre-stamp ingress drop (`tbl_fail`) cannot test.
 
 The state machine is correct. The model's own per-packet trace confirms the arithmetic
 directly: `md.wit_gap` came out `0xffff` for one lost packet, `0xfffb` for a five-packet burst,
@@ -108,6 +121,21 @@ against them. Three environment problems it works around, recorded so they are n
 - PTF runs as root and Debian's `protobuf nspkg.pth` pins the `google` namespace to
   `/usr/lib/python3/dist-packages`, whose protobuf predates `google.protobuf.internal.builder`.
   `p4/ptf/model/pyfix/sitecustomize.py` repoints it at the SDE's protobuf 3.20.3.
+
+## Still open
+
+- **Two live queues on one port.** `eg_intr_md.egress_qid` did not reliably follow
+  `ig_intr_md_for_tm.qid` on the model — 16 of 17 passes came out on queue 0 even where
+  `tbl_vlink` set qid 1 — which is the class of TM behaviour the original skeleton already
+  flagged as model-divergent. Test 12 therefore drives the `(port, qid) → vlink` *mapping*
+  instead, which proves the stamp names the mapped directed link and that each vlink has its own
+  sequence space. Two simultaneously live queues is a **silicon** check.
+- **A real post-TM drop.** Test 13's loss is inflicted by PTF on the wire. The in-pipeline
+  equivalent is `mcp_fabric_w4_egdrop.p4` (egress-side injector, after the stamp), which now
+  compiles from the generator with the corrected arming shape but has not been exercised.
+- **Stale or forged witness headers.** The downstream trusts the carried `link_id`; nothing yet
+  tests a packet whose id names a link it did not arrive on.
+- **Re-measurement on 9.13.2.** All placements here are 9.13.1.
 
 **A model PASS is necessary, not sufficient** — the model accepts control-plane writes the ASIC
 rejects. Silicon is still M2 step (c).

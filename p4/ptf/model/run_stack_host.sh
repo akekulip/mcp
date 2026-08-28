@@ -17,12 +17,12 @@ S() { printf '%s\n' "$SUDO_PASS" | sudo -S -p '' "$@"; }
 S pkill -x tofino-model 2>/dev/null; S pkill -x bf_switchd 2>/dev/null; sleep 1
 
 ( printf '%s\n' "$SUDO_PASS" | sudo -S -p '' env "PATH=$PATH" "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" \
-    tofino-model --p4-target-config $DIR/model_arm2.conf --install-dir $SDE_INSTALL \
+    tofino-model --p4-target-config $DIR/model_arm.conf --install-dir $SDE_INSTALL \
     -d 1 -k 1 -f $DIR/ports.json --chip-type 2 --log-dir $DIR ) > $DIR/model.log 2>&1 &
 sleep 6
 ( printf '%s\n' "$SUDO_PASS" | sudo -S -p '' env "SDE=$SDE" "SDE_INSTALL=$SDE_INSTALL" \
     "PATH=$PATH" "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" \
-    bf_switchd --install-dir $SDE_INSTALL --conf-file $DIR/model_arm2.conf --init-mode=cold \
+    bf_switchd --install-dir $SDE_INSTALL --conf-file $DIR/model_arm.conf --init-mode=cold \
     --status-port 7777 --skip-port-add ) > $DIR/switchd.log 2>&1 &
 ready=0
 for i in $(seq 1 180); do
