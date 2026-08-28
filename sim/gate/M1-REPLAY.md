@@ -188,6 +188,12 @@ detection delay — 9.0 epochs against 18.0 — and ties the oracle. Raising its
 10.0 to buy that false-alarm freedom costs it nothing, because its evidence per read is large enough
 that the LLR clears either threshold on the same epoch.
 
+**The clean control isolates the cause.** Hulk's 10 `-mcp_bg_loss 0` seeds (verified: zero rows with
+`drop > 0` anywhere in the fabric) produce **0 alarms in 0/10 seeds for every arm at h = 4.0 and
+h = 6.5**, in-band included. So the in-band arm's alarms at h = 6.5 are not the detector inventing
+suspicion out of nothing — they are background loss being observed 25× more often. That is a
+property of the observation rate, and it is exactly why the operating point has to be set per arm.
+
 **The honest limits of this table.** Ten seeds, so "0/10 seeds" is a one-sided 95 % upper bound of
 26 % per seed — the remaining 10 Vision seeds and Hulk's 10 clean controls will tighten it, and the
 whole table is provisional until they land. The in-band arm here is still B = n counter reading, not

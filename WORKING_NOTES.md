@@ -2,6 +2,49 @@
 
 Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-08-25).
 
+## Status (2026-08-28, later) — novelty gate tripped; the project is now TWO tracks
+
+- **Both novelty gates failed** (`docs/review/NOVELTY-GATE.md`, PREREG v1.7). The coverage bound is
+  Bellman/Blackwell stationary-target search, restated for budgeted policy classes by
+  Chaudhuri–Fellouris–Tajer (IEEE TIT 2024) and Xu–Mei–Moustakides (2021). The order witness is
+  NetSeer SIGCOMM'20 §3.3, verbatim, with LinkGuardian and UEC LLR as independent occupants. My §4
+  "spraying collapses the pooled-test design space" argument is refuted by SprayCheck. A correctness
+  error of ours: a post-TM witness does NOT see upstream TM drops.
+- **Two coordinated tracks now run in parallel** (Philip, from the parallel session):
+  1. **W4** — finish PTF/model then silicon validation. Useful infrastructure and a *costed known
+     primitive*, explicitly not standalone novelty. Proceeds independently of the new gate.
+  2. **Counterfactual observability** — evidence lease → switch-capped directed-link audit → limited
+     probation → confidence-qualified restoration, for links that mitigation has starved of passive
+     evidence. Novelty **provisional** until a rehabilitation/revalidation literature gate returns
+     PASS / NARROW / FAIL; that gate comes *before* lifecycle implementation. Audit reuses W4's
+     `link_id + sequence` and existing shim fields (target: zero added bytes; fallback +2 B
+     `audit_id`). Insufficient evidence must return INCONCLUSIVE, never "healthy". Cheap event
+     simulation gates the expensive P4/htsim/silicon work.
+- **Compile gate PASSED** (`p4/witness/COMPILE-GATE.md`): baseline 8 ingress / 3 egress, W2 8/3,
+  W4 8/3 — the witness costs zero MAU stages; arming the fast loop costs +1. **W4 is the silicon
+  variant**: W2's premise fails here because one loop port carries two directed vlinks under the
+  `(port, qid)` mapping. The existing injector drops in ingress, before the egress stamp, so it
+  cannot produce a gap event; the egress-side injector is compiled and costed.
+- **M1 re-issued after adversarial review** — ten harness defects, two of which invalidated claims I
+  had published the same day (the moving-fault row and the stale-suspicion finding). Added `confirm`
+  and `thompson` so H9 is tested against the class's strongest members; `confirm` is *exactly*
+  uniform on 29/30 seeds because one read of the faulty link is always enough.
+- **F0 is landing and it is the load-bearing block.** Background loss is real and distributed (1024
+  of 2048 links drop). First result: at the frozen h = 6.5 the budgeted arms raise **zero** false
+  alarms while in-band false-alarms in 10/10 seeds — it observes 25× more link-epochs. Read at each
+  arm's own false-alarm-free operating point, in-band still localizes in **9.0 epochs against
+  uniform's 18.0** and ties the oracle. Clean control (no loss at all): 0 alarms everywhere, so the
+  effect is background loss observed more often, not detector noise.
+- **Audit feasibility re-derived** (`docs/AUDIT-FEASIBILITY.md`): N = ln(1/α)/p = 29,956 packets at
+  p = 1e-4, α = 0.05 — 45 MB, 0.9 ms at 400 G, so not a blocker; the real constraint is that cost is
+  linear in 1/p, and that background loss at b = 1e-4 makes it **4×** (119,515 packets). Fleet scale
+  for the 2/8/25 % axis: 0.90 / 3.68 / 11.50 GB, ×4 under background loss.
+- **Another Claude session is editing this repo concurrently.** It owns README, PLAN, BRIEF,
+  NOVELTY-MATRIX, NOVELTY-GATE and `docs/superpowers/`. I commit only my own files — never
+  `git add -A` — after it swept Philip's PLAN.md edits into one of my commits this morning.
+- **Next:** full F0 set (tightens C6 and re-issues M1 against background loss), then W4 PTF/model
+  semantic validation; the counterfactual track waits on its literature gate.
+
 ## Status (2026-08-28) — warm-up bug fixed, M1 replay re-issued under PREREG v1.6
 
 - **The bug.** `baseline_warmup_epochs = 10` counted pool UPDATE CALLS, so `inband_sync`
