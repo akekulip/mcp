@@ -153,52 +153,56 @@ in-band arm is not free: it is 1024 reads/epoch here against 41, and the honest 
 byte currency — per-link data-plane state and one exception report per loss event — which is what
 the M2 cost table must produce.
 
-## C6 — the false-alarm axis, first real data (F0, background loss 1e-4)
+## C6 — the false-alarm axis (F0 complete: 20 background-loss + 10 clean seeds)
 
-The F0 control block is landing. On the first **10 completed Vision seeds** (`-mcp_bg_loss 1e-4`,
-no fault injected, `.fault` = NONE), background loss is genuinely distributed: **1024 of 2048 links
-carry drops**, up to 47 cumulative each. This is the regime C4 says M1 never had, and the localizer
-finally does work: every alarm on these logs is by construction a false alarm.
+The F0 control block finished. Background loss is genuinely distributed (`-mcp_bg_loss 1e-4`,
+`.fault` = NONE): **1024 of 2048 links carry drops**, up to 47 cumulative each. This is the
+regime C4 says the rest of M1 never had, and every alarm on these logs is by construction false.
 
-| h | uniform | threshold-gated | confirm | in-band (B = n) |
+**False alarms, 20 seeds** — seeds raising ≥ 1 alarm, and alarm epochs per 100 epochs at risk:
+
+| h | uniform | threshold-gated | confirm | thompson | in-band (B=n) | in-band sync/4 |
+|---|---|---|---|---|---|---|
+| 5.0 | 16/20 (50.5) | 0/20 (0) | 5/20 (0.71) | 3/20 (0.57) | 20/20 (57.8) | 20/20 (40.8) |
+| **6.5 (frozen)** | **0/20 (0)** | **0/20 (0)** | **0/20 (0)** | **0/20 (0)** | 20/20 (6.69) | 4/20 (1.00) |
+| 8.0 | 0/20 | 0/20 | 0/20 | 0/20 | 4/20 (0.57) | **0/20 (0)** |
+| 10.0 | 0/20 | 0/20 | 0/20 | 0/20 | **0/20 (0)** | 0/20 |
+| 13.0 | 0/20 | 0/20 | 0/20 | 0/20 | 0/20 | 0/20 |
+
+Two things follow. First, **the frozen threshold sits close to a cliff**: one step down to h = 5.0
+and uniform false-alarms in 16 of 20 seeds at 50 alarm-epochs per 100. Second, **the in-band arm
+is not false-alarm non-inferior at a shared threshold** — it reads 1024 link-epochs per epoch
+against uniform's 41, so under fabric-wide background loss it gets ~25× more chances to push a
+healthy link past h, and at 6.5 it alarms in every seed. Comparing arms at one threshold flatters
+the budgeted arms for the wrong reason: they are protected by their own blindness.
+
+**The clean control isolates the cause.** Hulk's 10 `-mcp_bg_loss 0` seeds (verified: no row
+anywhere in the fabric has `drop > 0`) raise **0 alarms for every arm at h = 4.0 and h = 6.5**,
+in-band included. The alarms are background loss observed more often, not detector noise.
+
+**Read at each arm's own false-alarm-free operating point, the result stands and strengthens:**
+
+| arm | lowest h with 0/20 false alarms | KM median TTL there | censored | oracle gap closed |
 |---|---|---|---|---|
-| 4.0 | 10/10 seeds, 64.5 alarm-epochs/100 | 10/10, 48.9 | 10/10, 4.3 | 10/10, **83.0** |
-| **6.5 (frozen)** | **0/10, 0.00** | **0/10, 0.00** | **0/10, 0.00** | **10/10, 7.39** |
-| 10.0 | 0/10, 0.00 | 0/10, 0.00 | 0/10, 0.00 | **0/10, 0.00** |
-| 20.0 | 0/10, 0.00 | 0/10, 0.00 | 0/10, 0.00 | 0/10, 0.00 |
+| uniform | 6.5 | 18.0 | 4/30 | 0 % |
+| confirm | 6.5 | 18.0 | 3/30 | 0 % |
+| thompson | 6.5 | 19.0 | 5/30 | −11 % |
+| threshold-gated | 6.5 | 20.0 | 1/30 | −22 % |
+| oracle (reference) | 6.5 | 9.0 | 0/30 | — |
+| in-band, sync/4 | 8.0 | 10.0 | 0/30 | 89 % |
+| **in-band (B = n)** | **10.0** | **9.0** | **0/30** | **100 %** |
 
-**The in-band arm is not false-alarm non-inferior at the frozen threshold.** It reads 1024 link-epochs
-per epoch against uniform's 41, so under a fabric-wide background loss it gets ~25× more chances to
-push a healthy link's CUSUM past h — and at h = 6.5 it does so in every seed. Comparing arms at one
-shared threshold therefore flatters the budgeted arms for the wrong reason: they are protected by
-their own blindness. Any equal-cost claim has to fix the false-alarm rate first and read the delay
-off at each arm's own operating point.
+At matched zero false-alarm rate on real background loss, unbudgeted per-link evidence **halves
+detection delay — 9.0 epochs against 18.0 — and ties the oracle**. Buying that false-alarm
+freedom costs the in-band arm nothing: it localizes in 9.0 epochs at h = 6.5, 8.0 and 10.0 alike,
+because its evidence per read is large enough to clear any of those thresholds on the same epoch.
+This is the first version of H8′ (equal-cost frontier, PREREG v1.7) that survives the false-alarm
+objection.
 
-**Doing that costs the in-band arm nothing:**
-
-| arm | threshold at which it is false-alarm-free on F0 | KM median TTL there | oracle gap closed |
-|---|---|---|---|
-| uniform | 6.5 | 18.0 (4/30 censored) | 0 % |
-| confirm | 6.5 | 18.0 (3) | 0 % |
-| in-band (B = n) | 10.0 | **9.0 (0)** | **100 %** |
-| in-band, collected every 4th epoch | 10.0 | 10.0 (0) | 89 % |
-
-At matched (zero) false-alarm rate on real background loss, unbudgeted per-link evidence halves
-detection delay — 9.0 epochs against 18.0 — and ties the oracle. Raising its threshold from 6.5 to
-10.0 to buy that false-alarm freedom costs it nothing, because its evidence per read is large enough
-that the LLR clears either threshold on the same epoch.
-
-**The clean control isolates the cause.** Hulk's 10 `-mcp_bg_loss 0` seeds (verified: zero rows with
-`drop > 0` anywhere in the fabric) produce **0 alarms in 0/10 seeds for every arm at h = 4.0 and
-h = 6.5**, in-band included. So the in-band arm's alarms at h = 6.5 are not the detector inventing
-suspicion out of nothing — they are background loss being observed 25× more often. That is a
-property of the observation rate, and it is exactly why the operating point has to be set per arm.
-
-**The honest limits of this table.** Ten seeds, so "0/10 seeds" is a one-sided 95 % upper bound of
-26 % per seed — the remaining 10 Vision seeds and Hulk's 10 clean controls will tighten it, and the
-whole table is provisional until they land. The in-band arm here is still B = n counter reading, not
-the order witness; what it bounds is the observation class, and the witness's own false-gap floor on
-silicon is M2's question, not this one. Reproduce with:
+**Limits.** 0/20 seeds is a one-sided 95 % upper bound of 13.9 % per seed on the per-seed
+false-alarm rate — tighter than the 26 % from the first ten, still not small. The in-band arm here
+is B = n counter reading, not the order witness: what it bounds is the observation class, and the
+witness's own false-gap floor on silicon is M2's question. Reproduce with:
 
 ```
 rsync -a --include="*.counters.csv" --include="*.onset" --include="*.fault" --exclude="*" \
