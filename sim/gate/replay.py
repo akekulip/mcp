@@ -36,6 +36,7 @@ from controller import infer                     # noqa: E402
 from controller.types import Sample              # noqa: E402
 
 EPOCH_US = 100000.0
+FORGET_MODE = infer.FORGET_MODE      # overridden by --forget-mode
 LINK_RE = re.compile(r"US(\d+)->CS(\d+)")
 
 
@@ -352,7 +353,7 @@ def replay_seed(names, per_epoch, faulty, onset_epoch, horizon, sched_name, budg
             if dtx > 0:
                 samples.append(Sample(element=f"vlink:{n}", delivered=max(dtx - ddrop, 0),
                                       lost=ddrop, latency_us=(), t_us=int(epoch * EPOCH_US)))
-        state = infer.update(state, samples, {}, baseline_mode="pooled")
+        state = infer.update(state, samples, {}, baseline_mode="pooled", forget_mode=FORGET_MODE)
         loc = infer.localize(state, k=max(1, len(want)), h=h)
         if loc.anomaly and loc.ranked:
             top = loc.ranked[0][0]
@@ -408,11 +409,17 @@ def main():
     ap.add_argument("--seeds", default="")
     ap.add_argument("--objective", default="any", choices=["any", "all", "original"],
                     help="multi-fault success semantics (PREREG v1.6 §14)")
+    ap.add_argument("--forget-mode", default=infer.FORGET_MODE, choices=list(infer.FORGET_MODES),
+                    help="per_observation (frozen) discounts once per read, so an arm's memory "
+                         "depends on its cadence; per_epoch discounts by elapsed epochs so every "
+                         "arm has the same wall-clock memory")
     ap.add_argument("--no-fault", action="store_true",
                     help="F0 control logs: no fault was injected, so EVERY alarm is a false alarm. "
                          "Needs no .fault/.onset files; TTL is meaningless and the run always goes "
                          "to the horizon. Sweep --h over these to get the false-alarm axis.")
     a = ap.parse_args()
+    global FORGET_MODE
+    FORGET_MODE = a.forget_mode
     root = Path(a.results)
     runs = sorted(root.glob("seed*.counters.csv"))
     if a.seeds:

@@ -109,6 +109,9 @@ K_CUSUM_LATENCY_US = _cfg_float(_FROZEN, "k_cusum_latency_us", 20.0)
 H_DEFAULT = _cfg_float(_FROZEN, "h_default", 6.5)
 BASELINE_GAMMA = _cfg_float(_FROZEN, "baseline_gamma", 0.05)
 FORGET_RHO = _cfg_float(_FROZEN, "forget_rho", 0.9)
+FORGET_MODE = _FROZEN.get("forget_mode", "per_observation")
+FORGET_MODES = ("per_observation", "per_epoch")
+FORGET_EPOCH_US = _cfg_float(_FROZEN, "forget_epoch_us", 100000.0)
 BASELINE_WARMUP_PKTS = _cfg_float(_FROZEN, "baseline_warmup_packets", 1e5)
 BASELINE_WARMUP_LAT = _cfg_float(_FROZEN, "baseline_warmup_latency_samples", 10)
 BASELINE_MODE = _FROZEN.get("baseline_mode", "per_element")
@@ -277,13 +280,32 @@ def _forget(x: float, prior: float, rho: float) -> float:
     return prior + rho * (x - prior)
 
 
+def _forget_rho(rho: float, elapsed_us: float, mode: str) -> float:
+    """The discount to apply to an element's pseudo-counts on this observation.
+
+    ``per_observation`` (the v1.0-v1.7 rule) applies ``rho`` once per OBSERVATION of the element.
+    That makes the posterior's memory a function of how often an arm looks: at rho = 0.9 an arm
+    reading a link every epoch remembers ~10 epochs, while one reading it every 25 epochs
+    remembers ~250. "One frozen localizer for every arm" is then true of the source and false of
+    the dynamics, and it systematically favours long-memory (budgeted) arms on a persistent fault
+    and penalises them on a moving one -- the two regimes M1 reports.
+
+    ``per_epoch`` discounts by ``rho ** (elapsed epochs)`` instead, so the memory is the same
+    wall-clock window for every arm regardless of cadence.
+    """
+    if mode == "per_observation" or elapsed_us <= 0.0:
+        return rho
+    return rho ** (elapsed_us / FORGET_EPOCH_US)
+
+
 def _posterior_step(st: ElementState, delivered: float, lost: float, lats: Sequence[float],
-                    t_us: int, rho: float) -> ElementState:
+                    t_us: int, rho: float, forget_mode: str = FORGET_MODE) -> ElementState:
     """Forgetting + conjugate posterior update only (no baseline / CUSUM).
 
     The loss posterior is touched only when ``delivered + lost > 0`` and the latency posterior
     only when latency samples are present; zero-information parts are left untouched.
     """
+    rho = _forget_rho(rho, float(t_us - st.last_t_us) if st.last_t_us else 0.0, forget_mode)
     la, lb, n_loss = st.loss_alpha, st.loss_beta, st.n_obs_loss
     if delivered + lost > 0.0:  # Beta-Binomial with exponential forgetting toward the prior
         la = _forget(st.loss_alpha, PRIOR_BETA_ALPHA, rho) + lost
@@ -310,9 +332,10 @@ def _posterior_step(st: ElementState, delivered: float, lost: float, lats: Seque
 
 def _update_element(st: ElementState, delivered: float, lost: float, lats: Sequence[float],
                     t_us: int, gamma: float, rho: float,
-                    pool: Optional[ElementState] = None) -> ElementState:
+                    pool: Optional[ElementState] = None,
+                    forget_mode: str = FORGET_MODE) -> ElementState:
     """Posterior update, then CUSUM against the element's own (or the pooled) baseline."""
-    new = _posterior_step(st, delivered, lost, lats, t_us, rho)
+    new = _posterior_step(st, delivered, lost, lats, t_us, rho, forget_mode)
     n = len(lats)
     pooled = pool is not None
     clp, cln, base_loss = st.cusum_loss_pos, st.cusum_loss_neg, st.base_loss
@@ -335,7 +358,7 @@ def _update_element(st: ElementState, delivered: float, lost: float, lats: Seque
 
 def update(state: InferState, samples: Iterable[Sample], path_to_links: Dict[str, List[str]],
            baseline_gamma: float = BASELINE_GAMMA, forget_rho: float = FORGET_RHO,
-           baseline_mode: str = BASELINE_MODE) -> InferState:
+           baseline_mode: str = BASELINE_MODE, forget_mode: str = FORGET_MODE) -> InferState:
     """Absorb one epoch of samples and return the new state (the input is not mutated).
 
     Args:
@@ -353,6 +376,8 @@ def update(state: InferState, samples: Iterable[Sample], path_to_links: Dict[str
     """
     if baseline_mode not in BASELINE_MODES:
         raise ValueError("baseline_mode must be one of %s" % (BASELINE_MODES,))
+    if forget_mode not in FORGET_MODES:
+        raise ValueError("forget_mode must be one of %s" % (FORGET_MODES,))
     acc, lats, t_max = _deaggregate(samples, path_to_links)
     # drop zero-information elements: no counts and no latency samples -> not probed
     acc = {e: dl for e, dl in acc.items() if dl[0] + dl[1] > 0.0 or lats[e]}
@@ -362,13 +387,15 @@ def update(state: InferState, samples: Iterable[Sample], path_to_links: Dict[str
         pool = _posterior_step(pool, sum(acc[e][0] for e in atomic),
                                sum(acc[e][1] for e in atomic),
                                [x for e in atomic for x in lats[e]],
-                               max(t_max[e] for e in atomic) if atomic else 0, forget_rho)
+                               max(t_max[e] for e in atomic) if atomic else 0, forget_rho,
+                               forget_mode)
     elements = dict(state.elements)
     for element in sorted(acc):  # sorted -> deterministic iteration regardless of input order
         delivered, lost = acc[element]
         elements[element] = _update_element(elements.get(element, ElementState()), delivered,
                                             lost, lats[element], t_max[element], baseline_gamma,
-                                            forget_rho, pool if baseline_mode == "pooled" else None)
+                                            forget_rho, pool if baseline_mode == "pooled" else None,
+                                            forget_mode)
     logger.debug("infer.update epoch=%d elements=%d mode=%s", state.epoch + 1, len(acc),
                  baseline_mode)
     return InferState(elements=elements, epoch=state.epoch + 1, pool=pool)

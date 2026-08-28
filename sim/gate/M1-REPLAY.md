@@ -242,7 +242,39 @@ BG_LOSS = 1e-4) and Hulk (2020–2029, clean); ~62 min and ~21.5 GB per run, so 
 memory-bound and watched. Once they land the ROC axis is a replay sweep over h, not new simulation
 — and per C4 it is also the re-issue of everything above.
 
-Not addressed, and known: the localizer's forgetting factor is applied per *observation*, not per
-epoch, so a B=41 arm has a ~250-epoch memory while the in-band arm has ~10 — "one frozen localizer
-for every arm" is true of the source and false of the dynamics. Deciding it needs a re-freeze and a
-re-issue, so it is queued behind the F0 block rather than done twice.
+## C7 — the forgetting confound: real in principle, inert in fact
+
+The localizer's forgetting factor is applied per *observation*, not per epoch, so at rho = 0.9 an
+arm reading a link every epoch remembers ~10 epochs while a B = 41 arm reading it every ~25 epochs
+remembers ~250. "One frozen localizer for every arm" is therefore true of the source and false of
+the dynamics, and the asymmetry runs the wrong way: it favours long-memory budgeted arms on a
+persistent fault and penalises them on a moving one — the two regimes M1 reports.
+
+It was worth measuring rather than arguing about, so `infer.py` gained a `forget_mode` knob
+(`per_observation`, the frozen rule, and `per_epoch`, which discounts by `rho ** elapsed_epochs`
+so every arm has the same wall-clock memory) and `replay.py` a `--forget-mode` flag. **Every
+published number is byte-identical under both modes**, across all three regimes:
+
+| regime | uniform | confirm | oracle | in-band | in-band sync/4 |
+|---|---|---|---|---|---|
+| single fault, h = 6.5 | 18.0 / 18.0 | 18.0 / 18.0 | 9.0 / 9.0 | 9.0 / 9.0 | 10.0 / 10.0 |
+| moving fault (move at 12) | 15.0 / 15.0 | 16.0 / 16.0 | 4.0 / 4.0 | 4.0 / 4.0 | 4.0 / 4.0 |
+| F0 background loss, alarms | 0/20 / 0/20 | 0/20 / 0/20 | — | 20/20 / 20/20 | 4/20 / 4/20 |
+
+(`per_observation / per_epoch`; the moving-fault stale-suspicion alarm counts are identical too —
+38, 25, 22, 19, 20.)
+
+The reason is structural, and it is the more useful finding: **forgetting never touches the
+decision variable.** `rho` discounts the Beta and Normal-Gamma pseudo-counts only; the CUSUM that
+`localize` ranks and thresholds accumulates with no decay at all, and in these regimes the pooled
+baseline it is compared against is pinned at `p_floor`. So the cadence-dependent memory cannot
+reach any reported result, and the frozen default stays `per_observation` — changing it would
+alter nothing while invalidating every number.
+
+**Where the concern actually lives is the CUSUM's lack of decay**, not the forgetting factor. That
+is the mechanism behind the stale-suspicion alarms in the moving-fault regime: once a link has
+been flagged, nothing brings its statistic back down when it stops misbehaving, so the arms that
+read it most often suffer most. A standard quickest-change design resets after an alarm; this one
+does not, and that is the change to make when re-localization becomes a measured objective.
+
+## Still open in M1
