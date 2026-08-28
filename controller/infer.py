@@ -30,13 +30,17 @@ Pipeline per epoch (:func:`update`):
    ``S+ <- max(0, S+ + x*log(p1/p0) + (n-x)*log((1-p1)/(1-p0)))`` (nats).  A clean probe of
    any size gives a negative increment, so light clean probes never alarm.  Latency: a
    two-sided CUSUM on the posterior-mean latency against its running baseline (an
-   exponential moving average of the posterior mean).  For the element's first ``baseline_warmup_epochs``
-   observed epochs the baseline simply follows the posterior mean and no CUSUM increment is
-   taken, so that the decay of the prior pseudo-counts is not read as a change.
+   exponential moving average of the posterior mean).  Until the baseline owner has observed
+   ``baseline_warmup_packets`` packets (``baseline_warmup_latency_samples`` latency samples)
+   the baseline simply follows the posterior mean and no CUSUM increment is taken, so that the
+   decay of the prior pseudo-counts is not read as a change.  Warm-up is measured in OBSERVED
+   EVIDENCE, never in update calls: a schedule that reads every fourth epoch carries the same
+   packets per read as one that reads every epoch, and must not be held in warm-up four times
+   as long (PREREG v1.6 amendment, §14).
    ``baseline_mode: pooled`` replaces the per-element baseline with the fabric-wide pooled
    posterior mean over all atomic elements observed so far (pooled pseudo-counts, same
-   forgetting, one pool update per epoch); warm-up then counts pool updates, not per-element
-   observations, so a sparsely probed outlier is compared against its peers at its first
+   forgetting, one pool update per epoch); warm-up then counts the POOL's packets, not the
+   element's, so a sparsely probed outlier is compared against its peers at its first
    observation.  Per-element posteriors are unchanged in both modes.
    Latency increments are normalised by the slack ``k``:
    ``S+ <- max(0, S+ + (x - b)/k - 1)``, ``S- <- max(0, S- + (b - x)/k - 1)``
@@ -105,7 +109,8 @@ K_CUSUM_LATENCY_US = _cfg_float(_FROZEN, "k_cusum_latency_us", 20.0)
 H_DEFAULT = _cfg_float(_FROZEN, "h_default", 6.5)
 BASELINE_GAMMA = _cfg_float(_FROZEN, "baseline_gamma", 0.05)
 FORGET_RHO = _cfg_float(_FROZEN, "forget_rho", 0.9)
-BASELINE_WARMUP = int(_cfg_float(_FROZEN, "baseline_warmup_epochs", 10))
+BASELINE_WARMUP_PKTS = _cfg_float(_FROZEN, "baseline_warmup_packets", 1e5)
+BASELINE_WARMUP_LAT = _cfg_float(_FROZEN, "baseline_warmup_latency_samples", 10)
 BASELINE_MODE = _FROZEN.get("baseline_mode", "per_element")
 BASELINE_MODES = ("per_element", "pooled")
 ALARM_MIN_OBS = int(_cfg_float(_FROZEN, "alarm_min_observations", 1))
@@ -137,6 +142,10 @@ class ElementState:
     base_lat: Optional[float] = None
     n_obs_loss: int = 0
     n_obs_lat: int = 0
+    # Evidence behind the baseline: packets (loss) and latency samples.  Warm-up is gated on
+    # THESE, never on the number of update calls (PREREG v1.6 §14).
+    n_pkt_loss: float = 0.0
+    n_samp_lat: int = 0
     # CUSUM statistics (loss is upper-sided only: cusum_loss_neg stays 0.0)
     cusum_loss_pos: float = 0.0
     cusum_loss_neg: float = 0.0
@@ -232,13 +241,15 @@ def _deaggregate(samples: Iterable[Sample], path_to_links: Dict[str, List[str]]
     return acc, lats, t_max
 
 
-def _loss_llr_step(pos: float, n: float, x: float, base: Optional[float], n_obs: int,
+def _loss_llr_step(pos: float, n: float, x: float, base: Optional[float], n_pkt: float,
                    rate: float, gamma: float, pooled: bool) -> Tuple[float, float]:
     """Upper-sided binomial LLR CUSUM step on counts; returns (S+, new baseline).
 
     ``base`` and ``rate`` are prior-free loss rates (see ``ElementState.loss_rate``).
+    ``n_pkt`` is the number of PACKETS the baseline owner has observed (the pool's in pooled
+    mode); the CUSUM stays at zero until it reaches ``BASELINE_WARMUP_PKTS``.
     """
-    if base is None or n_obs < BASELINE_WARMUP:
+    if base is None or n_pkt < BASELINE_WARMUP_PKTS:
         return 0.0, (base if pooled and base is not None else rate)
     p0 = min(max(base, P_FLOOR), 1.0 - 2.0 * DELTA_LOSS)
     p1 = p0 + DELTA_LOSS
@@ -247,15 +258,15 @@ def _loss_llr_step(pos: float, n: float, x: float, base: Optional[float], n_obs:
     return max(0.0, pos + inc), new_base
 
 
-def _track(pos: float, neg: float, x: float, base: Optional[float], n_obs: int, k: float,
+def _track(pos: float, neg: float, x: float, base: Optional[float], n_samp: float, k: float,
            gamma: float, pooled: bool = False) -> Tuple[float, float, float]:
     """One two-sided latency CUSUM + baseline step; returns (S+, S-, new baseline).
 
-    During the first ``BASELINE_WARMUP`` observations the baseline follows ``x`` and the
-    CUSUM stays at zero.  In pooled mode ``base``/``n_obs`` are the pool's and the returned
-    baseline is the pool mean itself (no per-element EMA).
+    Until the baseline owner has seen ``BASELINE_WARMUP_LAT`` latency SAMPLES the baseline
+    follows ``x`` and the CUSUM stays at zero.  In pooled mode ``base``/``n_samp`` are the
+    pool's and the returned baseline is the pool mean itself (no per-element EMA).
     """
-    if base is None or n_obs < BASELINE_WARMUP:
+    if base is None or n_samp < BASELINE_WARMUP_LAT:
         return 0.0, 0.0, (base if pooled and base is not None else x)
     z = (x - base) / k
     new_base = base if pooled else (1.0 - gamma) * base + gamma * x
@@ -293,7 +304,8 @@ def _posterior_step(st: ElementState, delivered: float, lost: float, lats: Seque
         mu, kappa, a, b = mu_n, kappa_n, a_n, b_n
     return replace(st, loss_alpha=la, loss_beta=lb, ng_mu=mu, ng_kappa=kappa, ng_alpha=a,
                    ng_beta=b, last_t_us=max(st.last_t_us, t_us),
-                   n_obs_loss=n_loss, n_obs_lat=st.n_obs_lat + (1 if n else 0))
+                   n_obs_loss=n_loss, n_obs_lat=st.n_obs_lat + (1 if n else 0),
+                   n_pkt_loss=st.n_pkt_loss + delivered + lost, n_samp_lat=st.n_samp_lat + n)
 
 
 def _update_element(st: ElementState, delivered: float, lost: float, lats: Sequence[float],
@@ -305,13 +317,14 @@ def _update_element(st: ElementState, delivered: float, lost: float, lats: Seque
     pooled = pool is not None
     clp, cln, base_loss = st.cusum_loss_pos, st.cusum_loss_neg, st.base_loss
     if delivered + lost > 0.0:
-        b_loss, n_loss = ((pool.loss_rate, pool.n_obs_loss) if pooled
-                          else (st.base_loss, st.n_obs_loss))
+        b_loss, n_loss = ((pool.loss_rate, pool.n_pkt_loss) if pooled
+                          else (st.base_loss, st.n_pkt_loss))
         clp, base_loss = _loss_llr_step(clp, delivered + lost, lost, b_loss, n_loss,
                                         new.loss_rate, gamma, pooled)
     base_lat, cap, can = st.base_lat, st.cusum_lat_pos, st.cusum_lat_neg
     if n:
-        b_lat, n_lat = (pool.latency_mean, pool.n_obs_lat) if pooled else (st.base_lat, st.n_obs_lat)
+        b_lat, n_lat = ((pool.latency_mean, pool.n_samp_lat) if pooled
+                        else (st.base_lat, st.n_samp_lat))
         if pooled and pool.n_obs_lat == 0:
             b_lat = None
         cap, can, base_lat = _track(cap, can, new.latency_mean, b_lat, n_lat,

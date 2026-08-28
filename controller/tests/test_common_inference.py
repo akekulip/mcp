@@ -226,16 +226,40 @@ class TestPooledBaseline(unittest.TestCase):
         """Pooled warm-up on clean 50000-packet links, then one clean 500-packet probe of a
         new link: anomaly False and that link's statistic exactly 0 (LLR of a clean probe < 0)."""
         state = InferState()
-        for e in range(infer.BASELINE_WARMUP + 5):
+        epochs = int(infer.BASELINE_WARMUP_PKTS // 200000) + 5   # 4 links x 50000 packets/epoch
+        for e in range(epochs):
             samples = [Sample(SPARSE_LINKS[(4 * e + j) % 64], 50000, 0, (50.0,), e) for j in range(4)]
             state = infer.update(state, samples, SPARSE_PATHS, baseline_mode="pooled")
-        self.assertGreaterEqual(state.pool.n_obs_loss, infer.BASELINE_WARMUP)
+        self.assertGreaterEqual(state.pool.n_pkt_loss, infer.BASELINE_WARMUP_PKTS)
         state = infer.update(state, [Sample("vlink:new", 500, 0, (50.0,), 99)], SPARSE_PATHS,
                              baseline_mode="pooled")
         loc = infer.localize(state, 1, infer.H_DEFAULT)
         self.assertFalse(loc.anomaly)
         self.assertEqual(state.get("vlink:new").cusum, 0.0)
         self.assertEqual(dict(loc.ranked)["vlink:new"], 0.0)
+
+    def test_warmup_counts_packets_not_update_calls(self):
+        """PREREG v1.6 §14: warm-up is evidence, not cadence.  A schedule that reads every
+        fourth epoch carries four times the packets per read; it must leave warm-up at the same
+        packet mass as a schedule that reads every epoch, and detect the same fault.  Before the
+        fix warm-up counted pool UPDATE CALLS, so the low-cadence arm stayed blind (11 drops in
+        99,704 packets, CUSUM 0.00)."""
+        n = int(infer.BASELINE_WARMUP_PKTS)
+        dense = sparse = InferState()
+        for e in range(8):      # 8 calls x 4 links x n/4 packets
+            dense = infer.update(dense, [Sample("vlink:%d" % j, n // 4, 0, (), e) for j in range(4)],
+                                 {}, baseline_mode="pooled")
+        for e in range(2):      # a quarter of the calls, the same packets in total
+            sparse = infer.update(sparse, [Sample("vlink:%d" % j, n, 0, (), e) for j in range(4)],
+                                  {}, baseline_mode="pooled")
+        self.assertGreater(dense.pool.n_pkt_loss, infer.BASELINE_WARMUP_PKTS)
+        self.assertGreater(sparse.pool.n_pkt_loss, infer.BASELINE_WARMUP_PKTS)
+        self.assertLess(sparse.pool.n_obs_loss, dense.pool.n_obs_loss)   # fewer calls, same evidence
+        for name, st in (("dense", dense), ("sparse", sparse)):
+            after = infer.update(st, [Sample("vlink:bad", n, int(n * 1e-3), (), 99)], {},
+                                 baseline_mode="pooled")
+            self.assertGreater(after.get("vlink:bad").cusum, infer.H_DEFAULT, name)
+            self.assertTrue(infer.localize(after, 1, infer.H_DEFAULT).anomaly, name)
 
     def test_frozen_mode_matches_the_runs_and_bad_mode_rejected(self):
         # PREREG v1.5 §7: every run passes `pooled`, so the frozen file records `pooled`

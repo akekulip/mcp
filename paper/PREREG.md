@@ -742,6 +742,7 @@ Every reported number is traceable to (config, seed, commit). The following are 
 | 2026-08-27 | §3.3 localizer constants (pre-freeze) | Loss change detector = upper-sided binomial-LLR CUSUM; `delta_loss` (minimum detectable shift) set to the frozen F1 rate 1e-4 (a larger delta makes the LLR drift negative at the fault rate and the fault can never alarm; measured on the Tier-1 pilot); h = 6.5 nats; pooled baseline. Consequence: a single observed drop (4.6 nats) cannot alarm — ≥ 2 drops in a probe window are required, which busy Tier-1 links provide (~3 expected per 30k-packet epoch). The LULESH-128 rehearsal (COSIM-RESULTS.md) was run at delta 1e-3 and is not comparable | pre-tuning, not yet frozen |
 | 2026-08-27 | Tier-1 PILOT at the frozen §14 point (NOT the pre-registered main block; 30 seeds paired with the gate arms) | cusum (localizer suspects + round-robin) ≡ uniform per seed (15 [10, 22]); MCP with the LULESH-tuned configuration (dlinucb, α 0, coverage floor 0.75; no Tier-1 tuning) 18 [14, 24], slower than uniform in 23/30 seeds (sign test p = 0.005); oracle 8. H1 (≥ 30 % lower median TTL than the best baseline) is NOT met by this configuration. Reading: with one stationary silent-loss fault, time-to-localize is decided by the first probe of the faulty link after onset; a learner must beat coverage per probe slot. The §3.2 Tier-1 tuning block has not been run (≈ 64 configs × 5 seeds × 1 h). Localizer provenance: infer.py 116ffc9f with delta_loss 1e-4, pooled | sim/gate/results_tier1_cosim_summary.md; reported, not suppressed |
 | 2026-08-27 | v1.5 — detector provenance, budget currency, retirements, replacement hypotheses H8/H9 (panel review, docs/review/) | Every published TTL was computed by the simulator's ratio rule (`mcp.cpp:133-152`), not the frozen localizer §3.3 names; re-issued under the pre-registered detector (MCP 19.0 KM vs cusum/uniform-schedule 20.0, paired 11/19, p = 0.20 — the arms are indistinguishable and no arm meets H1). Medians now read off the KM curve (§2.1). One budget currency. H1, H3, H5, H7-for-F1 and the 18,400-run matrix retired on the record; H8/H9 added | see Amendment v1.5 below |
+| 2026-08-28 | v1.6 — §3.3 warm-up defined in observed evidence; replay determinism and success semantics | The frozen localizer held an element in warm-up for `baseline_warmup_epochs = 10` **update calls**. Warm-up is a statement about how much evidence stands behind the baseline, so counting calls penalised any schedule that reads less often while carrying the same packets per read: the H8 in-band arm collecting every 4th epoch saw 11 drops in 99,704 packets and still reported CUSUM 0.00. Warm-up is now `baseline_warmup_packets = 1e5` observed packets (= 10/δ, so the baseline's own noise ~1/N = 1e-5 is an order below the shift under test) and `baseline_warmup_latency_samples = 10` latency samples. infer.py sha256 `0a989aaf…`; every replay result re-issued under it | see Amendment v1.6 below |
 
 Amendments are appended only. An amendment after the corresponding block has started running
 is flagged "post-hoc" in the paper.
@@ -908,4 +909,66 @@ HURDLES file's H-numbers are a separate namespace):
 `pooled`; the runs' mode is authoritative and the file is corrected. The LULESH rehearsal
 (`sim/gate/COSIM-RESULTS.md`) was produced with localizer hash `116ffc9f` and `delta_loss = 1e-3`,
 neither reproducible from HEAD: those results are marked **superseded** and are not cited in the paper.
+
+### Amendment v1.6 — 2026-08-28 — warm-up is evidence, not cadence
+
+**Reason.** §3.3 froze `baseline_warmup_epochs = 10`: the CUSUM stayed at zero until the baseline
+owner (the pool, in the `pooled` mode every run uses) had been *updated* ten times. An update call
+is not a unit of evidence. A schedule that reads every fourth epoch accumulates four epochs of
+packets per read, so it carried the same evidence per call and four times the evidence per warm-up
+— yet it was held in warm-up four times as long. The defect is not neutral across arms: it
+penalises exactly the low-cadence collection that the H8 in-band invariant proposes, and it was
+found because the `inband_sync` arm (per-link verdicts collected every 4th epoch) reported CUSUM
+0.00 after observing 11 drops in 99,704 packets on the faulty link.
+
+**Change.** Warm-up is counted in observed evidence:
+
+| knob | v1.5 | v1.6 |
+|---|---|---|
+| loss | `baseline_warmup_epochs: 10` (update calls) | `baseline_warmup_packets: 1e5` (packets the baseline owner has observed) |
+| latency | the same 10 update calls | `baseline_warmup_latency_samples: 10` (individual latency samples) |
+
+`1e5 = 10/δ` at the frozen `delta_loss = 1e-4`: the baseline's own estimation noise (~1/N = 1e-5)
+is then an order of magnitude below the shift the LLR is asked to detect. `ElementState` gained
+`n_pkt_loss` and `n_samp_lat`; `n_obs_loss`/`n_obs_lat` remain and still gate
+`alarm_min_observations`. Localizer hash `be12e7b2…` → `0a989aaf…`.
+
+**Effect on the published replay results** (30 gate seeds, frozen budget 41, h = 6.5, KM median TTL
+from onset, censored in parentheses):
+
+| schedule | v1.5 (call-counted warm-up) | v1.6 (packet-counted) |
+|---|---|---|
+| uniform | 20.0 (6) | **18.0 (4)** |
+| random | 22.0 (13) | 22.0 (13) |
+| load-gated | 24.0 (3) | 24.0 (3) |
+| threshold-gated | 20.0 (1) | 20.0 (1) |
+| greedy-information | 22.0 (7) | 22.0 (7) |
+| oracle | 10.0 (0) | **9.0 (0)** |
+| in-band (H8) | 10.0 (0) | **9.0 (0)** |
+| in-band, collected every 4th epoch | never localized (blind) | **10.0 (0)** |
+
+Every arm gains 0–2 epochs of warm-up that was previously wasted, and the low-cadence in-band arm
+stops being an artifact. Wrong-link alarms remain 0/30 seeds for every arm at h = 6.5 on these
+clean-background runs; the F0 background-loss block (BG_LOSS = 1e-4, no fault) is the false-alarm
+test and is still running. **The conclusions are unchanged**: no counter-computable schedule closes
+any of the oracle gap (H9 not tripped), and the link-local in-band invariant closes all of it.
+
+**Replay determinism and success semantics (same date, same commit).** Three defects in
+`sim/gate/replay.py` fixed alongside, because they affect what the H8/H9 numbers mean:
+
+1. Semi-synthetic fault identities were drawn from `random.Random(hash(stem))`. Python salts
+   `hash` of a string per process, so the multi-fault scenarios were not reproducible between runs
+   of the same command. They now use `scenario_seed()` = CRC-32 of the stem and role.
+2. Multi-fault success was implicitly "the recorded fault ranked first, distractors ignored".
+   The objective is now explicit and reported in the header: `any` (top-ranked element is any
+   injected fault), `all` (every injected fault has been top-ranked), `original` (the recorded
+   fault only, semi-synthetic ones are distractors). Moving-fault semantics are deterministic and
+   the vacated link becomes healthy at the move epoch.
+3. The oracle-gap summary named the best arm among *all* non-oracle arms, which let the in-band
+   arm answer a question about counter-computable **schedules**. The H9 gate now ranks only
+   counter-computable schedules; the in-band arms are reported separately as a different
+   observability class.
+
+A wrong-link false-alarm count (anomaly epochs whose top-ranked element is no injected fault) is
+now recorded per arm, so the ADD/false-alarm axis M4 needs is produced by the replay itself.
 

@@ -7,7 +7,12 @@ k_cusum_latency_us: 10.0    # CUSUM slack for posterior-mean latency (microsecon
 h_default: 6.5              # CUSUM threshold (nats for loss, units of k for latency); per-arm knob. 5.0 gives 3/20 false-alarm seeds at 1e-4 background
 alarm_min_observations: 1   # observations an element needs before it may raise the alarm
 baseline_gamma: 0.05        # EMA rate of each element's running baseline
-baseline_warmup_epochs: 10  # observed epochs (per element, or of the pool in pooled mode) before CUSUM starts
+baseline_warmup_packets: 1e5   # PACKETS the baseline owner (the pool in pooled mode) must observe before
+                               # CUSUM starts = 10/delta_loss, so the baseline's own noise (~1/N = 1e-5)
+                               # is an order below the shift being tested.  v1.6: was baseline_warmup_epochs
+                               # = 10 UPDATE CALLS, which held a low-cadence schedule in warm-up 4x longer
+                               # than a high-cadence one carrying the same packets (H8 in-band arm blind).
+baseline_warmup_latency_samples: 10   # latency samples before the two-sided latency CUSUM starts
 baseline_mode: pooled       # per_element | pooled — every run passes pooled (PREREG v1.5 §7); the runs are authoritative
 forget_rho: 0.9             # posterior pseudo-count discount per observed epoch (~10-epoch window)
 prior_beta_alpha: 1.0       # Beta(1,1) prior on loss rate (alpha = losses)
@@ -17,4 +22,4 @@ prior_ng_kappa: 1e-3
 prior_ng_alpha: 1e-3
 prior_ng_beta: 1e-3
 deaggregation: uniform_prior_fractional   # path counts split evenly over links, no rounding
-module_sha256: be12e7b2ecef75be652d06262f8ddefdb0d05cb9880d37a889512480dfe278fd
+module_sha256: 0a989aaf3b506de70b133a9ef9e6a5eb924fda79de1dfd7679062acb73b04c7e

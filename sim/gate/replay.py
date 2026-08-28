@@ -27,6 +27,7 @@ import random
 import re
 import statistics
 import sys
+import zlib
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -171,6 +172,13 @@ SCHEDULES = {c.name: c for c in (Uniform, Random_, LoadGated, ThresholdGated, Gr
                                  InBand, InBandSync)}
 
 
+def scenario_seed(stem: str, role: str) -> int:
+    """Stable per-seed scenario seed.  Python's ``hash`` of a str is salted per process
+    (PYTHONHASHSEED), so the semi-synthetic fault identities used to differ between runs of the
+    same command; CRC-32 of the stem is stable across processes, machines and versions."""
+    return zlib.crc32(f"{stem}/{role}".encode())
+
+
 def first_drop_epoch_of(counters: Path, link: str):
     """First epoch whose cumulative drop count on the faulty link is > 0 — the first moment any
     detector could possibly fire (the fault's own evidence rate, PREREG v1.5 H8)."""
@@ -197,18 +205,42 @@ def _poisson(lam: float, rng: random.Random) -> int:
 
 def replay_seed(counters: Path, faulty: List[str], onset_ms: float, sched_name: str, budget: int,
                 seed: int, h: float, extra_faults: Dict[str, float], move_epoch: int,
-                move_to: str) -> Tuple[int, bool, "int | None"]:
+                move_to: str, objective: str = "any") -> Tuple[int, bool, "int | None", int]:
+    """Replay one seed; returns (TTL from onset, censored, detection epoch, false-alarm epochs).
+
+    ``objective`` names the multi-fault success semantics explicitly (PREREG v1.6 §14), because
+    'localized' is ambiguous once distractor faults exist:
+
+    * ``any``      -- the top-ranked element is ANY injected fault (the reported default);
+    * ``all``      -- every injected fault has been top-ranked at some epoch (hardest);
+    * ``original`` -- the top-ranked element is the RECORDED fault, distractors are noise.
+
+    A false-alarm epoch is one whose anomaly bit is set while the top-ranked element is NOT an
+    injected fault — the wrong-link alarms this detector would have raised on the way.
+    """
     names, per_epoch = load_counters(counters)
-    sch = SCHEDULES[sched_name](names, budget, seed, faulty)
+    # the oracle is handed EVERY injected fault, semi-synthetic ones included -- otherwise it is
+    # not an upper bound under the "all" objective (it would read one link and miss the others)
+    sch = SCHEDULES[sched_name](names, budget, seed,
+                                list(faulty) + [f for f in extra_faults if f not in faulty])
     state = infer.InferState()
     onset_epoch = int(onset_ms * 1000 // EPOCH_US)
     rng = random.Random(seed ^ 0xA11)
     horizon = max(per_epoch)
-    want = {"vlink:" + f for f in faulty}
+    injected = list(faulty) + [f for f in extra_faults if f not in faulty]
+    # "any"/"all" count every INJECTED fault as a success; "original" keeps the recorded fault as
+    # the only success and treats the semi-synthetic ones as distractors.
+    want = {"vlink:" + f for f in (injected if objective != "original" else faulty[:1])}
+    all_injected = {"vlink:" + f for f in injected}
+    identified: set = set()
+    false_alarms = 0
     for epoch in sorted(per_epoch):
         cum = per_epoch[epoch]
         if move_epoch and epoch == move_epoch and move_to:
-            sch.faulty = [move_to]; want = {"vlink:" + move_to}
+            sch.faulty = [move_to]
+            want = {"vlink:" + move_to}          # the fault is now THERE; the old link is healthy
+            all_injected = (all_injected - {"vlink:" + faulty[0]}) | {"vlink:" + move_to}
+            identified = set()
         chosen = sch.pick(epoch, cum, state)
         samples = []
         # the in-band arms are not budgeted: their evidence is carried by the packets themselves
@@ -227,9 +259,15 @@ def replay_seed(counters: Path, faulty: List[str], onset_ms: float, sched_name: 
                                       lost=ddrop, latency_us=(), t_us=int(epoch * EPOCH_US)))
         state = infer.update(state, samples, {}, baseline_mode="pooled")
         loc = infer.localize(state, k=1, h=h)
-        if epoch >= onset_epoch and loc.anomaly and loc.ranked and loc.ranked[0][0] in want:
-            return epoch - onset_epoch, False, epoch
-    return max(horizon - onset_epoch, 0), True, None
+        if epoch >= onset_epoch and loc.anomaly and loc.ranked:
+            top = loc.ranked[0][0]
+            if top in want:
+                identified.add(top)
+                if objective != "all" or identified >= want:
+                    return epoch - onset_epoch, False, epoch, false_alarms
+            elif top not in all_injected:
+                false_alarms += 1
+    return max(horizon - onset_epoch, 0), True, None, false_alarms
 
 
 def km_median(times, censored):
@@ -265,6 +303,8 @@ def main():
     ap.add_argument("--extra-p", type=float, default=1e-4)
     ap.add_argument("--move-fault-epoch", type=int, default=0)
     ap.add_argument("--seeds", default="")
+    ap.add_argument("--objective", default="any", choices=["any", "all", "original"],
+                    help="multi-fault success semantics (PREREG v1.6 §14)")
     a = ap.parse_args()
     root = Path(a.results)
     runs = sorted(root.glob("seed*.counters.csv"))
@@ -275,10 +315,13 @@ def main():
     scheds = a.schedules.split(",")
     print(f"# replay: {len(runs)} seeds x {len(scheds)} schedules x {len(budgets)} budgets, "
           f"h={a.h}, faults={a.faults}, move_epoch={a.move_fault_epoch or '-'}")
-    print("\n| budget | schedule | n | KM median TTL | raw median | censored | vs uniform (faster/slower, p) |")
-    print("|---|---|---|---|---|---|---|")
+    print(f"# objective={a.objective} (multi-fault success semantics), detector = frozen "
+          f"controller/infer.py {infer.module_hash()[:8]}")
+    print("\n| budget | schedule | n | KM median TTL | raw median | censored | wrong-link alarm epochs (seeds with >=1) | vs uniform (faster/slower, p) |")
+    print("|---|---|---|---|---|---|---|---|")
     obs: Dict[str, List[int]] = {}
     ev: Dict[str, List[int]] = {}
+    fa: Dict[str, List[int]] = {}
     for b in budgets:
         per_sched = {}
         for sname in scheds:
@@ -290,16 +333,17 @@ def main():
                 names, _ = load_counters(c)
                 extra = {}
                 if a.faults > 1:
-                    rng = random.Random(hash(stem) & 0xFFFF)
+                    rng = random.Random(scenario_seed(stem, "extra"))
                     for n in rng.sample([n for n in names if n != fault], a.faults - 1):
                         extra[n] = a.extra_p
                 move_to = ""
                 if a.move_fault_epoch:
-                    rng2 = random.Random((hash(stem) ^ 0xBEEF) & 0xFFFF)
+                    rng2 = random.Random(scenario_seed(stem, "move"))
                     move_to = rng2.choice([n for n in names if n != fault])
                 r = replay_seed(c, [fault], onset, sname, b, int(stem.replace("seed", "")),
-                                a.h, extra, a.move_fault_epoch, move_to)
+                                a.h, extra, a.move_fault_epoch, move_to, a.objective)
                 res[stem] = (r[0], r[1])
+                fa.setdefault(sname, []).append(r[3])
                 # C1 decomposition: coverage time = localization epoch - first OBSERVABLE drop epoch
                 fd = first_drop_epoch_of(c, fault)
                 if r[2] is not None and fd is not None:
@@ -314,8 +358,9 @@ def main():
                 cmp_ = f"{w} faster / {l} slower, p={p:.3f}"
             kmm = km_median(ts, cs)
             kms = f"{kmm:.1f}" if kmm == kmm else f">{max(ts)} (>50% censored)"
+            f = fa.get(sname, [0])
             print(f"| {b} | {sname} | {len(ts)} | {kms} | {statistics.median(ts):.1f} | "
-                  f"{sum(cs)}/{len(cs)} | {cmp_} |")
+                  f"{sum(cs)}/{len(cs)} | {sum(f)} ({sum(1 for x in f if x)}/{len(f)}) | {cmp_} |")
         if obs:
             print("\n  C1 decomposition (uncensored runs): evidence time = first observable drop - onset;")
             print("  coverage time = localization - first observable drop")
@@ -331,11 +376,26 @@ def main():
                           [c for _, c in per_sched["uniform"].values()]):
             o = km_median([t for t, _ in per_sched["oracle"].values()], [c for _, c in per_sched["oracle"].values()])
             u = km_median([t for t, _ in per_sched["uniform"].values()], [c for _, c in per_sched["uniform"].values()])
-            best = min((km_median([t for t, _ in v.values()], [c for _, c in v.values()]), k)
-                       for k, v in per_sched.items() if k != "oracle")
             gap = (u - o) or float("nan")
-            print(f"\n  oracle {o:.1f}, uniform {u:.1f}, best non-oracle {best[1]} {best[0]:.1f} "
-                  f"-> closes {100*(u-best[0])/gap:.0f}% of the oracle gap (H9 gate: >=30% with p<0.05 revives allocation)\n")
+            counter = [k for k in per_sched if k not in ("oracle", "inband", "inband_sync")]
+            if counter:
+                best = min((km_median([t for t, _ in per_sched[k].values()],
+                                      [c for _, c in per_sched[k].values()]), k) for k in counter)
+                closed = 100 * (u - best[0]) / gap
+                _, _, pg = sign_test({k: v[0] for k, v in per_sched["uniform"].items()},
+                                     {k: v[0] for k, v in per_sched[best[1]].items()})
+                verdict = ("TRIPPED — the allocation thesis is revived and H1 reopens"
+                           if closed >= 30 and pg < 0.05 else "not tripped")
+                print(f"\n  oracle {o:.1f}, uniform {u:.1f}; best COUNTER-COMPUTABLE schedule "
+                      f"{best[1]} {best[0]:.1f} -> closes {closed:.0f}% of the oracle gap, "
+                      f"paired p={pg:.3f} vs uniform. H9 gate (>=30% AND p<0.05): {verdict}")
+            for k in ("inband", "inband_sync"):     # a different observability class, not a schedule
+                if k in per_sched:
+                    v = km_median([t for t, _ in per_sched[k].values()],
+                                  [c for _, c in per_sched[k].values()])
+                    print(f"  {k:12s} (in-band evidence, H8 -- NOT a counter-computable schedule) "
+                          f"{v:.1f} -> closes {100*(u-v)/gap:.0f}% of the oracle gap")
+            print()
 
 
 if __name__ == "__main__":

@@ -2,6 +2,38 @@
 
 Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-08-25).
 
+## Status (2026-08-28) — warm-up bug fixed, M1 replay re-issued under PREREG v1.6
+
+- **The bug.** `baseline_warmup_epochs = 10` counted pool UPDATE CALLS, so `inband_sync`
+  (collect every 4th epoch) stayed in warm-up 4x longer than an arm reading every epoch with the
+  same packets per read: 11 drops in 99,704 packets, CUSUM 0.00, `pool_n` 4 vs 16. Warm-up is now
+  `baseline_warmup_packets = 1e5` observed packets (= 10/δ) and 10 latency samples; `ElementState`
+  carries `n_pkt_loss` / `n_samp_lat`. infer.py `be12e7b2` → **`0a989aaf`**, re-frozen, 37 tests
+  pass (new regression test: same evidence, quarter the calls, must detect).
+- **Three more defects found in the same pass**, all in `sim/gate/replay.py`: salted `hash(stem)`
+  for semi-synthetic fault identities (→ CRC-32 `scenario_seed`), implicit multi-fault success
+  semantics (→ explicit `--objective any|all|original`, printed in the header), and an oracle that
+  was handed only the recorded fault (under `all` it was NOT an upper bound — uniform beat it).
+  The H9 gate line now evaluates the significance test too, and ranks only counter-computable
+  schedules; the in-band arms are reported as a separate observability class.
+- **Results (30 seeds, re-issued).** Frozen budget 41: uniform 20.0 → **18.0**, oracle 10.0 →
+  **9.0**, in-band **9.0**, in-band sync/4 blind → **10.0**. The in-band arm is FLAT at 9.0 from
+  budget 10 to 200 while every counter-computable schedule degrades (all censored at budget 10) —
+  its evidence is not budgeted. H9 still not tripped anywhere (nearest miss threshold-gated,
+  2 faults/any, 22 % of the gap at p = 0.86). Wrong-link alarms 0/30 seeds everywhere except the
+  moving-fault regime, where counter arms raise 121–199 stale-suspicion alarm epochs against
+  in-band's 14. Under `all` with three faults nothing finishes, oracle included — that row is
+  horizon-bound, not an arm result.
+- **Repo CLAUDE.md written** with the verified testbed (switch `decps@10.10.54.81`, never reboot;
+  Vision dp9 / Hulk dp10 at 25G; Agilio↔Hulk 10G Soft-RoCE leg; chip currently owned by
+  `defense4_rrc_bor_unified12` pid 36630) and the commit convention.
+- **Running:** F0 control batches — Vision seeds 2000–2019 (BG_LOSS 1e-4), Hulk 2020–2029 (clean),
+  5–10 concurrent runs per host, ~62 min each, ~21.5 GB peak. Hulk projects to ~115 GB of 125 GB,
+  so a memory/OOM watch is armed. These logs feed the h-sweep ROC axis.
+- **Next:** M1 theory gate (independent prior-art review of the coverage bound — this gates the
+  major P4 work per the plan), then M2 post-TM order witness compile study (2 B vs 4 B) against the
+  recorded 8-ingress/3-egress baseline. The chip is not ours right now.
+
 ## Status (2026-08-25) — Phase S-DOWN started (Tofino down)
 - Repo cloned from akekulip/mcp; legacy tree moved to `legacy/` (frozen, read-only — the audit
   found its simulator placement-insensitive, sketch actuation inert, "LinUCB" = SGD+UCB1, unseeded
@@ -442,3 +474,9 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   run (pool_n 4 vs 16). Warm-up should be defined in observed packets (or pooled counts), not update
   calls -- otherwise every low-frequency arm is penalised by construction. Fix before any arm is
   compared at different read cadences.
+
+<!-- AUTO-HANDOFF (PreCompact/auto) 2026-08-28T15:59:26Z -->
+### Compaction handoff — 2026-08-28T15:59:26Z
+- Git: branch `master`, 0 uncommitted file(s): 
+- Last verification run recorded: 2026-08-28T15:52:49Z	cd /home/philip/Projects/mcp/sim/gate; python3 - <<'PY' p='replay.py'; s=open(p).read() old='''class Oracle(Schedule):''
+- RESUME: re-read the Task/Status/Next-action sections above; trust this file over recollection.
