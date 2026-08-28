@@ -246,6 +246,53 @@ WIT_INGRESS = '''
 '''
 
 
+
+CAPSULE_INGRESS = """
+    /* ---- CONTEXT CAPSULE (P1) --------------------------------------------------
+     * The source leaf is the only place in the fabric where the IPv4 header is still
+     * parsed, so it is the only place that can see SERVICE CLASS. C-W4's egress
+     * classifier could only read eg_intr_md.pkt_length, which is why the capacity
+     * gate showed a 25-point oracle gap on a service-class-only fault and another on
+     * a boundary inside one coarse size bin.
+     *
+     * So classify once, at the source, into a 4-bit context id = size bin x DSCP
+     * class, and carry it in the shim's EXISTING pad byte -- zero added wire bytes.
+     * Every hop then indexes its witness by (vlink << 4) | context, and transit and
+     * downstream agree because they read the same carried label rather than
+     * re-deriving it from what they can see.
+     *
+     * Class 2: a range key is at most 20 bits over 5 nibble pairs. total_len is 16,
+     * which leaves one nibble pair -- enough for the DSCP class as a second range
+     * field only if it is 4 bits. It is kept EXACT here to stay clear of the budget. */
+    action set_ctx(bit<8> c) { md.ctx = c; }
+
+    table tbl_context {
+        key     = {
+            hdr.ipv4.total_len : range;
+            hdr.ipv4.diffserv  : ternary;
+        }
+        actions = { set_ctx; }
+        size    = 32;
+        const default_action = set_ctx(0);
+    }
+"""
+
+
+CAPSULE_EGRESS = """
+    /* The capsule is carried, so the egress does not classify -- it reads the label the
+     * source wrote and ORs it into the sublink index. One OR of two PHV fields: single
+     * stage, and no Class 5 exposure. */
+    action ctx_index() { md.sublink = md.sublink | md.ctx; }
+
+    table tbl_ctx_index {
+        key     = { hdr.fabric.nxt : exact; }
+        actions = { ctx_index; @defaultonly NoAction; }
+        size    = 4;
+        const default_action = NoAction();
+        const entries = { NXT_CSIG : ctx_index(); }
+    }
+"""
+
 CTX_EGRESS = """
     /* ---- BEHAVIORAL SUBLINKS (C-W4) -------------------------------------------
      * A physical link is not simply healthy or faulty: it can be healthy for some
@@ -492,7 +539,7 @@ OLD_EGPARSE_INIT = "        md.tdelta = 0;"
 NEW_EGPARSE_INIT = OLD_EGPARSE_INIT + "\n        md.eg_rnd_fail = 0;"
 
 
-def build(variant, arm=False, egdrop=False, ctx=False):
+def build(variant, arm=False, egdrop=False, ctx=False, capsule=False):
     t = BASE
     hdr = HDR_W2 if variant == "w2" else HDR_W4
     t = sub(t, ANCHOR_IPV4, hdr.lstrip("\n") + "\n" + ANCHOR_IPV4, "ipv4 header anchor")
@@ -570,6 +617,34 @@ def build(variant, arm=False, egdrop=False, ctx=False):
         t = sub(t, "            tbl_eg_vlink.apply();",
                 "            tbl_eg_vlink.apply();\n            tbl_stratum.apply();",
                 "apply stratum classifier")
+    if capsule:
+        # source-side classifier + carry the label in the shim's existing pad byte
+        t = sub(t, ANCHOR_IG_INSERT, CAPSULE_INGRESS.lstrip("\n") + "\n" + ANCHOR_IG_INSERT,
+                "capsule ingress block")
+        t = sub(t, "    bit<16> wit_gap;", "    bit<8>  ctx;        // capsule: size bin x service class\n    bit<16> wit_gap;",
+                "ig_md_t ctx")
+        t = sub(t, "        md.wit_gap    = 0;", "        md.ctx        = 0;\n        md.wit_gap    = 0;",
+                "ingress parser ctx init")
+        t = sub(t, "        hdr.fabric.pad    = 0;", "        hdr.fabric.pad    = md.ctx;   /* capsule rides the existing pad byte */",
+                "act_enter carries the capsule")
+        t = sub(t, "                tbl_wit_check.apply();",
+                "                tbl_wit_check.apply();", "noop")
+        t = sub(t, "            tbl_dst_leaf.apply();",
+                "            tbl_dst_leaf.apply();\n            tbl_context.apply();",
+                "apply the source classifier")
+        # egress reads the carried label
+        t = sub(t, "    bit<16> stratum;    // C-W4: the behavioral-sublink context of this packet",
+                "    bit<16> ctx;        // capsule read off the shim\n"
+                "    bit<16> stratum;    // C-W4: the behavioral-sublink context of this packet",
+                "eg_md_t ctx")
+        t = sub(t, "        md.stratum = 0;", "        md.ctx = 0;\n        md.stratum = 0;",
+                "egress parser ctx init")
+        t = sub(t, "        pkt.extract(hdr.fabric);\n        transition select(hdr.fabric.nxt) {",
+                "        pkt.extract(hdr.fabric);\n        md.ctx = (bit<16>)hdr.fabric.pad;\n"
+                "        transition select(hdr.fabric.nxt) {", "egress parser reads the capsule")
+        t = sub(t, CTX_EGRESS.strip(), CAPSULE_EGRESS.strip(), "swap classifier for carried label")
+        t = sub(t, "            tbl_stratum.apply();", "            tbl_ctx_index.apply();",
+                "apply the capsule index")
     if egdrop:
         t = sub(t, OLD_EGMD, NEW_EGMD, "eg_md_t rnd")
         t = sub(t, OLD_EGPARSE_INIT, NEW_EGPARSE_INIT, "egress parser init")
@@ -589,6 +664,7 @@ VARIANTS = [
     ("mcp_fabric_w4_arm",    dict(variant="w4", arm=True)),
     ("mcp_fabric_w4_egdrop", dict(variant="w4", arm=True, egdrop=True)),
     ("mcp_fabric_cw4",       dict(variant="w4", arm=True, ctx=True)),
+    ("mcp_fabric_capsule",   dict(variant="w4", arm=True, ctx=True, capsule=True)),
 ]
 # NOTE: *_arm now means the WORKING arming shape (explicit gap test). The two shapes that
 # compile but do not arm -- md.exceed in wit_loss, and arm-in-wit_measure/clear-in-wit_ok --
