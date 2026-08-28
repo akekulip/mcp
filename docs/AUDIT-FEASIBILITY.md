@@ -42,41 +42,57 @@ lifecycle's public verdict should carry both numbers rather than the word "healt
 same conclusion the spec reaches from the other side with its INCONCLUSIVE state, and this is the
 quantitative reason for it.
 
-## 3. Background loss is the term that actually hurts
+## 3. Background loss is the term that actually hurts — recomputed consistently
 
-With any background loss `b > 0`, a zero-loss run is not achievable and the test becomes separating
-`b` from `b + δ`. For a one-sided test at α = 0.05 with 90 % power (normal approximation,
-`N ≈ ((z_α√(b(1-b)) + z_β√((b+δ)(1-b-δ)))/δ)²`), at δ = 1e-4:
+**Correction (2026-08-28).** The first version of this section mixed two different tests: the
+`b = 0` row came from the exact zero-event bound above (α only, power 1 by construction because a
+healthy link cannot drop a packet), while the `b > 0` rows came from a normal approximation with
+α = 0.05 *and* 90 % power. The resulting "4×" was an artifact of switching tests between rows, and
+the normal approximation was invalid at `b = 1e-5` anyway — it implies **0.35 expected events**
+under H0, where a normal approximation to a binomial does not hold. Both defects were found in an
+independent review of this file and are corrected here.
 
-| background b | packets to separate b from b+1e-4 | vs the zero-background case |
-|---|---|---|
-| 0 | 29,956 | 1.0× |
-| 1e-5 | 34,754 | 1.2× |
-| 1e-4 | 119,515 | **4.0×** |
+Every row below is now the **same exact binomial design**, in the framing certification actually
+needs: over `N` audit packets, certify the link iff losses ≤ `c`, where
 
-This matters because our own F0 block is measured at exactly `b = 1e-4`: **on a fabric with that much
-background loss the audit costs four times its headline figure**, 180 MB and ~3.6 ms at 400 G. Any
-evaluation that quotes 29,956 without stating the background-loss assumption is quoting the best
-case. The audit-byte bound in the evaluation should therefore be expressed per certified ceiling and
-per background level, not as a single constant.
+* **α = P(certify | the link is really faulty at b + δ) ≤ 0.05** — the false-restoration risk, and
+* **1 − β = P(certify | the link is really healthy at b) ≥ 0.90** — so audits usually conclude
+  rather than returning INCONCLUSIVE forever.
+
+`N` is the exact minimum by bisection, δ = 1e-4:
+
+| background b | N packets | certify iff losses ≤ | P(false restore) | P(certify when healthy) | vs b = 0 |
+|---|---|---|---|---|---|
+| 0 | **29,956** | 0 | 0.050 | 1.000 | 1.0× |
+| 1e-5 | **43,125** | 1 | 0.050 | 0.930 | 1.4× |
+| 1e-4 | **139,392** | 19 | 0.050 | 0.926 | **4.7×** |
+
+At `b = 0` the design collapses to the zero-event bound of §1, which is why the headline figure
+survives unchanged. The honest background-loss penalty at `b = 1e-4` is **4.7×**, and the reason is
+visible in the expected counts: the test must separate 13.9 expected losses from 27.9, rather than
+0 from 3.
+
+This matters for our own numbers because the F0 block runs at exactly `b = 1e-4`: **on that fabric
+an audit costs 139,392 packets — 209 MB at 1500 B, or 4.2 ms of a 400 G link — not the 45 MB of
+the headline.** Any evaluation quoting 29,956 without stating the background-loss assumption is
+quoting the best case, and the ceiling being certified must be stated with it.
 
 ## 4. Fleet scale — the 2 / 8 / 25 % concurrent-recovery axis
 
-At the `p ≤ 1e-4`, α = 0.05 operating point, with 1024 directed links and zero background loss:
+At the `p ≤ 1e-4`, α = 0.05 operating point with 1024 directed links, using the corrected §3
+figures (zero background, then the `b = 1e-4` case our own F0 block actually runs at):
 
-| links recovering | count | total audit bytes | at 400 G aggregate | at 4×400 G |
+| links recovering | count | audit bytes at b = 0 (29,956 pkt) | at b = 1e-4 (139,392 pkt) | at 400 G aggregate, b = 1e-4 |
 |---|---|---|---|---|
-| 2 % | 20 | 0.90 GB | 18 ms | 4 ms |
-| 8 % | 82 | 3.68 GB | 74 ms | 18 ms |
-| 25 % | 256 | 11.50 GB | 230 ms | 58 ms |
+| 2 % | 20 | 0.90 GB | 4.2 GB | 84 ms |
+| 8 % | 82 | 3.7 GB | 17.1 GB | 343 ms |
+| 25 % | 256 | 11.5 GB | 53.5 GB | 1.07 s |
 
-Multiply by 4 at `b = 1e-4` (46 GB, ~0.9 s at 400 G aggregate for the 25 % case). This is where the
-"where and when to measure" question becomes real: at 2 % the audit is free and any policy works; at
-25 % under background loss the audit budget is a genuine scheduling problem, and that is the regime
-the evaluation should be built around. It is also the regime where returning INCONCLUSIVE early —
-rather than spending the full N on a link that is clearly still bad — is worth the most, because a
-faulty link declares itself in ~1/p packets on average while a healthy one needs the full ln(1/α)/p
-to be cleared.
+This is where "where and when to measure" stops being free. At 2 % the audit is negligible and any
+policy works; at 25 % under realistic background loss it is 53 GB and over a second of a 400 G
+aggregate, and the scheduling question is real. It is also the regime where returning INCONCLUSIVE
+early is worth the most, because a faulty link declares itself in ~1/p packets on average while a
+healthy one must pay the full N to be cleared.
 
 ## 5. What this does not say
 
