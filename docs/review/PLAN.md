@@ -12,6 +12,17 @@ Approved thesis, scoped so that prior-art mechanisms are not misclaimed:
 
 The paper has three possible contributions, all gated: (1) a nontrivial and tight characterization of the coverage term under the stated observation model; (2) a compileable post-TM order witness that reaches the evidence floor for non-tail partial loss; and (3) an equal-cost Tofino result that moves the localization/false-alarm/overhead Pareto frontier with bounded evidence capture. Sequence numbering, alternate marking, paired counting, generic zoom, and learned scheduling are prior art or baselines, not inventions here. Do not call the witness “minimal” or “optimal” without a bit/state lower bound; report its concrete 2 B or 4 B cost instead.
 
+> **GATE OUTCOME, 2026-08-28: BOTH HALVES FAILED — the pivot below is in force.**
+> Three independent reviews (`docs/review/NOVELTY-GATE.md`, PREREG v1.7) found the coverage bound to
+> be the perfect-detection case of Bellman (1957) / Blackwell's index rule, restated for budgeted
+> policy classes in IEEE TIT by Chaudhuri–Fellouris–Tajer (2024) and Xu–Mei–Moustakides (2021); and
+> the order witness to be NetSeer's inter-switch drop detection (SIGCOMM'20 §3.3), with LinkGuardian
+> (SIGCOMM'23) and UEC 1.0.2 §5.1 LLR as independent occupants. The §4 "spraying collapses the
+> pooled-test design space" argument is refuted by SprayCheck. Per this gate's own rule: the bound is
+> demoted to an attributed lemma, M2 becomes *instantiate and cost a known primitive*, and the
+> novelty budget moves to the measured decomposition, the equal-cost frontier (M4/M5) and the
+> hard-capped zoom (M6). H8 is withdrawn and replaced by H8′ (equal-cost frontier).
+
 **Novelty kill/pivot gate.** Before major P4 work, an independent theory/prior-art review must show that the bound is not merely a classical coverage/search lemma relabeled for fabrics and that it has a tight or near-tight construction. Before the paper claim is frozen, the system must create a preregistered equal-cost Pareto-frontier shift against the strongest applicable baseline, with non-inferiority bounds for false alarms and overhead. If either gate fails, demote the bound to an explanatory lemma and publish the scoped negative result/replay benchmark rather than a recombination claim.
 
 Owners: **P** = Philip (hardware sessions, cabling, sudo, submissions, final judgement). Installed roles: `researcher` (primary prior art), `planner`/`architect`/`critic` (claim and design gates), `executor` (bounded implementation), `test-engineer` (reproducibility and experiment harness), `verifier` (acceptance evidence), `code-reviewer` (artifact review), `writer` (paper text), and `ieee-paper-figures` (figures). The research handoff is `$autoresearch-goal`; use `$team` only after the theory/novelty gate approves parallel replay, P4, and evaluation lanes.
@@ -63,7 +74,26 @@ The panel's first draft framed this as "prove no schedule compresses detection d
 
 **Goal.** Make the first silent drop a localized, in-band event on the Tofino, and measure the resulting delay. This is the experiment the paper stands on.
 
-**Design.** Primary: a standalone byte-aligned post-TM order witness—never `csig_h.epoch`, whose packed container cannot be rewritten from the required egress sources (`mcp_fabric.p4:102-108,690-694`). After `tbl_eg_vlink`, the upstream egress increments a modular 16-bit counter keyed by directed vlink and writes the returned value before deparse. The downstream ingress compares it with expected state keyed by the incoming directed link. Use a 2 B sequence-only form only when ingress-port/topology mapping proves link identity; otherwise compile and cost a 4 B `link_id + sequence` form. Fallback: RFC 9341 alternate marking with explicitly costed color periods and control-plane reads.
+**Design.** The primitive is **prior art** (NetSeer SIGCOMM'20 §3.3: egress-inserted per-neighbour
+sequence number, downstream ingress reads inconsecutive numbers as drops, 4 B, on Tofino); this
+milestone instantiates and costs it, and does not claim it. Adopt rather than reinvent: LinkGuardian's
+**era bit** for modulo wrap and its **self-replenishing lowest-priority dummy packet** for the
+idle-tail and blackhole cases. NetSeer's detection surface is now a **mandatory arm**, compiled side
+by side from one source tree. Note the witness is post-TM and therefore does **not** see upstream TM
+drops — a discarded packet is never numbered and creates no gap.
+
+**COMPILE GATE PASSED, 2026-08-28** (`p4/witness/COMPILE-GATE.md`, built on the switch's own bf-p4c
+9.13.2; compile only, chip untouched). Baseline 8 ingress / 3 egress; **W2 8/3 and W4 8/3 — the
+witness costs zero MAU stages**, with 4 ingress and 9 egress stages still free. Arming the fast loop
+from a gap event costs exactly +1 ingress stage. **W4 (explicit 16-bit link id) is the variant to
+take to silicon**: W2's premise is false on this testbed, because `setup_skeleton.py` maps
+`leaf l → spine s` onto `(port, qid)` and one loop port carries `N_SPINE = 2` directed vlinks, so
+ingress port identifies the link only up to a factor of 2 — a question M3 was going to have to ask on
+hardware, answered at compile time. Also found: the existing injector drops in *ingress*, before the
+egress stamp, so it cannot produce a single gap event; the egress-side injector is compiled and
+costed (+0 stages over the armed variant, +3 egress SRAM, +2 egress TCAM).
+
+Original design text, retained: a standalone byte-aligned post-TM order witness—never `csig_h.epoch`, whose packed container cannot be rewritten from the required egress sources (`mcp_fabric.p4:102-108,690-694`). After `tbl_eg_vlink`, the upstream egress increments a modular 16-bit counter keyed by directed vlink and writes the returned value before deparse. The downstream ingress compares it with expected state keyed by the incoming directed link. Use a 2 B sequence-only form only when ingress-port/topology mapping proves link identity; otherwise compile and cost a 4 B `link_id + sequence` form. Fallback: RFC 9341 alternate marking with explicitly costed color periods and control-plane reads.
 
 **Work.** Compile gate first against the fresh recorded baseline—currently 8 ingress + 3 egress stages (`docs/DESIGN-ALTERNATIVES.md:3-6`), not the stale 9-ingress assertion. In order: (a) source compile and placement/resource delta for 2 B and 4 B candidates; (b) model/PTF for initialization, reset/resynchronization, modulo wrap, duplicates, allowed reorder, consecutive losses, and multi-queue traffic; (c) silicon. Place fault injection after upstream sequence allocation and before downstream validation; a pre-increment drop cannot validate wire-loss semantics.
 
