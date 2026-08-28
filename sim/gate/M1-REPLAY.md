@@ -153,6 +153,53 @@ in-band arm is not free: it is 1024 reads/epoch here against 41, and the honest 
 byte currency — per-link data-plane state and one exception report per loss event — which is what
 the M2 cost table must produce.
 
+## C6 — the false-alarm axis, first real data (F0, background loss 1e-4)
+
+The F0 control block is landing. On the first **10 completed Vision seeds** (`-mcp_bg_loss 1e-4`,
+no fault injected, `.fault` = NONE), background loss is genuinely distributed: **1024 of 2048 links
+carry drops**, up to 47 cumulative each. This is the regime C4 says M1 never had, and the localizer
+finally does work: every alarm on these logs is by construction a false alarm.
+
+| h | uniform | threshold-gated | confirm | in-band (B = n) |
+|---|---|---|---|---|
+| 4.0 | 10/10 seeds, 64.5 alarm-epochs/100 | 10/10, 48.9 | 10/10, 4.3 | 10/10, **83.0** |
+| **6.5 (frozen)** | **0/10, 0.00** | **0/10, 0.00** | **0/10, 0.00** | **10/10, 7.39** |
+| 10.0 | 0/10, 0.00 | 0/10, 0.00 | 0/10, 0.00 | **0/10, 0.00** |
+| 20.0 | 0/10, 0.00 | 0/10, 0.00 | 0/10, 0.00 | 0/10, 0.00 |
+
+**The in-band arm is not false-alarm non-inferior at the frozen threshold.** It reads 1024 link-epochs
+per epoch against uniform's 41, so under a fabric-wide background loss it gets ~25× more chances to
+push a healthy link's CUSUM past h — and at h = 6.5 it does so in every seed. Comparing arms at one
+shared threshold therefore flatters the budgeted arms for the wrong reason: they are protected by
+their own blindness. Any equal-cost claim has to fix the false-alarm rate first and read the delay
+off at each arm's own operating point.
+
+**Doing that costs the in-band arm nothing:**
+
+| arm | threshold at which it is false-alarm-free on F0 | KM median TTL there | oracle gap closed |
+|---|---|---|---|
+| uniform | 6.5 | 18.0 (4/30 censored) | 0 % |
+| confirm | 6.5 | 18.0 (3) | 0 % |
+| in-band (B = n) | 10.0 | **9.0 (0)** | **100 %** |
+| in-band, collected every 4th epoch | 10.0 | 10.0 (0) | 89 % |
+
+At matched (zero) false-alarm rate on real background loss, unbudgeted per-link evidence halves
+detection delay — 9.0 epochs against 18.0 — and ties the oracle. Raising its threshold from 6.5 to
+10.0 to buy that false-alarm freedom costs it nothing, because its evidence per read is large enough
+that the LLR clears either threshold on the same epoch.
+
+**The honest limits of this table.** Ten seeds, so "0/10 seeds" is a one-sided 95 % upper bound of
+26 % per seed — the remaining 10 Vision seeds and Hulk's 10 clean controls will tighten it, and the
+whole table is provisional until they land. The in-band arm here is still B = n counter reading, not
+the order witness; what it bounds is the observation class, and the witness's own false-gap floor on
+silicon is M2's question, not this one. Reproduce with:
+
+```
+rsync -a --include="*.counters.csv" --include="*.onset" --include="*.fault" --exclude="*" \
+      decps@10.10.54.166:mcp/sim/gate/results_f0_bg/moe8x8b_n16/uniform/ <dir>
+./replay.py --results <dir> --budgets 41 --schedules uniform,confirm,inband --no-fault --h 6.5
+```
+
 ## Still open in M1
 
 The h-sweep (ADD vs false-alarm rate) needs the F0 logs, running now on Vision (seeds 2000–2019,
