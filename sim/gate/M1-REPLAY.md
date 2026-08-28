@@ -235,13 +235,6 @@ rsync -a --include="*.counters.csv" --include="*.onset" --include="*.fault" --ex
 ./replay.py --results <dir> --budgets 41 --schedules uniform,confirm,inband --no-fault --h 6.5
 ```
 
-## Still open in M1
-
-The h-sweep (ADD vs false-alarm rate) needs the F0 logs, running now on Vision (seeds 2000–2019,
-BG_LOSS = 1e-4) and Hulk (2020–2029, clean); ~62 min and ~21.5 GB per run, so the fleet is
-memory-bound and watched. Once they land the ROC axis is a replay sweep over h, not new simulation
-— and per C4 it is also the re-issue of everything above.
-
 ## C7 — the forgetting confound: real in principle, inert in fact
 
 The localizer's forgetting factor is applied per *observation*, not per epoch, so at rho = 0.9 an
@@ -276,5 +269,39 @@ is the mechanism behind the stale-suspicion alarms in the moving-fault regime: o
 been flagged, nothing brings its statistic back down when it stops misbehaving, so the arms that
 read it most often suffer most. A standard quickest-change design resets after an alarm; this one
 does not, and that is the change to make when re-localization becomes a measured objective.
+
+## C8 — the two mechanisms do not spend the same currency (`sim/gate/cost_model.py`)
+
+C6 stops short of H8′ because it compares delay at matched false alarms without pricing anything.
+A single "equal cost" number was never going to work, and putting both mechanisms on the PREREG
+§2.3 units shows why. Traffic is measured from the recorded logs (2048 links, 176.7 M pkt/s
+aggregate, 2.12 Tb/s carried at 1500 B against 409.6 Tb/s of capacity — this trace runs the fabric
+at **0.52 % utilisation**); the per-mechanism costs are our compiled design for the witness and
+published figures for the rest.
+
+| mechanism | β_tag (% capacity) | tag as % of carried bytes | control reads/s | coverage delay | provenance |
+|---|---|---|---|---|---|
+| scheduled counters, B = 41 (uniform) | 0 | 0 | 410 | 11.0 | measured (replay) |
+| scheduled counters, B = n (the C6 "in-band" arm) | 0 | 0 | **20,480** | 1.0 | measured (replay) |
+| W4 order witness (ours, 4 B) | 0.0014 % | 0.267 % | **0** | 1.0 by construction | bytes measured; delay not yet on silicon |
+| NetSeer inter-switch detection (4 B) | 0.0014 % | 0.267 % | 0 | 1.0 by construction | SIGCOMM'20 §3.3, published |
+| RFC 9341 alternate marking, 100 ms colour | 0 | 0 | 40,960 | ≥ colour period | RFC 9341, published |
+
+At 4096 B the witness's share of carried bytes falls to 0.098 %; its share of *capacity* stays
+0.0014 % either way on this trace.
+
+**The frontier is a plane, not a line.** Scheduled counter reading spends control-plane reads and
+buys coverage delay; the witness spends wire bytes on every production packet and buys coverage
+delay of zero with no scheduled reads at all. The C6 arm that ties the oracle does it at 20,480
+reads/s — fifty times the B = 41 arm — which is precisely why C6 is an observation-class bound and
+not a frontier result. What the witness proposes is to buy that same delay for **0.0014 % of
+fabric capacity and no scheduled reads**; that is the claim H8′ has to test.
+
+**Not priced here**, and each is required before the frontier is publishable: per-link witness
+state and MAU stages (`p4/witness/COMPILE-GATE.md` carries the compiled delta), exception-report
+bytes at one per loss event, collector CPU, and — for the NetSeer row — its ring buffer and three
+redundant notification packets per loss event. Nor does this trace stress the byte axis: at 0.52 %
+utilisation a per-packet tag is nearly free, and the regime that matters is a loaded fabric where
+0.267 % of carried bytes is real capacity.
 
 ## Still open in M1
