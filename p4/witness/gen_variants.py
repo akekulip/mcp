@@ -205,7 +205,7 @@ WIT_INGRESS = '''
      *
      * A gap sets md.exceed, so the existing tbl_attn/tbl_gate machinery treats a
      * post-TM sequence discontinuity as path evidence with no new gate. */
-    Register<bit<16>, bit<16>>(64, 0) reg_wit_expect;
+    Register<bit<16>, bit<16>>(%WIT_CELLS%, 0) reg_wit_expect;
     RegisterAction<bit<16>, bit<16>, bit<16>>(reg_wit_expect) wit_check = {
         void apply(inout bit<16> v, out bit<16> rv) {
             rv = v - hdr.witness.seq;
@@ -244,6 +244,57 @@ WIT_INGRESS = '''
         const entries = { 16w0 : wit_ok(); }
     }
 '''
+
+
+CTX_EGRESS = """
+    /* ---- BEHAVIORAL SUBLINKS (C-W4) -------------------------------------------
+     * A physical link is not simply healthy or faulty: it can be healthy for some
+     * packet contexts and faulty for others. CorrOpt measured corruption that is
+     * one-directional in 91.8% of corrupting links; Aegis hit a production fault
+     * that dropped only packets larger than 1 KB while 64-byte probes saw nothing.
+     * So the resource this witness tracks is not the directed link but the
+     * BEHAVIORAL SUBLINK = (directed link x context stratum).
+     *
+     * COST: ZERO extra wire bytes. `wit_h.link_id` is already 16 bits and 64 links
+     * need 6, so the stratum rides in the low nibble:
+     *
+     *     link_id[15:4] = directed vlink      link_id[3:0] = stratum
+     *
+     * and because the downstream indexes `reg_wit_expect` by the WHOLE 16-bit
+     * field it receives, the ingress check needs NO change at all -- it is already
+     * per-sublink the moment the upstream composes the id. Only the egress gains a
+     * classifier, and both registers grow from 64 to 1024 cells (2 KB of state).
+     *
+     * The classifier reads eg_intr_md.pkt_length. Ingress on Tofino 1 has no
+     * packet-length intrinsic, which is precisely why the upstream labels and the
+     * downstream trusts the label: a corrupted label shows up as a gap in the
+     * wrong sublink, so it is detectable rather than silent.
+     *
+     * Class 2: a range key is at most 20 bits (5 nibble pairs); pkt_length is 16,
+     * so this fits in its own table -- it cannot share tbl_eg_fail's range budget. */
+    /* The SALU index must be a PLAIN PHV FIELD -- bf-p4c rejects an expression there with
+     * "The index is too complex for the primitive to be handled". So the sublink id is composed
+     * HERE, one stage earlier, in the classifier action that already has both halves: md.vlink
+     * from tbl_eg_vlink and the stratum from the action data. One shift and one or, single
+     * stage, no Class 5 exposure. */
+    action set_stratum(bit<16> s) {
+        md.stratum = s;
+        md.sublink = md.sublink | s;     /* one OR with action data: single stage */
+    }
+
+    table tbl_stratum {
+        key     = { eg_intr_md.pkt_length : range; }
+        actions = { set_stratum; }
+        size    = 16;
+        const default_action = set_stratum(0);
+        const entries = {
+            16w0   ..    16w255 : set_stratum(0);   // control / ACK
+            16w256 ..   16w1023 : set_stratum(1);   // small
+            16w1024 ..  16w2047 : set_stratum(2);   // the Aegis boundary sits here
+            16w2048 .. 16w65535 : set_stratum(3);   // jumbo / collective payload
+        }
+    }
+"""
 
 ARM_TABLE = """
     /* A sequence discontinuity arms the fast loop: md.exceed feeds the existing
@@ -325,7 +376,7 @@ WIT_EGRESS_W2 = '''
      * AFTER tbl_eg_vlink so the index is the directed link the packet is actually
      * leaving on, and it runs in EGRESS so it counts what the TM released, not
      * what ingress hoped to send. */
-    Register<bit<16>, bit<16>>(64, 0) reg_wit_seq;
+    Register<bit<16>, bit<16>>(%WIT_CELLS%, 0) reg_wit_seq;
     RegisterAction<bit<16>, bit<16>, bit<16>>(reg_wit_seq) wit_next = {
         void apply(inout bit<16> v, out bit<16> rv) {
             rv = v;
@@ -353,7 +404,7 @@ WIT_EGRESS_W4 = '''
      * AFTER tbl_eg_vlink so the index is the directed link the packet is actually
      * leaving on, and it runs in EGRESS so it counts what the TM released, not
      * what ingress hoped to send. */
-    Register<bit<16>, bit<16>>(64, 0) reg_wit_seq;
+    Register<bit<16>, bit<16>>(%WIT_CELLS%, 0) reg_wit_seq;
     RegisterAction<bit<16>, bit<16>, bit<16>>(reg_wit_seq) wit_next = {
         void apply(inout bit<16> v, out bit<16> rv) {
             rv = v;
@@ -361,8 +412,8 @@ WIT_EGRESS_W4 = '''
         }
     };
 
-    action wit_stamp() { hdr.witness.seq     = wit_next.execute(md.vlink); }
-    action wit_link()  { hdr.witness.link_id = md.vlink; }
+    action wit_stamp() { hdr.witness.seq     = wit_next.execute(%WIT_IDX%); }
+    action wit_link()  { hdr.witness.link_id = %WIT_IDX%; }
 
     /* Class 11 again: a keyless table cannot make a computed-index stateful action
      * its default.  hdr.fabric.nxt has a two-value compile-time domain, so const
@@ -441,7 +492,7 @@ OLD_EGPARSE_INIT = "        md.tdelta = 0;"
 NEW_EGPARSE_INIT = OLD_EGPARSE_INIT + "\n        md.eg_rnd_fail = 0;"
 
 
-def build(variant, arm=False, egdrop=False):
+def build(variant, arm=False, egdrop=False, ctx=False):
     t = BASE
     hdr = HDR_W2 if variant == "w2" else HDR_W4
     t = sub(t, ANCHOR_IPV4, hdr.lstrip("\n") + "\n" + ANCHOR_IPV4, "ipv4 header anchor")
@@ -470,6 +521,11 @@ def build(variant, arm=False, egdrop=False):
     # table cannot carry this as a default) and only ever SETS md.exceed -- never clears it --
     # so it cannot cancel a CSIG or NIC exceedance raised earlier in the pipeline.
     wit_ig = WIT_INGRESS.replace("%ARM_TABLE%", ARM_TABLE if arm else "")
+    # C-W4: the sublink id is (vlink << 4) | stratum, so one shift-or in a single stage (Class 5
+    # forbids multi-operand runtime arithmetic; this is shift + or on one PHV pair).
+    wit_idx = "md.sublink" if ctx else "md.vlink"
+    wit_cells = "1024" if ctx else "64"
+    wit_ig = wit_ig.replace("%WIT_IDX%", wit_idx).replace("%WIT_CELLS%", wit_cells)
     t = sub(t, ANCHOR_IG_INSERT, wit_ig.lstrip("\n") + "\n" + ANCHOR_IG_INSERT,
             "ingress witness block")
     t = sub(t, OLD_ENTER_TAIL_W2 if variant == "w2" else OLD_ENTER_TAIL_W2,
@@ -477,11 +533,43 @@ def build(variant, arm=False, egdrop=False):
     t = sub(t, OLD_DELIVER, NEW_DELIVER, "act_deliver")
     t = sub(t, OLD_APPLY, NEW_APPLY.replace("%ARM_APPLY%", ARM_APPLY if arm else ""),
             "ingress apply")
-    t = sub(t, ANCHOR_EG_INSERT,
-            (WIT_EGRESS_W2 if variant == "w2" else WIT_EGRESS_W4).lstrip("\n")
-            + "\n" + ANCHOR_EG_INSERT, "egress witness block")
+    wit_eg = (WIT_EGRESS_W2 if variant == "w2" else WIT_EGRESS_W4)
+    wit_eg = wit_eg.replace("%WIT_IDX%", wit_idx).replace("%WIT_CELLS%", wit_cells)
+    if ctx:
+        wit_eg = CTX_EGRESS.lstrip("\n") + wit_eg
+    t = sub(t, ANCHOR_EG_INSERT, wit_eg.lstrip("\n") + "\n" + ANCHOR_EG_INSERT,
+            "egress witness block")
+    if ctx:
+        t = sub(t, "    bit<32> tdelta;     // eg_intr_md.deq_timedelta (18-bit) widened here",
+                "    bit<16> stratum;    // C-W4: the behavioral-sublink context of this packet\n"
+                "    bit<16> sublink;    // (vlink << 4) | stratum, precomputed for the SALU index\n"
+                "    bit<32> tdelta;     // eg_intr_md.deq_timedelta (18-bit) widened here",
+                "eg_md_t stratum")
+        t = sub(t, "        md.tdelta = 0;",
+                "        md.stratum = 0;\n        md.sublink = 0;\n        md.tdelta = 0;",
+                "egress parser stratum init")
+
     t = sub(t, OLD_EG_APPLY,
             NEW_EG_APPLY_W2 if variant == "w2" else NEW_EG_APPLY_W4, "egress apply")
+    if ctx:
+        # The sublink id is built in TWO single-operation steps across the two tables that already
+        # run back to back, because `(vlink << 4) | s` in one action is bf-p4c Class 5 ("action
+        # spanning multiple stages"): tbl_eg_vlink shifts, tbl_stratum ors.
+        # NO data-plane arithmetic at all. Shifting the action parameter (`vlink << 4`) produced
+        # a SILENT internal compiler error -- "1 error generated" with no error text, the Class 6
+        # signature -- so the control plane supplies the pre-shifted half as a second action
+        # parameter instead. It costs nothing: the controller already knows the vlink id.
+        t = sub(t, "    action set_eg_vlink(bit<16> vlink) {",
+                "    action set_eg_vlink(bit<16> vlink, bit<16> vlink_base) {", "set_eg_vlink sig")
+        t = sub(t, "        md.vlink  = vlink;",
+                "        md.vlink  = vlink;\n        md.sublink = vlink_base;   /* C-W4: (vlink << 4), computed control-plane side */",
+                "set_eg_vlink sublink base")
+        t = sub(t, "        const default_action = set_eg_vlink(0);",
+                "        const default_action = set_eg_vlink(0, 0);", "eg_vlink default")
+        # LAST: this edits text the 'egress apply' anchor depends on, so it must run after it
+        t = sub(t, "            tbl_eg_vlink.apply();",
+                "            tbl_eg_vlink.apply();\n            tbl_stratum.apply();",
+                "apply stratum classifier")
     if egdrop:
         t = sub(t, OLD_EGMD, NEW_EGMD, "eg_md_t rnd")
         t = sub(t, OLD_EGPARSE_INIT, NEW_EGPARSE_INIT, "egress parser init")
@@ -500,6 +588,7 @@ VARIANTS = [
     ("mcp_fabric_w2_arm",    dict(variant="w2", arm=True)),
     ("mcp_fabric_w4_arm",    dict(variant="w4", arm=True)),
     ("mcp_fabric_w4_egdrop", dict(variant="w4", arm=True, egdrop=True)),
+    ("mcp_fabric_cw4",       dict(variant="w4", arm=True, ctx=True)),
 ]
 # NOTE: *_arm now means the WORKING arming shape (explicit gap test). The two shapes that
 # compile but do not arm -- md.exceed in wit_loss, and arm-in-wit_measure/clear-in-wit_ok --
