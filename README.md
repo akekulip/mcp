@@ -1,7 +1,21 @@
 # MCP — Measurement Control Plane
 
-MCP is to answer the questions: *"Where Should the Network Look Next? Multi-Objective Measurement Control for Programmable Network Monitoring"
-A control-plane subsystem that decides — every epoch — which measurement tasks (sketches, sampling, watchlists, polling) should run on which P4 switches, under hard resource budgets, using a constrained contextual bandit with shadow prices.
+> **Research direction updated 2026-08-28.** The original generic attention/bandit thesis and the
+> post-TM sequence witness are not treated as novel contributions. The active plan keeps W4 as
+> costed infrastructure and tests a new, still-gated question: after mitigation removes traffic
+> from a suspect link, can a switch-capped audit safely produce the evidence needed to restore or
+> keep quarantining that link?
+
+The project now has two coordinated tracks:
+
+1. finish semantic and silicon validation of the known W4 directed-link witness; and
+2. only after a new primary-source novelty gate passes, build and evaluate the
+   `detect -> quarantine -> audit -> probation -> restore` lifecycle.
+
+The canonical direction is `docs/review/PLAN.md`; the exact failed novelty verdict is
+`docs/review/NOVELTY-GATE.md`; the approved design and executable plan are under
+`docs/superpowers/`. The older generic MCP prototype and results documented below are retained as
+historical repository context, not as the current paper claim.
 
 ---
 

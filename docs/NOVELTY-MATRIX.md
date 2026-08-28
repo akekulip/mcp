@@ -1,8 +1,15 @@
 # Novelty "kill-list" matrix — data-plane-native measurement controller for packet-sprayed RDMA/AI fabrics
 
-Generated 2026-08-25. Zotero collection: `MCP-sprayed-fabrics` (key `AT2STS8I`, 39 items).
+Generated 2026-08-25. Status updated 2026-08-28. Zotero collection:
+`MCP-sprayed-fabrics` (key `AT2STS8I`, 39 items).
 
-## Our thesis (the thing every row is measured against)
+> **Status:** this matrix tested the original attention/bandit thesis. That thesis is retired as a
+> headline contribution after both blocking novelty gates failed in
+> `docs/review/NOVELTY-GATE.md`. The rows and rebuttals below are retained as the historical
+> kill-list, not as current absence claims. The replacement counterfactual-observability thesis is
+> provisional until its separate primary-source gate passes.
+
+## Retired thesis (historical matrix target)
 
 Switch keeps per-(dst-leaf, spine) uncertainty/anomaly state and an **attention weight per path** in SALU registers; the weight **gates mirroring / INT / CSIG-style tagging** toward the paths that are least certain or most deviant. The **NIC's per-path evidence** (RTT / ECN / PSN-gap) is **reflected in-band** to the switch. A control-plane **constrained bandit with shadow prices** sets per-resource budgets (mirror bandwidth, collector CPU, SRAM, INT bytes) **per collective iteration**.
 Claims: (C1) faster gray-failure localization at equal budget than uniform sampling, SprayCheck round-robin and OmniPath-style probing; (C2) works on lossy and 3-level fabrics; (C3) NIC+switch loop beats either alone.
@@ -63,7 +70,7 @@ Column key: *Where decided* = which element makes the measurement/adaptation dec
 
 ---
 
-## Closest prior work, ranked
+## Historical closest prior work, ranked against the retired thesis
 
 1. **SprayCheck (arXiv 2605.03702, 2026)** — same problem (gray failures under adaptive routing), same hardware class (Tofino + CX-6, 2-level fat-tree), in-switch, coordination-free. Every axis it leaves open is ours: loss-only signal, lossless-only, 2-level only, round-robin coverage, no budget. FlowPulse (HotNets'25) is its precursor and shares the gap. **This is the paper reviewers will name; our C1 baseline B2 must be its exact round-robin.**
 2. **OmniPath Ping (SIGCOMM'26)** — the only *measurement primitive* explicitly built for spraying, with an in-network cache and an SRAM-vs-timeliness knob. It is uniform-coverage and probe-based; it is our C1 baseline B3 and an arm of our bandit.
@@ -76,9 +83,33 @@ Column key: *Where decided* = which element makes the measurement/adaptation dec
 9. **FANcY (SIGCOMM'22)** — data-plane zooming toward lossy regions; ISP, loss-only.
 10. **DynATOS/DynATOS+ (NSDI'22 / ToN'24), HeteroSketch (NSDI'22), CoordSamp (ToN'26)** — resource budgeting of telemetry under dynamics, all controller-side and path-agnostic.
 
-## Gap statement (one paragraph)
+## Retired gap statement
 
-Every existing system occupies at most two of the four axes the thesis needs: **(i)** spray-aware fabric measurement is either uniform-coverage probing (OmniPath Ping, R-Pingmesh, Hostmesh, OpenAI Clustermapper) or a single loss statistic checked by the calendar (SprayCheck round-robin, FlowPulse temporal symmetry), both assuming lossless 2-level fabrics; **(ii)** adaptive "attention" over what to measure exists only for flows/tasks/prefixes on ECMP networks and is driven by a controller epoch (ChameleMon, FANT, SAROS, FANcY); **(iii)** budget pricing of telemetry resources is controller-side and path-agnostic (INTaaS primal–dual, DynATOS(+), HeteroSketch, CoordSamp, BRIGHT); and **(iv)** the richest per-path evidence — RTT, ECN, PSN gaps — now lives in the NIC transports (MetaRoCE, UET/REPS, MRC, Themis's PathMaxPSN) where it is used to *avoid* bad paths, which hides gray failures from operators rather than localising them. No published work keeps a per-(dst-leaf, spine) uncertainty/anomaly posterior in switch SALU registers, uses it as a per-path attention weight to gate mirroring, INT and CSIG-style tagging on the live sprayed collective, reflects the NIC's per-path evidence in-band into that state, and sets per-iteration budgets for mirror bandwidth, collector CPU, SRAM and INT bytes through a constrained bandit with shadow prices — nor does any evaluate localisation speed at *equal budget* against uniform sampling, SprayCheck round-robin and OmniPath-style probing on lossy and 3-level fabrics, or isolate the marginal value of the NIC+switch loop over either side alone. Those are the three claims, and the matrix shows each is unoccupied.
+The 2026-08-25 review proposed that no published system combined switch-local path uncertainty,
+selective live-traffic telemetry, reflected NIC evidence, and controller-side resource pricing. The
+subsequent gate showed that a conjunction of known mechanisms is too slim a novelty basis:
+Bellman/Blackwell occupies the scheduling result, SprayCheck occupies passive localization under
+spraying, and NetSeer/LinkGuardian/UEC occupy the link-local witness. This paragraph is retained
+only to document the rejected direction.
+
+## Provisional replacement gap — must pass the new gate
+
+The candidate gap is the **post-mitigation lifecycle**, not initial detection. Adaptive routing,
+NIC path avoidance, or quarantine can remove production traffic from a suspect link and therefore
+remove the passive evidence used to tell whether it is still faulty, recovered, or flapping.
+Existing rows already cover passive detection, service tracing, generic active probing, liveness
+traffic, mitigation, and telemetry scheduling. The narrower hypothesis to test is whether prior
+work already provides the full contract below:
+
+1. mitigation creates the missing-evidence condition explicitly;
+2. an audit exercises one avoided directed link;
+3. the switch enforces the audit packet/byte exposure cap despite sender or controller oversend;
+4. restoration requires fresh, confidence-qualified evidence and includes probation/relapse.
+
+This is **not yet an absence claim**. Task 1 in
+`docs/superpowers/plans/2026-08-28-counterfactual-observability.md` must add rehabilitation,
+revalidation, quarantine/probation, safe-exploration, and post-reroute diagnosis work to this
+matrix and issue `PASS`, `NARROW`, or `FAIL` before the primitive is presented as novel.
 
 ---
 

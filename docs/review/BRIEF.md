@@ -1,5 +1,11 @@
 # MCP project — briefing for the review panel (state as of 2026-08-27)
 
+> **Superseded framing notice (2026-08-28):** §1 below describes the original attention/bandit
+> thesis and remains useful only as historical context. Both novelty gates failed; the active
+> direction is now the counterfactual audit/recovery lifecycle in `docs/review/PLAN.md`, with the
+> exact verdict in `docs/review/NOVELTY-GATE.md`. W4 and the replay remain infrastructure, not
+> contributions.
+
 Repository: /home/philip/Projects/mcp (read anything; nothing here is secret). Key files:
 `paper/PREREG.md` (pre-registration v1.1 + amendments §14), `HURDLES.md` (H1–H27),
 `docs/P4-DESIGN-SPACE.md` (+ errata), `docs/DESIGN-ALTERNATIVES.md`, `docs/NOVELTY-MATRIX.md`,

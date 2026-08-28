@@ -119,6 +119,33 @@ did not, and it is corrected in `paper/THEORY.md` and here.
 5. **Adopt rather than reinvent**: LinkGuardian's era bit for wrap, its dummy-packet queue for the
    idle-tail/blackhole case.
 
+## Approved second-stage pivot — gate not yet passed (2026-08-28)
+
+The failed verdict above remains final for the original theory and witness. It does not validate a
+replacement claim. The approved second-stage hypothesis asks whether mitigation itself creates an
+unaddressed observability problem: after routing or quarantine drives production allocation on a
+suspect link to zero, how can the fabric determine safely whether that link is still faulty,
+recovered, or flapping?
+
+The candidate contribution is an evidence lease plus a switch-capped counterfactual audit inside a
+`detect -> quarantine -> audit -> probation -> restore` lifecycle. W4 is borrowed infrastructure;
+active probes, liveness packets, sequential tests, and generic scheduling remain prior art.
+
+Before implementation is allowed to support a novelty claim, the M1 review must determine whether
+close rehabilitation/revalidation work already combines all four capabilities:
+
+1. mitigation explicitly removes the passive evidence on which diagnosis depends;
+2. the system deliberately exercises an avoided directed link;
+3. hardware enforces a packet/byte exposure cap rather than trusting the sender/controller; and
+4. restoration requires fresh confidence-qualified evidence, with probation or relapse handling.
+
+Allowed verdicts are `PASS`, `NARROW`, and `FAIL`. `FAIL` stops the lifecycle branch before its
+simulator or P4 implementation; only the already-started W4 semantic closure continues, and the
+deterministic replay/W4 result becomes the primary artifact. `NARROW` removes every occupied
+capability from the claim before implementation.
+Until that verdict is written, "counterfactual observability" and "evidence lease" are research
+hypotheses, not novelty claims.
+
 ## Sources retrieved this session
 
 NetSeer (SIGCOMM'20) doi:10.1145/3387514.3406214 · LinkGuardian (SIGCOMM'23)
