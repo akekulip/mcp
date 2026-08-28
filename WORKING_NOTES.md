@@ -366,3 +366,20 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   oracle gap closed at the frozen budget under single, double, triple and moving faults; the one
   real effect is load-gating at budget 82 (22/8, p=0.016) worth 20% of the gap. Open: F0 logs for
   the ADD-vs-false-alarm sweep. NEXT: M2 in-band per-link evidence on silicon (Philip's chip time).
+- 08-28 HULK LINK: Philip re-cabled — Hulk enp59s0f1np1 now carries the QSFP-4x25G breakout leg to
+  the switch (f0 = SFP-H10GB-CU1M 10G to Vision's Agilio np1s0). **Hulk's leg is 15/2 = dev_port 10**:
+  it linked at 25G RS-FEC the moment the MAC-near loopback was removed and Hulk's port was admin-up.
+  It was never miscabled — yesterday's sweep missed it because (a) Hulk's port was admin-down and
+  (b) the lane was masked by a MAC-near loopback (a loopback port shows UP regardless of the wire).
+  setup_skeleton.py updated: HOST1_DP = 10, LEAF_HOST_DP = [9, 10, 9, 9], role rows for both hosts,
+  REQUIRED_PORTS includes dp10; dry-run self-check passes (10.0.1.2 now delivers on dp10).
+  This unblocks PLAN M3 (second vantage -> link-level, not path-level, localization).
+- 08-28 SHARED-CHIP INCIDENT (my error, reported to Philip): the chip is owned by
+  **defense4_rrc_bor_unified12** (bf_switchd PID 36630, started 2026-08-27 18:26; our mcp_fabric
+  switchd was SIGTERMed then). I configured ports on that running program before checking the owner:
+  removed MAC-near loopback from 15/0 and 15/2 (46.9M / 1.03M frames), added 15/3, and a 25G lane
+  sweep added ~125 ports. RESTORED via bfrt: deleted the 125 added ports + 15/3, re-created dp8/dp10
+  as 25G / FEC NONE / AN off / MAC_NEAR / enabled; port table now matches the as-found 4 rows
+  (frame counters reset to 0 — unavoidable). bf_switchd was NOT restarted; defense4 untouched
+  otherwise. LESSON: check `/proc/<pid>/cmdline` of bf_switchd for the loaded program BEFORE any
+  port or table write, not just `gc-switchd`.

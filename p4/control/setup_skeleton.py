@@ -86,6 +86,10 @@ CLIENT_ID = 0
 #   another rig and are NEVER touched here.
 #
 HOST_DP = 9                                  # 15/1 — Vision, leaf 0's host
+HOST1_DP = 10                                # 15/2 — Hulk enp59s0f1np1, leaf 1's host
+                                             # (verified 2026-08-28: 25G RS-FEC, the QSFP-4x25G
+                                             #  breakout leg; the lane was masked by a stale
+                                             #  MAC-near loopback, not miscabled)
 LEAF_A = [164, 165, 166, 167]                # 5/l — "leaf side" of loop pair l
 LEAF_B = [172, 173, 174, 175]                # 6/l — "spine side" of loop pair l
 PEER = dict([(LEAF_A[i], LEAF_B[i]) for i in range(4)] +
@@ -198,19 +202,23 @@ def md_spray(pass_idx, spine):
 # direct check on each pass.
 # ===========================================================================
 
-# Host IP -> leaf.  Leaf 0's host is Vision on dp9.  Leaves 1..3 have NO host
-# today, so their delivery port is dp9 as well: a packet addressed to
-# 10.0.1.2/3/4 traverses leaf0 -> spine s -> leaf 1/2/3 and is then HAIRPINNED
-# back to Vision.  That is deliberate — it is what makes a single-host testbed
-# exercise all four leaves and both spines.  Replace LEAF_HOST_DP[l] with the
-# real port the day leaf l gets a host.
+# Host IP -> leaf.  Leaf 0's host is Vision (dp9); **leaf 1's host is Hulk (dp10)**
+# since 2026-08-28.  Leaves 2 and 3 still have no host, so their delivery port is
+# dp9 and traffic addressed to them is HAIRPINNED back to Vision — deliberate, it
+# is what lets one host exercise all four leaves and both spines.
+#
+# Why the second host matters (docs/review/PLAN.md M3): with a single source leaf
+# every path's uplink and downlink carry identical evidence, so the localizer can
+# only name a PATH (measured: vlink:9 41.44 vs vlink:0 40.92, within 1 %).  Traffic
+# entering from two different leaves breaks that symmetry and makes LINK-level
+# localization identifiable.
 HOST_IPS = {
     "10.0.1.1": 0,
     "10.0.1.2": 1,
     "10.0.1.3": 2,
     "10.0.1.4": 3,
 }
-LEAF_HOST_DP = [HOST_DP, HOST_DP, HOST_DP, HOST_DP]
+LEAF_HOST_DP = [HOST_DP, HOST1_DP, HOST_DP, HOST_DP]
 
 # Default virtual-link capacity for the OPTIONAL `shape` command.  Use BPS at
 # realistic rates, NEVER PPS — a PPS shaper is a cap, not a pacer, and it was
@@ -265,7 +273,7 @@ def plan_roles():
     leaf the uplink came FROM (which is what hop 1 keys on), on a cage-5 port it
     is the leaf the packet is being delivered BY (unused at hop 2, since
     tbl_vlink is not applied there).  One uniform rule, no special cases."""
-    rows = [(HOST_DP, ROLE_HOST, 0)]
+    rows = [(HOST_DP, ROLE_HOST, 0), (HOST1_DP, ROLE_HOST, 1)]
     for l in range(N_LEAF):
         rows.append((LEAF_A[l], ROLE_LOOP, l))
         rows.append((LEAF_B[l], ROLE_LOOP, l))
@@ -443,6 +451,7 @@ def self_check():
         assert roles[dp][0] == ROLE_LOOP, "dp%d must be ROLE_LOOP" % dp
         assert PEER[dp] in roles, "dp%d has no peer role" % dp
     assert roles[HOST_DP][0] == ROLE_HOST
+    assert roles[HOST1_DP][0] == ROLE_HOST, "Hulk (dp%d) must be a HOST port" % HOST1_DP
 
     # uplinks leave cage 5, downlinks leave cage 6 — so hop 1 always ingresses on
     # a cage-6 port and hop 2 always ingresses on a cage-5 port
@@ -497,8 +506,9 @@ def print_plan():
     print("=== port roles (tbl_port_role), %d rows ===" % len(plan_roles()))
     for dp, role, leaf in plan_roles():
         tag = {ROLE_HOST: "HOST", ROLE_LOOP: "LOOP"}[role]
-        fp = "15/1" if dp == HOST_DP else ("5/%d" % LEAF_A.index(dp) if dp in LEAF_A
-                                           else "6/%d" % LEAF_B.index(dp))
+        fp = ("15/1" if dp == HOST_DP else "15/2" if dp == HOST1_DP
+              else "5/%d" % LEAF_A.index(dp) if dp in LEAF_A
+              else "6/%d" % LEAF_B.index(dp) if dp in LEAF_B else "?")
         print("  dp%-4d %-5s role=%s src_leaf=%d" % (dp, fp, tag, leaf))
 
     print("=== destination leaf (tbl_dst_leaf), %d rows ===" % len(plan_dst_leaf()))
@@ -621,7 +631,7 @@ def _action_fields(bfrt_table, action):
 # ports
 # ---------------------------------------------------------------------------
 
-REQUIRED_PORTS = [(HOST_DP, "BF_SPEED_25G")] + \
+REQUIRED_PORTS = [(HOST_DP, "BF_SPEED_25G"), (HOST1_DP, "BF_SPEED_25G")] + \
                  [(dp, "BF_SPEED_25G") for dp in LEAF_A + LEAF_B]
 
 

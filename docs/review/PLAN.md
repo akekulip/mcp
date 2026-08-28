@@ -2,19 +2,25 @@
 
 Target: **SIGCOMM'27**, deadline assumed ~29 Jan 2027 (`HURDLES H15`: CFP not out; Philip confirmed the venue 2026-08-25; re-verify monthly). Fallback: **NSDI'28 spring**, ~Apr 2027. Five months of calendar, one person plus AI agents, one Tofino, two hosts (Vision 72 c / 250 GB, Hulk 72 c / 125 GB), 64 min and 21.5 GB per htsim run, fleet width 15 concurrent (Vision 10 / Hulk 5, `H26`).
 
-Reframed thesis, and what would kill it:
+Approved thesis, scoped so that prior-art mechanisms are not misclaimed:
 
-> On a sprayed fabric, detection delay is evidence time plus coverage time; the coverage term
-> dominates at sub-1e-3 loss and is not compressible by any schedule computable from per-link
-> counters; a link-local in-band invariant removes it for 0.05 % of capacity.
+> On a sprayed fabric with action-local selective observability, detection delay decomposes into
+> evidence time plus coverage time. When unmeasured links are observationally exchangeable,
+> adaptive counter-computable schedules retain a coverage lower bound. A post-TM, link-local
+> order witness removes that term for non-tail partial loss, and hard-capped zoom spends detailed
+> telemetry only on the implicated directed link.
 
-Three things can kill it, in order of cheapness: (1) a counter-computable schedule closes a material share of the oracle's 47 % gap, or the negative result fails to hold under multiple or moving faults; (2) the in-band check produces false gaps under spraying at a rate above the fault rate; (3) the check does not fit the chip. M1 tests (1) in days on data already on disk; M2 tests (2) and (3) on silicon.
+The paper has three possible contributions, all gated: (1) a nontrivial and tight characterization of the coverage term under the stated observation model; (2) a compileable post-TM order witness that reaches the evidence floor for non-tail partial loss; and (3) an equal-cost Tofino result that moves the localization/false-alarm/overhead Pareto frontier with bounded evidence capture. Sequence numbering, alternate marking, paired counting, generic zoom, and learned scheduling are prior art or baselines, not inventions here. Do not call the witness “minimal” or “optimal” without a bit/state lower bound; report its concrete 2 B or 4 B cost instead.
 
-Owners: **P** = Philip (hardware sessions, cabling, sudo, submissions, final judgement), **C** = Claude (code, harness, analysis, drafts), **A** = agents (`deep-research` / `literature-reviewer` for sources, `builder`+`qa-verifier` for baselines, `ieee-journal-reviewer` for the adversarial gate, `ieee-paper-figures` for figures).
+**Novelty kill/pivot gate.** Before major P4 work, an independent theory/prior-art review must show that the bound is not merely a classical coverage/search lemma relabeled for fabrics and that it has a tight or near-tight construction. Before the paper claim is frozen, the system must create a preregistered equal-cost Pareto-frontier shift against the strongest applicable baseline, with non-inferiority bounds for false alarms and overhead. If either gate fails, demote the bound to an explanatory lemma and publish the scoped negative result/replay benchmark rather than a recombination claim.
+
+Owners: **P** = Philip (hardware sessions, cabling, sudo, submissions, final judgement). Installed roles: `researcher` (primary prior art), `planner`/`architect`/`critic` (claim and design gates), `executor` (bounded implementation), `test-engineer` (reproducibility and experiment harness), `verifier` (acceptance evidence), `code-reviewer` (artifact review), `writer` (paper text), and `ieee-paper-figures` (figures). The research handoff is `$autoresearch-goal`; use `$team` only after the theory/novelty gate approves parallel replay, P4, and evaluation lanes.
+
+The full RALPLAN-DR record, ADR, verification matrix, staffing plan, and execution gates are in `.omx/plans/high-novelty-telemetry-plan.md`. This tracked file is the canonical schedule and must remain synchronized with it before source implementation.
 
 ---
 
-## M0 — Pre-registration repair and honest re-issue · 28 Aug – 4 Sep · owner C, sign-off P
+## M0 — Pre-registration repair and honest re-issue · 28 Aug – 4 Sep · owner executor, sign-off P
 
 **Goal.** Every number in the repo is computed by the detector the pre-registration names, the budget has one currency, and the dead hypotheses are retired on the record before new work starts.
 
@@ -33,72 +39,74 @@ Owners: **P** = Philip (hardware sessions, cabling, sudo, submissions, final jud
 
 ---
 
-## M1 — Replay harness, the decomposition, and the scoped negative result · 31 Aug – 11 Sep · owner C
+## M1 — Replay, theory gate, and scoped negative result · 31 Aug – 11 Sep · owners researcher + executor
 
-**Goal.** Establish, cheaply and paired, (a) how detection delay splits between evidence and coverage, (b) that no counter-computable schedule closes the coverage gap, and (c) that (b) survives multiple and moving faults — and replace the simulation matrix with a method that costs seconds instead of hours.
+**Goal.** Define the exact observation model; establish, cheaply and paired, how detection delay splits between evidence and coverage; test the scoped schedule-invariance claim under single, multiple, and moving faults; and replace the simulation matrix with a method that costs seconds instead of hours.
 
 The panel's first draft framed this as "prove no schedule compresses detection delay". That is refuted by the repo's own oracle (10 vs 19 epochs at B = 41, a 47 % reduction above H1's bar). The goal is the decomposition plus the *computability* result, which is what actually survives.
 
 **Work.**
-1. Build `sim/gate/replay.py`: read `seed*.counters.csv` (per-link cumulative tx/rx/drop per epoch, logged for **all 2048 links** every epoch by `mcp.cpp:120-125`), replay any schedule against it, feed the frozen `infer.py`, emit TTL and TTL_obs. Soundness is already proven (counters policy-independent, 120/120). The remaining validation task is to match the C++ `_candidates` ordering so the replayed `uniform` arm reproduces the recorded arm seed-for-seed; a name-sorted candidate list currently gives 19.0 / 7-censored against the recorded 19.5 / 6-censored.
-2. Score every schedule class on the 30 recorded seeds at budgets {1, 2, 4, 8, 19.5 %}: uniform RR, random, load-gated RR (tx > 0 since last read), threshold-gated RR (tx ≥ 2/δ), greedy max-unobserved-traffic, Thompson on the Beta posteriors, LinUCB MCP as tuned, oracle. Chair's first pass at 4 %: oracle 10.0 (0 censored), uniform 19.0 (7), gated 19.0 (1), greedy 20.0 (7), random 26.0 (13); TTL_obs 1 / 13 / 11 for oracle / uniform / gated.
-3. **Semi-synthetic multi-fault and moving-fault replay** — this closes the biggest review hole and costs nothing. Inject a second (and third) Bernoulli fault into the replay by thinning the recorded tx stream of another link, and move the fault mid-run. If a learner ever beats round-robin, it is here, and §8 of the pre-registration says so.
-4. Sweep h for every open-loop arm (free in replay) to produce the ADD-vs-false-alarm curve the QCD and telemetry literature expects.
+1. **Theory/nontriviality gate.** Define the fault prior/adversary, policy action, action-local observation, sampling budget, exchangeability condition, stopping/localization objective, and whether measurement perturbs traffic. Prove the lower bound and a matching/near-matching construction. Record counterexample attempts and compare it with classical adaptive inspection/search results. If independent review finds only a textbook lemma, keep it as explanation and remove “formal lower bound” from the contribution list.
+2. Stabilize `sim/gate/replay.py`: read `seed*.counters.csv` (per-link cumulative tx/rx/drop per epoch, logged for **all 2048 links** every epoch by `mcp.cpp:120-125`), replay any schedule against it, feed the frozen `infer.py`, emit TTL and TTL_obs. Preserve the already-verified simulator candidate order and exact uniform replay. Replace salted `hash(stem)` with a stable scenario seed; emit chosen fault identities; and name multi-fault success semantics separately as “any,” “all,” or “original among distractors.” Moving-fault semantics must be deterministic.
+3. Score every schedule class on the 30 recorded seeds at budgets {1, 2, 4, 8, 19.5 %}: uniform RR, random, load-gated RR (tx > 0 since last read), threshold-gated RR (tx ≥ 2/δ), greedy max-unobserved-traffic, Thompson on the Beta posteriors, LinUCB MCP as tuned, oracle.
+4. **Semi-synthetic multi-fault and moving-fault replay.** Inject the second/third faults and movement from stable scenario ids, evaluate the preregistered “any” and “all” objectives, and keep “original among distractors” only as a separately labelled robustness test.
+5. Sweep h for every open-loop arm to produce the ADD-vs-false-alarm curve.
 
 **Metric.** KM median and p95 of TTL and TTL_obs with paired sign/Wilcoxon and log-rank, censoring fraction, delay ratio to oracle, per budget, per fault count. Plus the busy-set statistic already computed — at the first-drop epoch the busy uplink count is 1024 in the median seed and ≥768 in 21/30 — published as the reason load gating cannot pay.
 
 **Compute.** Minutes on Vision. No htsim runs.
-**Gate.** If any counter-computable schedule closes ≥30 % of the oracle gap with paired p < 0.05 at any budget or fault count, the allocation thesis is alive: stop, re-open H1, re-plan around it. Otherwise the scoped negative result is fixed and M2 becomes the critical path. (Prediction from data in hand: no single-fault schedule wins; gated RR's only effect is on censoring and p95, and its p95 is no better than uniform's at 3 of 5 budgets. Multi-fault is genuinely open.)
+**Gate.** Proceed to M2 only after replay is process-reproducible and the claim is either (a) an independently accepted nontrivial/tight result or (b) explicitly demoted to an explanatory lemma. If any counter-computable schedule closes ≥30 % of the oracle gap with paired p < 0.05 at a preregistered budget/fault objective, re-open the allocation result rather than hiding it.
 
 ---
 
-## M2 — In-band per-link loss evidence on silicon · 7 Sep – 2 Oct · owner P (chip) + C (P4/analysis)
+## M2 — In-band per-link loss evidence on silicon · 7 Sep – 2 Oct · owner P (chip) + executor/test-engineer
 
 **Goal.** Make the first silent drop a localized, in-band event on the Tofino, and measure the resulting delay. This is the experiment the paper stands on.
 
-**Design.** Primary: a per-link sequence stamp (LinkGuardian, SIGCOMM'23) — the sending side writes a 16-bit per-link counter into the existing `csig_h.epoch` field (`mcp_fabric.p4:108`; **not** `worst_qdepth`, which carries the working congestion loop); the receiving pass keeps one SALU word per link with the last sequence seen; a gap beyond a small reorder window is a localized drop that bumps `reg_attn` through the existing `tbl_exceed_*` path and emits one truncated mirror. Fallback if it does not fit or false-gaps: alternate marking (RFC 9341) — a one-bit colour in the shim plus per-colour ingress/egress counters per vlink (`tbl_vlink` already has a DirectCounter at `mcp_fabric.p4:482`; `tbl_eg_vlink` at line 915 has none), diffed per colour period.
+**Design.** Primary: a standalone byte-aligned post-TM order witness—never `csig_h.epoch`, whose packed container cannot be rewritten from the required egress sources (`mcp_fabric.p4:102-108,690-694`). After `tbl_eg_vlink`, the upstream egress increments a modular 16-bit counter keyed by directed vlink and writes the returned value before deparse. The downstream ingress compares it with expected state keyed by the incoming directed link. Use a 2 B sequence-only form only when ingress-port/topology mapping proves link identity; otherwise compile and cost a 4 B `link_id + sequence` form. Fallback: RFC 9341 alternate marking with explicitly costed color periods and control-plane reads.
 
-**Work.** (a) compile gate first — ingress has no headroom (`step7.md`: 9 ingress stages, "next feature must reuse a stage"), so the check must live in egress or replace a stage; (b) tofino-model + PTF; (c) silicon.
+**Work.** Compile gate first against the fresh recorded baseline—currently 8 ingress + 3 egress stages (`docs/DESIGN-ALTERNATIVES.md:3-6`), not the stale 9-ingress assertion. In order: (a) source compile and placement/resource delta for 2 B and 4 B candidates; (b) model/PTF for initialization, reset/resynchronization, modulo wrap, duplicates, allowed reorder, consecutive losses, and multi-queue traffic; (c) silicon. Place fault injection after upstream sequence allocation and before downstream validation; a pre-increment drop cannot validate wire-loss semantics.
 
 **Experiments.**
-1. **F0 false-gap floor.** No fault, per-packet spraying, ≥10 × 60 s, plus a multi-queue/TC run. Metric: false gaps per 1e6 packets, and per healthy vlink.
-2. **F1 at p ∈ {1e-2, 1e-3, 1e-4}, 12 reps each.** Metric: packets on the faulty link until the first detected gap (expected ≈ 1/p) against the ~2/δ the frozen CUSUM needs; τ_fast under the v1.4 ramp estimator; specificity over the 15 healthy vlinks. Ground truth is on-chip (`fail_ctr`; fault mirrors already 246/246) and the detector must never read it. **State the packet rate with every time figure**: the F6 session put ~75 kpps on the shaped vlink (150 kpps blast, hash-sprayed over two spines); `step5-7-silicon-v2.md` demonstrates ~300 kpps peak. At 75 kpps, 1/p at 1e-4 is 133 ms; at 300 kpps, 33 ms.
-3. **Cost table** from `*.resources.json`: SRAM KB, stages, TCAM, per primitive — plus the shim's β_tag in §2.3 units.
+1. **F0 false-gap floor.** No fault, per-packet spraying, ≥10 × 60 s, plus multi-queue/TC, wrap, duplicate, reorder, reset, and idle/resume runs. Report the exact one-sided binomial upper confidence bound from the packet denominator against a preregistered operational limit.
+2. **F1 at p ∈ {1e-2, 1e-3, 1e-4}, 12 reps each.** Separate time-to-first-loss from gap-to-reaction. For non-tail partial loss, the receiver should react on the next survivor; the time to create evidence is still ≈1/p. Ground truth is on-chip and unread by the detector. State packet rate with every time figure.
+3. **Limit cases.** Consecutive partial loss is revealed by the next survivor. Idle-tail loss and a 100% blackhole require a separately priced marker plus timeout/control path; exclude them from the main witness claim if that path is not built.
+4. **Cost table** from `*.resources.json`: source and placed stages, SRAM, TCAM, SALUs, tag bytes at both 1500 B and 4096 B, marker/probe bytes, mirror/collector bytes, and control-plane reads/writes.
 
 **Compute.** Chip time only; three to four evening sessions. No sim.
-**Gate.** Kill condition: false-gap rate at F0 exceeds the fault event rate at 1e-4 (7.5 events/s at 75 kpps, 30/s at 300 kpps), or per-path FIFO ordering does not hold. Then fall back to alternate marking; if that also fails, the paper becomes "negative results + congestion fast loop" and the target moves to NSDI'28. Confirm condition: detection at ~1/p packets with 0 healthy-vlink reactions, which closes H7 for F1 with a data-plane loop and produces the paper's floor curve.
+**Gate.** Admit silicon only if one primary form compiles, directed-link identity is proven, and all model/PTF semantics pass. Kill/fallback if the preregistered false-gap bound fails, ordering assumptions fail, the resource delta is unacceptable, or link attribution is ambiguous. Then use alternate marking; if it also fails, pivot to the scoped negative result. Never force `csig_h.epoch`.
 
-**Note to keep the claim honest.** The claim is "one pipeline pass after the drop", never "100 µs detection of 1e-4 loss".
+**Note to keep the claim honest.** The claim is “the next surviving packet reveals a post-TM sequence discontinuity,” not “the dropped packet is mirrored” and never “100 µs detection of 1e-4 loss.”
 
 ---
 
-## M3 — Second vantage: link, not path · 28 Sep – 16 Oct · owner P
+## M3 — Directed-link attribution, local first · 28 Sep – 16 Oct · owner P
 
 **Goal.** Remove the identifiability limit: with one source leaf, `vlink:9` (41.44) and `vlink:0` (40.92, the genuinely faulty uplink) track each other to within 1 %, so today's hardware localizes a path.
 
-**Work.** Cable Hulk as a second source leaf (or emulate one on spare ports) and intersect two destination-leaf reports, as SprayCheck does. Move the mirror collector off the shared host port dp9 while the cabling is open. Fix `mirror_h.hop` off-by-one and the evidence-copy path-0 mislabel.
+**Work.** First prove whether receiver ingress port plus topology uniquely identifies the upstream directed link; if not, use the M2 explicit 16-bit link id. Cable Hulk as a second source leaf and intersect reports only if the one-chip emulation remains ambiguous after both local methods. Move the mirror collector off shared host port dp9 and fix `mirror_h.hop` plus the evidence-copy path-0 mislabel.
 
 **Metric.** Separation of uplink from downlink under an injected one-directional fault, 12 reps; report localization granularity explicitly.
-**Gate.** If a second vantage is not achievable by 16 Oct, the paper says "path" everywhere in the hardware section and claims link granularity only in simulation. Not a blocker for M2 or M5.
+**Gate.** Correct directed-link attribution in hardware is mandatory for the link-local headline. If local identity, explicit id, and second vantage all fail, say “path” everywhere and remove directed-link localization from the contribution list.
 
 ---
 
-## M4 — The competitors, implemented for real · 5 Oct – 30 Oct · owner C + A(builder/qa-verifier)
+## M4 — Equal-cost baseline pack · 5 Oct – 30 Oct · owner executor + test-engineer
 
 **Goal.** The paper is measured against the 2026 state of the art, not against uniform-at-41.
 
-**Work.** Implement, in the replay harness and (where cheap) in P4:
-- **B7 SprayCheck** as published and **B7' SprayCheck-L** (background-loss-aware threshold): per-(dst-leaf, spine) count imbalance with a one-sided Z-test, <2 KB SRAM per 32 spines, its published sensitivity being 1.5 % per-link drop in 1 iteration and 0.5 % in 5 (Llama-3-70B, 64 spines).
-- **FlowPulse-style** per-ingress-port byte comparison against a per-iteration load model, 1 % threshold (misses 0.8 % at radix 32, per its own §6).
-- **B13 OPP-style** first-hop probe duplication with dedup — only if the SIGCOMM'26 full text is obtained (`PREREG B13` decision rule; ACM DL 403 from here — P to fetch via campus). Its published point is 10 ms service tracing at 181 KB SRAM.
-- **B11 NIC-only, non-aggregating**, with the strongest commodity evidence (OOS, local-ACK timeout, per-path SACK) — the operational comparator, not an arm to beat.
+**Work.** Use tiers rather than gratuitous full reimplementations:
+- **Direct empirical:** exact-replay uniform and oracle; SprayCheck and FlowPulse semantic reproductions; RFC alternate marking; always-on evidence/mirroring; the strongest feasible paired-counter/FANcY-style detector; and NIC-only evidence as an operational comparator.
+- **Mechanism/cost:** LinkGuardian sequencing/recovery and FANcY's published hardware costs. Reproduce only the surface needed for the compared axis and never label that a full reproduction.
+- **Policy ablations:** current LinUCB/attention and ChameleMon-, DynATOS-, or DE-CuSum-style policies only where observation/action semantics match replay. Otherwise use a primary-source published point and mark assumptions as unmatched.
+- Label every row `reproduced`, `semantic reimplementation`, `replay-only`, or `published point`.
 
 **Metric.** Each on the paper's axes: packets-on-the-faulty-link (and collective iterations) to localization at p ∈ {1e-4, 1e-3, 5e-3, 1.5e-2}, FPR/FNR ROC over the threshold knob, SRAM KB, probe/collector bytes, localization granularity — all in §2.3 units.
-**Gate.** If our primitive does not sit ≥1 order of magnitude below SprayCheck in packets-to-detect at 0.5 % — the point where SprayCheck is strongest — the floor claim is weak and the paper leads with the lossy/AlltoAll regime instead, where SprayCheck's §6 states it does not apply.
+**Gate.** Preregister the primary localization metric, a material frontier margin, and non-inferiority bounds for false alarms and total overhead from operational requirements or pilot variance—not from the observed winner. A post-hoc one-axis win does not pass.
 
 ---
 
-## M5 — The simulation block, resized · 26 Oct – 20 Nov · owner C
+## M5 — The simulation block, resized · 26 Oct – 20 Nov · owner executor + test-engineer
 
 **Goal.** One figure, at a compute cost that closes.
 
@@ -106,40 +114,40 @@ The panel's first draft framed this as "prove no schedule compresses detection d
 
 **Compute.** ~360 runs × 64 min / 15 concurrent ≈ 26 h wall, ~2 nights on the fleet, 21.5 GB per slot. Everything else — every schedule, every h, every localizer variant, multi-fault, moving faults — comes from replay in seconds.
 
-**Metric.** The paper's figure (packets-to-localize vs p, two panels: lossless 2-level and lossy MoE AlltoAll) plus KM/TTL_obs as the secondary time axis, with the sequence/alternate-marking arm, SprayCheck, SprayCheck-L, FlowPulse-style, uniform, LinUCB MCP and oracle on the same axes.
-**Gate.** The in-band arm must land at TTL_obs 0–1 epoch in ≥27/30 seeds with 0 false alarms across F0 levels. If it does not, the sim model of the invariant is wrong (most likely in-flight accounting) — fix it before the hardware claim is written.
+**Metric.** One Pareto figure: packets/time to directed-link localization versus total measurement cost, with false-alarm non-inferiority shown at the fixed operating point. Report KM/TTL_obs secondarily. Include sequence/alternate marking, SprayCheck, FlowPulse-style, paired counters, always-on evidence, uniform, LinUCB ablation, and oracle on honest matched axes. Reorder, wrap, duplicate, consecutive-loss, moving/multiple-fault, tail, and overload cases use replay/model/PTF where htsim lacks the fault mechanism; do not pretend they are native htsim results.
+**Gate.** The system must be non-dominated and move the preregistered equal-cost frontier by the material margin while satisfying false-alarm and overhead bounds. Otherwise pivot to the negative-result/replay artifact.
 
 ---
 
-## M6 — Fast loop as stage two, and the cost table · 16 Nov – 11 Dec · owner P + C
+## M6 — Hard-capped directed-link zoom and cost table · 16 Nov – 11 Dec · owner P + executor
 
 **Goal.** Give the working silicon a defensible role and the field's metric pair.
 
-**Work.** Re-drive the attention gate from the M2 evidence source; report **average detection delay vs pre-change sampling duty cycle at a fixed false-alarm rate** by sweeping `a_min` ∈ {1, 6, 25, 100 %} and `k_up`/`n_clean`, 10+ reps, for F1 and F5 congestion, controller frozen. Report τ_fast in absolute µs against the pipeline bound and τ_slow as a range (2.20 ms minimal slot, 88.8 ms raw sweep, 96.2–116.6 ms Python loop), with the breakdown that makes it honest: 48.5 ms register read + 29.8 ms counter sync/read + 9.6 ms register write of raw bfrt I/O, plus ~16 ms of `to_dict()` decoding. Produce the per-arm cost table from `*.resources.json` and measured mirror/collector bytes.
+**Work.** Replace the proposed stochastic path-attention mechanism with a vlink-keyed finite-state machine: `QUIET -> SUSPECT -> ZOOM(K packets/bytes) -> COOLDOWN`, enforced by a token bucket/hard episode cap. The M2 gap event arms the implicated vlink; the controller only installs thresholds/budgets. Keep existing probabilistic attention as an ablation. Test loss and congestion separately: loss reacts on the next survivor; the already-working congestion loop reacts on the evidence packet. Preserve the measured τ_slow breakdown and produce the resource/cost table plus a fault-storm collector-stress run.
 
-**Metric.** ADD within x % of always-on mirroring at ≤6 % pre-change duty cycle, 0 healthy-path reactions; bytes of mirror per identified drop; time from counter alarm to first header sample.
-**Gate.** If the gate gives no ADD advantage over fixed-rate sampling at equal duty cycle, report that and demote it to "evidence capture after localization" — still a needed stage, no longer a claim. Note in the text that a Bernoulli gate with a state-dependent probability is state-dependent fractional sampling, which is weaker than DE-CuSum's deterministic on-off control; do not claim QCD optimality.
+**Metric.** Gap-to-first-context packet, context packets/bytes per episode, p95 concurrent-fault mirror bytes, collector drops, cooldown/re-arm correctness, and ADD versus pre-change duty cycle at fixed false-alarm rate.
+**Gate.** Mirror volume never exceeds the configured cap and the collector drops none at the declared operating envelope. If bounded zoom has no equal-duty advantage, demote it to evidence capture after localization. Do not claim QCD optimality.
 
 ---
 
-## M7 — Writing, figures, related work · 7 Dec – 15 Jan · owner C, direction P, A for sources
+## M7 — Writing, figures, related work · 7 Dec – 15 Jan · owner writer, direction P, researcher for sources
 
 **Work.** Structure with `systems-paper-writing`; voice with `paper-voice` + `academic-humanizer` (never the generic humanizer); figures with `ieee-paper-figures`; final `remove-ai-marks` Layer A. Related work must **add** to the 34-row matrix: **LinkGuardian** (SIGCOMM'23, DOI 10.1145/3603269.3604853), **LossRadar** (CoNEXT'16, currently mentioned only inside the ChameleMon row), **RFC 9341/8321** alternate marking, **dDrops**, **WJH**, packet trimming on current merchant silicon. **FANcY (SIGCOMM'22) is already row 23** — position against it, do not "add" it. Keep and sharpen the existing positioning against SprayCheck, FlowPulse, OPP, CSIG, R-Pingmesh, Hostmesh, MetaRoCE, REPS, Themis, ChameleMon, and the bandit-QCD line (Gopalan et al. NeurIPS'21; Banerjee & Veeravalli 2011/2012/2013; Sonata; DynATOS). Chase primary motivation numbers with the citation checked before use — e.g. the Llama-3 herd paper reports 466 job interruptions over 54 days of which 419 were unexpected; do not paraphrase from a survey.
 
-**Gate (15 Dec, hard).** If M2 confirmed and M5 produced the figure → SIGCOMM'27. If either failed → NSDI'28 (Apr 2027), using the extra quarter for the second vantage, fault mechanisms in the simulator, and a larger-scale sim.
+**Gate (15 Dec, hard).** SIGCOMM'27 only if the theorem is correctly classified, M2/M3 prove the claimed granularity, M5 moves the preregistered frontier, and M6 enforces bounded capture. Otherwise use NSDI'28 time for the honest pivot or missing evidence; do not stretch the claim to meet a date.
 
 ---
 
-## M8 — Adversarial review, artifact, submission · 15 Jan – 29 Jan · owner P + A
+## M8 — Adversarial review, artifact, submission · 15 Jan – 29 Jan · owner P + code-reviewer/verifier
 
-`ieee-journal-reviewer` pass at venue standards; fix or disclose every finding; package the artifact (traces, replay harness, P4, controller, the 30-seed counter logs — the replay harness is itself a contribution a reviewer can run in seconds); submit. Keep a running "what we did not do" paragraph: single-chip emulation (stated in the first paragraph of Implementation, as SprayCheck does), software RDMA, no absolute-latency claims from the loopback fabric, one stationary fault class implemented in the simulator.
+Use `code-reviewer`, `verifier`, and an independent systems-paper critic at venue standards; fix or disclose every finding. Package traces, deterministic replay, P4, controller, compiler/resource reports, baseline provenance labels, and counter logs. Keep a running “what we did not do” paragraph: single-chip emulation, software RDMA, no absolute-latency claims from loopback hardware, simulator-native fault limits, and excluded liveness cases.
 
 ---
 
 ## What we drop, explicitly
 
-LinUCB and its three variants, the 7-dimensional context, shadow prices, the dual-ascent knapsack, the coverage floor and ablations A1–A4 (retained only as one appendix ablation showing they do not beat round-robin); H1 as pre-registered, H3, H5; the ≈18,400-run matrix and the 730-run tuning block; the CSIG-style tag and `nic/evidence_probe.py` as contributions; baselines B1, B4, B5, B8; the 100 ms fixed epoch as the reporting clock (use the collective's iteration/burst clock, as SprayCheck and FlowPulse do); the words "attention", "bandit" and "shadow price" from the contribution sentence.
+LinUCB and its variants, the 7-dimensional context, shadow prices, the dual-ascent knapsack, and probabilistic attention as contributions (retain one appendix ablation); H1 as pre-registered, H3, H5; the ≈18,400-run matrix and 730-run tuning block; the CSIG-style tag and `nic/evidence_probe.py` as contributions; baselines with no matched axis; the 100 ms fixed epoch as the primary reporting clock. Never claim sequence numbers, alternate marking, paired counters, generic zoom, or a textbook coverage lemma as inventions.
 
 ## Standing risks
 
-`H26` memory (21.5 GB/run) bounds every htsim block — M5 is sized to it. Chip availability is one machine shared with `defense4`; M2 and M6 need ~8 evening sessions total, booked ahead. `H20/H21` (Soft-RoCE, no ECN, reorder-confounded PSN gaps) mean no "switch beats NIC" claim can come from hardware — B11 is a comparator, not a defeated baseline. `H19` (segfault on 2-tier topologies) keeps every sim on 3-tier fat trees. SIGCOMM'27 dates are assumed; re-verify monthly (`H15`).
+`H26` memory (21.5 GB/run) bounds every htsim block. Chip availability is one shared machine; compile/model evidence precedes evening silicon sessions. `H20/H21` mean no “switch beats NIC” claim can come from hardware. `H19` keeps simulations on 3-tier fat trees. Sequence evidence is blind to idle-tail loss and a 100% blackhole without a separately priced liveness path. The current one-source hardware result is path-level until M3 proves otherwise. SIGCOMM'27 has an official site, but no research-paper CFP/deadline was found as of 2026-08-27; re-verify monthly (`H15`).
