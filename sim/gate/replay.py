@@ -100,7 +100,10 @@ class LoadGated(Schedule):
     name = "load_gated"
     def pick(self, epoch, cum, state):
         out, tried = [], 0
-        while len(out) < self.budget and tried < 4 * len(self.names):
+        # ONE full pass. The old cap of 4*len(names) advanced the cursor 4096 times = 0 mod
+        # 1024, so on an epoch with fewer than `budget` eligible links the cursor came back to
+        # exactly where it started and the schedule made no round-robin progress at all (H29).
+        while len(out) < self.budget and tried < len(self.names):
             n = self.names[self.cursor]; self.cursor = (self.cursor + 1) % len(self.names); tried += 1
             tx0 = self.last_seen.get(n, (0, 0))[0]
             if cum.get(n, (0, 0))[0] - tx0 > 0 and n not in out:
@@ -114,7 +117,10 @@ class ThresholdGated(LoadGated):
     MIN_PKTS = 20000           # ~2 drops at delta_loss = 1e-4
     def pick(self, epoch, cum, state):
         out, tried = [], 0
-        while len(out) < self.budget and tried < 4 * len(self.names):
+        # ONE full pass. The old cap of 4*len(names) advanced the cursor 4096 times = 0 mod
+        # 1024, so on an epoch with fewer than `budget` eligible links the cursor came back to
+        # exactly where it started and the schedule made no round-robin progress at all (H29).
+        while len(out) < self.budget and tried < len(self.names):
             n = self.names[self.cursor]; self.cursor = (self.cursor + 1) % len(self.names); tried += 1
             tx0 = self.last_seen.get(n, (0, 0))[0]
             if cum.get(n, (0, 0))[0] - tx0 >= self.MIN_PKTS and n not in out:
@@ -160,6 +166,37 @@ class InBandSync(Schedule):
         return list(self.names) if epoch % self.SYNC == 0 else []
 
 
+class Confirm(Schedule):
+    """Round-robin until the localizer suspects something, then PIN the suspects and fill.
+
+    The member of the counter-computable class that would beat round-robin if localization ever
+    needed more than one read of the faulty link: it turns a first read into continuous
+    observation. A negative result about the class is only worth stating with this arm in it.
+    """
+    name = "confirm"
+
+    def pick(self, epoch, cum, state):
+        known = set(self.names)
+        pin = [e[len("vlink:"):] for e, st in
+               sorted(state.elements.items(), key=lambda kv: -kv[1].cusum) if st.cusum > 0.0]
+        pin = [n for n in pin if n in known][: self.budget]
+        return pin + self._rr(self.budget - len(pin), exclude=pin)
+
+
+class Thompson(Schedule):
+    """Thompson sampling over the per-link Beta posteriors the frozen localizer already keeps."""
+    name = "thompson"
+
+    def pick(self, epoch, cum, state):
+        scored = []
+        for n in self.names:
+            st = state.elements.get("vlink:" + n)
+            a, b = (st.loss_alpha, st.loss_beta) if st is not None else (1.0, 1.0)
+            scored.append((self.rng.betavariate(max(a, 1e-6), max(b, 1e-6)), n))
+        scored.sort(key=lambda t: -t[0])
+        return [n for _, n in scored[: self.budget]]
+
+
 class Oracle(Schedule):
     """Upper bound: always read the faulty link(s), fill with round-robin."""
     name = "oracle"
@@ -168,8 +205,11 @@ class Oracle(Schedule):
         return out + self._rr(self.budget - len(out), exclude=out)
 
 
-SCHEDULES = {c.name: c for c in (Uniform, Random_, LoadGated, ThresholdGated, Greedy, Oracle,
-                                 InBand, InBandSync)}
+SCHEDULES = {c.name: c for c in (Uniform, Random_, LoadGated, ThresholdGated, Greedy, Confirm,
+                                 Thompson, Oracle, InBand, InBandSync)}
+# the in-band arms are NOT schedules -- they are a different observation, reported separately
+COUNTER_COMPUTABLE = ("uniform", "random", "load_gated", "threshold_gated", "greedy", "confirm",
+                      "thompson")
 
 
 def scenario_seed(stem: str, role: str) -> int:
@@ -203,71 +243,125 @@ def _poisson(lam: float, rng: random.Random) -> int:
             return k - 1
 
 
-def replay_seed(counters: Path, faulty: List[str], onset_ms: float, sched_name: str, budget: int,
-                seed: int, h: float, extra_faults: Dict[str, float], move_epoch: int,
-                move_to: str, objective: str = "any") -> Tuple[int, bool, "int | None", int]:
-    """Replay one seed; returns (TTL from onset, censored, detection epoch, false-alarm epochs).
+def apply_scenario(names, per_epoch, stem, fault, onset_epoch, extra_faults, move_epoch, move_to,
+                   move_p):
+    """Materialise the scenario ONCE per seed, before any schedule runs.
 
-    ``objective`` names the multi-fault success semantics explicitly (PREREG v1.6 §14), because
-    'localized' is ambiguous once distractor faults exist:
+    Semi-synthetic faults and fault movement must not be drawn inside a schedule's read loop. If
+    they are, every arm faces a different realisation of the fabric, which destroys the exactness
+    the recorded fault has (byte-identical counter logs across arms) and makes the paired tests
+    compare different worlds. And a "moving" fault implemented by relabelling the success criterion
+    does not move anything at all: the original link keeps dropping, so its CORRECT detections get
+    counted as false alarms and the moved-to link never produces evidence (H29).
 
-    * ``any``      -- the top-ranked element is ANY injected fault (the reported default);
-    * ``all``      -- every injected fault has been top-ranked at some epoch (hardest);
-    * ``original`` -- the top-ranked element is the RECORDED fault, distractors are noise.
-
-    A false-alarm epoch is one whose anomaly bit is set while the top-ranked element is NOT an
-    injected fault — the wrong-link alarms this detector would have raised on the way.
+    Here the effective cumulative (tx, drop) series is rewritten once per seed: extra faults ADD
+    drops; a move SUBTRACTS the original link's drops from ``move_epoch`` on and starts dropping on
+    the new link instead. Every arm then replays the same series, exactly as for the recorded fault.
     """
-    names, per_epoch = load_counters(counters)
-    # the oracle is handed EVERY injected fault, semi-synthetic ones included -- otherwise it is
-    # not an upper bound under the "all" objective (it would read one link and miss the others)
-    sch = SCHEDULES[sched_name](names, budget, seed,
-                                list(faulty) + [f for f in extra_faults if f not in faulty])
+    eps = sorted(per_epoch)
+    add: Dict[str, Dict[int, int]] = {}
+    inject = dict(extra_faults)
+    if move_epoch and move_to:
+        inject[move_to] = move_p
+    for n, p in inject.items():
+        rng = random.Random(scenario_seed(stem, "drops/" + n))
+        start = move_epoch if (move_epoch and n == move_to) else onset_epoch
+        run, prev_tx, series = 0, 0, {}
+        for t in eps:
+            tx = per_epoch[t].get(n, (0, 0))[0]
+            dtx = max(tx - prev_tx, 0)
+            prev_tx = tx
+            if t >= start and dtx > 0:
+                run += _poisson(dtx * p, rng)
+            series[t] = run
+        add[n] = series
+    sub: Dict[str, Dict[int, int]] = {}
+    if move_epoch and move_to:              # the vacated link stops dropping at move_epoch
+        at_move, series = None, {}
+        for t in eps:
+            d = per_epoch[t].get(fault, (0, 0))[1]
+            if t >= move_epoch and at_move is None:
+                at_move = d
+            series[t] = max(d - at_move, 0) if at_move is not None else 0
+        sub[fault] = series
+    eff = {t: {n: (tx, drop - sub.get(n, {}).get(t, 0) + add.get(n, {}).get(t, 0))
+               for n, (tx, drop) in per_epoch[t].items()} for t in eps}
+    return eff
+
+
+def first_drop_epoch(per_epoch, link: str, after: int):
+    """First epoch at or after ``after`` at which ``link``'s cumulative drop count rises.
+
+    GROUND TRUTH, not an arm-computable quantity: it reads the injected fault's identity out of
+    the log. It feeds the evidence/coverage diagnostic only -- never TTL, never a headline number.
+    """
+    prev = None
+    for t in sorted(per_epoch):
+        d = per_epoch[t].get(link, (0, 0))[1]
+        if prev is not None and t >= after and d > prev:
+            return t
+        prev = d
+    return None
+
+
+def replay_seed(names, per_epoch, faulty, onset_epoch, horizon, sched_name, budget, seed, h,
+                objective, move_epoch, move_to):
+    """Replay one seed over an ALREADY-MATERIALISED counter series.
+
+    Returns (TTL from onset, censored, detection epoch, wrong-link alarm epochs, epochs run,
+    total link-reads).
+
+    ``objective`` names the multi-fault success semantics explicitly (PREREG v1.6 §14):
+    ``any`` -- the top-ranked element is any injected fault; ``all`` -- every injected fault has
+    been top-ranked; ``original`` -- the recorded fault only, the synthetic ones are distractors.
+
+    A wrong-link alarm epoch is one whose anomaly bit is set while the top-ranked element is no
+    injected fault. It is counted over the WHOLE run, pre-onset included, and returned with the
+    number of epochs the arm actually ran so it can be reported as a rate rather than a count
+    (arms that detect early are exposed for fewer epochs).
+    """
+    sch = SCHEDULES[sched_name](names, budget, seed, list(faulty))
     state = infer.InferState()
-    onset_epoch = int(onset_ms * 1000 // EPOCH_US)
-    rng = random.Random(seed ^ 0xA11)
-    horizon = max(per_epoch)
-    injected = list(faulty) + [f for f in extra_faults if f not in faulty]
-    # "any"/"all" count every INJECTED fault as a success; "original" keeps the recorded fault as
-    # the only success and treats the semi-synthetic ones as distractors.
-    want = {"vlink:" + f for f in (injected if objective != "original" else faulty[:1])}
-    all_injected = {"vlink:" + f for f in injected}
+    want = {"vlink:" + f for f in (faulty if objective != "original" else faulty[:1])}
+    all_injected = {"vlink:" + f for f in faulty}
     identified: set = set()
-    false_alarms = 0
+    alarms, epochs_run, reads = 0, 0, 0
     for epoch in sorted(per_epoch):
         cum = per_epoch[epoch]
+        epochs_run += 1
         if move_epoch and epoch == move_epoch and move_to:
             sch.faulty = [move_to]
-            want = {"vlink:" + move_to}          # the fault is now THERE; the old link is healthy
-            all_injected = (all_injected - {"vlink:" + faulty[0]}) | {"vlink:" + move_to}
+            want = {"vlink:" + move_to}
+            all_injected = {"vlink:" + move_to}
             identified = set()
         chosen = sch.pick(epoch, cum, state)
+        reads += len(chosen)
         samples = []
-        # the in-band arms are not budgeted: their evidence is carried by the packets themselves
         for n in chosen:
             tx, drop = cum.get(n, (0, 0))
             tx0, drop0 = sch.last_seen.get(n, (0, 0))
-            dtx, ddrop = tx - tx0, drop - drop0
-            # semi-synthetic extra faults: thin the observed traffic of that link
-            p = extra_faults.get(n, 0.0)
-            if p > 0 and dtx > 0 and epoch >= onset_epoch:
-                ddrop += _poisson(dtx * p, rng)      # Binomial(dtx, p) ~ Poisson for small p
+            dtx, ddrop = tx - tx0, max(drop - drop0, 0)
             sch.last_seen[n] = (tx, drop)
             sch.last_epoch[n] = epoch
             if dtx > 0:
                 samples.append(Sample(element=f"vlink:{n}", delivered=max(dtx - ddrop, 0),
                                       lost=ddrop, latency_us=(), t_us=int(epoch * EPOCH_US)))
         state = infer.update(state, samples, {}, baseline_mode="pooled")
-        loc = infer.localize(state, k=1, h=h)
-        if epoch >= onset_epoch and loc.anomaly and loc.ranked:
+        loc = infer.localize(state, k=max(1, len(want)), h=h)
+        if loc.anomaly and loc.ranked:
             top = loc.ranked[0][0]
-            if top in want:
-                identified.add(top)
-                if objective != "all" or identified >= want:
-                    return epoch - onset_epoch, False, epoch, false_alarms
-            elif top not in all_injected:
-                false_alarms += 1
-    return max(horizon - onset_epoch, 0), True, None, false_alarms
+            if top not in all_injected:
+                alarms += 1
+            elif epoch >= onset_epoch and top in want:
+                # "all" is suspect-set CONTAINMENT, not a sequence of top-1 hits: CUSUMs are
+                # monotone for read elements, so demanding that fault B overtake fault A's
+                # statistic measures the ranking's inertia, not localization (H29).
+                if objective != "all":
+                    return epoch - onset_epoch, False, epoch, alarms, epochs_run, reads
+                identified = want & set(loc.suspects)
+                if identified >= want:
+                    return epoch - onset_epoch, False, epoch, alarms, epochs_run, reads
+    return max(horizon - onset_epoch, 0), True, None, alarms, epochs_run, reads
 
 
 def km_median(times, censored):
@@ -300,7 +394,8 @@ def main():
     ap.add_argument("--schedules", default=",".join(SCHEDULES))
     ap.add_argument("--h", type=float, default=infer.H_DEFAULT)
     ap.add_argument("--faults", type=int, default=1, help="1 = the recorded fault; >1 adds semi-synthetic ones")
-    ap.add_argument("--extra-p", type=float, default=1e-4)
+    ap.add_argument("--extra-p", type=float, default=1e-4,
+                    help="loss rate of a semi-synthetic or moved fault (= the recorded F1 rate)")
     ap.add_argument("--move-fault-epoch", type=int, default=0)
     ap.add_argument("--seeds", default="")
     ap.add_argument("--objective", default="any", choices=["any", "all", "original"],
@@ -315,87 +410,111 @@ def main():
     scheds = a.schedules.split(",")
     print(f"# replay: {len(runs)} seeds x {len(scheds)} schedules x {len(budgets)} budgets, "
           f"h={a.h}, faults={a.faults}, move_epoch={a.move_fault_epoch or '-'}")
-    print(f"# objective={a.objective} (multi-fault success semantics), detector = frozen "
-          f"controller/infer.py {infer.module_hash()[:8]}")
-    print("\n| budget | schedule | n | KM median TTL | raw median | censored | wrong-link alarm epochs (seeds with >=1) | vs uniform (faster/slower, p) |")
-    print("|---|---|---|---|---|---|---|---|")
-    obs: Dict[str, List[int]] = {}
-    ev: Dict[str, List[int]] = {}
-    fa: Dict[str, List[int]] = {}
+    print(f"# objective={a.objective}; detector = frozen controller/infer.py {infer.module_hash()[:8]}")
+    print("\n| budget | schedule | n | KM median TTL | raw median | censored | reads/epoch | "
+          "wrong-link alarms (per 100 epochs) | vs uniform (faster/slower, p, n) |")
+    print("|---|---|---|---|---|---|---|---|---|")
     for b in budgets:
-        per_sched = {}
+        per_sched: Dict[str, Dict[str, Tuple[int, bool]]] = {s: {} for s in scheds}
+        cov: Dict[str, List[Tuple[int, bool]]] = {s: [] for s in scheds}
+        ev: Dict[str, List[int]] = {s: [] for s in scheds}
+        alarm: Dict[str, List[Tuple[int, int]]] = {s: [] for s in scheds}
+        load: Dict[str, List[float]] = {s: [] for s in scheds}
+        for c in runs:
+            stem = c.name.split(".")[0]
+            fault = (root / f"{stem}.fault").read_text().strip()
+            onset = float((root / f"{stem}.onset").read_text().strip())
+            onset_epoch = int(onset * 1000 // EPOCH_US)
+            names, raw = load_counters(c)
+            extra: Dict[str, float] = {}
+            if a.faults > 1:
+                rng = random.Random(scenario_seed(stem, "extra"))
+                for n in rng.sample([n for n in names if n != fault], a.faults - 1):
+                    extra[n] = a.extra_p
+            move_to = ""
+            if a.move_fault_epoch:
+                move_to = random.Random(scenario_seed(stem, "move")).choice(
+                    [n for n in names if n != fault and n not in extra])
+            eff = apply_scenario(names, raw, stem, fault, onset_epoch, extra,
+                                 a.move_fault_epoch, move_to, a.extra_p)
+            horizon = max(eff)
+            gt = move_to if a.move_fault_epoch else fault
+            fd = first_drop_epoch(eff, gt, max(onset_epoch, a.move_fault_epoch))
+            injected = [fault] + [n for n in extra if n != fault]
+            for sname in scheds:
+                r = replay_seed(names, eff, injected, onset_epoch, horizon, sname, b,
+                                int(stem.replace("seed", "")), a.h, a.objective,
+                                a.move_fault_epoch, move_to)
+                per_sched[sname][stem] = (r[0], r[1])
+                alarm[sname].append((r[3], r[4]))
+                load[sname].append(r[5] / max(r[4], 1))
+                if fd is not None:
+                    if r[2] is not None:
+                        cov[sname].append((max(r[2] - fd, 0), False))
+                        ev[sname].append(max(fd - onset_epoch, 0))
+                    else:
+                        cov[sname].append((max(horizon - fd, 0), True))
         for sname in scheds:
-            res = {}
-            for c in runs:
-                stem = c.name.split(".")[0]
-                fault = (root / f"{stem}.fault").read_text().strip()
-                onset = float((root / f"{stem}.onset").read_text().strip())
-                names, _ = load_counters(c)
-                extra = {}
-                if a.faults > 1:
-                    rng = random.Random(scenario_seed(stem, "extra"))
-                    for n in rng.sample([n for n in names if n != fault], a.faults - 1):
-                        extra[n] = a.extra_p
-                move_to = ""
-                if a.move_fault_epoch:
-                    rng2 = random.Random(scenario_seed(stem, "move"))
-                    move_to = rng2.choice([n for n in names if n != fault])
-                r = replay_seed(c, [fault], onset, sname, b, int(stem.replace("seed", "")),
-                                a.h, extra, a.move_fault_epoch, move_to, a.objective)
-                res[stem] = (r[0], r[1])
-                fa.setdefault(sname, []).append(r[3])
-                # C1 decomposition: coverage time = localization epoch - first OBSERVABLE drop epoch
-                fd = first_drop_epoch_of(c, fault)
-                if r[2] is not None and fd is not None:
-                    obs.setdefault(sname, []).append(max(r[2] - fd, 0))
-                    ev.setdefault(sname, []).append(max(fd - int(onset * 1000 // EPOCH_US), 0))
-            per_sched[sname] = res
+            res = per_sched[sname]
             ts = [t for t, _ in res.values()]; cs = [c for _, c in res.values()]
             cmp_ = ""
             if sname != "uniform" and "uniform" in per_sched:
-                w, l, p = sign_test({k: v[0] for k, v in per_sched["uniform"].items()},
-                                    {k: v[0] for k, v in res.items()})
-                cmp_ = f"{w} faster / {l} slower, p={p:.3f}"
+                w, l, pv = sign_test({k: v[0] for k, v in per_sched["uniform"].items()},
+                                     {k: v[0] for k, v in res.items()})
+                cmp_ = f"{w} faster / {l} slower, p={pv:.3f}, n={w + l}"
             kmm = km_median(ts, cs)
             kms = f"{kmm:.1f}" if kmm == kmm else f">{max(ts)} (>50% censored)"
-            f = fa.get(sname, [0])
+            al = sum(x for x, _ in alarm[sname]); ep = sum(e for _, e in alarm[sname])
             print(f"| {b} | {sname} | {len(ts)} | {kms} | {statistics.median(ts):.1f} | "
-                  f"{sum(cs)}/{len(cs)} | {sum(f)} ({sum(1 for x in f if x)}/{len(f)}) | {cmp_} |")
-        if obs:
-            print("\n  C1 decomposition (uncensored runs): evidence time = first observable drop - onset;")
-            print("  coverage time = localization - first observable drop")
-            for sname in per_sched:
-                if sname in obs and obs[sname]:
-                    print(f"    {sname:16s} evidence {statistics.median(ev[sname]):.1f} + coverage "
-                          f"{statistics.median(obs[sname]):.1f} epochs (n={len(obs[sname])})")
-            obs.clear(); ev.clear()
-        if "oracle" in per_sched and "uniform" in per_sched and \
-                km_median([t for t, _ in per_sched["uniform"].values()],
-                          [c for _, c in per_sched["uniform"].values()]) == \
-                km_median([t for t, _ in per_sched["uniform"].values()],
-                          [c for _, c in per_sched["uniform"].values()]):
-            o = km_median([t for t, _ in per_sched["oracle"].values()], [c for _, c in per_sched["oracle"].values()])
-            u = km_median([t for t, _ in per_sched["uniform"].values()], [c for _, c in per_sched["uniform"].values()])
+                  f"{sum(cs)}/{len(cs)} | {statistics.mean(load[sname]):.1f} | "
+                  f"{al} ({100.0 * al / max(ep, 1):.2f}) | {cmp_} |")
+        bound = (len(names) - b) / (2.0 * b)
+        print(f"\n  coverage time (localization - first observable drop), KM median WITH censored "
+              f"runs; classical search bound (n-B)/2B = {bound:.1f} epochs at n={len(names)}, B={b}:")
+        allev = [x for s_ in scheds for x in ev[s_]]
+        if allev:
+            # evidence time is a property of the fault and the traffic phase: it is computed from
+            # the log and the injected fault's identity, so it is IDENTICAL for every arm by
+            # construction. Reporting it per arm would dress a definition up as a measurement.
+            print(f"    evidence time (all arms, by construction): {statistics.median(allev):.1f} epochs")
+        for sname in scheds:
+            if cov[sname]:
+                k = km_median([t for t, _ in cov[sname]], [c for _, c in cov[sname]])
+                ks = f"{k:.1f}" if k == k else ">50% censored"
+                print(f"    {sname:16s} coverage {ks} "
+                      f"({sum(1 for _, c in cov[sname] if c)}/{len(cov[sname])} censored)")
+        u = km_median([t for t, _ in per_sched["uniform"].values()],
+                      [c for _, c in per_sched["uniform"].values()]) if "uniform" in per_sched else float("nan")
+        o = km_median([t for t, _ in per_sched["oracle"].values()],
+                      [c for _, c in per_sched["oracle"].values()]) if "oracle" in per_sched else float("nan")
+        counter = [k for k in scheds if k in COUNTER_COMPUTABLE and k != "uniform"]
+        if not (math.isnan(u) or math.isnan(o)):
             gap = (u - o) or float("nan")
-            counter = [k for k in per_sched if k not in ("oracle", "inband", "inband_sync")]
-            if counter:
-                best = min((km_median([t for t, _ in per_sched[k].values()],
-                                      [c for _, c in per_sched[k].values()]), k) for k in counter)
+            cands = [(km_median([t for t, _ in per_sched[k].values()],
+                                [c for _, c in per_sched[k].values()]), k) for k in counter]
+            cands = [(v, k) for v, k in cands if not math.isnan(v)]
+            if not cands:
+                print(f"\n  oracle {o:.1f}, uniform {u:.1f}; H9 gate UNDEFINED at this budget: every "
+                      f"other counter-computable arm is >50% censored, so its KM median does not exist\n")
+            else:
+                best = min(cands + [(u, "uniform")])
                 closed = 100 * (u - best[0]) / gap
                 _, _, pg = sign_test({k: v[0] for k, v in per_sched["uniform"].items()},
                                      {k: v[0] for k, v in per_sched[best[1]].items()})
-                verdict = ("TRIPPED — the allocation thesis is revived and H1 reopens"
+                verdict = ("TRIPPED -- the allocation thesis is revived and H1 reopens"
                            if closed >= 30 and pg < 0.05 else "not tripped")
                 print(f"\n  oracle {o:.1f}, uniform {u:.1f}; best COUNTER-COMPUTABLE schedule "
                       f"{best[1]} {best[0]:.1f} -> closes {closed:.0f}% of the oracle gap, "
-                      f"paired p={pg:.3f} vs uniform. H9 gate (>=30% AND p<0.05): {verdict}")
-            for k in ("inband", "inband_sync"):     # a different observability class, not a schedule
-                if k in per_sched:
-                    v = km_median([t for t, _ in per_sched[k].values()],
-                                  [c for _, c in per_sched[k].values()])
-                    print(f"  {k:12s} (in-band evidence, H8 -- NOT a counter-computable schedule) "
-                          f"{v:.1f} -> closes {100*(u-v)/gap:.0f}% of the oracle gap")
-            print()
+                      f"paired p={pg:.3f}. H9 gate (>=30% AND p<0.05): {verdict}")
+        else:
+            print(f"\n  H9 gate UNDEFINED at budget {b} (uniform or oracle >50% censored)")
+        for k in ("inband", "inband_sync"):
+            if k in per_sched:
+                v = km_median([t for t, _ in per_sched[k].values()],
+                              [c for _, c in per_sched[k].values()])
+                vs = f"{v:.1f}" if v == v else ">50% censored"
+                print(f"  {k:12s} (in-band evidence = UNBUDGETED, B=n; not a schedule) {vs}")
+        print()
 
 
 if __name__ == "__main__":

@@ -743,6 +743,7 @@ Every reported number is traceable to (config, seed, commit). The following are 
 | 2026-08-27 | Tier-1 PILOT at the frozen §14 point (NOT the pre-registered main block; 30 seeds paired with the gate arms) | cusum (localizer suspects + round-robin) ≡ uniform per seed (15 [10, 22]); MCP with the LULESH-tuned configuration (dlinucb, α 0, coverage floor 0.75; no Tier-1 tuning) 18 [14, 24], slower than uniform in 23/30 seeds (sign test p = 0.005); oracle 8. H1 (≥ 30 % lower median TTL than the best baseline) is NOT met by this configuration. Reading: with one stationary silent-loss fault, time-to-localize is decided by the first probe of the faulty link after onset; a learner must beat coverage per probe slot. The §3.2 Tier-1 tuning block has not been run (≈ 64 configs × 5 seeds × 1 h). Localizer provenance: infer.py 116ffc9f with delta_loss 1e-4, pooled | sim/gate/results_tier1_cosim_summary.md; reported, not suppressed |
 | 2026-08-27 | v1.5 — detector provenance, budget currency, retirements, replacement hypotheses H8/H9 (panel review, docs/review/) | Every published TTL was computed by the simulator's ratio rule (`mcp.cpp:133-152`), not the frozen localizer §3.3 names; re-issued under the pre-registered detector (MCP 19.0 KM vs cusum/uniform-schedule 20.0, paired 11/19, p = 0.20 — the arms are indistinguishable and no arm meets H1). Medians now read off the KM curve (§2.1). One budget currency. H1, H3, H5, H7-for-F1 and the 18,400-run matrix retired on the record; H8/H9 added | see Amendment v1.5 below |
 | 2026-08-28 | v1.6 — §3.3 warm-up defined in observed evidence; replay determinism and success semantics | The frozen localizer held an element in warm-up for `baseline_warmup_epochs = 10` **update calls**. Warm-up is a statement about how much evidence stands behind the baseline, so counting calls penalised any schedule that reads less often while carrying the same packets per read: the H8 in-band arm collecting every 4th epoch saw 11 drops in 99,704 packets and still reported CUSUM 0.00. Warm-up is now `baseline_warmup_packets = 1e5` observed packets (= 10/δ, so the baseline's own noise ~1/N = 1e-5 is an order below the shift under test) and `baseline_warmup_latency_samples = 10` latency samples. infer.py sha256 `0a989aaf…`; every replay result re-issued under it | see Amendment v1.6 below |
+| 2026-08-28 | v1.7 — **novelty gate tripped**: the coverage bound and the H8 mechanism are both prior art | Three independent reviews (docs/review/NOVELTY-GATE.md) returned DUPLICATE on the §3 coverage proposition — it is the perfect-detection case of Bellman (1957, Ch. III Ex. 3) / Blackwell's index rule, restated for budgeted policy classes by Chaudhuri–Fellouris–Tajer (IEEE TIT 2024, Thm 3.1/4.3) and quantified by Xu–Mei–Moustakides (IEEE TIT 2021, Thm 1) — and DUPLICATE on the H8 order witness, which is NetSeer's inter-switch drop detection (SIGCOMM 2020 §3.3, verbatim: egress-inserted per-neighbour sequence number, downstream ingress treats inconsecutive numbers as drops), with LinkGuardian (SIGCOMM 2023) and UEC 1.0.2 §5.1 LLR as independent occupants. The §4 'spraying collapses the pooled-test design space' argument is REFUTED by SprayCheck, which localizes from passive pooled evidence under spraying. Per PLAN.md's kill/pivot rule the bound is demoted to an attributed lemma and the mechanism is reframed as instantiate-and-cost; H8 is restated below | see Amendment v1.7 below |
 
 Amendments are appended only. An amendment after the corresponding block has started running
 is flagged "post-hoc" in the paper.
@@ -971,4 +972,44 @@ any of the oracle gap (H9 not tripped), and the link-local in-band invariant clo
 
 A wrong-link false-alarm count (anomaly epochs whose top-ranked element is no injected fault) is
 now recorded per arm, so the ADD/false-alarm axis M4 needs is produced by the replay itself.
+
+### Amendment v1.7 — 2026-08-28 — the novelty gate, and what H8 now claims
+
+**Reason.** `docs/review/PLAN.md` requires an independent theory/prior-art review to clear the
+coverage bound and the mechanism *before* major P4 work, and prescribes the response if either
+fails: demote the bound and publish the scoped result rather than a recombination claim. Three
+reviews ran; both gates failed on retrieved primary sources. The full record, with the verbatim
+NetSeer passage I verified myself and the Bellman/Blackwell mapping, is in
+`docs/review/NOVELTY-GATE.md`.
+
+**H8 as pre-registered (v1.5) is withdrawn and replaced.** The old wording claimed the link-local
+in-band invariant as the contribution. The primitive is prior art, so the hypothesis is restated
+about the thing that is actually ours — its cost and its effect on the frontier in a sprayed fabric:
+
+> **H8′ (equal-cost frontier).** On a packet-sprayed fabric, instantiating a per-directed-link
+> post-TM order witness moves the (time-to-directed-link-localization, total measurement cost)
+> frontier relative to the strongest scheduled-counter baseline at matched cost in the §2.3 byte
+> currency, with false-alarm non-inferiority at the fixed operating point. *Fails if* the witness
+> is not materially cheaper or faster at matched cost, if its F0 false-gap rate exceeds the fault
+> event rate, or if it is dominated by alternate marking (RFC 9341/9342) on both axes.
+
+Three consequences for the evaluation, all binding:
+
+1. **NetSeer's inter-switch detection surface becomes a mandatory arm**, compiled side by side from
+   one source tree and compared on placed stages / SRAM / SALU / PHV, tag bytes at 1500 B and
+   4096 B, packets-to-localization at p ∈ {1e-2, 1e-3, 1e-4}, and behaviour under consecutive loss
+   beyond ring-buffer depth and under per-packet-sprayed multi-queue traffic — the two cases NetSeer
+   concedes or never evaluated. RFC 9341/9342 alternate marking becomes the zero-wire-byte arm.
+2. **The idle-tail and blackhole holes are closed by adoption, not invention**: LinkGuardian's era
+   bit for modulo wrap and its self-replenishing lowest-priority dummy packet for liveness.
+3. **The witness is post-TM and does not see upstream TM drops.** A packet the TM discards never
+   reaches egress and is never numbered. Any claim that the witness covers congestion loss is
+   withdrawn; the fault-injection placement in M2 (after sequence allocation, before downstream
+   validation) was already correct.
+
+**The coverage bound** (§3 of `paper/THEORY.md`) is retained as an attributed lemma explaining why
+the system is built this way. It is not a contribution, is not called a theorem, and is never called
+"our bound". The one modelling observation kept is that cumulative counters place this problem in
+the perfect-detection stationary-target regime, which is why the sampling-control QCD constants do
+not transfer.
 
