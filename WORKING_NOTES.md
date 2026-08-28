@@ -416,3 +416,16 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
   docs/netronome-sdk-request.txt for Philip to send. A 2018 Docker image appears to bundle an SDK;
   flagged as unlicensed redistribution and NOT used. Judgement: request in the background, do not
   block — XDP offload already covers the NIC arm.
+- 08-28 SDK REQUEST SENT by Philip to Corigine (smartnic-support@corigine.com, cc help@netronome.com)
+  using docs/netronome-sdk-request.txt: Agilio P4C SDK for AMDA0097-0001 serial SMCAMDA0097-000117291655.
+  AWAITING REPLY — follow up if nothing by ~2026-09-11. Not blocking: the NIC arm runs on eBPF/XDP
+  offload today (nic/README-xdp.md).
+- 08-28 F0 CONTROL BATCHES LAUNCHED (closes M1's open item, no chip needed): run_gate_real.sh gained
+  FAULT=0 (no fault at all -> measures the localizer's false-alarm rate / ARL) and BG_LOSS=<p>.
+  Vision seeds 2000-2019 with BG_LOSS=1e-4 (background == delta_loss, the hardest false-alarm case,
+  verified "MCP background loss p=0.0001 on 1024 uplinks", fault file NONE); Hulk seeds 2020-2029
+  clean (no loss at all). ~2 h. Then: sweep h over these counter logs with replay.py to get the
+  ADD-vs-false-alarm (ROC) curve the telemetry/QCD literature expects, paired with the F1 runs.
+  NOTE: my first launch used an unsaved patch (a later assert aborted the write) so both batches ran
+  the WRONG experiment (F1 with new seeds); killed within a minute, results deleted, relaunched.
+  Verify the intended flags in the run log before trusting a batch.
