@@ -199,3 +199,80 @@ class Test22StratumIsCarriedWithoutExtraBytes(CtxBase):
             self.assertEqual(idx & 0xF, st, "the low nibble must decode to the stratum")
             self.send(idx, 0)
             self.assertEqual(self.expect_of(idx), 1, f"stratum {st} has its own sequence space")
+
+
+# ---------------------------------------------------------------------------------------------
+# End-to-end: classify by egress packet length, compose the sublink id, and stamp on the wire.
+# ---------------------------------------------------------------------------------------------
+STAMP_VLINK = 20
+
+
+class CtxEndToEndBase(CtxBase):
+    """Programs one fabric pass through the C-W4 stamping egress.
+
+    Tests 20--22 intentionally isolate the downstream checker by supplying a composed sublink id.
+    This fixture exercises the other half of the contract: ``tbl_stratum`` must classify the
+    packet at egress, ``set_eg_vlink`` must supply the pre-shifted vlink base, and the wire stamp
+    must name the resulting behavioral sublink.
+    """
+
+    def setUp(self):
+        CtxBase.setUp(self)
+        self._program_path()
+        for st in range(4):
+            self._reg_set("pipe.Egress.reg_wit_seq", sublink(STAMP_VLINK, st), 0)
+
+    def _program_path(self):
+        t = self.bfrt.table_get("pipe.Ingress.tbl_vlink")
+        self._upsert(t, t.make_key([gc.KeyTuple("md.role", ROLE_LOOP),
+                                    gc.KeyTuple("md.hop", 1),
+                                    gc.KeyTuple("md.src_leaf", 0),
+                                    gc.KeyTuple("md.dst_leaf", 0),
+                                    gc.KeyTuple("md.spray_idx", 0)]),
+                     t.make_data([gc.DataTuple("vlink_id", STAMP_VLINK),
+                                  gc.DataTuple("loop_port", LOOP_DN_PORT),
+                                  gc.DataTuple("qid", 0),
+                                  gc.DataTuple("next_vsw", 16),
+                                  gc.DataTuple("path_id", STAMP_VLINK)], "Ingress.to_loop"))
+
+        t = self.bfrt.table_get("pipe.Egress.tbl_eg_vlink")
+        self._upsert(t, t.make_key([gc.KeyTuple("eg_intr_md.egress_port", LOOP_DN_PORT),
+                                    gc.KeyTuple("eg_intr_md.egress_qid", 0)]),
+                     t.make_data([gc.DataTuple("vlink", STAMP_VLINK),
+                                  gc.DataTuple("vlink_base", STAMP_VLINK << 4)],
+                                 "Egress.set_eg_vlink"))
+
+        t = self.bfrt.table_get("pipe.Ingress.tbl_final")
+        self._upsert(t, t.make_key([gc.KeyTuple("md.role", ROLE_LOOP),
+                                    gc.KeyTuple("md.hop", 1),
+                                    gc.KeyTuple("md.dst_leaf", 0)]),
+                     t.make_data([gc.DataTuple("next_hop", NXT_CSIG)],
+                                 "Ingress.act_transit"))
+
+    def stamp(self, payload_len):
+        pkt = wit_pkt(link_id=0, seq=0, path_id=STAMP_VLINK, plen=payload_len)
+        send_packet(self, LOOP_UP_PORT, pkt)
+        (_, rcv_port, rcv_pkt, _) = testutils.dp_poll(self, timeout=2)
+        self.assertIsNotNone(rcv_pkt, "nothing came out of the C-W4 stamping egress")
+        self.assertEqual(rcv_port, LOOP_DN_PORT)
+        return Ether(rcv_pkt)[Wit]
+
+
+class Test23EgressClassifiesAndStampsSublinks(CtxEndToEndBase):
+    """The upstream pipeline, not the test, must compose the behavioral-sublink id.
+
+    A 120-byte frame belongs to stratum 0 and a 1272-byte frame to stratum 2 under the frozen
+    range table. Interleaving them must expose two independently increasing sequence spaces on
+    the wire.
+    """
+
+    def runTest(self):
+        seen = []
+        for payload_len in (48, 1200, 48, 1200):
+            w = self.stamp(payload_len)
+            seen.append((w.link_id, w.seq))
+
+        small = sublink(STAMP_VLINK, 0)
+        large = sublink(STAMP_VLINK, 2)
+        self.assertEqual(seen, [(small, 0), (large, 0), (small, 1), (large, 1)],
+                         "egress size classification must select independent wire sequences")

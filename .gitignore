@@ -13,3 +13,8 @@ sim/htsim/
 sim/htsim-broadcom/
 sim/.venv/
 sim/runs/
+
+# PTF / bf_switchd model runtime artifacts (root-owned, regenerated per run)
+bf_drivers.log*
+zlog-cfg-cur
+*.pcap

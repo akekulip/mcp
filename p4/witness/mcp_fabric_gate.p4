@@ -263,7 +263,7 @@ struct eg_md_t {
     bit<16> diff;       // worst_qdepth |-| this_q : 0 <=> this hop is the worst so far
     bit<16> vlink;      // this egress (port, qid) as a virtual-link id, from tbl_eg_vlink
     bit<16> hop;        // hdr.fabric.hop widened here, not inside the tag actions
-    bit<16> ctx;        // capsule read off the shim
+    bit<8>  ctx;        // capsule read off the shim
     bit<16> stratum;    // C-W4: the behavioral-sublink context of this packet
     bit<16> sublink;    // (vlink << 4) | stratum, precomputed for the SALU index
     bit<32> tdelta;     // eg_intr_md.deq_timedelta (18-bit) widened here
@@ -1068,7 +1068,7 @@ parser EgParser(packet_in pkt, out eg_headers_t hdr, out eg_md_t md,
 
     state parse_fabric {
         pkt.extract(hdr.fabric);
-        md.ctx = (bit<16>)hdr.fabric.pad;
+        md.ctx = hdr.fabric.pad;
         transition select(hdr.fabric.nxt) {
             NXT_CSIG : parse_csig;
             default  : accept;
@@ -1105,9 +1105,10 @@ control Egress(inout eg_headers_t hdr, inout eg_md_t md,
      * predicate.  So: diff = worst |-| this_q (saturating, one ALU op); the gateway
      * tests diff == 0 (equality with a constant), i.e. this_q >= worst. */
     /* The capsule is carried, so the egress does not classify -- it reads the label the
-     * source wrote and ORs it into the sublink index. One OR of two PHV fields: single
-     * stage, and no Class 5 exposure. */
-    action ctx_index() { md.sublink = md.sublink | md.ctx; }
+     * source wrote and writes its low nibble into the sublink index. The parser copy is
+     * deliberately 8 -> 8 bits: widening the packed pad byte to 16 bits in the parser also
+     * copied the adjacent NXT_CSIG byte on Tofino (ctx 0 became 0x0100). */
+    action ctx_index() { md.sublink[3:0] = md.ctx[3:0]; }
 
     table tbl_ctx_index {
         key     = { hdr.fabric.nxt : exact; }

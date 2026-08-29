@@ -150,6 +150,15 @@ NEW_MD_W4 = """    bit<16> mir_etype;
     bit<16> wit_gap;     // expected_seq - observed_seq; 0 <=> no discontinuity
 }"""
 
+EVENT_TYPES = """
+struct wit_result_t {
+    bit<16> gap;
+    bit<16> observed;
+}
+
+"""
+ANCHOR_METADATA = "/* ======================= metadata ======================= */"
+
 # W2 only: the start state zeroes wit_link because tbl_port_role writes it in the MAU.
 OLD_START_ZERO = "        md.mir_etype  = ETYPE_MCP_MIRROR;"
 NEW_START_ZERO_W2 = """        md.mir_etype  = ETYPE_MCP_MIRROR;
@@ -245,6 +254,55 @@ WIT_INGRESS = '''
     }
 '''
 
+WIT_STATEFUL = '''    Register<bit<16>, bit<16>>(%WIT_CELLS%, 0) reg_wit_expect;
+    RegisterAction<bit<16>, bit<16>, bit<16>>(reg_wit_expect) wit_check = {
+        void apply(inout bit<16> v, out bit<16> rv) {
+            rv = v - hdr.witness.seq;
+            v  = hdr.witness.seq + 1;
+        }
+    };
+
+    action wit_measure() { md.wit_gap = wit_check.execute(md.wit_link); }'''
+
+WIT_STATEFUL_EVENT = '''    Register<bit<16>, bit<16>>(%WIT_CELLS%, 0) reg_wit_expect;
+    RegisterAction<bit<16>, bit<16>, bit<16>>(reg_wit_expect) wit_check = {
+        void apply(inout bit<16> v, out bit<16> rv) {
+            rv = v - hdr.witness.seq;
+            v  = hdr.witness.seq + 1;
+        }
+    };
+
+    action wit_measure() { md.wit_result.gap = wit_check.execute(md.wit_link); }
+
+    /* A second single-field SALU counts ARRIVALS, saturating so a long clean run
+     * cannot wrap to zero and be mistaken for silence. It runs after wit_check and
+     * resets stored state only when this packet closes a discontinuity; the returned
+     * value still includes that survivor. Tofino forbids the equivalent packed-state
+     * subtraction, so the split is a compiler constraint, not a semantic choice. */
+    Register<bit<16>, bit<16>>(%WIT_CELLS%, 0) reg_wit_observed;
+    RegisterAction<bit<16>, bit<16>, bit<16>>(reg_wit_observed) wit_count = {
+        void apply(inout bit<16> v, out bit<16> rv) {
+            rv = v;
+            if (md.wit_result.gap != 0) {
+                v = 0;
+            } else {
+                v = v |+| 1;
+            }
+        }
+    };
+
+    action wit_count_arrival() {
+        md.wit_result.observed = wit_count.execute(md.wit_link);
+    }
+
+    table tbl_wit_count {
+        key     = { md.role : exact; }
+        actions = { wit_count_arrival; @defaultonly NoAction; }
+        size    = 4;
+        const default_action = NoAction();
+        const entries = { ROLE_LOOP : wit_count_arrival(); }
+    }'''
+
 
 
 
@@ -312,9 +370,10 @@ CAPSULE_INGRESS = """
 
 CAPSULE_EGRESS = """
     /* The capsule is carried, so the egress does not classify -- it reads the label the
-     * source wrote and ORs it into the sublink index. One OR of two PHV fields: single
-     * stage, and no Class 5 exposure. */
-    action ctx_index() { md.sublink = md.sublink | md.ctx; }
+     * source wrote and writes its low nibble into the sublink index. The parser copy is
+     * deliberately 8 -> 8 bits: widening the packed pad byte to 16 bits in the parser also
+     * copied the adjacent NXT_CSIG byte on Tofino (ctx 0 became 0x0100). */
+    action ctx_index() { md.sublink[3:0] = md.ctx[3:0]; }
 
     table tbl_ctx_index {
         key     = { hdr.fabric.nxt : exact; }
@@ -394,6 +453,62 @@ ARM_TABLE = """
 ARM_APPLY = """                if (md.wit_gap != 0) {          /* a discontinuity arms the fast loop */
                     tbl_wit_arm.apply();
                 }
+"""
+
+GAP_EVENT_ACTION = """
+    /* P3: a discontinuity is a guaranteed notification, not a probabilistic
+     * attention sample. This action runs last so these mirror-only fields cannot
+     * be overwritten by tbl_vlink/tbl_attn/tbl_final. Session 2 retains enough of
+     * the copied ingress frame for the controller to validate CSIG epoch and W4 id. */
+    action set_gap_event() {
+        ig_dprsr_md.mirror_type = 3w1;
+        md.mirror_sid           = 2;
+        md.flags_out            = md.flags_out | 8;
+        md.vlink_id             = md.wit_link;
+        md.mir_path             = md.wit_result.gap;
+        md.attn                 = md.wit_result.observed;
+    }
+
+    action set_audit_receipt() {
+        ig_dprsr_md.mirror_type = 3w1;
+        md.mirror_sid           = 2;
+        md.flags_out            = md.flags_out | 16;
+        md.vlink_id             = md.wit_link;
+        md.mir_path             = md.wit_result.gap;
+        md.attn                 = md.wit_result.observed;
+    }
+
+    action set_audit_gap_event() {
+        ig_dprsr_md.mirror_type = 3w1;
+        md.mirror_sid           = 2;
+        md.flags_out            = md.flags_out | 24;
+        md.vlink_id             = md.wit_link;
+        md.mir_path             = md.wit_result.gap;
+        md.attn                 = md.wit_result.observed;
+    }
+"""
+
+AUDIT_STEER = """
+    /* P3 liveness/probation. Packets on the reserved audit UDP destination are
+     * controller-owned evidence, not production. A tiny exact table selects the
+     * physical spray requested by the audit sender and marks the packet so the P2
+     * quarantine gate is bypassed. The packet keeps the ordinary size/DSCP context,
+     * receives the ordinary C-W4 stamp, and is force-mirrored only when it arrives
+     * downstream. Silence is therefore meaningful relative to a declared send set. */
+    action set_audit_spray(bit<16> spray) {
+        md.spray_idx = spray;
+        md.is_audit  = 1;
+    }
+
+    table tbl_audit_steer {
+        key = {
+            hdr.udp.dst_port : exact;
+            hdr.udp.src_port : exact;
+        }
+        actions = { set_audit_spray; @defaultonly NoAction; }
+        size = 16;
+        const default_action = NoAction();
+    }
 """
 
 ANCHOR_IG_INSERT = "    /* ---- S8: final forward, shim write / strip"
@@ -571,7 +686,7 @@ OLD_EGPARSE_INIT = "        md.tdelta = 0;"
 NEW_EGPARSE_INIT = OLD_EGPARSE_INIT + "\n        md.eg_rnd_fail = 0;"
 
 
-def build(variant, arm=False, egdrop=False, ctx=False, capsule=False, gate=False):
+def build(variant, arm=False, egdrop=False, ctx=False, capsule=False, gate=False, event=False):
     t = BASE
     hdr = HDR_W2 if variant == "w2" else HDR_W4
     t = sub(t, ANCHOR_IPV4, hdr.lstrip("\n") + "\n" + ANCHOR_IPV4, "ipv4 header anchor")
@@ -600,6 +715,9 @@ def build(variant, arm=False, egdrop=False, ctx=False, capsule=False, gate=False
     # table cannot carry this as a default) and only ever SETS md.exceed -- never clears it --
     # so it cannot cancel a CSIG or NIC exceedance raised earlier in the pipeline.
     wit_ig = WIT_INGRESS.replace("%ARM_TABLE%", ARM_TABLE if arm else "")
+    if event:
+        wit_ig = wit_ig.replace(WIT_STATEFUL, WIT_STATEFUL_EVENT)
+        wit_ig = wit_ig.replace("md.wit_gap", "md.wit_result.gap")
     # C-W4: the sublink id is (vlink << 4) | stratum, so one shift-or in a single stage (Class 5
     # forbids multi-operand runtime arithmetic; this is shift + or on one PHV pair).
     wit_idx = "md.sublink" if ctx else "md.vlink"
@@ -610,7 +728,15 @@ def build(variant, arm=False, egdrop=False, ctx=False, capsule=False, gate=False
     t = sub(t, OLD_ENTER_TAIL_W2 if variant == "w2" else OLD_ENTER_TAIL_W2,
             NEW_ENTER_TAIL_W2 if variant == "w2" else NEW_ENTER_TAIL_W4, "act_enter")
     t = sub(t, OLD_DELIVER, NEW_DELIVER, "act_deliver")
-    t = sub(t, OLD_APPLY, NEW_APPLY.replace("%ARM_APPLY%", ARM_APPLY if arm else ""),
+    arm_apply = ARM_APPLY
+    if event:
+        arm_apply = arm_apply.replace("md.wit_gap", "md.wit_result.gap")
+    ingress_apply = NEW_APPLY.replace("%ARM_APPLY%", arm_apply if arm else "")
+    if event:
+        ingress_apply = ingress_apply.replace("                tbl_wit_check.apply();",
+                                              "                tbl_wit_check.apply();\n"
+                                              "                tbl_wit_count.apply();")
+    t = sub(t, OLD_APPLY, ingress_apply,
             "ingress apply")
     wit_eg = (WIT_EGRESS_W2 if variant == "w2" else WIT_EGRESS_W4)
     wit_eg = wit_eg.replace("%WIT_IDX%", wit_idx).replace("%WIT_CELLS%", wit_cells)
@@ -666,13 +792,13 @@ def build(variant, arm=False, egdrop=False, ctx=False, capsule=False, gate=False
                 "apply the source classifier")
         # egress reads the carried label
         t = sub(t, "    bit<16> stratum;    // C-W4: the behavioral-sublink context of this packet",
-                "    bit<16> ctx;        // capsule read off the shim\n"
+                "    bit<8>  ctx;        // capsule read off the shim\n"
                 "    bit<16> stratum;    // C-W4: the behavioral-sublink context of this packet",
                 "eg_md_t ctx")
         t = sub(t, "        md.stratum = 0;", "        md.ctx = 0;\n        md.stratum = 0;",
                 "egress parser ctx init")
         t = sub(t, "        pkt.extract(hdr.fabric);\n        transition select(hdr.fabric.nxt) {",
-                "        pkt.extract(hdr.fabric);\n        md.ctx = (bit<16>)hdr.fabric.pad;\n"
+                "        pkt.extract(hdr.fabric);\n        md.ctx = hdr.fabric.pad;\n"
                 "        transition select(hdr.fabric.nxt) {", "egress parser reads the capsule")
         t = sub(t, CTX_EGRESS.strip(), CAPSULE_EGRESS.strip(), "swap classifier for carried label")
         t = sub(t, "            tbl_stratum.apply();", "            tbl_ctx_index.apply();",
@@ -685,6 +811,45 @@ def build(variant, arm=False, egdrop=False, ctx=False, capsule=False, gate=False
         t = sub(t, "                tbl_spray_mode.apply();",
                 "                tbl_spray_mode.apply();\n                tbl_health_gate.apply();",
                 "apply the health gate")
+    if event:
+        t = sub(t, "const bit<16> UDP_PORT_ROCEV2   = 4791;",
+                "const bit<16> UDP_PORT_ROCEV2   = 4791;\n"
+                "const bit<16> AUDIT_UDP_DST = 4792;", "P3 audit UDP constant")
+        t = sub(t, ANCHOR_METADATA, EVENT_TYPES + ANCHOR_METADATA, "P3 event types")
+        t = sub(t, "    bit<16> do_measure;",
+                "    bit<16> do_measure;\n    bit<16> is_audit;   // reserved P3 probation/liveness packet",
+                "P3 audit metadata")
+        t = sub(t, "    bit<16> wit_gap;     // expected_seq - observed_seq; 0 <=> no discontinuity",
+                "    wit_result_t wit_result; // gap plus saturating arrivals since prior gap",
+                "P3 event metadata")
+        t = sub(t, "        md.do_measure = 0;",
+                "        md.do_measure = 0;\n        md.is_audit   = 0;",
+                "P3 audit parser init")
+        t = sub(t, "        md.wit_gap    = 0;",
+                "        md.wit_result.gap = 0;\n        md.wit_result.observed = 0;",
+                "P3 event parser init")
+        t = sub(t, ANCHOR_IG_INSERT, AUDIT_STEER.lstrip("\n") + "\n" + ANCHOR_IG_INSERT,
+                "P3 audit steering")
+        t = sub(t, ANCHOR_IG_INSERT, GAP_EVENT_ACTION.lstrip("\n") + "\n" + ANCHOR_IG_INSERT,
+                "P3 event action")
+        t = sub(t, "                tbl_spray_mode.apply();\n                tbl_health_gate.apply();\n            }",
+                "                tbl_spray_mode.apply();\n"
+                "            }\n"
+                "            tbl_audit_steer.apply();\n"
+                "            if (md.hop == 0 && md.is_audit == 0) {\n"
+                "                tbl_health_gate.apply();\n"
+                "            }", "P3 audit bypasses quarantine")
+        t = sub(t, "                tbl_final.apply();",
+                "                tbl_final.apply();\n"
+                "                if (md.hop != 0 && hdr.witness.isValid() && md.is_audit != 0) {\n"
+                "                    if (md.wit_result.gap != 0) {\n"
+                "                        set_audit_gap_event();\n"
+                "                    } else {\n"
+                "                        set_audit_receipt();\n"
+                "                    }\n"
+                "                } else if (md.wit_result.gap != 0) {\n"
+                "                    set_gap_event();\n"
+                "                }", "P3 guaranteed mirror apply")
     if egdrop:
         t = sub(t, OLD_EGMD, NEW_EGMD, "eg_md_t rnd")
         t = sub(t, OLD_EGPARSE_INIT, NEW_EGPARSE_INIT, "egress parser init")
@@ -706,6 +871,8 @@ VARIANTS = [
     ("mcp_fabric_cw4",       dict(variant="w4", arm=True, ctx=True)),
     ("mcp_fabric_capsule",   dict(variant="w4", arm=True, ctx=True, capsule=True)),
     ("mcp_fabric_gate",      dict(variant="w4", arm=True, ctx=True, capsule=True, gate=True)),
+    ("mcp_fabric_gate_event", dict(variant="w4", arm=True, ctx=True, capsule=True, gate=True,
+                                    event=True)),
 ]
 # NOTE: *_arm now means the WORKING arming shape (explicit gap test). The two shapes that
 # compile but do not arm -- md.exceed in wit_loss, and arm-in-wit_measure/clear-in-wit_ok --

@@ -46,7 +46,7 @@ Usage (on the switch, with the SDE env set):
     PYTHONPATH=$P/tofino:$P/tofino/bfrt_grpc:$P python3 setup_skeleton.py <cmd>
 
     python3 setup_skeleton.py --dry-run            # print the entry plan, no writes
-    python3 setup_skeleton.py up                   # ports + roles + fabric + spray + seeds
+    python3 setup_skeleton.py up [--program mcp_fabric_cw4] # ports + roles + fabric + spray + seeds
     python3 setup_skeleton.py spray hash|random|rr|sel
     python3 setup_skeleton.py fail <vlink> <pct> [drop|corrupt]
     python3 setup_skeleton.py fail-clear
@@ -565,15 +565,28 @@ def print_plan():
 # bfrt side.  Imported lazily so --dry-run works without the SDE.
 # ===========================================================================
 
-def connect():
+def connect(program=PROG):
     import bfrt_grpc.client as gc
     iface = gc.ClientInterface(GRPC_ADDR, client_id=CLIENT_ID, device_id=DEV)
-    iface.bind_pipeline_config(PROG)          # client_id 0 ONLY
-    bfrt = iface.bfrt_info_get(PROG)
+    iface.bind_pipeline_config(program)          # client_id 0 ONLY
+    bfrt = iface.bfrt_info_get(program)
     # P4 tables/registers are symmetric: write with pipe_id 0xffff.  Targeting
     # pipe 0 on a symmetric table returns INVALID_ARGUMENT on this SDE.
     tgt = gc.Target(device_id=DEV, pipe_id=0xffff)
     return gc, iface, bfrt, tgt
+
+
+def extract_program_arg(argv):
+    """Remove ``--program NAME`` from a legacy argv list and return the selected program."""
+    remaining = list(argv)
+    if "--program" not in remaining:
+        return PROG, remaining
+    index = remaining.index("--program")
+    if index + 1 >= len(remaining):
+        raise SystemExit("--program requires a P4 program name")
+    program = remaining[index + 1]
+    del remaining[index:index + 2]
+    return program, remaining
 
 
 def _upsert(table, tgt, key, data):
@@ -1154,7 +1167,7 @@ def blackhole(gc, bfrt, tgt, src_leaf, dst_leaf, spray):
 
 
 def main():
-    argv = [a for a in sys.argv[1:]]
+    program, argv = extract_program_arg(sys.argv[1:])
     as_json = "--json" in argv
     args = [a for a in argv if not a.startswith("--")]
     if "--dry-run" in argv or not args:
@@ -1164,7 +1177,7 @@ def main():
         return
 
     cmd = args[0]
-    gc, iface, bfrt, tgt = connect()
+    gc, iface, bfrt, tgt = connect(program)
 
     if cmd == "up":
         print("[ports]")

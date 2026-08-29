@@ -55,6 +55,7 @@ const bit<8>  NXT_CSIG          = 1;
 
 const bit<8>  IP_PROTO_UDP      = 17;
 const bit<16> UDP_PORT_ROCEV2   = 4791;
+const bit<16> AUDIT_UDP_DST = 4792;
 const bit<16> UDP_PORT_EVIDENCE = 0xE5E5;
 
 /* Port roles, written by tbl_port_role from the ingress port (§3 carriage detail 2). */
@@ -213,6 +214,12 @@ struct attn_pair_t {
     bit<16> clean;
 }
 
+
+struct wit_result_t {
+    bit<16> gap;
+    bit<16> observed;
+}
+
 /* ======================= metadata ======================= */
 
 /* Every field is bit<16> even where one bit would do: constraint Class 3 (sub-byte
@@ -239,6 +246,7 @@ struct ig_md_t {
     bit<16> attn_idx;    // reg_attn index = path id (from tbl_vlink, csig or evid)
     bit<16> exceed;      // 1 = this packet is threshold-exceedance evidence for attn_idx
     bit<16> do_measure;
+    bit<16> is_audit;   // reserved P3 probation/liveness packet
     bit<16> fault;       // 0 none, 2 dropped, 4 corrupted (bit0 is reserved for "measured")
     bit<16> flags_out;   // fabric_h.flags to write: fault | measured
     MirrorId_t mirror_sid;   // bit<10>: Mirror.emit() wants a plain field, no cast/slice
@@ -253,7 +261,7 @@ struct ig_md_t {
      * not zeroed in the start state and is read only under hdr.witness.isValid(). */
     bit<16> wit_link;    // directed link this packet ARRIVED on, from the witness
     bit<8>  ctx;        // capsule: size bin x service class
-    bit<16> wit_gap;     // expected_seq - observed_seq; 0 <=> no discontinuity
+    wit_result_t wit_result; // gap plus saturating arrivals since prior gap
 }
 
 struct eg_md_t {
@@ -298,6 +306,7 @@ parser IgParser(packet_in pkt, out headers_t hdr, out ig_md_t md,
          * data packets get it from tbl_vlink action data instead. */
         md.exceed     = 0;
         md.do_measure = 0;
+        md.is_audit   = 0;
         md.fault      = 0;
         md.flags_out  = 0;
         md.mirror_sid = 0;
@@ -309,7 +318,8 @@ parser IgParser(packet_in pkt, out headers_t hdr, out ig_md_t md,
         md.mir_smac   = 48w0x020000004D43;
         md.mir_etype  = ETYPE_MCP_MIRROR;
         md.ctx        = 0;
-        md.wit_gap    = 0;
+        md.wit_result.gap = 0;
+        md.wit_result.observed = 0;
         transition parse_ethernet;
     }
 
@@ -739,11 +749,48 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
     RegisterAction<bit<16>, bit<16>, bit<16>>(reg_wit_expect) wit_check = {
         void apply(inout bit<16> v, out bit<16> rv) {
             rv = v - hdr.witness.seq;
-            v  = hdr.witness.seq + 1;
+            /* ADVANCE-ONLY resync: only move `expected` forward.  The test is the
+             * SIGNED sign of the same difference the SALU already computes, so it
+             * is modular and therefore wrap-correct: gap <= 0 (signed) means the
+             * observed seq is at or ahead of expected, in the 32768-wide forward
+             * window.  A late (reordered) packet has small POSITIVE signed gap and
+             * leaves `v` untouched, so it can no longer rewind `expected`. */
+            if ((int<16>)(v - hdr.witness.seq) <= 0) {
+                v = hdr.witness.seq + 1;
+            }
         }
     };
 
-    action wit_measure() { md.wit_gap = wit_check.execute(md.wit_link); }
+    action wit_measure() { md.wit_result.gap = wit_check.execute(md.wit_link); }
+
+    /* A second single-field SALU counts ARRIVALS, saturating so a long clean run
+     * cannot wrap to zero and be mistaken for silence. It runs after wit_check and
+     * resets stored state only when this packet closes a discontinuity; the returned
+     * value still includes that survivor. Tofino forbids the equivalent packed-state
+     * subtraction, so the split is a compiler constraint, not a semantic choice. */
+    Register<bit<16>, bit<16>>(1024, 0) reg_wit_observed;
+    RegisterAction<bit<16>, bit<16>, bit<16>>(reg_wit_observed) wit_count = {
+        void apply(inout bit<16> v, out bit<16> rv) {
+            rv = v;
+            if (md.wit_result.gap != 0) {
+                v = 0;
+            } else {
+                v = v |+| 1;
+            }
+        }
+    };
+
+    action wit_count_arrival() {
+        md.wit_result.observed = wit_count.execute(md.wit_link);
+    }
+
+    table tbl_wit_count {
+        key     = { md.role : exact; }
+        actions = { wit_count_arrival; @defaultonly NoAction; }
+        size    = 4;
+        const default_action = NoAction();
+        const entries = { ROLE_LOOP : wit_count_arrival(); }
+    }
 
     /* Class 11: a stateful action whose index is a PHV field cannot be a table's
      * DEFAULT action ("requires the hash distribution unit").  Same fix as
@@ -767,7 +814,7 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
     /* A sequence discontinuity arms the fast loop: md.exceed feeds the existing
      * tbl_attn / tbl_gate machinery, so a post-TM gap becomes path evidence with no
      * new gate. Verified on the model: act_attn_exceed fires exactly once per nonzero
-     * md.wit_gap (p4/ptf/PTF-MODEL.md). */
+     * md.wit_result.gap (p4/ptf/PTF-MODEL.md). */
     action wit_arm() { md.exceed = 1; }
 
     table tbl_wit_arm {
@@ -780,7 +827,7 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
 
 
     table tbl_wit_verdict {
-        key      = { md.wit_gap : exact; }
+        key      = { md.wit_result.gap : exact; }
         actions  = { wit_ok; wit_loss; }
         counters = wit_ctr;
         size     = 2;
@@ -814,6 +861,87 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
         actions = { set_ctx; }
         size    = 32;
         const default_action = set_ctx(0);
+    }
+
+    /* ---- BEHAVIORAL HEALTH GATE (P2) -------------------------------------------
+     * The point of behavioural sublinks is to keep using the parts of a link that
+     * are still proven good. This is the table that does it: when a (source, dest,
+     * spray path, context) sublink is quarantined, the packet's SPRAY CHOICE is
+     * rewritten to a prevalidated backup, and tbl_vlink then resolves and counts the
+     * path that was actually taken.
+     *
+     * IT MUST RUN BEFORE tbl_vlink, never after. tbl_vlink is the counted table --
+     * overriding forwarding downstream of it would leave the ground-truth counter
+     * naming a link the packet never used, which would corrupt exactly the evidence
+     * the witness exists to provide.
+     *
+     * Default is NoAction: a healthy context, or one with no entry at all, is
+     * untouched and keeps using the same physical link. Quarantine is therefore
+     * expressed as the PRESENCE of an entry, so revocation is an entry delete. */
+    action sublink_reroute(bit<16> alt_spray) { md.spray_idx = alt_spray; }
+
+    table tbl_health_gate {
+        key = {
+            md.src_leaf  : exact;
+            md.dst_leaf  : exact;
+            md.spray_idx : exact;
+            md.ctx       : exact;
+        }
+        actions = { sublink_reroute; @defaultonly NoAction; }
+        size    = 256;
+        const default_action = NoAction();
+    }
+
+    /* P3 liveness/probation. Packets on the reserved audit UDP destination are
+     * controller-owned evidence, not production. A tiny exact table selects the
+     * physical spray requested by the audit sender and marks the packet so the P2
+     * quarantine gate is bypassed. The packet keeps the ordinary size/DSCP context,
+     * receives the ordinary C-W4 stamp, and is force-mirrored only when it arrives
+     * downstream. Silence is therefore meaningful relative to a declared send set. */
+    action set_audit_spray(bit<16> spray) {
+        md.spray_idx = spray;
+        md.is_audit  = 1;
+    }
+
+    table tbl_audit_steer {
+        key = {
+            hdr.udp.dst_port : exact;
+            hdr.udp.src_port : exact;
+        }
+        actions = { set_audit_spray; @defaultonly NoAction; }
+        size = 16;
+        const default_action = NoAction();
+    }
+
+    /* P3: a discontinuity is a guaranteed notification, not a probabilistic
+     * attention sample. This action runs last so these mirror-only fields cannot
+     * be overwritten by tbl_vlink/tbl_attn/tbl_final. Session 2 retains enough of
+     * the copied ingress frame for the controller to validate CSIG epoch and W4 id. */
+    action set_gap_event() {
+        ig_dprsr_md.mirror_type = 3w1;
+        md.mirror_sid           = 2;
+        md.flags_out            = md.flags_out | 8;
+        md.vlink_id             = md.wit_link;
+        md.mir_path             = md.wit_result.gap;
+        md.attn                 = md.wit_result.observed;
+    }
+
+    action set_audit_receipt() {
+        ig_dprsr_md.mirror_type = 3w1;
+        md.mirror_sid           = 2;
+        md.flags_out            = md.flags_out | 16;
+        md.vlink_id             = md.wit_link;
+        md.mir_path             = md.wit_result.gap;
+        md.attn                 = md.wit_result.observed;
+    }
+
+    action set_audit_gap_event() {
+        ig_dprsr_md.mirror_type = 3w1;
+        md.mirror_sid           = 2;
+        md.flags_out            = md.flags_out | 24;
+        md.vlink_id             = md.wit_link;
+        md.mir_path             = md.wit_result.gap;
+        md.attn                 = md.wit_result.observed;
     }
 
     /* ---- S8: final forward, shim write / strip -------------------------------
@@ -931,6 +1059,10 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
                 tbl_spray_sel.apply();
                 tbl_spray_mode.apply();
             }
+            tbl_audit_steer.apply();
+            if (md.hop == 0 && md.is_audit == 0) {
+                tbl_health_gate.apply();
+            }
 
             /* The destination leaf delivers; it does not resolve another link, and a
              * link it is not on cannot fail it. */
@@ -952,8 +1084,9 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
              * program order on that write-after-write. */
             if (hdr.witness.isValid()) {
                 tbl_wit_check.apply();
+                tbl_wit_count.apply();
                 tbl_wit_verdict.apply();
-                if (md.wit_gap != 0) {          /* a discontinuity arms the fast loop */
+                if (md.wit_result.gap != 0) {          /* a discontinuity arms the fast loop */
                     tbl_wit_arm.apply();
                 }
             }
@@ -977,6 +1110,15 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
                 tbl_evid_fwd.apply();
             } else {
                 tbl_final.apply();
+                if (md.hop != 0 && hdr.witness.isValid() && md.is_audit != 0) {
+                    if (md.wit_result.gap != 0) {
+                        set_audit_gap_event();
+                    } else {
+                        set_audit_receipt();
+                    }
+                } else if (md.wit_result.gap != 0) {
+                    set_gap_event();
+                }
             }
         }
     }

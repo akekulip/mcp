@@ -63,13 +63,14 @@ Frozen rule (PREREG amendment v1.3):
     gate       : measure iff rnd_attn < attn, as a 256-row TCAM on attn[15:8] x rnd_attn range
 
 Usage (on the switch, SDE env + PYTHONPATH as in setup_skeleton.py):
-    python3 setup_attention.py up [--a0 A0] [--k-up K] [--a-min M] [--n-clean N]
+    python3 setup_attention.py up [--program mcp_fabric_cw4] [--a0 A0] [--k-up K]
+                                      [--a-min M] [--n-clean N]
     python3 setup_attention.py seed <A0>              # re-seed every reg_attn slot
     python3 setup_attention.py params                 # print the four RegisterParams
     python3 setup_attention.py attn [path_id]         # dump reg_attn (attn, clean) per path
     python3 setup_attention.py thresh evid <loss_q_lo> <rtt_q_lo>   # exceedance if loss_q>=lo OR rtt_q>=lo
     python3 setup_attention.py thresh csig <qdepth_cells_lo>
-    python3 setup_attention.py mirror <collector_dp>  # sessions 1 (128 B) and 3 (64 B)
+    python3 setup_attention.py mirror <collector_dp>  # sessions 1/2 (128 B) and 3 (64 B)
     python3 setup_attention.py mirror-counts          # not available on Tofino 1 mirror cfg; use tcpdump at the collector
     python3 setup_attention.py --dry-run
 """
@@ -91,6 +92,16 @@ N_CLEAN_DEFAULT = 4096
 LOOP_UP_DP = {0: 164, 1: 165, 2: 166, 3: 167}    # 5/0..5/3  (uplink egress, arrives at spine pass)
 LOOP_DN_DP = {0: 172, 1: 173, 2: 174, 3: 175}    # 6/0..6/3  (downlink egress, arrives at dest-leaf pass)
 N_SPINE = 2
+CONTEXTUAL_PROGRAMS = {
+    "mcp_fabric_cw4",
+    "mcp_fabric_capsule",
+    "mcp_fabric_gate",
+    "mcp_fabric_gate_event",
+}
+
+
+def is_contextual_program(program):
+    return program in CONTEXTUAL_PROGRAMS
 
 
 def vlink_up(leaf, spine):
@@ -135,6 +146,19 @@ def plan_eg_vlink():
     return rows
 
 
+def eg_vlink_action_fields(vlink, contextual=False):
+    """Return the action-data contract for the selected pipeline.
+
+    C-W4 uses the low nibble of the 16-bit witness link id for the context stratum. The compiler
+    cannot shift the runtime action parameter, so the control plane must also supply ``vlink << 4``.
+    Keeping this transformation here prevents model-only tests from masking a bring-up failure.
+    """
+    fields = (("vlink", vlink),)
+    if contextual:
+        fields += (("vlink_base", vlink << 4),)
+    return fields
+
+
 def plan_gate():
     """Row L (1..255): attn[15:8] == L and rnd_attn in [0, (L<<8)-1] -> measure."""
     return [(L, 0, (L << 8) - 1) for L in range(1, 256)]
@@ -144,21 +168,24 @@ def print_plan(args):
     print(f"reg_attn seed: {N_PATHS} slots, attn={args.a0}, clean=0")
     print(f"params: k_up={args.k_up} a_min={args.a_min} n_clean_m1={args.n_clean - 1}")
     print(f"tbl_gate: {len(plan_gate())} rows, e.g. {plan_gate()[0]} ... {plan_gate()[-1]}")
-    print(f"tbl_eg_vlink: {len(plan_eg_vlink())} rows: {plan_eg_vlink()}")
+    contextual = is_contextual_program(args.program)
+    print(f"program: {args.program}")
+    print(f"tbl_eg_vlink: {len(plan_eg_vlink())} rows: "
+          f"{[(p, q, eg_vlink_action_fields(v, contextual)) for p, q, v in plan_eg_vlink()]}")
     print("tbl_exceed_evid: 2 rows (loss_q >= lo, any rtt) and (any loss, rtt_q >= lo)")
     print("tbl_exceed_csig: 1 row (worst_qdepth >= lo cells)")
-    print("mirror: sid 1 max_pkt_len 128, sid 3 max_pkt_len 64, INGRESS -> collector dev_port")
+    print("mirror: sid 1/2 max_pkt_len 128, sid 3 max_pkt_len 64, INGRESS -> collector dev_port")
 
 
 # --------------------------------------------------------------------------- bfrt
-def connect():
+def connect(program=PROG):
     import bfrt_grpc.client as gc
     iface = gc.ClientInterface(GRPC_ADDR, client_id=CLIENT_ID, device_id=DEV)
-    bfrt = iface.bfrt_info_get(PROG)
+    bfrt = iface.bfrt_info_get(program)
     # Every client must BIND to the program before any read/write ("Unable to get
     # bound_program" otherwise).  Binding is per-client and does not warm-init; the
     # "only client 0" rule of §5.7 concerns VERIFY_AND_WARM_INIT, not this.
-    iface.bind_pipeline_config(PROG)
+    iface.bind_pipeline_config(program)
     tgt = gc.Target(device_id=DEV, pipe_id=0xFFFF)
     return gc, iface, bfrt, tgt
 
@@ -225,14 +252,16 @@ def install_gate(gc, bfrt, tgt):
     print(f"tbl_gate: {len(keys)} rows installed")
 
 
-def install_eg_vlink(gc, bfrt, tgt):
+def install_eg_vlink(gc, bfrt, tgt, contextual=False):
     t = bfrt.table_get("pipe.Egress.tbl_eg_vlink")
     want = set((p, q) for p, q, _ in plan_eg_vlink())
     for port, qid, vl in plan_eg_vlink():
+        action_data = [gc.DataTuple(name, value)
+                       for name, value in eg_vlink_action_fields(vl, contextual)]
         _upsert(gc, t, tgt,
                 [t.make_key([gc.KeyTuple("eg_intr_md.egress_port", port),
                              gc.KeyTuple("eg_intr_md.egress_qid", qid)])],
-                [t.make_data([gc.DataTuple("vlink", vl)], "Egress.set_eg_vlink")])
+                [t.make_data(action_data, "Egress.set_eg_vlink")])
     stale = 0
     for _d, k in list(t.entry_get(tgt, flags={"from_hw": False})):
         kd = k.to_dict()
@@ -283,7 +312,7 @@ def install_evid_fwd(gc, bfrt, tgt, loop_dp=164, role_host=1):
 def install_mirrors(gc, bfrt, tgt, collector_dp):
     """§5.4: action-based $mirror.cfg; the action name '$normal' is mandatory."""
     t = bfrt.table_get("$mirror.cfg")
-    for sid, maxlen in ((1, 128), (3, 64)):
+    for sid, maxlen in ((1, 128), (2, 128), (3, 64)):
         _upsert(gc, t, tgt,
                 [t.make_key([gc.KeyTuple("$sid", sid)])],
                 [t.make_data([gc.DataTuple("$direction", str_val="INGRESS"),
@@ -291,7 +320,7 @@ def install_mirrors(gc, bfrt, tgt, collector_dp):
                               gc.DataTuple("$ucast_egress_port_valid", bool_val=True),
                               gc.DataTuple("$session_enable", bool_val=True),
                               gc.DataTuple("$max_pkt_len", maxlen)], "$normal")])
-    print(f"mirror sessions 1 (128 B) and 3 (64 B) -> dev_port {collector_dp}")
+    print(f"mirror sessions 1/2 (128 B) and 3 (64 B) -> dev_port {collector_dp}")
 
 
 def main():
@@ -299,6 +328,8 @@ def main():
     ap.add_argument("cmd", nargs="?", default="up")
     ap.add_argument("args", nargs="*")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--program", default=PROG,
+                    help="loaded P4 program (use mcp_fabric_cw4 for behavioral sublinks)")
     ap.add_argument("--a0", type=int, default=A0_DEFAULT)
     ap.add_argument("--k-up", type=int, default=K_UP_DEFAULT)
     ap.add_argument("--a-min", type=int, default=A_MIN_DEFAULT)
@@ -308,13 +339,13 @@ def main():
     if a.dry_run:
         print_plan(a)
         return
-    gc, iface, bfrt, tgt = connect()
+    gc, iface, bfrt, tgt = connect(a.program)
     try:
         if a.cmd == "up":
             write_params(gc, bfrt, tgt, a.k_up, a.a_min, a.n_clean)
             seed_attn(gc, bfrt, tgt, a.a0)
             install_gate(gc, bfrt, tgt)
-            install_eg_vlink(gc, bfrt, tgt)
+            install_eg_vlink(gc, bfrt, tgt, contextual=a.program == "mcp_fabric_cw4")
             set_thresh_evid(gc, bfrt, tgt, 1, 255)      # any reported loss is exceedance; rtt off
             set_thresh_csig(gc, bfrt, tgt, 4096)        # 4096 cells ~ 320 KB queued
             install_mirrors(gc, bfrt, tgt, a.collector)
