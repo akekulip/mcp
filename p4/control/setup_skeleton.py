@@ -236,6 +236,62 @@ SPRAY_ACTIONS = {
 AUDIT_SRC_OK, AUDIT_SRC_NO = 1, 0   # tbl_audit_steer provenance (H35)
 DEFAULT_SPRAY = "hash"
 
+# ===========================================================================
+# CONTEXT CAPSULE (P1) — tbl_context, the classifier that makes a behavioural
+# sublink behavioural.  It maps (size, service class) onto the 4-bit context that
+# becomes the low nibble of md.sublink = (vlink << 4) | ctx.  Nothing in P3 works
+# without it: with the table empty the const default_action set_ctx(0) puts EVERY
+# packet in context 0, so all four strata collapse into one sublink.
+# ---------------------------------------------------------------------------
+# READ THIS BEFORE CHANGING A NUMBER — the units do NOT match the simulator's.
+#
+#   tbl_context keys hdr.ipv4.total_len = IPv4 header + payload.  It EXCLUDES the
+#   14-byte Ethernet header, the FCS, and — on a looped pass — the 12-byte fabric
+#   shim, the 14-byte CSIG tag and the 4-byte witness.
+#
+#   sim/sublink_capacity.py's SizeSchema calls itself "the four size strata
+#   compiled into mcp_fabric_cw4.p4", and that program's tbl_stratum keys
+#   eg_intr_md.pkt_length under `if (hdr.csig.isValid())` — the whole egress frame,
+#   which at that point is ethernet(14) + fabric(12) + csig(14) + witness(4) +
+#   ipv4(total_len).  So C-W4's quantity is total_len + 44 on a fabric pass, and a
+#   bare host frame at the source leaf is total_len + 14.
+#
+#   THE TWO QUANTITIES THEREFORE DO NOT AGREE.  Using 256/1024/2048 verbatim on
+#   total_len puts a packet one stratum LOWER than C-W4 would whenever total_len
+#   falls in [B-44, B) for a boundary B — that is 212..255, 980..1023, 2004..2047.
+#
+#   Convention implemented here: VERBATIM, CTX_LEN_OFFSET = 0.  The capsule
+#   stratum is a property of the IP packet, so it is invariant across hops, across
+#   testbeds and across any future change to the emulation shim — none of which is
+#   true of pkt_length.  It is also the only convention that can be stated exactly
+#   offline: whether eg_intr_md.pkt_length counts ingress-inserted headers and
+#   excludes the FCS is a TNA fact this repo has not measured on silicon, and a
+#   wrong 44 would be worse than a stated 0.
+#
+#   WHY THIS IS SAFE FOR THE FROZEN EXPERIMENT, and where it is not:
+#   every packet size in the frozen scenarios (512, 1400, 1800, 4096 B) is more
+#   than 44 bytes away from every boundary, so offsets 0, 14 and 44 all produce
+#   identical strata for every frozen row — proved in
+#   p4/control/tests/test_setup_context.py.  A hardware campaign that puts traffic
+#   in one of the three bands above, or that compares this capsule arm against the
+#   C-W4 arm at a boundary, must set CTX_LEN_OFFSET to the shim size it wants to
+#   compensate and re-run.  That is the single constant; nothing else changes.
+CTX_SIZE_BOUNDARIES = (256, 1024, 2048)   # frozen; == sim/sublink_capacity.SizeSchema
+CTX_LEN_OFFSET = 0                        # bytes subtracted from each boundary, see above
+CTX_LEN_MAX = 65535                       # hdr.ipv4.total_len is bit<16>
+
+# DSCP codepoint -> service class.  CS0/CS1/CS2/CS3, the four class selectors, are
+# the published mapping already used by p4/ptf/test_capsule.py and
+# p4/ptf/test_health_gate.py; the diffserv BYTE is the codepoint << 2.
+CTX_DSCP_CLASSES = ((0x00, 0), (0x08, 1), (0x10, 2), (0x18, 3))
+
+# The ternary mask covers the 6 DSCP bits ONLY.  The low 2 bits of the diffserv byte
+# are ECN: any congested queue anywhere on the path may set them, and if they were
+# part of the key that packet would fall out of its class and be reclassified into a
+# different context mid-flow — i.e. congestion would silently move packets between
+# behavioural sublinks, which is precisely the signal the sublink exists to measure.
+CTX_DSCP_MASK = 0xFC
+
 
 # ===========================================================================
 # The entry plan.  Pure functions, no bfrt — reviewable and self-checkable
@@ -312,6 +368,73 @@ def plan_dst_leaf():
     # shifts (design Class 5).  path_id = path_base | spray_idx names one of the
     # N_LEAF*N_SPINE end-to-end paths; steps 1-4 only carry it.
     return [(ip, leaf, leaf * N_SPINE) for ip, leaf in sorted(HOST_IPS.items())]
+
+
+def ctx_of(size_bin, dscp_class):
+    """The published 4-bit capsule id: class in the high 2 bits, size bin in the low 2.
+
+    Same function as p4/ptf/test_capsule.py and p4/ptf/test_health_gate.py, and it is
+    what sim/dynamic/PREREG.md means by "contexts 0..3 (the four compiled size
+    strata)" — those are class 0, whose ids are the size bins themselves."""
+    return (dscp_class << 2) | size_bin
+
+
+def ctx_size_bins():
+    """(low, high, size_bin) over hdr.ipv4.total_len, INCLUSIVE on both ends.
+
+    Built by walking the frozen boundaries once, so the bins tile 0..CTX_LEN_MAX by
+    construction: there is no gap and no overlap to get wrong, and the number of
+    bins is len(CTX_SIZE_BOUNDARIES) + 1 rather than a second hard-coded list."""
+    bins = []
+    low = 0
+    for i, boundary in enumerate(CTX_SIZE_BOUNDARIES):
+        high = boundary - CTX_LEN_OFFSET - 1
+        bins.append((low, high, i))
+        low = high + 1
+    bins.append((low, CTX_LEN_MAX, len(CTX_SIZE_BOUNDARIES)))
+    return bins
+
+
+def plan_context():
+    """(total_len_low, total_len_high, dscp_value, dscp_mask, priority) -> ctx.
+
+    4 size bins x 4 DSCP classes = 16 rows in a table of 32.
+
+    PRIORITY RULE: the 16 rows are pairwise disjoint — the size ranges tile
+    0..65535 without overlap, and under CTX_DSCP_MASK the four DSCP values are
+    distinct — so no packet can ever match two rows and the priority is a tie-break
+    that cannot fire.  It still has to be written, because a bfrt ternary/range
+    table requires $MATCH_PRIORITY on every entry.  Rows are therefore numbered
+    strictly increasing from 1 in (size bin, DSCP class) order: deterministic,
+    reproducible, and identical to the order the PTF tests install.  Lower value =
+    higher priority on this target, so if a future edit DOES make two rows overlap,
+    the earlier (smaller, lower-numbered) bin wins rather than the order being
+    whatever the driver happened to do."""
+    rows = []
+    priority = 1
+    for low, high, size_bin in ctx_size_bins():
+        for dscp, dscp_class in CTX_DSCP_CLASSES:
+            rows.append(((low, high, dscp << 2, CTX_DSCP_MASK, priority),
+                         ctx_of(size_bin, dscp_class)))
+            priority += 1
+    return rows
+
+
+def classify_context(total_len, diffserv):
+    """What tbl_context assigns to a packet, walked the way the MAU walks it.
+
+    The highest-priority (= lowest-numbered) row whose RANGE contains total_len and
+    whose diffserv matches under the row's own mask wins; if nothing matches, the
+    P4's `const default_action = set_ctx(0)` runs and the packet lands in context 0.
+
+    This is the capsule's counterpart to simulate(): it reads the very rows the
+    installer writes, so a test against it is a test of the plan and not of a
+    reimplementation of the plan."""
+    for (low, high, dscp, mask, _prio), ctx in sorted(plan_context(),
+                                                      key=lambda r: r[0][4]):
+        if low <= total_len <= high and (diffserv & mask) == (dscp & mask):
+            return ctx
+    return 0          # const default_action = set_ctx(0)
 
 
 def plan_vlink():
@@ -521,12 +644,36 @@ def self_check():
             paths += 1
 
     assert SPRAY_MASK == N_SPINE - 1
+
+    # tbl_context.  The strata must TILE hdr.ipv4.total_len: a GAP would drop those
+    # packets through to the const default set_ctx(0) and silently merge them into
+    # stratum 0, and an OVERLAP would make the context depend on entry order.
+    bins = ctx_size_bins()
+    assert bins[0][0] == 0, "size bins must start at total_len 0, got %d" % bins[0][0]
+    assert bins[-1][1] == CTX_LEN_MAX, \
+        "size bins must reach total_len %d, got %d" % (CTX_LEN_MAX, bins[-1][1])
+    for (_lo, hi, i), (lo2, _hi2, j) in zip(bins, bins[1:]):
+        assert lo2 == hi + 1, \
+            "size bins %d and %d neither abut nor tile: %d then %d" % (i, j, hi, lo2)
+    ctx_rows = plan_context()
+    assert len(ctx_rows) == len(bins) * len(CTX_DSCP_CLASSES), \
+        "tbl_context must be the full size x class cross product"
+    assert len(ctx_rows) <= 32, "tbl_context is 32 entries in the P4, plan has %d" % len(ctx_rows)
+    assert len(set(k[4] for k, _ in ctx_rows)) == len(ctx_rows), \
+        "every tbl_context row needs its own $MATCH_PRIORITY"
+    assert CTX_DSCP_MASK & 0x03 == 0, \
+        "the two ECN bits MUST be masked out of the capsule key (mask=0x%02X)" % CTX_DSCP_MASK
+    for _k, c in ctx_rows:
+        assert 0 <= c <= 0xF, "capsule id %d does not fit the shim pad nibble" % c
+
     print("plan self-check OK: %d leaves x %d spines, %d virtual links on %d distinct "
           "TM queues over %d loop ports, %d end-to-end paths deliver in 3 passes"
           % (N_LEAF, N_SPINE, n, len(v_of_q), 2 * N_LEAF, paths))
     print("  SHIM_MD_ALIAS = %s%s" % (SHIM_MD_ALIAS,
           " (fabric_h.vsw_id forced to 0; looped-pass spray keys are hop<<8|spine)"
           if SHIM_MD_ALIAS else ""))
+    print("  tbl_context: %d rows tile total_len 0..%d x %d DSCP classes, ECN masked out"
+          % (len(ctx_rows), CTX_LEN_MAX, len(CTX_DSCP_CLASSES)))
 
 
 def print_plan():
@@ -542,6 +689,16 @@ def print_plan():
     for ip, leaf, base in plan_dst_leaf():
         print("  %-10s -> leaf %d, path_base %2d, delivered on dp%d"
               % (ip, leaf, base, LEAF_HOST_DP[leaf]))
+
+    rows = plan_context()
+    print("=== capsule classifier (tbl_context), %d rows ===" % len(rows))
+    print("  KEY UNIT IS hdr.ipv4.total_len (IP header + payload, NO Ethernet, NO shim);")
+    print("  boundaries %s, CTX_LEN_OFFSET=%d, ECN bits masked out (mask 0x%02X)"
+          % (list(CTX_SIZE_BOUNDARIES), CTX_LEN_OFFSET, CTX_DSCP_MASK))
+    for (low, high, dscp, mask, prio), ctx in rows:
+        print("  prio %-3d total_len [%5d,%5d]  diffserv 0x%02X&0x%02X (DSCP %2d, class %d)"
+              "  ->  set_ctx(%2d)  size_bin=%d"
+              % (prio, low, high, dscp, mask, dscp >> 2, ctx >> 2, ctx, ctx & 0x3))
 
     print("=== spray mode (tbl_spray_mode), default '%s' ===" % DEFAULT_SPRAY)
     for key, act, mask in plan_spray(DEFAULT_SPRAY):
@@ -770,6 +927,26 @@ def install_dst_leaf(gc, bfrt, tgt):
     print("  tbl_dst_leaf: %d rows" % len(plan_dst_leaf()))
 
 
+def install_context(gc, bfrt, tgt):
+    """Install the capsule classifier.
+
+    A range+ternary table needs $MATCH_PRIORITY in the key; see plan_context() for
+    why the rows are disjoint and what the numbering means.  The diffserv mask is
+    CTX_DSCP_MASK = 0xFC, i.e. the 6 DSCP bits with the 2 ECN bits excluded, so a
+    congestion mark cannot move a packet into another behavioural sublink."""
+    t = bfrt.table_get("pipe.Ingress.tbl_context")
+    rows = plan_context()
+    for (low, high, dscp, mask, prio), ctx in rows:
+        _upsert(t, tgt,
+                t.make_key([gc.KeyTuple("hdr.ipv4.total_len", low=low, high=high),
+                            gc.KeyTuple("hdr.ipv4.diffserv", dscp, mask),
+                            gc.KeyTuple("$MATCH_PRIORITY", prio)]),
+                t.make_data([gc.DataTuple("c", ctx)], "Ingress.set_ctx"))
+    print("  tbl_context: %d rows (%d size bins on hdr.ipv4.total_len x %d DSCP classes, "
+          "ECN masked out)"
+          % (len(rows), len(ctx_size_bins()), len(CTX_DSCP_CLASSES)))
+
+
 # The loaded step-4 binary's to_loop takes 4 action arguments; the step-5+ program
 # adds a 5th, `path_id`.  Which one is live cannot be decided from the served bfrt
 # schema alone: bf_switchd serves the schema from the JSON path in its conf file,
@@ -919,6 +1096,10 @@ def set_spray(gc, bfrt, tgt, mode):
     if mode == "sel":
         print("  NOTE: 'sel' also needs ActionProfile members and a selector group "
               "installed in pipe.Ingress.spray_prof / spray_sel_impl — not done here.")
+        print("  WARNING: with tbl_spray_sel EMPTY, spray_member never runs, md.spray_sel "
+              "keeps the parser start-state 0, and spray_from_sel therefore sprays every "
+              "packet onto spine 0.  Do NOT run an experiment in 'sel' mode until that "
+              "selector group exists.")
 
 
 def seed_registers(gc, bfrt, tgt):
@@ -1213,6 +1394,7 @@ def main():
         print("[p4 tables]")
         install_roles(gc, bfrt, tgt)
         install_dst_leaf(gc, bfrt, tgt)
+        install_context(gc, bfrt, tgt)
         install_vlinks(gc, bfrt, tgt)
         install_final(gc, bfrt, tgt)
         set_spray(gc, bfrt, tgt, DEFAULT_SPRAY)

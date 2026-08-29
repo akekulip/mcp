@@ -86,6 +86,33 @@ EXEMPT: Dict[str, str] = {
 }
 
 
+def _spray_sel_status():
+    """tbl_spray_sel is exempt ONLY while the selector spray mode is unused.
+
+    The table is applied unconditionally at hop 0 (mcp_fabric_gate_event.p4:1111), but all it
+    does is write ``md.spray_sel``, which ``tbl_spray_mode`` consumes only under the selector
+    mode.  Under random / hash / round-robin the value is computed and discarded, so an empty
+    selector costs nothing.  Installing it is not plain rows either — it is an indirect selector
+    needing action-profile members plus selector groups.
+
+    This is deliberately CONDITIONAL rather than a flat exemption: if the configured spray mode
+    ever becomes the selector, an unplanned tbl_spray_sel silently sprays everything to member 0
+    and every path result in the campaign would be wrong with no error anywhere.  So the audit
+    must fail in that case, not wave it through.  Returns (is_exempt, reason).
+    """
+    try:
+        import setup_skeleton as sk
+        mode = sk.DEFAULT_SPRAY
+    except Exception:
+        return (False, "cannot determine the spray mode; treat as required")
+    if str(mode).lower() in ("sel", "selector"):
+        return (False, "spray mode is %r, which CONSUMES md.spray_sel — an installer is "
+                       "required (action-profile members + selector groups)" % mode)
+    return (True, "applied at hop 0 but its output md.spray_sel is consumed only under the "
+                  "selector spray mode; configured mode is %r, so the value is discarded. "
+                  "Becomes REQUIRED if the mode changes to selector." % mode)
+
+
 # --------------------------------------------------------------------------- planners
 def _planners() -> Dict[str, Tuple[int, str]]:
     """Bare table name -> (planned rows, where the number comes from).
@@ -106,6 +133,7 @@ def _planners() -> Dict[str, Tuple[int, str]]:
         out["tbl_final"] = (len(sk.plan_final()), "setup_skeleton.plan_final()")
         out["tbl_spray_mode"] = (len(sk.plan_spray(sk.DEFAULT_SPRAY)),
                                  "setup_skeleton.plan_spray(%r)" % sk.DEFAULT_SPRAY)
+        out["tbl_context"] = (len(sk.plan_context()), "setup_skeleton.plan_context()")
         out["reg_spray_rr"] = (64, "setup_skeleton.seed_registers() seeds 64 slots")
     try:
         import setup_attention as at
@@ -227,6 +255,13 @@ def audit(tables: List[Dict[str, Any]],
                 status = "default-action-only (no match key; cannot hold a row)"
             elif short in EXEMPT:
                 status = "exempt (%s)" % EXEMPT[short]
+            elif short == "tbl_spray_sel":
+                ok, why = _spray_sel_status()
+                if ok:
+                    status = "exempt (%s)" % why
+                else:
+                    status = "FAIL %s" % why
+                    failures.append("%s: %s" % (short, why))
             elif not plan:
                 status = "FAIL unplanned — nothing installs rows in this table"
                 failures.append("%s: required and unplanned" % short)
@@ -252,13 +287,21 @@ def audit(tables: List[Dict[str, Any]],
                          if is_match(t) and is_const_entries(t))
     keyless_names = sorted(bare(t["name"]) for t in tables
                            if is_match(t) and not is_const_entries(t) and is_keyless(t))
+    # tbl_spray_sel is exempt only while the selector spray mode is unused; keep the
+    # summary counters consistent with the per-table verdict, or the two contradict
+    # each other and whoever is reading this on a switch believes the wrong one.
+    _dyn_exempt = set()
+    if _spray_sel_status()[0]:
+        _dyn_exempt.add("tbl_spray_sel")
+    _all_exempt = set(EXEMPT) | _dyn_exempt
+
     exempt_present = sorted(bare(t["name"]) for t in tables
-                            if is_match(t) and bare(t["name"]) in EXEMPT)
+                            if is_match(t) and bare(t["name"]) in _all_exempt)
     gap = sorted(bare(t["name"]) for t in tables
                  if is_match(t)
                  and not is_const_entries(t)
                  and not is_keyless(t)
-                 and bare(t["name"]) not in EXEMPT
+                 and bare(t["name"]) not in _all_exempt
                  and bare(t["name"]) not in planners)
 
     print("match-action tables in schema : %d" % n_match)
