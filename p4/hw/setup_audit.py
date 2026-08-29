@@ -53,13 +53,36 @@ GRPC_ADDR = "localhost:50052"
 MATCH_PREFIX = "MatchAction"
 STATE_TYPES = ("Register", "Selector", "Action", "RegisterParam")
 
-# Match-action tables that are CORRECT when empty, each with the reason.  Anything
-# not listed here is required.  The list is short on purpose: every entry is a claim
-# that "empty" is the healthy state, and each one has to be defensible.
+# A table declared `const entries` in the P4 has its rows compiled into the binary and
+# CANNOT be written at run time.  The bf-rt schema expresses this directly: bf-p4c
+# emits "ConstTable" in the table's `attributes` array.  That is a schema fact, so it
+# is detected rather than listed — a name list here would reintroduce exactly the
+# drift the schema-derived design exists to prevent.
+#
+# Verified on p4/hw/schema/mcp_fabric_gate_event.bfrt.json: the 8 tables carrying the
+# attribute are tbl_attn, tbl_ctx_index, tbl_wit_arm, tbl_wit_check, tbl_wit_count,
+# tbl_wit_link, tbl_wit_stamp, tbl_wit_verdict — and no others.
+CONST_TABLE_ATTR = "ConstTable"
+
+# A second compiled-in shape, also a schema fact: a table with an EMPTY key array has
+# no match key at all.  It exists only to invoke its `const default_action`, so it can
+# never hold a row and can never be installed.  In mcp_fabric_gate_event that is
+# tbl_csig_diff / tbl_csig_replace_a / tbl_csig_replace_b, each declared in one line
+# as `actions = { X; } const default_action = X(); size = 1;`.  Counting these as a
+# coverage gap would send someone writing installers for tables that cannot take one.
+
+# Match-action tables that are CORRECT when empty.  Each reason names the code that
+# writes the table at run time, or the code that deliberately empties it, so the
+# exemption is evidence rather than assumption.  All three also carry a const default
+# action, so "empty" means the compiled default runs — which is the healthy behaviour
+# in each case.
 EXEMPT: Dict[str, str] = {
-    "tbl_fail": "fault injector; empty IS healthy (setup_skeleton `up` clears it)",
-    "tbl_health_gate": "quarantine state; empty means nothing is quarantined",
-    "tbl_audit_steer": "armed per audit round by the controller, not at setup",
+    "tbl_fail": "fault injector; setup_skeleton.clear_fail() empties it during `up`, "
+                "and hw_adapter.py:496 reads its counters as ground truth",
+    "tbl_health_gate": "quarantine state written at run time by "
+                       "controller/sublink_feedback.py:257; empty = nothing quarantined",
+    "tbl_audit_steer": "armed per audit round by controller/sublink_feedback.py:287, "
+                       "not at setup; 16-entry cap = AUDIT_ROUND_MAX_TOKENS",
 }
 
 
@@ -121,6 +144,19 @@ def is_state(table: Dict[str, Any]) -> bool:
     return str(table.get("table_type", "")) in STATE_TYPES
 
 
+def is_const_entries(table: Dict[str, Any]) -> bool:
+    """True if bf-p4c compiled this table's entries into the binary.
+
+    Read straight from the schema's `attributes` array; no name list, no inference.
+    """
+    return CONST_TABLE_ATTR in (table.get("attributes") or [])
+
+
+def is_keyless(table: Dict[str, Any]) -> bool:
+    """True if the table has no match key: default-action-only, cannot hold a row."""
+    return not (table.get("key") or [])
+
+
 # ------------------------------------------------------------------------------- live
 def connect(program: str) -> Tuple[Any, Any, Any]:
     """bfrt read-only session.  Imported lazily so offline mode needs no SDE."""
@@ -153,7 +189,7 @@ def audit(tables: List[Dict[str, Any]],
     print("-" * len(hdr))
 
     failures: List[str] = []
-    n_match = n_planned = 0
+    n_match = n_planned = n_const = n_keyless = 0
 
     for t in sorted(tables, key=lambda x: (not is_match(x), x["name"])):
         name = t["name"]
@@ -175,7 +211,21 @@ def audit(tables: List[Dict[str, Any]],
             n_match += 1
             if plan:
                 n_planned += 1
-            if short in EXEMPT:
+            if is_const_entries(t):
+                # Compiled-in rows.  Never a coverage gap and never installable: if a
+                # const-entry table misbehaves the fault is at COMPILE or LOAD time,
+                # so the fix is never "install more rows".
+                n_const += 1
+                if live and inst == 0:
+                    status = ("WARN compiled-in but 0 rows on the chip — a LOAD problem "
+                              "(wrong binary / wrong bfrt schema), NOT a setup problem")
+                else:
+                    status = "compiled-in (const entries; no runtime installation possible)"
+            elif is_keyless(t):
+                # No key at all: the table only ever runs its const default action.
+                n_keyless += 1
+                status = "default-action-only (no match key; cannot hold a row)"
+            elif short in EXEMPT:
                 status = "exempt (%s)" % EXEMPT[short]
             elif not plan:
                 status = "FAIL unplanned — nothing installs rows in this table"
@@ -198,14 +248,33 @@ def audit(tables: List[Dict[str, Any]],
               % (short, ttype, size, planned_s, inst_s, status))
 
     print()
+    const_names = sorted(bare(t["name"]) for t in tables
+                         if is_match(t) and is_const_entries(t))
+    keyless_names = sorted(bare(t["name"]) for t in tables
+                           if is_match(t) and not is_const_entries(t) and is_keyless(t))
+    exempt_present = sorted(bare(t["name"]) for t in tables
+                            if is_match(t) and bare(t["name"]) in EXEMPT)
+    gap = sorted(bare(t["name"]) for t in tables
+                 if is_match(t)
+                 and not is_const_entries(t)
+                 and not is_keyless(t)
+                 and bare(t["name"]) not in EXEMPT
+                 and bare(t["name"]) not in planners)
+
     print("match-action tables in schema : %d" % n_match)
     print("  with a planner              : %d" % n_planned)
+    print("  compiled-in (const entries) : %d  %s"
+          % (n_const, ", ".join(const_names) or "-"))
+    print("  default-action-only (no key): %d  %s"
+          % (n_keyless, ", ".join(keyless_names) or "-"))
+    print("     -> neither category is a coverage gap: their behaviour is in the binary")
+    print("        and cannot be written at run time.  If one of them misbehaves the")
+    print("        fault is at COMPILE or LOAD time (wrong source, wrong binary, wrong")
+    print("        bfrt schema) — the fix is NEVER 'install more rows'.")
     print("  exempt (empty is healthy)   : %d  %s"
-          % (len(EXEMPT), ", ".join(sorted(EXEMPT))))
-    print("  required and unplanned      : %d"
-          % sum(1 for t in tables
-                if is_match(t) and bare(t["name"]) not in EXEMPT
-                and bare(t["name"]) not in planners))
+          % (len(exempt_present), ", ".join(exempt_present) or "-"))
+    print("  required and unplanned      : %d  %s"
+          % (len(gap), ", ".join(gap) or "-"))
     print("mode                          : %s" % ("live (plan vs chip)" if live
                                                   else "offline (plan only, no switch)"))
 
