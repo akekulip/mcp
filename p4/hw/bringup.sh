@@ -102,9 +102,17 @@ for dev in cfg.get("p4_devices", []):
             for k in ("context", "config", "path"):
                 if k in pl:
                     pl[k] = absolute(pl[k])
-        for k in ("bfrt-config", "model_json_path"):
-            if k in prog and not os.path.exists(prog[k]):
-                raise SystemExit("missing build artifact: %s" % prog[k])
+        # model_json_path points at aug_model.json, which bf-p4c emits only into an
+        # INSTALLED layout and which only the software model ever reads.  On silicon it
+        # is dead weight -- the program displaced from this chip carried no such key at
+        # all.  Drop it rather than refusing to boot, but say so, because silently
+        # rewriting a conf is how you end up debugging the wrong binary.
+        if "model_json_path" in prog and not os.path.exists(prog["model_json_path"]):
+            print("note: dropping model_json_path (%s does not exist; it is read only by "
+                  "the software model, not by hardware)" % prog["model_json_path"])
+            del prog["model_json_path"]
+        if "bfrt-config" in prog and not os.path.exists(prog["bfrt-config"]):
+            raise SystemExit("missing build artifact: %s" % prog["bfrt-config"])
         for pl in prog.get("p4_pipelines", []):
             for k in ("context", "config"):
                 if not os.path.exists(pl[k]):
@@ -123,7 +131,11 @@ else
 fi
 
 # ================================================================ 3. launch
-hw_step "3. launch bf_switchd under tmux (LD_LIBRARY_PATH set, stdin kept open — H11)"
+# NOTE: sudo STRIPS LD_LIBRARY_PATH (and every LD_*) from the environment even with -E;
+# that is a sudo security behaviour, not a quoting bug.  Exporting it before sudo is not
+# enough and fails as 'libdriver.so: cannot open shared object file'.  It must be set on
+# the sudo'd child via env(1).  Do not 'simplify' this back to a plain export.
+hw_step "3. launch bf_switchd under tmux (LD_LIBRARY_PATH via sudo env, stdin kept open — H11)"
 LAUNCH=$(hw_ssh_script "launch bf_switchd" <<EOF
 set -u
 tmux kill-session -t '${TMUX_SESSION}' 2>/dev/null || true
@@ -131,7 +143,8 @@ rm -f '${SWLOG}'
 tmux new-session -d -s '${TMUX_SESSION}' \
   "export SDE='${SDE}'; export SDE_INSTALL='${SDE_INSTALL}'; \
    export LD_LIBRARY_PATH='${SDE_INSTALL}/lib'; \
-   sudo -E '${SDE_INSTALL}/bin/bf_switchd' --install-dir '${SDE_INSTALL}' \
+   sudo -E env LD_LIBRARY_PATH='${SDE_INSTALL}/lib' SDE='${SDE}' SDE_INSTALL='${SDE_INSTALL}' \
+        '${SDE_INSTALL}/bin/bf_switchd' --install-dir '${SDE_INSTALL}' \
         --conf-file '${CONF_ABS}' --init-mode=cold --status-port 7777 2>&1 \
    | tee '${SWLOG}'"
 sleep 2
