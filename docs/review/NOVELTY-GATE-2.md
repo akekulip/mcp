@@ -70,4 +70,4 @@ The Aegis quotes were confirmed by the PI against the USENIX PDF. CorrOpt, Everf
 Configurations quotes were read from primary PDFs by the reviewing agent. The 007, Flock, SprayCheck
 and Y.1564 wordings came from HTML renderings or search summaries and **must be checked against the
 PDFs before appearing in a submission**. Deepview, NetBouncer, deTector, Y.1731 and proof-of-transit
-were not assessed and are the next ones to check.
+were not assessed. **Y.1731 per-CoS OAM has since been assessed in full — see `NOVELTY-GATE-3.md`, verdict SERIOUS: per-(link, class) loss MEASUREMENT is standardised prior art and that half of the claim is deleted, but no standard acts on the pair.** deTector, Deepview and proof-of-transit remain secondary-only and are the next to check.
