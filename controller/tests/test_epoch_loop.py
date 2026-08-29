@@ -306,5 +306,153 @@ class TestLoop(unittest.TestCase):
         self.assertEqual(row["suspects"], "path:5"); self.assertEqual(row["anomaly"], 1)
 
 
+class _StubSource:
+    def poll(self) -> List[bytes]:
+        return []
+
+    def close(self) -> None:
+        return None
+
+
+class _FakeBfrtInfo:
+    """`bfrt_grpc.client._BfRtInfo.table_get` is `self.table_dict[name]` — a KeyError on a
+    table the served schema does not carry (SDE 9.13, client.py:3007)."""
+
+    def __init__(self, program: str, tables: Any) -> None:
+        self.p4_name, self.table_dict = program, dict(tables)
+
+    def table_get(self, name: str) -> Any:
+        return self.table_dict[name]
+
+
+class _FakeIface:
+    def __init__(self, tables_by_program: Dict[str, Any]) -> None:
+        self._tables = tables_by_program
+        self.info_calls: List[str] = []
+        self.bind_calls: List[str] = []
+
+    def bfrt_info_get(self, program: str) -> _FakeBfrtInfo:
+        self.info_calls.append(program)
+        return _FakeBfrtInfo(program, self._tables.get(program, {}))
+
+    def bind_pipeline_config(self, program: str) -> None:
+        self.bind_calls.append(program)
+
+
+class _FakeGc(types.ModuleType):
+    """Stand-in for `bfrt_grpc.client`: only what BfrtAdapter.__init__ touches."""
+
+    def __init__(self, tables_by_program: Dict[str, Any]) -> None:
+        types.ModuleType.__init__(self, "bfrt_grpc.client")
+        self._tables = tables_by_program
+        self.last_iface: Any = None
+        self.ClientInterface = self._client_interface
+        self.Target = lambda **kw: ("target", kw)
+        self.KeyTuple = lambda *a, **kw: ("key", a, kw)
+        self.DataTuple = lambda *a, **kw: ("data", a, kw)
+
+    def _client_interface(self, addr: str, client_id: int = 0, device_id: int = 0) -> _FakeIface:
+        self.last_iface = _FakeIface(self._tables)
+        return self.last_iface
+
+
+class _fake_bfrt:
+    """Install a fake `bfrt_grpc.client` for the duration of a `with` block."""
+
+    def __init__(self, tables_by_program: Dict[str, Any]) -> None:
+        self.gc = _FakeGc(tables_by_program)
+
+    def __enter__(self) -> _FakeGc:
+        self._saved = {k: sys.modules.get(k) for k in ("bfrt_grpc", "bfrt_grpc.client")}
+        pkg = types.ModuleType("bfrt_grpc")
+        pkg.client = self.gc            # type: ignore[attr-defined]
+        sys.modules["bfrt_grpc"], sys.modules["bfrt_grpc.client"] = pkg, self.gc
+        return self.gc
+
+    def __exit__(self, *exc: Any) -> None:
+        for k, v in self._saved.items():
+            if v is None:
+                sys.modules.pop(k, None)
+            else:
+                sys.modules[k] = v
+
+
+ALL_TABLES = {t: object() for t in hw.REQUIRED_TABLES}
+
+
+class TestBfrtProgramBinding(unittest.TestCase):
+    """H39b: the program name is a parameter, and a wrong one fails loudly HERE rather
+    than as wrong action arity or a silently empty table later."""
+
+    def test_default_program_is_unchanged(self) -> None:
+        self.assertEqual(hw.PROG, "mcp_fabric")
+        with _fake_bfrt({"mcp_fabric": ALL_TABLES}) as gc:
+            a = hw.BfrtAdapter(_StubSource())
+        self.assertEqual(a.program, "mcp_fabric")
+        self.assertEqual(gc.last_iface.info_calls, ["mcp_fabric"])
+        self.assertEqual(gc.last_iface.bind_calls, ["mcp_fabric"])
+
+    def test_explicit_program_reaches_info_get_and_bind(self) -> None:
+        with _fake_bfrt({"mcp_fabric_gate_event": ALL_TABLES}) as gc:
+            a = hw.BfrtAdapter(_StubSource(), program="mcp_fabric_gate_event")
+        self.assertEqual(a.program, "mcp_fabric_gate_event")
+        self.assertEqual(gc.last_iface.info_calls, ["mcp_fabric_gate_event"])
+        self.assertEqual(gc.last_iface.bind_calls, ["mcp_fabric_gate_event"])
+        self.assertEqual(a.bfrt.p4_name, "mcp_fabric_gate_event")
+
+    def test_missing_table_raises_named_error_not_a_usable_adapter(self) -> None:
+        partial = {t: object() for t in hw.REQUIRED_TABLES if t != "pipe.Ingress.reg_attn"}
+        with _fake_bfrt({"not_the_loaded_program": partial}):
+            with self.assertRaises(hw.ProgramMismatch) as cm:
+                hw.BfrtAdapter(_StubSource(), program="not_the_loaded_program")
+        msg = str(cm.exception)
+        self.assertIn("not_the_loaded_program", msg)
+        self.assertIn("pipe.Ingress.reg_attn", msg)
+
+    def test_empty_schema_names_the_first_missing_table(self) -> None:
+        with _fake_bfrt({"mcp_fabric": {}}):
+            with self.assertRaises(hw.ProgramMismatch) as cm:
+                hw.BfrtAdapter(_StubSource())
+        self.assertIn(hw.REQUIRED_TABLES[0], str(cm.exception))
+
+    def test_verify_program_accepts_every_required_table(self) -> None:
+        self.assertIsNone(hw.verify_program(_FakeBfrtInfo("mcp_fabric_cw4", ALL_TABLES),
+                                            "mcp_fabric_cw4"))
+
+    def test_verify_program_rejects_a_table_that_resolves_to_none(self) -> None:
+        tables = dict(ALL_TABLES, **{"pipe.Ingress.tbl_fail": None})
+        with self.assertRaises(hw.ProgramMismatch):
+            hw.verify_program(_FakeBfrtInfo("mcp_fabric", tables), "mcp_fabric")
+
+
+class TestProgramFlag(unittest.TestCase):
+    """The CLI flag must be the one setup_skeleton.py / setup_attention.py already expose."""
+
+    def _setup_scripts(self) -> Any:
+        root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        sys.path.insert(0, os.path.join(root, "p4", "control"))
+        import setup_skeleton  # noqa: E402
+        import setup_attention  # noqa: E402
+        return setup_skeleton, setup_attention
+
+    def test_flag_defaults_to_the_shared_program_name(self) -> None:
+        skeleton, attention = self._setup_scripts()
+        args = epoch_loop.build_parser().parse_args(["--dry-run"])
+        self.assertEqual(args.program, hw.PROG)
+        self.assertEqual(hw.PROG, skeleton.PROG)
+        self.assertEqual(hw.PROG, attention.PROG)
+
+    def test_flag_parses_the_same_way_as_setup_skeleton(self) -> None:
+        skeleton, attention = self._setup_scripts()
+        args = epoch_loop.build_parser().parse_args(["--program", "mcp_fabric_gate_event"])
+        self.assertEqual(args.program, "mcp_fabric_gate_event")
+        self.assertEqual(skeleton.extract_program_arg(["up", "--program", "mcp_fabric_gate_event"]),
+                         ("mcp_fabric_gate_event", ["up"]))
+        # setup_attention builds its parser inline in main(), so its convention is checked
+        # at the source: the same flag spelling, defaulting to the same program.
+        src = open(attention.__file__).read()
+        self.assertIn('ap.add_argument("--program", default=PROG,', src)
+
+
 if __name__ == "__main__":
     unittest.main()

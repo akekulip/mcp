@@ -22,8 +22,11 @@ bit4 declared-audit receipt (sid 2). Event copies reuse the mirror metadata as
 inner frame. Audit copies additionally retain the reserved UDP source port as the probe token.
 
 STATUS: the pure parsing/aggregation path is unit-tested (controller/tests).  The bfrt
-path (`BfrtAdapter`) is code-complete but UNTESTED against the switch — it was written
-while another engineer held the testbed.  Idioms are copied from
+path (`BfrtAdapter`) HAS run on silicon: `p4/reports/slow-loop-silicon.md` §5 records it
+connecting, reading counters, reading and writing `reg_attn`, and honouring
+`--freeze-controller`, with paired timings (read_attn 47.5 ms keyless vs 54.7 ms with 256
+explicit keys).  That run used the default program `mcp_fabric`; the `program=` argument
+and `verify_program` are newer and have NOT been exercised on the switch.  Idioms are copied from
 p4/control/setup_attention.py (connect, reg_attn) and setup_skeleton.py (counters).
 """
 import logging
@@ -36,7 +39,7 @@ from typing import Any, Dict, Iterator, List, Optional, Tuple
 logger = logging.getLogger(__name__)
 
 DEV = 0
-PROG = "mcp_fabric"
+PROG = "mcp_fabric"        # DEFAULT only — pass program=/--program for another binary
 GRPC_ADDR = "localhost:50052"
 CLIENT_ID = 4              # epoch controller; 0 = setup_skeleton, 2 = setup_attention
 N_PATHS = 256              # reg_attn slots
@@ -374,15 +377,50 @@ def parse_copies(frames: List[bytes]) -> List[Dict[str, Any]]:
 
 
 # ----------------------------------------------------------------------------- bfrt adapter
+# Every table BfrtAdapter reads or writes.  All three exist in mcp_fabric, mcp_fabric_cw4
+# and mcp_fabric_gate_event, so a program that cannot resolve them is the wrong program.
+REQUIRED_TABLES = ("pipe.Ingress.tbl_vlink", "pipe.Ingress.tbl_fail", "pipe.Ingress.reg_attn")
+
+
+class ProgramMismatch(RuntimeError):
+    """The bound bfrt schema is not the P4 program this adapter needs (HURDLES H39b)."""
+
+
+def verify_program(bfrt: Any, program: str,
+                   tables: Tuple[str, ...] = REQUIRED_TABLES) -> None:
+    """Resolve every table the adapter uses, immediately after binding.
+
+    Binding the WRONG program name does not fail on its own: bf_switchd serves its schema
+    from the JSON named in its conf, so the reply is a schema for a program the chip may
+    not be running, and the damage surfaces later as wrong action arity or a silently
+    EMPTY table (setup_skeleton.TO_LOOP_PATH_ID; HURDLES H39b).  Fail here instead, naming
+    the program and the table that is missing."""
+    for name in tables:
+        try:
+            resolved = bfrt.table_get(name)
+        except Exception as e:                     # bfrt raises KeyError; wrappers vary
+            resolved, reason = None, "%s: %s" % (type(e).__name__, e)
+        else:
+            reason = "table_get returned None"
+        if resolved is None:
+            raise ProgramMismatch(
+                "P4 program %r does not provide %s (%s).  The bound bfrt schema is not the "
+                "program this adapter needs — pass --program <the loaded binary>."
+                % (program, name, reason))
+    logger.info("bound P4 program %s: %d required tables resolved", program, len(tables))
+
+
 class BfrtAdapter:
     """Live adapter against bf_switchd.  UNTESTED on silicon (see module docstring)."""
 
-    def __init__(self, source: Any, client_id: int = CLIENT_ID) -> None:
+    def __init__(self, source: Any, client_id: int = CLIENT_ID, program: str = PROG) -> None:
         import bfrt_grpc.client as gc   # type: ignore
         self.gc = gc
+        self.program = program
         self.iface = gc.ClientInterface(GRPC_ADDR, client_id=client_id, device_id=DEV)
-        self.bfrt = self.iface.bfrt_info_get(PROG)
-        self.iface.bind_pipeline_config(PROG)      # per-client bind, no warm-init
+        self.bfrt = self.iface.bfrt_info_get(program)
+        self.iface.bind_pipeline_config(program)   # per-client bind, no warm-init
+        verify_program(self.bfrt, program)         # loud and early, never a silent empty table
         self.tgt = gc.Target(device_id=DEV, pipe_id=0xFFFF)
         self.source = source
         self._prev: Dict[int, Tuple[int, int]] = {}

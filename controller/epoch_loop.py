@@ -11,10 +11,14 @@ write reg_attn (all 256 slots, all pipes: pipe_id 0xffff) -> one CSV row.
 --freeze-controller: observe and log, never write (PREREG H7 frozen-controller mode).
 --dry-run: synthetic adapter, no switch, no bfrt import.
 --pcap: replay copies from a file instead of the live collector socket.
+--program: the P4 program loaded on the switch, same flag and default as
+  p4/control/setup_skeleton.py and setup_attention.py; binding the wrong one is checked
+  for and refused (hw_adapter.verify_program) instead of yielding empty tables.
 
 STATUS: --dry-run and the CSV path are tested (controller/tests/test_epoch_loop.py).
-The bfrt path (BfrtAdapter in hw_adapter.py, client_id 4) is code-complete but has NOT
-been run against the switch — another engineer held the testbed while this was written.
+The bfrt path (BfrtAdapter in hw_adapter.py, client_id 4) HAS run on silicon against the
+default program -- see p4/reports/slow-loop-silicon.md §5.  The --program flag and the
+verify_program check added for mcp_fabric_gate_event are newer and switch-unverified.
 """
 import argparse
 import csv
@@ -256,6 +260,8 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--dry-run", action="store_true", help="synthetic adapter, no switch")
     ap.add_argument("--pcap", help="replay copies from this pcap instead of a live socket")
     ap.add_argument("--iface", default="enp3s0f1", help="collector interface for live copies")
+    ap.add_argument("--program", default=hw.PROG,
+                    help="loaded P4 program (use mcp_fabric_cw4 for behavioral sublinks)")
     ap.add_argument("--infer", choices=("auto", "real", "stub"), default="auto")
     ap.add_argument("--faulty-path", type=int, default=5, help="dry-run: synthetic faulty path")
     ap.add_argument("-v", "--verbose", action="store_true")
@@ -271,7 +277,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         infer = load_infer(args.infer)
     else:
         source = hw.PcapSource(args.pcap, args.epoch_ms * 1000) if args.pcap else hw.LiveSource(args.iface)
-        adapter = hw.BfrtAdapter(source)
+        adapter = hw.BfrtAdapter(source, program=args.program)
         infer = load_infer("real" if args.infer == "auto" else args.infer)
     policy = policies.make_policy(args.policy, args.budget, args.seed, args.manifest, args.a_hi, args.a_lo)
     loop = EpochLoop(adapter, infer, policy, args.epoch_ms, args.out, args.k, args.h,
