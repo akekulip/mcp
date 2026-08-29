@@ -345,7 +345,14 @@ def main():
             write_params(gc, bfrt, tgt, a.k_up, a.a_min, a.n_clean)
             seed_attn(gc, bfrt, tgt, a.a0)
             install_gate(gc, bfrt, tgt)
-            install_eg_vlink(gc, bfrt, tgt, contextual=a.program == "mcp_fabric_cw4")
+            install_eg_vlink(gc, bfrt, tgt, contextual=is_contextual_program(a.program))
+            # NOT `a.program == "mcp_fabric_cw4"`.  Every capsule-era program composes
+            # md.sublink = (vlink << 4) | ctx, and the compiler cannot shift a runtime
+            # action parameter, so the control plane must supply the shift.  Hardcoding
+            # one program name silently installed UNSHIFTED vlinks for gate_event and
+            # capsule: no error, no failed write, just sublink ids where the context
+            # nibble collides with the low bits of the vlink.  CONTEXTUAL_PROGRAMS is
+            # the single source of truth; the print path at line ~171 already used it.
             set_thresh_evid(gc, bfrt, tgt, 1, 255)      # any reported loss is exceedance; rtt off
             set_thresh_csig(gc, bfrt, tgt, 4096)        # 4096 cells ~ 320 KB queued
             install_mirrors(gc, bfrt, tgt, a.collector)
