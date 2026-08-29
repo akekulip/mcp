@@ -233,6 +233,7 @@ SPRAY_ACTIONS = {
     "rr":     "Ingress.spray_from_rr",       # B4 — perfectly balanced, replayable
     "sel":    "Ingress.spray_from_sel",      # B3 — ActionSelector, group-managed
 }
+AUDIT_SRC_OK, AUDIT_SRC_NO = 1, 0   # tbl_audit_steer provenance (H35)
 DEFAULT_SPRAY = "hash"
 
 
@@ -267,16 +268,42 @@ def vlink_name(vlink_id):
 
 
 def plan_roles():
-    """(dev_port, role, src_leaf).
+    """(dev_port, role, src_leaf, audit_src).
 
     Both halves of loop pair l carry src_leaf = l: on a cage-6 port that is the
     leaf the uplink came FROM (which is what hop 1 keys on), on a cage-5 port it
     is the leaf the packet is being delivered BY (unused at hop 2, since
-    tbl_vlink is not applied there).  One uniform rule, no special cases."""
-    rows = [(HOST_DP, ROLE_HOST, 0), (HOST1_DP, ROLE_HOST, 1)]
+    tbl_vlink is not applied there).  One uniform rule, no special cases.
+
+    ``audit_src`` authorizes the declared-audit path (H35).  ``tbl_audit_steer``
+    opens a deliberate bypass of ``tbl_health_gate`` so probation traffic can
+    reach a sublink the gate has emptied; without a provenance check any host
+    able to emit UDP/4792 with a guessed 16-bit token could push traffic onto a
+    link we just decided was faulty.
+
+    It is a per-PORT permission and NOT simply "the controller's port", because
+    ``tbl_audit_steer`` re-fires on every hop: the ingress parser reaches
+    ``hdr.udp`` on fabric passes too, and the audit RECEIPT mirror is gated on
+    ``md.hop != 0 && md.is_audit != 0``.  Authorize only the controller's port
+    and the table misses on the loop ports, ``md.is_audit`` reads 0 downstream,
+    and receipts silently stop being generated -- the program still compiles and
+    P3 simply produces no liveness evidence.  So the loop ports carry 1 as well.
+
+    The bypass itself exists only at hop 0 (``md.hop == 0 && md.is_audit == 0``
+    guards ``tbl_health_gate``), and an off-path host can only enter at hop 0,
+    so authorizing the loop ports does not widen the exposure.
+
+    Residual exposure in THIS testbed, stated rather than glossed: the
+    controller shares dp9 with Vision's production traffic, so dp9 must be
+    authorized and any process on Vision keeps the capability.  The surface
+    shrinks from "any host on the fabric, Hulk included" to "the one machine on
+    the controller's port"; it does not reach zero.  A deployment with a
+    dedicated controller port does get the full property."""
+    rows = [(HOST_DP, ROLE_HOST, 0, AUDIT_SRC_OK),      # controller shares this port
+            (HOST1_DP, ROLE_HOST, 1, AUDIT_SRC_NO)]     # Hulk: no audit path
     for l in range(N_LEAF):
-        rows.append((LEAF_A[l], ROLE_LOOP, l))
-        rows.append((LEAF_B[l], ROLE_LOOP, l))
+        rows.append((LEAF_A[l], ROLE_LOOP, l, AUDIT_SRC_OK))   # must re-derive is_audit
+        rows.append((LEAF_B[l], ROLE_LOOP, l, AUDIT_SRC_OK))
     return rows
 
 
@@ -376,7 +403,7 @@ def tm_coords(dev_port, qid):
 # ---------------------------------------------------------------------------
 
 def _role_map():
-    return dict((dp, (role, leaf)) for dp, role, leaf in plan_roles())
+    return dict((dp, (role, leaf)) for dp, role, leaf, _audit in plan_roles())
 
 
 def simulate(dst_ip, spine, ingress_dp=HOST_DP, max_pass=6):
@@ -504,7 +531,7 @@ def self_check():
 
 def print_plan():
     print("=== port roles (tbl_port_role), %d rows ===" % len(plan_roles()))
-    for dp, role, leaf in plan_roles():
+    for dp, role, leaf, _audit in plan_roles():
         tag = {ROLE_HOST: "HOST", ROLE_LOOP: "LOOP"}[role]
         fp = ("15/1" if dp == HOST_DP else "15/2" if dp == HOST1_DP
               else "5/%d" % LEAF_A.index(dp) if dp in LEAF_A
@@ -721,11 +748,12 @@ def show_ports(bfrt, tgt):
 
 def install_roles(gc, bfrt, tgt):
     t = bfrt.table_get("pipe.Ingress.tbl_port_role")
-    for dp, role, leaf in plan_roles():
+    for dp, role, leaf, audit in plan_roles():
         _upsert(t, tgt,
                 t.make_key([gc.KeyTuple("ig_intr_md.ingress_port", dp)]),
                 t.make_data([gc.DataTuple("role", role),
-                             gc.DataTuple("src_leaf", leaf)], "Ingress.set_role"))
+                             gc.DataTuple("src_leaf", leaf),
+                             gc.DataTuple("audit_src", audit)], "Ingress.set_role"))
     print("  tbl_port_role: %d rows" % len(plan_roles()))
 
 
