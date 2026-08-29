@@ -174,7 +174,15 @@ not: the credit roughly halves the phantom loss, and at that particular rate the
 the CUSUM threshold. The result is rate-dependent, so the free data-plane change is still required.
 The credit alone is a threshold accident; the pair is an identity.
 
-Remaining before adoption: a 9.13.2 recompile on the switch, and a PREREG amendment.
+**Confirmed on the switch's own SDE, 2026-08-29.** Both programs were shipped to
+`decps@10.10.54.81` (sha256 verified identical on both sides) and compiled with bf-p4c **9.13.2**,
+the version that actually runs the chip, using the compile-only `build.sh` which never touches the
+pipeline. Both returned exit 0 with 4 warnings, and `pipe/logs/table_summary.log` — the
+authoritative source, not `context.json` — reports **11 ingress / 4 egress for both**. The
+advance-only fix therefore costs zero stages on the deployed toolchain, not merely on the laptop's
+9.13.1. The sibling program running on the chip was undisturbed (pid unchanged).
+
+Remaining before adoption: a PREREG amendment.
 
 ### Why the exposure is bounded
 
