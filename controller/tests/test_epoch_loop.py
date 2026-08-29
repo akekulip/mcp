@@ -63,6 +63,7 @@ except ImportError:
 from controller import hw_adapter as hw  # noqa: E402
 from controller import policies  # noqa: E402
 from controller import epoch_loop  # noqa: E402
+from controller.sublink_feedback import AuditReceipt, GapEvent  # noqa: E402
 
 FAKE_INFER = _install_fake_infer()
 
@@ -112,6 +113,77 @@ class TestParseCopy(unittest.TestCase):
                                         {"worst_tdelta": 2500, "worst_vlink": 3}))
         self.assertEqual((c["vlink"], c["path_id"], c["worst_tdelta_ns"]), (3, 5, 2500))
 
+    def test_gap_mirror_decodes_an_attributed_sublink_event(self) -> None:
+        sublink = (2 << 4) | 3
+        frame = hw.build_copy(
+            sublink, 0xFFFB, hw.FLAG_GAP_EVENT, 99, 999, 2, hw.FABRIC_ETYPE,
+            {"epoch": 42}, witness={"link_id": sublink, "seq": 17})
+        copy = hw.parse_copy(frame)
+        self.assertTrue(copy["gap_event"])
+        self.assertEqual(copy["witness"], {"link_id": sublink, "seq": 17})
+        self.assertEqual(hw.gap_event_from_copy(copy), GapEvent(2, 3, 42, 0xFFFB, 1000))
+
+    def test_gap_mirror_rejects_missing_or_mismatched_attribution(self) -> None:
+        sublink = (2 << 4) | 3
+        no_witness = hw.build_copy(
+            sublink, 0xFFFB, hw.FLAG_GAP_EVENT, 99, 1000, 2, hw.FABRIC_ETYPE,
+            {"epoch": 42})
+        with self.assertRaisesRegex(ValueError, "witness"):
+            hw.parse_copy(no_witness)
+
+        mismatch = hw.build_copy(
+            sublink, 0xFFFB, hw.FLAG_GAP_EVENT, 99, 1000, 2, hw.FABRIC_ETYPE,
+            {"epoch": 42}, witness={"link_id": sublink + 1, "seq": 17})
+        with self.assertRaisesRegex(ValueError, "sublink mismatch"):
+            hw.gap_event_from_copy(hw.parse_copy(mismatch))
+
+    def test_audit_receipt_decodes_declared_probe_token(self) -> None:
+        sublink = (2 << 4) | 3
+        frame = hw.build_copy(
+            sublink, 0, hw.FLAG_AUDIT_RECEIPT, 99, 7, 2, hw.FABRIC_ETYPE,
+            {"epoch": 42}, witness={"link_id": sublink, "seq": 17},
+            udp_src_port=40001, udp_dst_port=hw.AUDIT_UDP_DST)
+        copy = hw.parse_copy(frame)
+        self.assertTrue(copy["audit_receipt"])
+        self.assertEqual(copy["udp"], {"src_port": 40001, "dst_port": hw.AUDIT_UDP_DST})
+        self.assertEqual(
+            hw.audit_receipt_from_copy(copy),
+            AuditReceipt(2, 3, 42, 40001, 17, 0),
+        )
+        self.assertIsNone(hw.gap_event_from_copy(copy))
+
+    def test_combined_audit_gap_is_both_negative_receipt_and_gap_event(self) -> None:
+        sublink = (13 << 4) | 7
+        frame = hw.build_copy(
+            sublink, 0xFFFB, hw.FLAG_AUDIT_RECEIPT | hw.FLAG_GAP_EVENT,
+            99, 2, 2, hw.FABRIC_ETYPE, {"epoch": 9},
+            witness={"link_id": sublink, "seq": 21},
+            udp_src_port=40002, udp_dst_port=hw.AUDIT_UDP_DST)
+        copy = hw.parse_copy(frame)
+        self.assertEqual(hw.gap_event_from_copy(copy), GapEvent(13, 7, 9, 0xFFFB, 3))
+        self.assertEqual(
+            hw.audit_receipt_from_copy(copy),
+            AuditReceipt(13, 7, 9, 40002, 21, 0xFFFB),
+        )
+
+    def test_audit_receipt_requires_reserved_udp_identity(self) -> None:
+        sublink = (2 << 4) | 3
+        missing_udp = hw.build_copy(
+            sublink, 0, hw.FLAG_AUDIT_RECEIPT, 99, 1, 2, hw.FABRIC_ETYPE,
+            {"epoch": 42}, witness={"link_id": sublink, "seq": 17})
+        with self.assertRaisesRegex(ValueError, "audit UDP"):
+            hw.parse_copy(missing_udp)
+        wrong_port = hw.build_copy(
+            sublink, 0, hw.FLAG_AUDIT_RECEIPT, 99, 1, 2, hw.FABRIC_ETYPE,
+            {"epoch": 42}, witness={"link_id": sublink, "seq": 17},
+            udp_src_port=40001, udp_dst_port=4791)
+        with self.assertRaisesRegex(ValueError, "destination"):
+            hw.parse_copy(wrong_port)
+
+    def test_normal_mirror_is_not_a_gap_event(self) -> None:
+        copy = hw.parse_copy(hw.build_copy(3, 5, hw.FLAG_MEASURED, 99))
+        self.assertIsNone(hw.gap_event_from_copy(copy))
+
 
 class TestAggregate(unittest.TestCase):
     def test_synthetic_epoch(self) -> None:
@@ -135,6 +207,28 @@ class TestAggregate(unittest.TestCase):
         obs = hw.Observation(epoch=1, t_host_us=0)
         obs.fail_truth = {0: {"inj_drop": 5}}
         hw._fill(obs, [], {}, 0)
+        self.assertEqual(obs.samples, [])
+
+    def test_observation_surfaces_gap_events_separately_from_attention_samples(self) -> None:
+        sublink = (13 << 4) | 7
+        frame = hw.build_copy(
+            sublink, 0xFFF0, hw.FLAG_GAP_EVENT, 99, 1499, 2, hw.FABRIC_ETYPE,
+            {"epoch": 9}, witness={"link_id": sublink, "seq": 21})
+        obs = hw.Observation(epoch=9, t_host_us=0)
+        hw._fill(obs, hw.parse_copies([frame]), {}, 0)
+        self.assertEqual(obs.gap_events, [GapEvent(13, 7, 9, 0xFFF0, 1500)])
+        self.assertEqual(obs.n_gap_events, 1)
+
+    def test_observation_surfaces_audit_receipts_without_polluting_attention_samples(self) -> None:
+        sublink = (13 << 4) | 7
+        frame = hw.build_copy(
+            sublink, 0, hw.FLAG_AUDIT_RECEIPT, 99, 0, 2, hw.FABRIC_ETYPE,
+            {"epoch": 9}, witness={"link_id": sublink, "seq": 21},
+            udp_src_port=40003, udp_dst_port=hw.AUDIT_UDP_DST)
+        obs = hw.Observation(epoch=9, t_host_us=0)
+        hw._fill(obs, hw.parse_copies([frame]), {}, 0)
+        self.assertEqual(obs.audit_receipts, [AuditReceipt(13, 7, 9, 40003, 21, 0)])
+        self.assertEqual(obs.n_audit_receipts, 1)
         self.assertEqual(obs.samples, [])
 
 

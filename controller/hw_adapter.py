@@ -16,7 +16,10 @@ Wire format of a copy (p4/mcp_fabric.p4 `mirror_h`, 30 B) followed by the origin
   dmac48 smac48 etype16=0x88F1 | next_hop16 vlink16 path_id16 attn16 flags16 tstamp48
   inner: eth(0x0800) ipv4 ...                                (source-leaf copy, hop 0)
          eth(0x88F0) fabric_h(12) [csig_h(14) if fabric.nxt==1] ipv4 ...   (spine copy)
-Flags: bit0 measured (sid 1), bit1 dropped, bit2 corrupted (sid 3).
+Flags: bit0 measured (sid 1), bit1 dropped, bit2 corrupted (sid 3), bit3 C-W4 gap event,
+bit4 declared-audit receipt (sid 2). Event copies reuse the mirror metadata as
+``sublink, gap, observed`` and carry the authoritative epoch and witness identity in the copied
+inner frame. Audit copies additionally retain the reserved UDP source port as the probe token.
 
 STATUS: the pure parsing/aggregation path is unit-tested (controller/tests).  The bfrt
 path (`BfrtAdapter`) is code-complete but UNTESTED against the switch — it was written
@@ -50,11 +53,14 @@ ETH_H_LEN = 14
 FABRIC_H_LEN = 12
 CSIG_H_LEN = 14
 NXT_CSIG = 1
+AUDIT_UDP_DST = 4792
 FLAG_MEASURED, FLAG_DROPPED, FLAG_CORRUPTED = 0x1, 0x2, 0x4
+FLAG_GAP_EVENT, FLAG_AUDIT_RECEIPT = 0x8, 0x10
 
 _MIRROR_META = struct.Struct("!HHHHH")     # next_hop vlink path_id attn flags (tstamp48 apart)
 _FABRIC = struct.Struct("!HHHHBBBB")
 _CSIG = struct.Struct("!HHHIHH")
+_WITNESS = struct.Struct("!HH")
 
 
 # ----------------------------------------------------------------------------- encoding
@@ -96,8 +102,10 @@ def parse_copy(buf: bytes) -> Dict[str, Any]:
         "measured": bool(flags & FLAG_MEASURED),
         "dropped": bool(flags & FLAG_DROPPED),
         "corrupted": bool(flags & FLAG_CORRUPTED),
+        "gap_event": bool(flags & FLAG_GAP_EVENT),
+        "audit_receipt": bool(flags & FLAG_AUDIT_RECEIPT),
         "length": len(buf), "inner_etype": None, "fabric": None, "csig": None,
-        "worst_tdelta_ns": None,
+        "witness": None, "udp": None, "worst_tdelta_ns": None,
     }
     inner = buf[MIRROR_H_LEN:]
     if len(inner) >= ETH_H_LEN:
@@ -112,12 +120,43 @@ def parse_copy(buf: bytes) -> Dict[str, Any]:
             out["csig"] = dict(zip(("worst_hop", "worst_vlink", "worst_qdepth",
                                     "worst_tdelta", "path_id", "epoch"), c))
             out["worst_tdelta_ns"] = c[3]
+            off += CSIG_H_LEN
+            if out["gap_event"] or out["audit_receipt"]:
+                if len(inner) < off + _WITNESS.size:
+                    raise ValueError("event copy is missing the copied C-W4 witness")
+                link_id, seq = _WITNESS.unpack_from(inner, off)
+                out["witness"] = {"link_id": link_id, "seq": seq}
+                off += _WITNESS.size
+                if out["audit_receipt"] and len(inner) >= off + 20:
+                    version_ihl = inner[off]
+                    ihl = (version_ihl & 0x0F) * 4
+                    if version_ihl >> 4 == 4 and ihl >= 20 and len(inner) >= off + ihl + 8:
+                        protocol = inner[off + 9]
+                        if protocol == 17:
+                            src_port, dst_port = struct.unpack_from("!HH", inner, off + ihl)
+                            out["udp"] = {"src_port": src_port, "dst_port": dst_port}
+    if out["gap_event"] or out["audit_receipt"]:
+        if out["csig"] is None or out["witness"] is None:
+            raise ValueError("event copy requires copied CSIG epoch and C-W4 witness")
+        if out["witness"]["link_id"] != out["vlink"]:
+            raise ValueError("event sublink mismatch between witness and mirror metadata")
+    if out["gap_event"]:
+        if out["path_id"] == 0:
+            raise ValueError("gap event carries a zero discontinuity")
+    if out["audit_receipt"]:
+        if out["udp"] is None:
+            raise ValueError("audit receipt is missing its copied audit UDP identity")
+        if out["udp"]["dst_port"] != AUDIT_UDP_DST:
+            raise ValueError("audit receipt has the wrong UDP destination")
     return out
 
 
 def build_copy(vlink: int, pid: int, flags: int, tstamp_ns: int, attn: int = 4096,
                next_hop: int = 1, inner_etype: int = 0x0800,
-               csig: Optional[Dict[str, int]] = None, payload_len: int = 32) -> bytes:
+               csig: Optional[Dict[str, int]] = None, payload_len: int = 32,
+               witness: Optional[Dict[str, int]] = None,
+               udp_src_port: Optional[int] = None,
+               udp_dst_port: Optional[int] = None) -> bytes:
     """Hand-build a copy exactly as the deparser would emit it.  Used by the synthetic
     adapter and the unit tests; NOT a parser — see parse_copy."""
     hdr = MIRROR_DMAC + MIRROR_SMAC + struct.pack("!H", MIRROR_ETYPE)
@@ -132,7 +171,46 @@ def build_copy(vlink: int, pid: int, flags: int, tstamp_ns: int, attn: int = 409
             inner += _CSIG.pack(csig.get("worst_hop", 0), csig.get("worst_vlink", 0),
                                 csig.get("worst_qdepth", 0), csig.get("worst_tdelta", 0),
                                 csig.get("path_id", pid), csig.get("epoch", 0))
+            if witness:
+                inner += _WITNESS.pack(witness.get("link_id", 0), witness.get("seq", 0))
+    if udp_src_port is not None or udp_dst_port is not None:
+        if udp_src_port is None or udp_dst_port is None:
+            raise ValueError("both UDP ports are required")
+        if inner_etype != FABRIC_ETYPE or not csig or not witness:
+            raise ValueError("audit UDP copies require fabric, CSIG, and witness headers")
+        total_len = 20 + 8 + payload_len
+        inner += struct.pack("!BBHHHBBHII", 0x45, 0, total_len, 0, 0, 64, 17, 0, 0, 0)
+        inner += struct.pack("!HHHH", udp_src_port, udp_dst_port, 8 + payload_len, 0)
     return hdr + inner + bytes(payload_len)
+
+
+def gap_event_from_copy(copy: Dict[str, Any]) -> Optional[Any]:
+    """Convert one validated event copy into the P3 decision-core record."""
+    if not copy.get("gap_event"):
+        return None
+    from controller.sublink_feedback import GapEvent
+    raw_sublink = int(copy["vlink"])
+    vlink, context = raw_sublink >> 4, raw_sublink & 0xF
+    if not 0 <= vlink < N_VLINKS:
+        raise ValueError("gap event sublink is outside the configured fabric")
+    return GapEvent(vlink=vlink, context=context, epoch=int(copy["csig"]["epoch"]),
+                    gap=int(copy["path_id"]), observed_packets=int(copy["attn"]) + 1)
+
+
+def audit_receipt_from_copy(copy: Dict[str, Any]) -> Optional[Any]:
+    """Convert one validated audit copy into its exact declared-probe receipt."""
+    if not copy.get("audit_receipt"):
+        return None
+    from controller.sublink_feedback import AuditReceipt
+    raw_sublink = int(copy["vlink"])
+    vlink, context = raw_sublink >> 4, raw_sublink & 0xF
+    if not 0 <= vlink < N_VLINKS:
+        raise ValueError("audit receipt sublink is outside the configured fabric")
+    return AuditReceipt(
+        vlink=vlink, context=context, epoch=int(copy["csig"]["epoch"]),
+        token=int(copy["udp"]["src_port"]), witness_seq=int(copy["witness"]["seq"]),
+        gap=int(copy["path_id"]),
+    )
 
 
 # ----------------------------------------------------------------------------- samples
@@ -175,6 +253,10 @@ class Observation:
     t_read_us: int = 0                       # copies
     t_sync_us: int = 0                       # counters incl. SyncCounters
     counter_reads: int = 0
+    gap_events: List[Any] = field(default_factory=list)
+    n_gap_events: int = 0
+    audit_receipts: List[Any] = field(default_factory=list)
+    n_audit_receipts: int = 0
 
 
 def aggregate(copies: List[Dict[str, Any]], vlink_deltas: Dict[int, Tuple[int, int]],
@@ -187,6 +269,8 @@ def aggregate(copies: List[Dict[str, Any]], vlink_deltas: Dict[int, Tuple[int, i
         samples.append(sample("vlink:%d" % v, int(pkts), 0, (), t_us))
     per_path: Dict[int, Dict[str, Any]] = {}
     for c in copies:
+        if c["gap_event"] or c["audit_receipt"]:
+            continue
         p = per_path.setdefault(c["path_id"], {"d": 0, "l": 0, "lat": [], "links": set()})
         if c["dropped"] or c["corrupted"]:
             p["l"] += 1
@@ -385,6 +469,12 @@ class BfrtAdapter:
 def _fill(obs: Observation, copies: List[Dict[str, Any]],
           deltas: Dict[int, Tuple[int, int]], t_us: int) -> None:
     obs.samples, obs.path_to_links = aggregate(copies, deltas, t_us)
+    obs.gap_events = [event for event in (gap_event_from_copy(c) for c in copies)
+                      if event is not None]
+    obs.n_gap_events = len(obs.gap_events)
+    obs.audit_receipts = [receipt for receipt in (audit_receipt_from_copy(c) for c in copies)
+                          if receipt is not None]
+    obs.n_audit_receipts = len(obs.audit_receipts)
     obs.n_copies = len(copies)
     obs.n_measured = sum(1 for c in copies if c["measured"] and not (c["dropped"] or c["corrupted"]))
     obs.n_lost = sum(1 for c in copies if c["dropped"] or c["corrupted"])
