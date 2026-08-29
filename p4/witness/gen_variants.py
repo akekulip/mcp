@@ -247,6 +247,38 @@ WIT_INGRESS = '''
 
 
 
+
+HEALTH_GATE = """
+    /* ---- BEHAVIORAL HEALTH GATE (P2) -------------------------------------------
+     * The point of behavioural sublinks is to keep using the parts of a link that
+     * are still proven good. This is the table that does it: when a (source, dest,
+     * spray path, context) sublink is quarantined, the packet's SPRAY CHOICE is
+     * rewritten to a prevalidated backup, and tbl_vlink then resolves and counts the
+     * path that was actually taken.
+     *
+     * IT MUST RUN BEFORE tbl_vlink, never after. tbl_vlink is the counted table --
+     * overriding forwarding downstream of it would leave the ground-truth counter
+     * naming a link the packet never used, which would corrupt exactly the evidence
+     * the witness exists to provide.
+     *
+     * Default is NoAction: a healthy context, or one with no entry at all, is
+     * untouched and keeps using the same physical link. Quarantine is therefore
+     * expressed as the PRESENCE of an entry, so revocation is an entry delete. */
+    action sublink_reroute(bit<16> alt_spray) { md.spray_idx = alt_spray; }
+
+    table tbl_health_gate {
+        key = {
+            md.src_leaf  : exact;
+            md.dst_leaf  : exact;
+            md.spray_idx : exact;
+            md.ctx       : exact;
+        }
+        actions = { sublink_reroute; @defaultonly NoAction; }
+        size    = 256;
+        const default_action = NoAction();
+    }
+"""
+
 CAPSULE_INGRESS = """
     /* ---- CONTEXT CAPSULE (P1) --------------------------------------------------
      * The source leaf is the only place in the fabric where the IPv4 header is still
@@ -539,7 +571,7 @@ OLD_EGPARSE_INIT = "        md.tdelta = 0;"
 NEW_EGPARSE_INIT = OLD_EGPARSE_INIT + "\n        md.eg_rnd_fail = 0;"
 
 
-def build(variant, arm=False, egdrop=False, ctx=False, capsule=False):
+def build(variant, arm=False, egdrop=False, ctx=False, capsule=False, gate=False):
     t = BASE
     hdr = HDR_W2 if variant == "w2" else HDR_W4
     t = sub(t, ANCHOR_IPV4, hdr.lstrip("\n") + "\n" + ANCHOR_IPV4, "ipv4 header anchor")
@@ -645,6 +677,14 @@ def build(variant, arm=False, egdrop=False, ctx=False, capsule=False):
         t = sub(t, CTX_EGRESS.strip(), CAPSULE_EGRESS.strip(), "swap classifier for carried label")
         t = sub(t, "            tbl_stratum.apply();", "            tbl_ctx_index.apply();",
                 "apply the capsule index")
+    if gate:
+        t = sub(t, ANCHOR_IG_INSERT, HEALTH_GATE.lstrip("\n") + "\n" + ANCHOR_IG_INSERT,
+                "health gate block")
+        # right after the spray choice is made and the capsule is known, and strictly BEFORE
+        # tbl_vlink, which is the counted table
+        t = sub(t, "                tbl_spray_mode.apply();",
+                "                tbl_spray_mode.apply();\n                tbl_health_gate.apply();",
+                "apply the health gate")
     if egdrop:
         t = sub(t, OLD_EGMD, NEW_EGMD, "eg_md_t rnd")
         t = sub(t, OLD_EGPARSE_INIT, NEW_EGPARSE_INIT, "egress parser init")
@@ -665,6 +705,7 @@ VARIANTS = [
     ("mcp_fabric_w4_egdrop", dict(variant="w4", arm=True, egdrop=True)),
     ("mcp_fabric_cw4",       dict(variant="w4", arm=True, ctx=True)),
     ("mcp_fabric_capsule",   dict(variant="w4", arm=True, ctx=True, capsule=True)),
+    ("mcp_fabric_gate",      dict(variant="w4", arm=True, ctx=True, capsule=True, gate=True)),
 ]
 # NOTE: *_arm now means the WORKING arming shape (explicit gap test). The two shapes that
 # compile but do not arm -- md.exceed in wit_loss, and arm-in-wit_measure/clear-in-wit_ok --
