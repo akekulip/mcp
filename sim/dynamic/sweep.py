@@ -6,6 +6,7 @@ Usage::
     python3 -m sim.dynamic.sweep --quick                     # smoke grid, seconds
     python3 -m sim.dynamic.sweep --scenarios persistent_partial,no_fault --seeds 30
     python3 -m sim.dynamic.sweep --witness-mode both         # both witness semantics, side by side
+    python3 -m sim.dynamic.sweep --context-share 0.7,0.1,0.1,0.1   # the grid under a skewed split
     python3 -m sim.dynamic.sweep --json out/dynamic.json     # full records for reanalysis
 
 The grid is the one frozen in `sim/dynamic/PREREG.md`; the flags narrow it, never widen it beyond
@@ -41,6 +42,7 @@ from sim.dynamic.metrics import RunRecord, format_table, summarize
 from sim.dynamic.runner import (
     ARMS,
     SCENARIOS,
+    UNIFORM_QUARTER,
     CellKey,
     RunConfig,
     cell_key,
@@ -102,8 +104,16 @@ def build_configs(scenarios: Sequence[str], arms: Sequence[str], taus: Sequence[
                   hs: Sequence[float], ks: Sequence[int], ps: Sequence[float],
                   seeds: Sequence[int], epochs: int, tau_write: object = None,
                   onset_epoch: int = 10, audit_tokens: int = 8,
-                  modes: Sequence[str] = ("baseline",)) -> List[RunConfig]:
-    """Expand the grid in a fixed order, so two invocations enumerate identically."""
+                  modes: Sequence[str] = ("baseline",),
+                  context_share: Sequence[float] = UNIFORM_QUARTER) -> List[RunConfig]:
+    """Expand the grid in a fixed order, so two invocations enumerate identically.
+
+    ``context_share`` is ONE vector applied to every cell and every seed.  That is the right shape
+    for "run the frozen grid under a skewed workload" and the WRONG shape for a collateral-vs-share
+    curve: the faulty context is drawn per seed, so a fixed vector puts the swept share on the
+    faulty context in only some of the runs.  `sim/dynamic/share_sweep.py` rebuilds the vector per
+    seed for exactly that reason and is what any collateral ratio must come from.
+    """
     configs: List[RunConfig] = []
     for scenario in scenarios:
         for arm in arms:
@@ -119,7 +129,9 @@ def build_configs(scenarios: Sequence[str], arms: Sequence[str], taus: Sequence[
                                         tau_write_us=tw, h=h, clean_epochs_to_restore=k,
                                         p_fault=p, epochs=epochs, seed=seed,
                                         audit_tokens=audit_tokens, onset_epoch=onset_epoch,
-                                        witness_mode=mode))
+                                        witness_mode=mode,
+                                        n_context=len(context_share),
+                                        context_share=tuple(context_share)))
     return configs
 
 
@@ -149,6 +161,10 @@ def main(argv: Sequence[str] = ()) -> int:
                         choices=list(WITNESS_MODES) + ["both"],
                         help="which compiled witness to emulate; 'both' runs each cell under "
                              "each and prints the mode in every cell key")
+    parser.add_argument("--context-share", default=",".join(str(s) for s in UNIFORM_QUARTER),
+                        help="one share vector for the whole grid, summing to 1; the collateral "
+                             "curve over share lives in sim.dynamic.share_sweep, which places the "
+                             "share on each seed's own faulty context")
     parser.add_argument("--json", default=None, help="write cells and per-run records here")
     parser.add_argument("--quick", action="store_true", help="small smoke grid (seconds)")
     args = parser.parse_args(list(argv) if argv else None)
@@ -173,7 +189,8 @@ def main(argv: Sequence[str] = ()) -> int:
     modes = witness_modes(args.witness_mode)
     configs = build_configs(scenarios, arms, taus, hs, ks, ps, seeds, epochs,
                             tau_write=args.tau_write, onset_epoch=args.onset,
-                            audit_tokens=args.audit_tokens, modes=modes)
+                            audit_tokens=args.audit_tokens, modes=modes,
+                            context_share=_csv(args.context_share, float))
     started = time.time()
     cells = execute(configs)
     elapsed = time.time() - started

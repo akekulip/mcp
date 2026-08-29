@@ -17,10 +17,23 @@ person writing the paragraph:
    ``NO-FAULT-INJECTED`` and its other numbers are about the harness, not about the mechanism
    (HURDLES H29/H32).
 
-Uncertainty is reported everywhere it exists: rates as Wilson score intervals (which stay inside
-[0, 1] and stay informative at 0/n and n/n, where the normal approximation collapses to a point),
-latencies as percentile-bootstrap intervals around the median (the latency distributions here are
-skewed and small-sample, so a mean +- s.e. would be a fiction). Both are deterministic given a
+Uncertainty is reported everywhere it exists, and **the estimator is chosen per metric by what the
+independent unit actually is**. That choice is a third invariant, added after the first two because
+getting it wrong understates every safety interval in the paper:
+
+* ``wilson()`` assumes independent Bernoulli trials. That holds when the trial is a whole RUN --
+  "did this run quarantine the fault", "did this run restore it" -- because runs are drawn on
+  independent seeds. It is used for exactly those.
+* ``cluster_bootstrap_rate_ci()`` resamples whole RUNS with replacement. It is used for every rate
+  pooled over observations *inside* a run, of which the false-quarantine rate is the one that
+  matters: quarantine state is autocorrelated **by construction**, because one decision holds a
+  sublink out for many consecutive epochs. Treating those sublink-epochs as independent Bernoulli
+  trials inflates the effective sample size by roughly the length of a quarantine and returns an
+  interval far narrower than the data supports. Both are printed for the false-quarantine rate so
+  the size of that error is visible rather than asserted.
+
+Latencies are percentile-bootstrap intervals around the median (the latency distributions here are
+skewed and small-sample, so a mean +- s.e. would be a fiction). All three are deterministic given a
 seed; stdlib only, no numpy or scipy in this repository.
 """
 
@@ -97,6 +110,86 @@ def bootstrap_median_ci(values: Sequence[float], seed: int, iters: int = 2000,
     return (_percentile(medians, alpha / 2.0), _percentile(medians, 1.0 - alpha / 2.0))
 
 
+def cluster_bootstrap_rate_ci(clusters: Sequence[Tuple[int, int]], seed: int,
+                              iters: int = 2000, alpha: float = 0.05) -> Tuple[float, float]:
+    """Percentile interval for a pooled rate whose observations cluster inside runs.
+
+    ``clusters`` is one ``(successes, trials)`` pair per INDEPENDENT unit -- here, per run. Whole
+    runs are resampled with replacement and the rate recomputed as ``sum(successes)/sum(trials)``,
+    so the interval inherits the between-run variance instead of assuming the within-run
+    observations were independent draws.
+
+    This exists because the metrics it serves are autocorrelated by construction. A quarantine
+    decision holds a sublink out of service for many consecutive epochs, so 60 sublink-epochs from
+    one run carry nowhere near 60 epochs' worth of information about the false-quarantine rate;
+    ``wilson()`` on the pooled counts would treat them as if they did. The bootstrap makes no such
+    assumption, and on all-or-nothing runs it is several times wider -- which is the point.
+
+    Two properties of the percentile bootstrap are handled explicitly rather than left to bite:
+
+    * **At the 0/n and n/n boundaries it cannot move.** Every resample of all-zero clusters is
+      all-zero, so the raw interval would be the point ``[0, 0]`` -- a cell that never
+      false-quarantined would be reported as known to be exactly zero. Those two cases fall back to
+      a Wilson interval over the CLUSTERS: with equal-sized runs, the fraction of runs carrying any
+      success upper-bounds the pooled rate, so ``wilson(0, n_runs)`` is a conservative bound at the
+      right unit of independence. It is much wider than the same Wilson computed on the pooled
+      epochs, which is the whole point.
+    * **Identical clusters give a point interval, and that is a real statement.** If every run
+      returns the same rate, the between-run variance observed is zero and the bootstrap reports
+      it as such. A zero-width interval therefore means "n runs, no observed between-run
+      variation", not "no uncertainty"; the naive Wilson column printed beside it in
+      ``format_table`` keeps that visible.
+
+    Deterministic given ``seed``. Degenerate inputs are vacuous rather than fatal, matching
+    ``wilson``: no clusters, or no trials at all, is "unknown", not zero.
+    """
+    if iters <= 0:
+        raise ValueError("iters must be positive, got %r" % (iters,))
+    if not 0.0 < alpha < 1.0:
+        raise ValueError("alpha must be in (0, 1), got %r" % (alpha,))
+    pairs = [(int(successes), int(trials)) for successes, trials in clusters]
+    for successes, trials in pairs:
+        if trials < 0:
+            raise ValueError("trials must be non-negative, got %r" % (trials,))
+        if not 0 <= successes <= max(trials, 0):
+            raise ValueError("successes must be in [0, trials], got %r of %r"
+                             % (successes, trials))
+    if not pairs or sum(trials for _, trials in pairs) == 0:
+        return (0.0, 1.0)
+
+    rng = random.Random(seed)
+    size = len(pairs)
+    rates: List[float] = []
+    for _ in range(iters):
+        resample = rng.choices(pairs, k=size)
+        total_trials = sum(trials for _, trials in resample)
+        if total_trials == 0:
+            # Every cluster drawn happened to have no trials; that resample carries no rate at
+            # all. Dropping it is the only honest option -- substituting 0.0 would invent
+            # observations the resample does not contain.
+            continue
+        rates.append(sum(successes for successes, _ in resample) / total_trials)
+    if not rates:
+        return (0.0, 1.0)
+
+    # Boundary correction, for the same reason ``wilson`` exists at all. When EVERY cluster sits at
+    # 0 successes (or at all successes), every resample reproduces that rate and the percentile
+    # interval collapses to a point -- it would report a cell that never false-quarantined as known
+    # to be exactly zero, which is the "perfectly safe because perfectly useless" failure this
+    # module was written to prevent (repo CLAUDE.md, cross-check item 4). At those two boundaries
+    # the interval is taken at the level of the independent unit instead: n RUNS, none of which (or
+    # all of which) carried a success. That is far wider than the same Wilson interval computed on
+    # the pooled epochs, which is the correct direction -- there are n runs of information here,
+    # not sum(trials).
+    if all(successes == 0 for successes, _ in pairs):
+        return (0.0, wilson(0, len(pairs))[1])
+    if all(successes == trials for successes, trials in pairs):
+        return (wilson(len(pairs), len(pairs))[0], 1.0)
+
+    rates.sort()
+    return (_percentile(rates, alpha / 2.0), _percentile(rates, 1.0 - alpha / 2.0))
+
+
 @dataclass
 class RunRecord:
     """One run: a single (scenario, arm, tau, h, restore_k, p, seed) point.
@@ -149,10 +242,15 @@ class CellSummary:
     # usefulness and safety, deliberately adjacent
     quarantined_runs: int
     quarantine_rate: float
+    #: WILSON. Unit of independence = the RUN: one Bernoulli trial per run, independent seeds.
     quarantine_ci: Tuple[float, float]
     healthy_epochs: int
     false_quarantine_epochs: int
     false_quarantine_rate: float
+    #: CLUSTER BOOTSTRAP over runs. Unit of independence = the RUN, NOT the sublink-epoch: one
+    #: decision holds a sublink out for many consecutive epochs, so the epochs inside a run are
+    #: autocorrelated by construction and a binomial interval on the pooled counts is too narrow.
+    #: This is the interval to quote.
     false_quarantine_ci: Tuple[float, float]
     inert: bool
     # exposure and timing
@@ -163,6 +261,7 @@ class CellSummary:
     # restoration
     restored_runs: int
     restore_rate: float
+    #: WILSON. Unit of independence = the RUN: "of the runs that quarantined, how many restored".
     restore_ci: Tuple[float, float]
     restore_us_median: float
     restore_us_ci: Tuple[float, float]
@@ -184,6 +283,12 @@ class CellSummary:
     loss_ratio: float
     fault_injected: bool
     evidence_epoch_fraction: float
+    #: The SAME false-quarantine rate under Wilson, i.e. pretending the sublink-epochs inside a run
+    #: were independent. Kept and printed only so the size of that error is visible in the table
+    #: instead of being a claim in a paragraph; it is not the interval to quote. Defaulted because
+    #: it was added after the field list was in use, and a caller that has not been updated must
+    #: get the vacuous "unknown" rather than a fabricated interval.
+    false_quarantine_ci_wilson: Tuple[float, float] = (0.0, 1.0)
 
 
 def _rate(successes: int, trials: int) -> float:
@@ -238,7 +343,11 @@ def summarize(records: Sequence[RunRecord], seed: int) -> CellSummary:
         healthy_epochs=healthy_epochs,
         false_quarantine_epochs=false_quarantine_epochs,
         false_quarantine_rate=_rate(false_quarantine_epochs, healthy_epochs),
-        false_quarantine_ci=wilson(false_quarantine_epochs, healthy_epochs),
+        # The run is the cluster: `false_quarantine_epochs` inside one run are consecutive epochs
+        # of the same held-out sublink, not independent trials (see the module docstring).
+        false_quarantine_ci=cluster_bootstrap_rate_ci(
+            [(r.false_quarantine_epochs, r.healthy_epochs) for r in records], seed + 2),
+        false_quarantine_ci_wilson=wilson(false_quarantine_epochs, healthy_epochs),
         # "Never fired" means never quarantined ANYTHING -- not merely never quarantined the
         # faulty sublink. A cell that only ever false-quarantines did act, badly, and saying INERT
         # there would be as misleading as saying "safe" about a rule that never fires.
@@ -275,6 +384,10 @@ NO_FAULT_LABEL = "NO-FAULT-INJECTED"
 
 _COLUMNS = (
     "cell", "runs", "quarantine rate (95%)", "false-quarantine rate (95%)", "acts?",
+    # The naive interval for the SAME rate, printed beside the honest one. It is not there to be
+    # quoted; it is there so that "Wilson would have said this" cannot be left out of the
+    # comparison when someone argues the intervals are too wide.
+    "false-q naive Wilson (95%)",
     "unsafe pkts", "detect us (95%)", "collateral pkts",
     "restore rate (95%)", "restore us (95%)", "unsafe restores", "flaps",
     "audit c/l/i/s",
@@ -322,6 +435,10 @@ def format_table(cells: Mapping[Any, CellSummary]) -> str:
     zero-false-positive claim cannot be read without seeing that the mechanism never fired. The
     realised-parameter columns end the row, and ``fault check`` reads ``NO-FAULT-INJECTED`` unless
     the faulty sublink's measured loss rate genuinely exceeds the healthy mean.
+
+    The false-quarantine rate carries its CLUSTER-BOOTSTRAP interval, and the naive Wilson interval
+    for the same rate is printed in the next column but one. Printing both is the point: the gap
+    between them is the size of the independence assumption that was being made silently.
     """
     rows = ["| " + " | ".join(_COLUMNS) + " |",
             "|" + "|".join(["---"] * len(_COLUMNS)) + "|"]
@@ -332,6 +449,7 @@ def format_table(cells: Mapping[Any, CellSummary]) -> str:
             _fmt_rate(cell.quarantine_rate, cell.quarantine_ci),
             _fmt_rate(cell.false_quarantine_rate, cell.false_quarantine_ci),
             INERT_LABEL if cell.inert else "acts",
+            "[%.4f, %.4f]" % cell.false_quarantine_ci_wilson,
             str(cell.unsafe_packets),
             _fmt_us(cell.detect_us_median, cell.detect_us_ci),
             str(cell.collateral_packets),

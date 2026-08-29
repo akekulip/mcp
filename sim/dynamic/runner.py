@@ -91,6 +91,20 @@ class HarnessError(AssertionError):
     """
 
 
+#: The share vector every result before 2026-08-29 was measured under: four contexts, a uniform
+#: quarter each.  It is the DEFAULT and not a law of the fabric.  HURDLES H37: the headline
+#: "7x less collateral than directed quarantine" decomposes into 1/0.25 = 4.00x that follows from
+#: this vector alone plus a 1.75x residual, and until the vector was a parameter that decomposition
+#: could not be produced at all.  Keeping the default byte-identical is what makes every earlier
+#: number reproducible; making it settable is what makes the claim falsifiable.
+UNIFORM_QUARTER: Tuple[float, ...] = (0.25, 0.25, 0.25, 0.25)
+
+#: The share vector must sum to the whole link.  A vector that sums to less would silently model an
+#: under-loaded link, and every collateral ratio computed on it would be a statement about the
+#: missing load rather than about the mechanism.
+SHARE_SUM_TOL = 1e-9
+
+
 @dataclass(frozen=True)
 class RunConfig:
     """One point of the frozen sweep: `sim/dynamic/PREREG.md` "Frozen sweep"."""
@@ -110,6 +124,11 @@ class RunConfig:
     #: Which compiled witness the fabric emulates.  Defaulting to ``baseline`` keeps every
     #: previously reported number reproducible by re-running the same config.
     witness_mode: str = "baseline"
+    #: How the link's traffic splits across the compiled behavioural contexts, and how many there
+    #: are.  Swept by `sim/dynamic/share_sweep.py`; see ``UNIFORM_QUARTER`` above for why the
+    #: default must stay exactly what it is.
+    n_context: int = 4
+    context_share: Tuple[float, ...] = UNIFORM_QUARTER
 
     def __post_init__(self) -> None:
         if self.scenario not in SCENARIOS:
@@ -123,6 +142,20 @@ class RunConfig:
             raise ValueError("a run must outlast its own fault onset")
         if not 1 <= self.audit_tokens <= 16:
             raise ValueError("audit tokens must fit the 16-entry P4 steering table")
+        # ``md.sublink = (vlink << 4) | context``, so the context index is four bits wide in the
+        # compiled data plane; a harness that swept past 16 would be describing silicon that does
+        # not exist.
+        if not 1 <= self.n_context <= 16:
+            raise ValueError("n_context must fit the four-bit capsule, got %r" % (self.n_context,))
+        if len(self.context_share) != self.n_context:
+            raise ValueError("context_share has %d entries for %d contexts"
+                             % (len(self.context_share), self.n_context))
+        if any(not 0.0 <= s <= 1.0 for s in self.context_share):
+            raise ValueError("every context share must be a fraction, got %r"
+                             % (self.context_share,))
+        if abs(sum(self.context_share) - 1.0) > SHARE_SUM_TOL:
+            raise ValueError("context_share must sum to 1.0, got %r summing to %r"
+                             % (self.context_share, sum(self.context_share)))
 
 
 class CellKey(NamedTuple):
@@ -138,11 +171,16 @@ class CellKey(NamedTuple):
     #: Part of the KEY, not a footnote: a sweep may carry both witness semantics at once, and two
     #: rows that differ only in which silicon they model must never merge into one cell.
     witness_mode: str = "baseline"
+    #: Also part of the key, and PRINTED, for the reason H37 records: a collateral ratio is a
+    #: property of the workload split until you show it is not, so a row that does not name its
+    #: share vector cannot be decomposed by the reader.
+    context_share: Tuple[float, ...] = UNIFORM_QUARTER
 
     def __str__(self) -> str:
-        return "%s/%s wit=%s tau=%d/%d h=%.1f k=%d p=%g" % (
+        return "%s/%s wit=%s tau=%d/%d h=%.1f k=%d p=%g share=%s" % (
             self.scenario, self.arm, self.witness_mode, self.tau_feedback_us, self.tau_write_us,
-            self.h, self.clean_epochs_to_restore, self.p_fault)
+            self.h, self.clean_epochs_to_restore, self.p_fault,
+            "/".join("%g" % s for s in self.context_share))
 
 
 def cell_key(cfg: RunConfig) -> CellKey:
@@ -150,7 +188,7 @@ def cell_key(cfg: RunConfig) -> CellKey:
     return CellKey(scenario=cfg.scenario, arm=cfg.arm, tau_feedback_us=cfg.tau_feedback_us,
                    tau_write_us=cfg.tau_write_us, h=cfg.h,
                    clean_epochs_to_restore=cfg.clean_epochs_to_restore, p_fault=cfg.p_fault,
-                   witness_mode=cfg.witness_mode)
+                   witness_mode=cfg.witness_mode, context_share=cfg.context_share)
 
 
 @dataclass
@@ -176,6 +214,23 @@ class RunTrace:
 # ------------------------------------------------------------------------------------------
 # Scenario construction
 # ------------------------------------------------------------------------------------------
+#: The emulated fabric of `sim/dynamic/PREREG.md`: 4 leaves x 2 spines, 16 directed vlinks.
+N_LEAF, N_SPINE = 4, 2
+
+
+def fault_site(scenario: str, seed: int, n_context: int = 4) -> Tuple[int, int]:
+    """The ``(vlink, context)`` the fault is drawn onto, without building the fabric.
+
+    Split out of :func:`build_scenario` because the share sweep has to put the faulty context's
+    share on the RIGHT index: a curve of collateral against "the faulty context's share" is
+    meaningless if the share landed on one of its healthy siblings.  The draw is the same CRC-32
+    stream `build_scenario` always used (`scenario_seed`, never salted ``hash``) and depends only
+    on the scenario, the seed and ``n_context``, so calling it here does not move the fault.
+    """
+    rng = random.Random(scenario_seed("%s/%d" % (scenario, seed), "faultsite"))
+    return rng.randrange(N_LEAF * N_SPINE * 2), rng.randrange(n_context)
+
+
 def build_scenario(cfg: RunConfig) -> Tuple[Fabric, Optional[Tuple[int, int]]]:
     """Build the fabric for one run and name the sublink the fault was injected on.
 
@@ -187,12 +242,8 @@ def build_scenario(cfg: RunConfig) -> Tuple[Fabric, Optional[Tuple[int, int]]]:
     Which sublink fails is drawn per seed rather than fixed, so a result cannot be an artifact of
     one position in the topology; the draw is CRC-32 (`scenario_seed`), never salted ``hash``.
     """
-    stem = "%s/%d" % (cfg.scenario, cfg.seed)
-    rng = random.Random(scenario_seed(stem, "faultsite"))
-    n_leaf, n_spine, n_context = 4, 2, 4
-    n_vlink = n_leaf * n_spine * 2
-    vlink = rng.randrange(n_vlink)
-    context = rng.randrange(n_context)
+    n_leaf, n_spine, n_context = N_LEAF, N_SPINE, cfg.n_context
+    vlink, context = fault_site(cfg.scenario, cfg.seed, n_context)
 
     faults: List[FaultSpec] = []
     reorder_rate = 0.0
@@ -234,6 +285,7 @@ def build_scenario(cfg: RunConfig) -> Tuple[Fabric, Optional[Tuple[int, int]]]:
         raise ValueError("unhandled scenario %r" % (cfg.scenario,))
 
     fab = Fabric(seed=cfg.seed, scenario=cfg.scenario, p_bg=p_bg, faults=faults,
+                 context_share=cfg.context_share,
                  n_leaf=n_leaf, n_spine=n_spine, n_context=n_context,
                  reorder_rate=reorder_rate, seq_start=seq_start,
                  witness_mode=cfg.witness_mode)

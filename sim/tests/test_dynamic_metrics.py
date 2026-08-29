@@ -7,6 +7,7 @@ from sim.dynamic.metrics import (
     CellSummary,
     RunRecord,
     bootstrap_median_ci,
+    cluster_bootstrap_rate_ci,
     format_table,
     summarize,
     wilson,
@@ -103,6 +104,120 @@ class BootstrapTest(unittest.TestCase):
 
     def test_constant_input_gives_a_degenerate_interval(self):
         self.assertEqual(bootstrap_median_ci([4.0] * 10, seed=3, iters=100), (4.0, 4.0))
+
+
+class ClusterBootstrapTest(unittest.TestCase):
+    """The estimator that stops us quoting an interval built on a false independence assumption.
+
+    Sublink-epochs inside one run are autocorrelated by construction: a single quarantine decision
+    holds a sublink out for many consecutive epochs. Wilson on the pooled epoch counts therefore
+    reports an interval far narrower than the data supports, and the whole reason this estimator
+    exists is that it does not.
+    """
+
+    @staticmethod
+    def autocorrelated_clusters():
+        """30 runs of 60 healthy epochs: 10 runs quarantined for the whole run, 20 for none.
+
+        This is the shape the real harness produces -- one decision, then a long held-out stretch --
+        and the pooled rate (600/1800 = 1/3) is identical to what 1800 independent coin flips at
+        p = 1/3 would give. The two estimators must NOT agree on it.
+        """
+        return [(60, 60)] * 10 + [(0, 60)] * 20
+
+    def test_is_deterministic_given_a_seed(self):
+        clusters = self.autocorrelated_clusters()
+        first = cluster_bootstrap_rate_ci(clusters, seed=11, iters=500)
+        self.assertEqual(first, cluster_bootstrap_rate_ci(clusters, seed=11, iters=500))
+        self.assertEqual(first, cluster_bootstrap_rate_ci(list(clusters), seed=11, iters=500))
+
+    def test_a_different_seed_gives_a_different_interval_when_the_input_can_show_one(self):
+        """Seeded, not fixed. The all-or-nothing input above cannot show this and is not used here:
+        with two distinct cluster rates the resampled distribution is a coarse lattice and both
+        seeds land on the same percentile, which is a property of that input, not determinism."""
+        clusters = [(i, 60) for i in range(1, 21)]
+        self.assertNotEqual(cluster_bootstrap_rate_ci(clusters, seed=11, iters=500),
+                            cluster_bootstrap_rate_ci(clusters, seed=12, iters=500))
+
+    def test_is_wider_than_wilson_on_autocorrelated_input(self):
+        """The test that proves the fix does something: same counts, honest interval, much wider."""
+        clusters = self.autocorrelated_clusters()
+        successes = sum(s for s, _ in clusters)
+        trials = sum(t for _, t in clusters)
+        naive_low, naive_high = wilson(successes, trials)
+        low, high = cluster_bootstrap_rate_ci(clusters, seed=13, iters=2000)
+
+        self.assertLessEqual(low, successes / trials)
+        self.assertGreaterEqual(high, successes / trials)
+        self.assertGreater(high - low, 5.0 * (naive_high - naive_low))
+
+    def test_zero_successes_everywhere_is_not_reported_as_certainly_zero(self):
+        """[0, 0] here would be the "perfectly safe because perfectly useless" failure again."""
+        clusters = [(0, 60)] * 10
+        low, high = cluster_bootstrap_rate_ci(clusters, seed=14, iters=500)
+        self.assertEqual(low, 0.0)
+        self.assertGreater(high, 0.0)
+        self.assertEqual(high, wilson(0, 10)[1])
+        # ... and 40x wider than pretending the 600 sublink-epochs were independent trials.
+        self.assertGreater(high, 40.0 * wilson(0, 600)[1])
+
+    def test_all_successes_everywhere_is_not_reported_as_certainly_one(self):
+        low, high = cluster_bootstrap_rate_ci([(60, 60)] * 10, seed=15, iters=500)
+        self.assertEqual(high, 1.0)
+        self.assertEqual(low, wilson(10, 10)[0])
+        self.assertLess(low, 1.0)
+
+    def test_identical_clusters_give_a_point_interval_at_their_common_rate(self):
+        """Zero observed between-run variance is reported as such, not padded."""
+        self.assertEqual(cluster_bootstrap_rate_ci([(30, 60)] * 8, seed=16, iters=500), (0.5, 0.5))
+
+    def test_no_clusters_or_no_trials_is_vacuous_rather_than_zero(self):
+        self.assertEqual(cluster_bootstrap_rate_ci([], seed=17), (0.0, 1.0))
+        self.assertEqual(cluster_bootstrap_rate_ci([(0, 0)] * 5, seed=17), (0.0, 1.0))
+
+    def test_impossible_counts_are_rejected(self):
+        with self.assertRaises(ValueError):
+            cluster_bootstrap_rate_ci([(5, 3)], seed=1)
+        with self.assertRaises(ValueError):
+            cluster_bootstrap_rate_ci([(0, -1)], seed=1)
+        with self.assertRaises(ValueError):
+            cluster_bootstrap_rate_ci([(1, 2)], seed=1, iters=0)
+
+    def test_the_interval_brackets_the_pooled_rate_on_mixed_input(self):
+        clusters = [(i, 60) for i in range(1, 21)]
+        low, high = cluster_bootstrap_rate_ci(clusters, seed=18, iters=1000)
+        pooled = sum(s for s, _ in clusters) / sum(t for _, t in clusters)
+        self.assertLessEqual(low, pooled)
+        self.assertGreaterEqual(high, pooled)
+
+
+class EstimatorChoiceTest(unittest.TestCase):
+    """Which estimator each reported rate uses, asserted rather than left to the comment."""
+
+    def test_false_quarantine_uses_the_cluster_bootstrap_and_keeps_wilson_beside_it(self):
+        records = ([make_record(false_quarantine_epochs=60) for _ in range(10)]
+                   + [make_record(false_quarantine_epochs=0) for _ in range(20)])
+        cell = summarize(records, seed=scenario_seed("dynamic_metrics", "estimator"))
+        self.assertAlmostEqual(cell.false_quarantine_rate, 600 / 1800)
+        self.assertEqual(cell.false_quarantine_ci_wilson,
+                         wilson(cell.false_quarantine_epochs, cell.healthy_epochs))
+        honest = cell.false_quarantine_ci[1] - cell.false_quarantine_ci[0]
+        naive = cell.false_quarantine_ci_wilson[1] - cell.false_quarantine_ci_wilson[0]
+        self.assertGreater(honest, 5.0 * naive)
+
+    def test_run_level_rates_still_use_wilson_because_the_run_is_the_trial(self):
+        records = [make_record(quarantined_faulty=i < 7, restored=i < 3, restore_us=1000)
+                   for i in range(10)]
+        cell = summarize(records, seed=3)
+        self.assertEqual(cell.quarantine_ci, wilson(7, 10))
+        self.assertEqual(cell.restore_ci, wilson(3, 7))
+
+    def test_the_summary_is_deterministic_given_its_seed(self):
+        records = [make_record(false_quarantine_epochs=3 * i) for i in range(12)]
+        first = summarize(records, seed=99)
+        self.assertEqual(first.false_quarantine_ci, summarize(records, seed=99).false_quarantine_ci)
+        self.assertNotEqual(first.false_quarantine_ci,
+                            summarize(records, seed=100).false_quarantine_ci)
 
 
 class SummarizeTest(unittest.TestCase):
@@ -228,6 +343,20 @@ class FormatTableTest(unittest.TestCase):
         self.assertIn("%.4f [%.4f, %.4f]" % (cell.quarantine_rate, low, high), row)
         self.assertIn("%.0f [%.0f, %.0f]" % (cell.detect_us_median, cell.detect_us_ci[0],
                                              cell.detect_us_ci[1]), row)
+
+    def test_both_false_quarantine_intervals_are_printed_side_by_side(self):
+        """The gap between the two is the size of the independence assumption; hiding it is a bug."""
+        records = ([make_record(false_quarantine_epochs=60) for _ in range(10)]
+                   + [make_record(false_quarantine_epochs=0) for _ in range(20)])
+        cell = summarize(records, seed=scenario_seed("dynamic_metrics", "two_intervals"))
+        table = format_table({"cw4": cell})
+        header = [c.strip() for c in table.splitlines()[0].strip("| ").split("|")]
+        self.assertIn("false-q naive Wilson (95%)", header)
+        row = table.splitlines()[2]
+        self.assertIn("%.4f [%.4f, %.4f]" % (cell.false_quarantine_rate,
+                                             cell.false_quarantine_ci[0],
+                                             cell.false_quarantine_ci[1]), row)
+        self.assertIn("[%.4f, %.4f]" % cell.false_quarantine_ci_wilson, row)
 
     def test_table_is_markdown_with_one_row_per_cell(self):
         table = format_table({"a": self.inert_cell(), "b": self.acting_cell()})
