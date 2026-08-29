@@ -1,5 +1,10 @@
 # MCP plan — counterfactual observability pivot · 2026-08-28 → submission
 
+> **Superseded as the active implementation direction on 2026-08-28.** The audit-lease/lifecycle
+> novelty gate failed and is retained below as historical decision evidence. The current primary
+> plan is `docs/review/BEHAVIORAL-SUBLINK-PLAN.md`; W4 and witness-stop are reused as infrastructure
+> and baselines.
+
 Target: **SIGCOMM'27** if its research-paper schedule and the gates below close; fallback:
 **NSDI'28 / IEEE-ACM ToN**. The SIGCOMM'27 research CFP/deadline remains unverified (`HURDLES H15`),
 so re-check monthly and do not weaken a gate to meet an assumed date.

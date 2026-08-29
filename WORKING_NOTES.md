@@ -523,3 +523,30 @@ Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-
 - Git: branch `master`, 0 uncommitted file(s): 
 - Last verification run recorded: 2026-08-28T15:52:49Z	cd /home/philip/Projects/mcp/sim/gate; python3 - <<'PY' p='replay.py'; s=open(p).read() old='''class Oracle(Schedule):''
 - RESUME: re-read the Task/Status/Next-action sections above; trust this file over recollection.
+
+<!-- AUTO-HANDOFF (PreCompact/auto) 2026-08-29T12:52:24Z -->
+### Compaction handoff — 2026-08-29T12:52:24Z
+- Git: branch `master`, 30 uncommitted file(s): controller/hw_adapter.py controller/sublink_feedback.py controller/tests/test_epoch_loop.py controller/tests/test_sublink_feedback.py docs/review/HEALTH-GATE-RESULT.md docs/review/P3-FEEDBACK-RESULT.md docs/review/PLAN.md p4/control/setup_attention.py p4/control/setup_skeleton.py p4/ptf/test_cw4_sublinks.py p4/witness/gen_variants.py p4/witness/mcp_fabric_capsule.p4 
+- Last verification run recorded: 2026-08-29T12:52:07Z	cd /home/philip/Projects/mcp; ls sim/sublink/ sim/tests/ 2>/dev/null; echo "=== does anything drive the REAL SublinkFeed
+- RESUME: re-read the Task/Status/Next-action sections above; trust this file over recollection.
+
+## Status (2026-08-29) — closing the last two P3 audit gaps
+
+Independent audit `docs/review/P2-P3-INDEPENDENT-AUDIT.md` left P3 PARTIAL with six gaps. The
+parallel session closed #1 (event source: `controller/hw_adapter.py:gap_event_from_copy`), #2
+(transport: mirror copy + `epoch_loop`), #3 (restoration evidence: `AuditRound`/`AuditReceipt` +
+`tbl_audit_steer`), and #5 is a stated claim boundary rather than a defect. Two remain:
+
+- **#6 dynamic operating point** — nothing drives the REAL `SublinkFeedback` state machine in a
+  sweep. Contract frozen at `sim/dynamic/PREREG.md` (2026-08-29): 8 scenarios, 4 arms
+  (none/cw4_feedback/directed_w4/oracle), tau x h x restore_k x p sweep, 30 seeds/cell, Wilson +
+  bootstrap intervals, four mechanical harness tripwires (oracle floor, realised-parameter dump,
+  never-acts INERT detector, emission-rule cross-check against the gap-event PTF).
+- **#4 end-to-end latency** — stays a SWEPT parameter in the harness; the controller-host software
+  segment (parse -> GapEvent -> decision -> BFRT marshalling, excluding gRPC and switch programming)
+  is being micro-benchmarked separately as an explicit lower bound, never as an end-to-end figure.
+
+Baseline before this work, measured 2026-08-29: `controller/tests` 69 passed, `sim/tests` 7 passed.
+
+Next action: verify the three builder outputs myself (run their tests, read their diffs), then wire
+`sim/dynamic/runner.py` + `sweep.py` against the REAL controller objects and run the frozen sweep.

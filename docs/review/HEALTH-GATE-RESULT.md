@@ -1,5 +1,10 @@
 # P2 — Behavioural health gate: built, compiles at 10/3, hostile suite 5/5
 
+**Independent verification, 2026-08-28:** the four exact source files were compiled on local SDE
+9.13.1 and remote SDE 9.13.2 without loading a pipeline. Both compilers placed armed W4 at 9/3,
+C-W4 at 9/4, Context Capsule at 9/3, and Capsule + health gate at 10/3. The earlier 8/3 W4 row was
+a stale count and is corrected below.
+
 The piece that makes behavioural sublinks *do* something rather than merely observe: when a
 (source, destination, spray path, context) sublink is quarantined, the packet's **spray choice** is
 rewritten to a prevalidated backup, and `tbl_vlink` then resolves and counts the path actually
@@ -25,15 +30,14 @@ invariant (vlink resolution, counting, witness stamping) is unchanged by constru
 
 | variant | ingress / egress stages |
 |---|---|
-| W4 witness | 8 / 3 |
+| armed W4 witness | 9 / 3 |
 | C-W4 (egress-classified sublinks) | 9 / 4 |
 | Context Capsule (source-classified) | 9 / **3** |
 | **Capsule + health gate** | **10 / 3** |
 
-From the authoritative `pipe/logs/table_summary.log` of a `--verbose 2` build. The gate costs one
-ingress stage. Tofino 1 has 12 per gress, so **2 ingress and 9 egress remain** — ingress is now the
-binding constraint for anything added later, which is the number to watch when P3's feedback path
-arrives.
+From the authoritative `pipe/logs/table_summary.log` of `--verbose 2` builds. The gate costs one
+ingress stage relative to Context Capsule. Tofino 1 has 12 per gress, so **2 ingress and 9 egress
+remain** — ingress is the binding constraint for anything added later.
 
 ## Hostile suite — 5/5 (`p4/ptf/test_health_gate.py`)
 
@@ -58,8 +62,9 @@ the same physical link are still carrying traffic on it.
 
 ## What is still required
 
-P3 (topology-realistic feedback: a downstream C-W4 event has to reach the source selector, with
-real latency, coalescing, epoch/reset, stale feedback and flapping) and P4 (trace-driven
-Ring-AllReduce and MoE AlltoAll value), then silicon. The gate is the mechanism; nothing here yet
-measures what it is worth under realistic feedback delay, and the capacity numbers in
-`CAPSULE-RESULT.md` assume an instantaneous decision.
+P3 remains partial: a downstream C-W4 event still needs a real source-to-selector transport, and a
+quarantined primary needs explicit probation/audit traffic before restoration. The current
+controller decision core programs the exact P2 keys and rejects restoration by silence, but this is
+not an end-to-end feedback path. P4 (trace-driven Ring-AllReduce and MoE AlltoAll value) remains
+blocked on that observability gate, then silicon. The capacity numbers in `CAPSULE-RESULT.md` assume
+an instantaneous post-localization decision.
