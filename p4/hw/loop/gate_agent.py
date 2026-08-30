@@ -162,6 +162,35 @@ while True:
                     conn.sendall(("ARMED %d %s\n" % (sub, encoded)).encode())
                     print("A %d %d -> armed seq %s" % (sub, ndrop, ranges), flush=True)
                     continue
+                elif f[0] == "U":
+                    # U <udp_dst> <udp_src> <spray>  -- declare ONE audit/probation flow and
+                    # pin the sublink it must take.  tbl_audit_steer opens a deliberate
+                    # tbl_health_gate bypass at hop 0, which is the only way probation can
+                    # reach a sublink the gate has already emptied of production traffic.
+                    # Negative spray deletes the declaration, so a probation round can be
+                    # closed as explicitly as it was opened.
+                    dst_p, src_p, spray = int(f[1]), int(f[2]), int(f[3])
+                    at = info.table_get("pipe.Ingress.tbl_audit_steer")
+                    ak = at.make_key([gc.KeyTuple("md.audit_src", 1),
+                                      gc.KeyTuple("hdr.udp.dst_port", dst_p),
+                                      gc.KeyTuple("hdr.udp.src_port", src_p)])
+                    if spray < 0:
+                        try:
+                            at.entry_del(tgt, [ak])
+                        except gc.BfruntimeRpcException as error:
+                            if not is_not_found(error):
+                                raise
+                        conn.sendall(("AUDIT-CLEARED %d %d\n" % (dst_p, src_p)).encode())
+                    else:
+                        ad = at.make_data([gc.DataTuple("spray", spray)],
+                                          "Ingress.set_audit_spray")
+                        try:
+                            at.entry_add(tgt, [ak], [ad])
+                        except gc.BfruntimeRpcException:
+                            at.entry_mod(tgt, [ak], [ad])
+                        conn.sendall(("AUDIT %d %d -> spray %d\n"
+                                      % (dst_p, src_p, spray)).encode())
+                    continue
                 elif f[0] == "K":
                     # K <sublink> -- TOTAL context blackhole ("kill").  NOT "B": that is
                     # already the batch-gate-rows command, and a duplicate branch is dead
