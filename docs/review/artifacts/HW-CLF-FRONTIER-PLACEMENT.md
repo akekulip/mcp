@@ -140,3 +140,50 @@ Both produced the *expected* answer for the wrong reason, which is the failure m
 repository's standing rules exist to catch: a teardown step that can be skipped by a signal is a
 fault injector left armed, and a shell variable that can be empty is a measurement that can be
 fabricated. Print the raw readings, not just the difference.
+
+---
+
+# STARVED, measured on silicon rather than asserted
+
+The counter change was justified by the claim that a near-total loss masked as HEALTHY becomes
+reportable. That claim was originally supported only by unit tests: every hardware reading was
+either 0 or saturated at 255, so the discriminating band had never been exercised on silicon.
+
+A total blackhole can never produce it — it only ever gives RX == 0. Producing the band needs a
+*partial* fault, so `gate_agent`'s `K` now takes an optional sequence range (`K <sublink> lo hi`);
+`tbl_eg_fail` already keys on `hdr.witness.seq : range`, so no data-plane change was required.
+
+The range must spare the LOW sequence numbers: the per-sublink sequence runs upward from wherever
+it is, so arming `[0..64511]` drops everything, which is what a first attempt did. Reading the
+sequence first (`R 2` → `S 2 0 2 851 3`) and arming `[seq+5 .. 65535]` spares exactly five.
+
+## Result
+
+Sent 60 probe packets on sublink 2 with the drop range armed at `[856..65535]`:
+
+| quantity | value |
+|---|---:|
+| TX (source committed) | 62 |
+| RX (arrived off the wire) | 3 |
+| injector drop counter | 60 |
+
+The 62 against 60 sent is background traffic on the same sublink; the injector counter confirms
+the fault in the data rather than in the flags.
+
+Both encodings evaluated on the same measured numbers:
+
+| encoding | verdict |
+|---|---|
+| presence bit (`verdict`) | **HEALTHY** |
+| saturating count (`verdict_counts`) | **STARVED** |
+
+60 of 62 packets destroyed on the link, and the presence bit reports the link healthy because
+three packets survived. That is the masking failure, reproduced deliberately and under control,
+and it is the measured justification for the counter — previously this rested on unit tests only.
+
+## Still not established
+
+`STARVED_RATIO = 8` remains a chosen number, not a measured threshold. This run shows the class
+fires where it should at a ~5% survival rate; it does not establish where the boundary belongs,
+and it is not in `sim/clf/PREREG.md`. Treat the threshold as provisional until a survival-rate
+sweep sets it.

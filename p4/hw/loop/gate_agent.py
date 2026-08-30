@@ -170,17 +170,28 @@ while True:
                     # This is the case C-W4 structurally cannot see: with no survivor there
                     # is never a later packet to expose a discontinuity, so the only
                     # evidence that anything is wrong is the source frontier saying it sent.
+                    # K <sublink> [lo hi] -- optional sequence range. The default covers the
+                    # whole space (a TOTAL blackhole). A partial range drops only the packets
+                    # whose per-sublink sequence falls inside it, which is how a controlled
+                    # near-total loss is produced: the survivors are the ones outside it.
+                    # Needed because a total blackhole only ever exercises RX == 0, so the
+                    # band between "nothing arrived" and "everything arrived" was never tested
+                    # on silicon.
                     sub = int(f[1])
+                    lo = int(f[2]) if len(f) > 3 else 0
+                    hi = int(f[3]) if len(f) > 3 else 0xFFFF
+                    if not (0 <= lo <= hi <= 0xFFFF):
+                        raise ValueError("sequence range outside 0..65535")
                     ft = info.table_get("pipe.Egress.tbl_eg_fail")
                     fk = ft.make_key([gc.KeyTuple("md.sublink", sub),
-                                      gc.KeyTuple("hdr.witness.seq", low=0, high=0xFFFF),
+                                      gc.KeyTuple("hdr.witness.seq", low=lo, high=hi),
                                       gc.KeyTuple("$MATCH_PRIORITY", 1)])
                     fd = ft.make_data([], "Egress.eg_fail_drop")
                     try:
                         ft.entry_add(tgt, [fk], [fd])
                     except gc.BfruntimeRpcException:
                         ft.entry_mod(tgt, [fk], [fd])
-                    conn.sendall(("BLACKHOLED %d [0..65535]\n" % sub).encode())
+                    conn.sendall(("BLACKHOLED %d [%d..%d]\n" % (sub, lo, hi)).encode())
                     print("K %d -> total blackhole armed" % sub, flush=True)
                     continue
                 elif f[0] == "N":
