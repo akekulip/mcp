@@ -186,7 +186,7 @@ while True:
                 elif f[0] == "N":
                     # N <bank> -- flip the CLF epoch. Rewrites tbl_final's source-side
                     # act_enter rows so newly entering packets are stamped with the new bank
-                    # parity in hdr.fabric.flags bit 3.
+                    # parity in hdr.fabric.clf_bank.
                     #
                     # This is what makes the frontier readable on a LIVE fabric. A reader
                     # never zeroes: it flips, waits a guard interval for in-flight packets to
@@ -194,7 +194,7 @@ while True:
                     # complete and no longer being written. Zeroing the active bank instead
                     # clears TX while packets are in flight, so they arrive and set RX with
                     # no matching TX -- the TX=0/RX=1 state, seen in 50 of 50 trials.
-                    bank = 8 if int(f[1]) else 0
+                    bank = 1 if int(f[1]) else 0   # hdr.fabric.clf_bank, a dedicated byte
                     t = info.table_get("pipe.Ingress.tbl_final")
                     n = 0
                     for d, k in t.entry_get(tgt, None, {"from_hw": True}):

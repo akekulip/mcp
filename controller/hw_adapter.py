@@ -49,6 +49,7 @@ N_VLINKS = 16
 
 MIRROR_ETYPE = 0x88F1
 FABRIC_ETYPE = 0x88F0
+IPV4_ETYPE = 0x0800
 MIRROR_DMAC = bytes.fromhex("a5a5a5a5a5a5")
 MIRROR_SMAC = bytes.fromhex("020000004d43")
 MIRROR_H_LEN = 30
@@ -108,14 +109,31 @@ def parse_copy(buf: bytes) -> Dict[str, Any]:
         "gap_event": bool(flags & FLAG_GAP_EVENT),
         "audit_receipt": bool(flags & FLAG_AUDIT_RECEIPT),
         "length": len(buf), "inner_etype": None, "fabric": None, "csig": None,
-        "witness": None, "udp": None, "worst_tdelta_ns": None,
+        "witness": None, "ipv4": None, "udp": None, "worst_tdelta_ns": None,
     }
     inner = buf[MIRROR_H_LEN:]
     if len(inner) >= ETH_H_LEN:
         out["inner_etype"] = struct.unpack_from("!H", inner, 12)[0]
+    if out["inner_etype"] == IPV4_ETYPE and len(inner) >= ETH_H_LEN + 20:
+        off = ETH_H_LEN
+        version_ihl = inner[off]
+        ihl = (version_ihl & 0x0F) * 4
+        if version_ihl >> 4 == 4 and ihl >= 20 and len(inner) >= off + ihl:
+            total_len = struct.unpack_from("!H", inner, off + 2)[0]
+            protocol = inner[off + 9]
+            out["ipv4"] = {
+                "diffserv": inner[off + 1],
+                "total_len": total_len,
+                "protocol": protocol,
+                "src": socket.inet_ntoa(inner[off + 12:off + 16]),
+                "dst": socket.inet_ntoa(inner[off + 16:off + 20]),
+            }
+            if protocol == 17 and len(inner) >= off + ihl + 8:
+                src_port, dst_port = struct.unpack_from("!HH", inner, off + ihl)
+                out["udp"] = {"src_port": src_port, "dst_port": dst_port}
     if out["inner_etype"] == FABRIC_ETYPE and len(inner) >= ETH_H_LEN + FABRIC_H_LEN:
         f = _FABRIC.unpack_from(inner, ETH_H_LEN)
-        out["fabric"] = dict(zip(("vsw_id", "hop", "spray", "path_id", "loops",
+        out["fabric"] = dict(zip(("vsw_id", "hop", "spray", "path_id", "clf_bank",
                                   "flags", "nxt", "pad"), f))
         off = ETH_H_LEN + FABRIC_H_LEN
         if out["fabric"]["nxt"] == NXT_CSIG and len(inner) >= off + CSIG_H_LEN:

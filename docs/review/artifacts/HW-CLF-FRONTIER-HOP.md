@@ -82,3 +82,75 @@ recorded in the repository's standing rules. Here the failure was narrower and w
 the *encoding* had no way to say "absent". Because sublink 0 is a valid address, "no upstream
 stamp" and "arrived on vlink 0, context 0" are the same 16-bit value. A reserved index, or a
 validity bit, would have made the defect a loud error instead of a plausible verdict.
+
+---
+
+# Second defect, same family: the bank parity did not survive transit
+
+Found immediately after the hop fix, by the 10-trial rate run it enabled.
+
+## Symptom
+
+Fault detection was 9/9, but the CONTROL arm reported a blackhole in 5 of 9 trials (56%),
+where PREREG rule 1 requires 0%.
+
+## The control failures were not noise — they were perfectly deterministic
+
+`clf_trials.py` alternates the measurement bank per trial (`bank = i % 2`):
+
+| trials | bank | control arm |
+|---|---|---|
+| 1, 3, 5, 7 | 0 | correct, 0/4 false |
+| 2, 4, 6, 8, 10 | 1 | **false blackhole, 5/5** |
+
+Every bank-1 trial failed and no bank-0 trial did. A 56% "false positive rate" was one bug
+with a 100% hit rate on half the trials.
+
+## Cause
+
+TX is marked at the SOURCE leaf's egress and RX at the SPINE's egress. `act_transit` runs at
+the spine's ingress, between them, and wrote:
+
+```p4
+hdr.fabric.flags = (bit<8>)md.flags_out;     // bank bit erased
+```
+
+while `act_enter` had stamped the parity into `hdr.fabric.flags` bit 3. So RX was always
+recorded in bank 0 while TX went to bank B. With B=0 they agreed and everything looked
+correct; with B=1 every sublink showed TX with no RX — a false blackhole on every one.
+
+This is the same shape as the hop defect: the comment above `act_enter` stated the intent
+outright — "stamped ... at the SOURCE so every switch the packet traverses agrees which
+frontier bank the packet belongs to" — and the implementation did not honour it.
+
+## A second, latent defect found while fixing the first
+
+The bank shared **bit 3 of `flags` with `set_gap_event()`** (`md.flags_out |= 8`). A packet
+raising a gap event would be stamped into the wrong bank. It never fired in these trials
+because a full blackhole leaves no surviving packet to reveal a gap — the structural limit
+C-W4 already has — but it would corrupt every reading the moment the controller loop runs
+with real gap events. Found by reading the bit allocation, not by a test.
+
+## Fix — and why it is not in `flags`
+
+The parity now rides `hdr.fabric.clf_bank`, the byte formerly declared as `loops` (§7.4 L1
+extra latency loops: written to 0 once, never read, never implemented).
+
+Two compiler constraints ruled out the alternatives, and both are worth recording:
+
+* Preserving the bit across transit needs `flags = md.flags_out | (flags & BANK)`, which
+  bf-p4c rejects: *"or: action spanning multiple stages"* (constraint class 5).
+* Pre-computing the mask in the parser is also rejected: *"Assignment source cannot be
+  evaluated in the parser"*. The parser does plain copies, not arithmetic.
+
+The dead byte solves both by construction: `act_transit` does not write it, so the parity
+survives every transit hop with no OR, no extra table, no stage, and no wire bytes. Bits 0-4
+of `flags` are taken (1, 2, 4, 8, 16, and 24 = 8|16), so there was no free bit there anyway.
+
+Compiles 11 ingress / 5 egress — unchanged, as with the hop fix.
+
+## Lesson
+
+Both defects were found the same way and neither needed a new experiment: the code was
+checked against its own stated intent. A comment that says what a mechanism does is a
+testable claim about the implementation, and in both cases the implementation disagreed.

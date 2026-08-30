@@ -88,7 +88,15 @@ header fabric_h {
                       // for a Random<> seed: the path is recoverable from a capture
     bit<16> path_id;  // (dst_leaf, spray) path id, written at the source leaf; egress
                       // stamps it into the CSIG tag and every pass indexes reg_attn by it
-    bit<8>  loops;    // remaining extra latency loops (§7.4 L1)
+    bit<8>  clf_bank; // CLF frontier bank parity (0 or 1), stamped at the SOURCE.
+                      // Was `loops` (§7.4 L1 extra latency loops): declared, written to 0
+                      // once in act_enter, never read, never implemented.  Reusing that
+                      // dead byte costs no wire bytes and -- the reason it is HERE and not
+                      // in `flags` -- act_transit does not write it, so the parity survives
+                      // every transit hop by construction.  Packing it into `flags` cannot
+                      // work: bit 3 is already set_gap_event's marker, and preserving a bit
+                      // across act_transit needs a mask+OR, which bf-p4c rejects as
+                      // "action spanning multiple stages" (constraint class 5).
     bit<8>  flags;    // bit0 measured, bit1 dropped, bit2 corrupted (never parsed into md)
     bit<8>  nxt;      // NXT_IPV4 | NXT_CSIG — parser select only
     bit<8>  pad;
@@ -1010,8 +1018,14 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
      * Egress then only compare-and-replaces the worst_* fields, first at this very
      * pass (worst_qdepth starts at 0, so hop 0's own queue depth is recorded). */
     /* CLF bank parity.  `bank` is action data the control plane flips once per measurement
-     * epoch, and it is stamped into hdr.fabric.flags bit 3 at the SOURCE so every switch the
-     * packet traverses agrees which frontier bank the packet belongs to.
+     * epoch, and it is stamped into hdr.fabric.clf_bank at the SOURCE so every switch the
+     * packet traverses agrees which frontier bank the packet belongs to.  It is a property
+     * of the PACKET, not of the table, so transit must carry it rather than restamp it --
+     * which is why it lives in a byte act_transit never writes.  When it lived in flags,
+     * act_transit's `flags = md.flags_out` erased it: TX is marked at the source's egress
+     * and RX at the spine's, act_transit runs between them, so RX always landed in bank 0
+     * while TX landed in bank B.  With B=1 every sublink showed TX with no RX -- a false
+     * blackhole on every one, on exactly the bank-1 trials, 5 of 5.
      *
      * Without this the double buffering is inert.  Measured consequence of leaving it
      * unimplemented: bank 0 is the only bank ever written, so a reader must ZERO the active
@@ -1028,8 +1042,8 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
         hdr.fabric.vsw_id = md.next_vsw;
         hdr.fabric.hop    = next_hop;
         hdr.fabric.spray  = md.spray_idx;
-        hdr.fabric.loops  = 0;
-        hdr.fabric.flags  = (bit<8>)md.flags_out | bank;
+        hdr.fabric.clf_bank = bank;
+        hdr.fabric.flags  = (bit<8>)md.flags_out;
         hdr.fabric.nxt    = NXT_CSIG;
         hdr.fabric.pad    = md.ctx;   /* capsule rides the existing pad byte */
         hdr.fabric.path_id = md.attn_idx;
@@ -1514,13 +1528,13 @@ control Egress(inout eg_headers_t hdr, inout eg_md_t md,
             /* CLF receiver mark FIRST: hdr.witness.link_id still names the UPSTREAM
              * sublink until tbl_wit_link rewrites it below. */
             md.clf_idx = hdr.witness.link_id;
-            if ((hdr.fabric.flags & 8) != 0) {
+            if (hdr.fabric.clf_bank != 0) {
                 md.clf_idx = md.clf_idx | 16w0x100;
             }
             tbl_rx_frontier.apply();
             /* TX commitment, after tbl_ctx_index has composed md.sublink. */
             md.clf_tx_idx = md.sublink;
-            if ((hdr.fabric.flags & 8) != 0) {
+            if (hdr.fabric.clf_bank != 0) {
                 md.clf_tx_idx = md.clf_tx_idx | 16w0x100;
             }
             tbl_tx_frontier.apply();
