@@ -1,3 +1,45 @@
+## Status (2026-08-30, end of session) — the C-W4 comparison is measured; one claim retracted
+
+**Retracted:** commit 7eed2f7 claimed "coverage doubles" from listing frontier entries {1,2}.
+Never measured, and false. With 10 probe packets both frontiers read TX=20 RX=20 — every count
+doubled, no second vlink row ever appeared, because md.vlink resolves to 0 at the spine's egress
+so the second link has no distinct sublink identity and its marks land in the FIRST link's slot.
+Worse than missing coverage: with the second link dark, TX=20 and RX=10 gives a ratio of 0.5 and
+reports HEALTHY, a masking hole. Reverted to {1} in c296ec8 and the accounting verified exact:
+20->20/20, 30->30/30, 50->50/50, and 30 with the context dark -> TX=31 RX=0.
+**CLF covers the FIRST directed link only.** Extending it needs each hop's outgoing sublink to
+have a distinct identity at the spine — separate work, not done.
+
+**STARVED now fires on silicon** (f01ee97), not just in unit tests. A total blackhole can only
+ever give RX==0, so the discriminating band needed a partial fault: `K` takes an optional
+sequence range now (tbl_eg_fail already keys on hdr.witness.seq : range). The range must spare
+the LOW sequence numbers — a first attempt at [0..64511] dropped all 60 packets. Reading the
+sequence first and arming [seq+5..65535] spares five: **TX=62 RX=3, injector dropped 60**. On
+those measured numbers the presence bit reports HEALTHY and the count reports STARVED.
+STARVED_RATIO=8 is still a chosen number, not a measured threshold, and is not in PREREG.
+
+**The contribution is now measured** (`docs/review/artifacts/HW-CLF-VS-CW4.md`). C-W4's state is
+read through reg_wit_observed (increments on arrival, resets on a gap, frozen when nothing
+arrives). Across 5 runs, IDLE and DARK leave that counter **identical — delta 0 every time** —
+while CLF separates them 5/5 (TX=0 RX=0 IDLE vs TX=60-62 RX=0 BLACKHOLE).
+
+And a sharper finding than "C-W4 detects 0%": the healthy arm's deltas were NEGATIVE, which only
+happens on a reset. Measured directly — 40 clean packets leave observed at 201; 60 destroyed
+leave it at **201, unchanged**; 20 packets after clearing leave it at **45**. So C-W4 detects a
+total blackhole **retroactively**, at the first survivor, and is blind for exactly as long as the
+blackhole lasts. The mechanisms differ in WHEN evidence exists. A detector that reports a link
+dark only after it comes back cannot drive mitigation while it is dark.
+
+Regression on the corrected build: fault 9/9, control 0/9, IMPOSSIBLE 0.
+
+### Next action
+- `all_context_blackhole` — carries its own kill criterion (a fully dark link is what ordinary
+  link management already catches).
+- Sweep survival rate to set STARVED_RATIO from measurement, and add it to PREREG.
+- Instrument the mirror/gap-event path so the C-W4 comparison covers event delivery, not just
+  witness state.
+- Retrieve dShark (NSDI'19) — still the live FATAL novelty vector, still unread.
+
 ## Status (2026-08-30, later) — CLF frontier redesigned: counts, and counted pre-TM
 
 Four defects were fixed earlier today (see the block below and
