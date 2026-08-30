@@ -1153,11 +1153,15 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
         const default_action = NoAction();
         /* In INGRESS md.hop names the hop the packet is AT: 0 = host injection (no
          * upstream link), 1 = arrived at the spine over the source->spine link,
-         * 2 = arrived at the destination leaf over the spine->leaf link.  Both 1 and
-         * 2 are genuine arrivals over a directed link.  (In EGRESS the same field
-         * names the NEXT hop, which is what made the egress version mark the source
-         * leaf's own departure as an arrival.) */
-        const entries = { 1 : rx_frontier_mark(); 2 : rx_frontier_mark(); }
+         * 2 = arrived at the destination leaf over the spine->leaf link.  (In EGRESS the
+         * same field names the NEXT hop, which is what made the egress version mark the
+         * source leaf's own departure as an arrival.)
+         *
+         * Only entry 1 is listed, matching tbl_tx_frontier: the second link has no
+         * distinct sublink identity, so marking its arrival would land in the first
+         * link's slot.  Measured -- 10 packets read TX=20 RX=20 with both entries
+         * listed.  See tbl_tx_frontier for why that aliasing masks a dark second link. */
+        const entries = { 1 : rx_frontier_mark(); }
     }
 
     apply {
@@ -1442,12 +1446,17 @@ control Egress(inout eg_headers_t hdr, inout eg_md_t md,
          * spine committing onto the spine->leaf link.  An entry for 0 is dead: nothing
          * presents md.hop == 0 in egress.
          *
-         * Both are listed now that RX is marked in INGRESS: the destination leaf records
-         * the arrival of the second link before csig is removed, so that link finally has
-         * an arrival counterpart and can safely be committed.  While RX lived in egress it
-         * did not, and committing a link whose arrivals cannot be observed would have
-         * reported a permanent, unfalsifiable blackhole -- so only entry 1 was listed. */
-        const entries = { 1 : tx_frontier_mark(); 2 : tx_frontier_mark(); }
+         * ONLY entry 1 is listed, and the reason is measured, not assumed.  Listing 2 as
+         * well was tried and reverted: with exactly 10 probe packets the frontier read
+         * TX=20 RX=20, i.e. every count was doubled, because md.vlink resolves to 0 at the
+         * spine's egress too.  The second link has no distinct sublink identity, so its
+         * marks land in the FIRST link's slot instead of its own.
+         *
+         * That aliasing is not merely a lost measurement, it is a masking hole: with the
+         * second link dark, TX would be 20 (both hops commit) and RX 10 (only the first
+         * link delivers), a ratio of 0.5, which reports HEALTHY.  Until a hop's outgoing
+         * sublink is distinct at the spine, CLF covers the FIRST directed link only. */
+        const entries = { 1 : tx_frontier_mark(); }
     }
 
 

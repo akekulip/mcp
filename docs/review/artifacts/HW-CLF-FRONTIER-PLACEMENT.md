@@ -80,9 +80,21 @@ decides.
 * **In ingress `md.hop` names the hop the packet is AT**, so entries `{1, 2}` are simply correct.
   The original author's numbering was right for the intended placement; the table had ended up in
   the wrong control.
-* **Coverage doubles.** The destination leaf records the second link's arrival in ingress, before
-  `csig` is removed at `LAST_HOP`. That link finally has an arrival counterpart, so TX can safely
-  commit it too (`tbl_tx_frontier` entries `{1, 2}`). CLF previously covered one directed link.
+* **Coverage does NOT double — this was claimed and then measured false.** Listing entry 2 on
+  both frontiers was tried on the assumption that the destination leaf would record the second
+  link's arrival. With exactly 10 probe packets the frontier read **TX=20 RX=20**: every count
+  doubled, because `md.vlink` resolves to 0 at the spine's egress too, so the second link has no
+  distinct sublink identity and its marks land in the FIRST link's slot.
+
+  That aliasing is worse than missing coverage. With the second link dark, TX would be 20 (both
+  hops commit) and RX 10 (only the first link delivers) — a ratio of 0.5, reported HEALTHY. The
+  entries were reverted to `{1}` on both frontiers, and the fix verified: 20 packets read
+  **TX=20 RX=20**, 30 read **30/30**, 50 read **50/50**, and 30 with the context blackholed read
+  **TX=31 RX=0**. One mark per packet per frontier, exact and proportional.
+
+  **CLF covers the FIRST directed link only**, as it did before this change. Extending it
+  requires giving each hop's outgoing sublink a distinct identity at the spine, which is separate
+  work and is not done.
 
 ### Cost
 
@@ -91,12 +103,19 @@ widening both frontiers from flags to counters cost zero additional stages and z
 
 ## Validated on silicon
 
-| condition | TX | RX | verdict |
-|---|---:|---:|---|
-| healthy fabric, no fault | 255 | 255 | HEALTHY |
-| total blackhole on ctx 2 | 255 | 0 | BLACKHOLE |
-| **downstream congestion, no fault** (spine TM discarding 76%) | 255 | **255** | **HEALTHY** |
-| congestion AND blackhole | 255 | 0 | BLACKHOLE |
+| condition | sent | TX | RX | verdict |
+|---|---:|---:|---:|---|
+| healthy fabric, no fault | 400 | 255 (sat) | 255 (sat) | HEALTHY |
+| healthy fabric, no fault | 30 | 30 | 30 | HEALTHY |
+| healthy fabric, no fault | 50 | 50 | 50 | HEALTHY |
+| total blackhole on ctx 2 | 400 | 255 | 0 | BLACKHOLE |
+| total blackhole on ctx 2 | 30 | 31 | 0 | BLACKHOLE |
+| **downstream congestion, no fault** (spine TM discarding 76%) | 400 | 255 | **255** | **HEALTHY** |
+| congestion AND blackhole | 400 | 255 | 0 | BLACKHOLE |
+
+The small-count rows are the ones that show the accounting is exact rather than merely non-zero;
+the 400-packet rows saturate at 255 and cannot distinguish 255 arrivals from 400. The TX=31
+against 30 sent is one background packet on the same sublink.
 
 The third row is the point: under the receiver's queue discarding most of the traffic, the link is
 still correctly reported healthy, because RX no longer measures the receiver's queue.
