@@ -97,10 +97,34 @@ CONTEXTUAL_PROGRAMS = {
     "mcp_fabric_capsule",
     "mcp_fabric_gate",
     "mcp_fabric_gate_event",
+    "mcp_fabric_clf",
+    "mcp_fabric_clf_eg",
 }
 
 
-def is_contextual_program(program):
+def is_contextual_program(program, bfrt=None):
+    """Does this program compose md.sublink = (vlink << 4) | ctx?
+
+    DERIVED FROM THE SCHEMA when a bfrt handle is available, and only falling back to
+    CONTEXTUAL_PROGRAMS when it is not.  The name list is a fact restated in two places and
+    it has now caused the same silent defect three times: a program missing from it gets
+    tbl_eg_vlink installed WITHOUT the vlink << 4 shift, so md.sublink becomes vlink | ctx,
+    every small vlink collapses to sublink >> 4 == 0, and all evidence is attributed to
+    vlink 0.  Nothing errors; the numbers are simply wrong.  Most recently this made the
+    CLF frontier report a single directed link on a fabric that was demonstrably forwarding
+    400/400 across several.
+
+    The compiled schema already knows the answer: a contextual program's set_eg_vlink action
+    takes a `vlink_base` parameter (the pre-shifted value, supplied because the compiler
+    cannot shift a runtime action parameter).  Ask the schema, not a list."""
+    if bfrt is not None:
+        try:
+            t = bfrt.table_get("pipe.Egress.tbl_eg_vlink")
+            for act in t.info.action_name_list_get():
+                if "set_eg_vlink" in act:
+                    return "vlink_base" in t.info.data_field_name_list_get(act)
+        except Exception:
+            pass
     return program in CONTEXTUAL_PROGRAMS
 
 
@@ -345,7 +369,7 @@ def main():
             write_params(gc, bfrt, tgt, a.k_up, a.a_min, a.n_clean)
             seed_attn(gc, bfrt, tgt, a.a0)
             install_gate(gc, bfrt, tgt)
-            install_eg_vlink(gc, bfrt, tgt, contextual=is_contextual_program(a.program))
+            install_eg_vlink(gc, bfrt, tgt, contextual=is_contextual_program(a.program, bfrt))
             # NOT `a.program == "mcp_fabric_cw4"`.  Every capsule-era program composes
             # md.sublink = (vlink << 4) | ctx, and the compiler cannot shift a runtime
             # action parameter, so the control plane must supply the shift.  Hardcoding
