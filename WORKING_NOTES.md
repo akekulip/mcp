@@ -1,3 +1,51 @@
+## Status (2026-08-30, session end) — both open items closed; a bring-up defect corrected a wrong call
+
+**A bring-up defect invalidated every vlink label earlier in the session.** `tbl_eg_vlink` maps
+(egress_port, egress_qid) -> virtual link and composes `md.sublink`; its miss action is
+`set_eg_vlink(0, 0)`, and it is installed by **`setup_attention.py`, not `setup_skeleton.py`**.
+Every bring-up ran only setup_skeleton, so the table was empty and **every packet reported vlink 0**.
+Exposed only by two instruments disagreeing: with a gate rerouting spray 0->1, the ingress counter
+read `spray=1 vlink=1 pkts=30` while the frontier still said vlink 0. TX/RX counts all stand (every
+earlier run used one virtual link); only the labels were meaningless.
+`bringup.sh` now runs `setup_attention.py up` as step 5b and **fails** if it installs 0 rows.
+
+**That corrected commit c296ec8.** The `TX=20 RX=20` doubling was real but my diagnosis ("the second
+link has no distinct sublink identity") was wrong — it was the empty table. Restoring `{1,2}` gives
+proper per-link counters: 10 packets -> vlink0 11/11 and vlink10 10/10, separate slots, no aliasing.
+
+**Per-link localization now measured** (`artifacts/HW-CLF-RESTORATION-LIFECYCLE.md`): no fault ->
+both links 10/10; first link dark -> vlink0 TX=11 RX=0 and vlink10 **no row at all**; second link
+dark -> vlink0 10/10 and vlink10 TX=10 RX=0. CLF identifies WHICH directed link failed, and with
+link 1 dark it reports link 2 **IDLE, not FAULTY** — it does not blame the innocent downstream link,
+because TX records commitment and the spine committed nothing. Supersedes the "first link only" scope.
+
+**Restoration lifecycle demonstrated on silicon**, 30 packets/step: healthy 30/30 -> fault 30/0 ->
+quarantine (production appears on vlink1 at 30/30, **no vlink0 row**) -> fault cleared (still no
+vlink0 row) -> probation via a declared audit flow reads **vlink0 30/30** while production stays on
+the backup -> gate removed, production returns 30/30. Shows selective mitigation working, mitigation
+destroying the passive evidence (steps 3 and 4 are indistinguishable from the quarantined sublink —
+IDLE whether broken or repaired), and probation restoring it. **Scripted, not controller-driven**:
+`sublink_feedback.py`'s decision core was not in the loop, so P3's "no running controller has yet…"
+is only half discharged. How much probation is *sufficient* is unmeasured (30 was for symmetry, not
+from `probation_packets_required()`).
+
+**CLF priced** (`artifacts/HW-CLF-COST.md`). Same program with and without the frontier: **11/4 vs
+11/5** — +1 egress stage, +0 ingress, +12 SRAM blocks, +4 map RAM, +2 stateful ALUs (exactly
+`rx_seen`/`tx_seen`), **0 wire bytes**, 1024 bytes of fixed on-chip state. Evidence leaving the
+switch, frame size measured at 1446 B: 10/100/500 packets gave a CLF readout of **58/37/86 bytes**
+against mirrored **14,460/144,600/723,000** — 249x/3,908x/8,407x. The readout does not grow with
+packet count; it varies only with the number of active sublinks and is bounded ~1 KB.
+Caveats recorded: dShark can truncate or sample, this is equal-task not equal-capability, and the
+mirrored column is arithmetic on measured counts, not a captured trace.
+
+### Next action
+- Put the lifecycle under `controller_loop.py` + `sublink_feedback.py` so the decision path, not a
+  shell script, drives probation and restore. That is the remaining half of P3.
+- Size probation from `probation_packets_required()` rather than by symmetry.
+- `direction_only` is now testable with two-link coverage; still unmeasured.
+- STARVED_RATIO into PREREG with a margin; noise floor at fixed k.
+- dDrops and Speedlight still unretrieved.
+
 ## Status (2026-08-30, later still) — rule 1 fully measured; dShark read; framing must change
 
 **PREREG rule 1 is now measured on both its scenarios** (`docs/review/artifacts/HW-CLF-VS-CW4.md`):
