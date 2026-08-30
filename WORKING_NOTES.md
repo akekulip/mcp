@@ -1,233 +1,248 @@
-## Status (2026-08-30, session end) — both open items closed; a bring-up defect corrected a wrong call
+# Session record — 2026-08-30 (Claude): CLF detection made trustworthy, then measured
 
-**A bring-up defect invalidated every vlink label earlier in the session.** `tbl_eg_vlink` maps
-(egress_port, egress_qid) -> virtual link and composes `md.sublink`; its miss action is
-`set_eg_vlink(0, 0)`, and it is installed by **`setup_attention.py`, not `setup_skeleton.py`**.
-Every bring-up ran only setup_skeleton, so the table was empty and **every packet reported vlink 0**.
-Exposed only by two instruments disagreeing: with a gate rerouting spray 0->1, the ingress counter
-read `spray=1 vlink=1 pkts=30` while the frontier still said vlink 0. TX/RX counts all stand (every
-earlier run used one virtual link); only the labels were meaningless.
-`bringup.sh` now runs `setup_attention.py up` as step 5b and **fails** if it installs 0 rows.
+Consolidates five fragmentary status blocks written during the session. Everything below is
+measured on silicon unless it says otherwise. Commits `47797c6`..`0ce5e8d`.
 
-**That corrected commit c296ec8.** The `TX=20 RX=20` doubling was real but my diagnosis ("the second
-link has no distinct sublink identity") was wrong — it was the empty table. Restoring `{1,2}` gives
-proper per-link counters: 10 packets -> vlink0 11/11 and vlink10 10/10, separate slots, no aliasing.
+---
 
-**Per-link localization now measured** (`artifacts/HW-CLF-RESTORATION-LIFECYCLE.md`): no fault ->
-both links 10/10; first link dark -> vlink0 TX=11 RX=0 and vlink10 **no row at all**; second link
-dark -> vlink0 10/10 and vlink10 TX=10 RX=0. CLF identifies WHICH directed link failed, and with
-link 1 dark it reports link 2 **IDLE, not FAULTY** — it does not blame the innocent downstream link,
-because TX records commitment and the spine committed nothing. Supersedes the "first link only" scope.
+## 1. Seven defects found and fixed
 
-**Restoration lifecycle demonstrated on silicon**, 30 packets/step: healthy 30/30 -> fault 30/0 ->
-quarantine (production appears on vlink1 at 30/30, **no vlink0 row**) -> fault cleared (still no
-vlink0 row) -> probation via a declared audit flow reads **vlink0 30/30** while production stays on
-the backup -> gate removed, production returns 30/30. Shows selective mitigation working, mitigation
-destroying the passive evidence (steps 3 and 4 are indistinguishable from the quarantined sublink —
-IDLE whether broken or repaired), and probation restoring it. **Scripted, not controller-driven**:
-`sublink_feedback.py`'s decision core was not in the loop, so P3's "no running controller has yet…"
-is only half discharged. How much probation is *sufficient* is unmeasured (30 was for symmetry, not
-from `probation_packets_required()`).
+Ordered as found. Numbers 1-6 are all the same failure at bottom: **an RX bit that did not belong
+to the measured traffic read as evidence of health**, and a 1-bit flag cannot say "implausibly
+few". Number 7 is a bring-up omission that invalidated a conclusion I had already drawn.
 
-**CLF priced** (`artifacts/HW-CLF-COST.md`). Same program with and without the frontier: **11/4 vs
-11/5** — +1 egress stage, +0 ingress, +12 SRAM blocks, +4 map RAM, +2 stateful ALUs (exactly
-`rx_seen`/`tx_seen`), **0 wire bytes**, 1024 bytes of fixed on-chip state. Evidence leaving the
-switch, frame size measured at 1446 B: 10/100/500 packets gave a CLF readout of **58/37/86 bytes**
-against mirrored **14,460/144,600/723,000** — 249x/3,908x/8,407x. The readout does not grow with
-packet count; it varies only with the number of active sublinks and is bounded ~1 KB.
-Caveats recorded: dShark can truncate or sample, this is equal-task not equal-capability, and the
-mirrored column is arithmetic on measured counts, not a captured trace.
+**D1 — the trial driver never zeroed the bank.** `clf_trials.py`'s docstring specified
+`quiesce -> zero -> quiesce -> generate -> settle -> read`; `trial()` had no zero step at all. The
+"frozen" bank carried residue from every earlier run, and a stale RX bit makes `TX & ~RX` come out
+zero **for the sublink under test** — a real blackhole read as HEALTHY. Residue does not add noise,
+it deletes detections.
 
-### Next action
-- Put the lifecycle under `controller_loop.py` + `sublink_feedback.py` so the decision path, not a
-  shell script, drives probation and restore. That is the remaining half of P3.
-- Size probation from `probation_packets_required()` rather than by symmetry.
-- `direction_only` is now testable with two-link coverage; still unmeasured.
-- STARVED_RATIO into PREREG with a margin; noise floor at fixed k.
-- dDrops and Speedlight still unretrieved.
+**D2 — the source leaf marked its own egress as an arrival.** In EGRESS `md.hop` names the NEXT
+hop (ingress already advanced it: `act_enter` -> 1, `act_transit` -> 2), so the source's own egress
+presented `md.hop == 1` and matched `tbl_rx_frontier`, at index `hdr.witness.link_id` = 0, still
+ingress-zeroed because `tbl_wit_link` stamps later in the same apply block. Sublink 0 is a legal
+address, so "unstamped" and "arrived on vlink 0 ctx 0" were the same 16-bit value. This produced a
+standing TX=0/RX=1 verdict that failed PREREG rule 5 **on every trial**.
+*Proven with no new experiment*: in the fault arm all 400 probes were discarded at `tbl_eg_fail`,
+which runs AFTER `tbl_rx_frontier`, so nothing reached a downstream hop — yet RX registered an
+arrival. Only the source's own egress could have written it.
 
-## Status (2026-08-30, later still) — rule 1 fully measured; dShark read; framing must change
+**D3 — `act_transit` erased the bank parity.** TX is marked at the source's egress and RX at the
+spine's, and `act_transit` runs between them writing `flags = md.flags_out` without the bank bit.
+RX always landed in bank 0 while TX landed in bank B. Measured as a **56% control false-blackhole
+rate** that was not noise at all: every bank-1 trial failed (5/5) and no bank-0 trial did (0/4).
+**Latent second defect found while fixing it:** the bank shared `flags` bit 3 with
+`set_gap_event()` (`md.flags_out |= 8`), so any packet raising a gap event would be stamped into
+the wrong bank. It cannot fire under a total blackhole (no survivor, no gap) but would corrupt
+every reading once the controller loop runs.
 
-**PREREG rule 1 is now measured on both its scenarios** (`docs/review/artifacts/HW-CLF-VS-CW4.md`):
-- `selective_blackhole`: fault 9/9 or 10/10, control 0/N, IMPOSSIBLE 0 across repeated runs.
-- `all_context_blackhole`: CLF 4/4 contexts BLACKHOLE; C-W4's observed counters byte-identical
-  before and after (80/680/133/42 unchanged) = 0/4. Injector dropped 84, confirmed in data.
-- The comparison arm rule 1 actually turns on: IDLE and DARK are **indistinguishable to C-W4**
-  (delta 0 in all 5 runs) and CLF separates them 5/5.
-- Sharper than "C-W4 detects 0%": C-W4 detects a total blackhole **retroactively**. Measured —
-  40 clean packets leave observed at 201; 60 destroyed leave it at **201, unchanged**; 20 after
-  clearing leave it at **45**, so the gap fires at the first survivor. It is blind for exactly as
-  long as the blackhole lasts.
-- Kill criterion tested: while all four contexts were dark the physical port read **up=True**.
-  Scope stated honestly — in this emulation a directed link is a TM queue on a shared port, so a
-  hard all-context failure on a real fabric would coincide with link-down and CLF would add
-  nothing there. The scenario is meaningful for the gray failure this project is about.
+**D4 — a background packet could arrive between the zero and the arm.** The driver zeroed and
+only then armed, leaving the target live for ~0.8 s. One stray packet in that window sets RX and
+masks the blackhole. This was the single fault-arm miss at 89% (trial 6: **401 packets dropped,
+verdict HEALTHY**).
 
-**STARVED threshold sweep** (`artifacts/HW-CLF-STARVED-SWEEP.md`). A prerequisite had to be
-measured first: **the witness sequence advances 2.0 values per packet** (reg_wit_seq 13859->13959
-for 50 packets), because it is stamped on each fabric pass. So a sequence-range fault covers half
-as many packets as its width suggests, and the 16-bit space wraps every **32768 packets per
-sublink, not 65536** — the wrap scenario in PREREG should use that figure. Across k=0..60, RX
-tracks k/2 monotonically, so **RX/TX is a faithful linear estimator of survival**. That makes
-STARVED_RATIO=8 a policy statement (survival below 12.5%) rather than an arbitrary constant, but
-it does NOT settle where the boundary belongs: at k=15 the ratio is 0.133 against a 0.125
-threshold, about one packet in sixty. Still not in PREREG, still provisional, noise floor
-uncharacterised.
+**D5 — RX was on the wrong side of the traffic manager.** TX is in egress deliberately (post-TM,
+so our own queueing is not blamed on the link); RX was **also** post-TM, at the receiver, where
+that argument does not hold. A packet crossing the link cleanly and then dropped by the
+*receiving* switch's TM never marked RX — and that queue belongs to the receiver's *outgoing*
+link, so congestion on the downstream link was charged to the upstream one.
+*Measured*: spine downlink shaped to 100 kb/s, no fault injected — `dp164 tx +408` and
+`dp172 rx +408` (every packet crossed link 0 and arrived) while `dp174 tx +96`. **The link
+delivered 408/408 and 76% of those deliveries were invisible to a post-TM RX mark.**
 
-**dShark (NSDI'19) retrieved and read** (`docs/review/NOVELTY-GATE-DSHARK.md`). It was the one
-unretrieved FATAL vector. It does not kill the project; it kills one framing of it.
-- Table 2 ships a **"Silent black hole localizer"** — "Localize switches that drop all packets".
+**D6 — the presence bit itself.** `rx_seen` did `v = 1` into a `bit<8>` register: seven bits
+unused and the write discarded how many packets arrived. `RX > 0` meant "at least one packet, from
+any source, at any time this epoch". This is why D1-D5 were all *silent*.
+Critically, the presence bit also made PREREG rule 2 pass **for the wrong reason** — 96 survivors
+and 408 survivors are the same bit, so congestion looked healthy because the encoding was
+insensitive. That is the same insensitivity that let one stray packet mask a blackhole, and it is
+why the counter fix and the placement fix had to ship together: counting alone, with RX still in
+egress, would have turned rule 2 into a false STARVED verdict on a healthy link.
+
+**D7 — `tbl_eg_vlink` was never installed.** It maps (egress_port, egress_qid) -> virtual link and
+composes `md.sublink`; its miss action is `set_eg_vlink(0, 0)`; and it is installed by
+**`setup_attention.py`, not `setup_skeleton.py`**. Every bring-up ran only setup_skeleton, so the
+table was empty and **every packet reported virtual link 0**.
+*Exposed only by two instruments disagreeing*: with a gate rerouting spray 0->1 the ingress
+counter read `spray=1 vlink=1 pkts=30` while the frontier still said vlink 0.
+
+---
+
+## 2. Two claims of mine that were wrong, and the corrections
+
+**"Coverage doubles" — retracted, then the retraction itself was reversed.** I claimed listing
+frontier entries `{1,2}` extended coverage to the second link (`7eed2f7`). Ten packets read
+`TX=20 RX=20` — every count doubled — so I reverted to `{1}` and wrote that the second link "has
+no distinct sublink identity" (`c296ec8`). The doubling was real; **the diagnosis was wrong** — it
+was D7, the empty table. With it populated, `{1,2}` restored gives proper per-link counters
+(`4bc9da7`).
+
+**"The spine transmitted zero frames" — an invalid measurement I reported as evidence.** Three
+`$(ssh ...)` substitutions returned empty strings, so `$((A-B))` evaluated `0-0` and printed a
+delta that had never been measured. Compounded by a second trap: `bash val.sh | head -4` let
+SIGPIPE kill the script after it armed a blackhole and before its final clear, so the injector
+stayed armed and every later port reading showed nothing leaving the source. **Both produced the
+expected answer for the wrong reason.** Re-measured with raw values printed.
+
+---
+
+## 3. Engineering changes
+
+| change | why |
+|---|---|
+| RX frontier moved **egress -> ingress** | D5: receiver's TM must sit outside the link measurement |
+| both frontiers -> **saturating counters** (`v = v \|+\| 1`) | D6: a flag cannot express "implausibly few" |
+| bank parity -> `hdr.fabric.clf_bank` (the dead `loops` byte) | D3 + bit-3 collision. Two compiler constraints forced it: preserving a bit across transit needs a mask+OR, rejected as *"action spanning multiple stages"* (class 5), and pre-computing the mask in the parser is rejected as *"Assignment source cannot be evaluated in the parser"*. `act_transit` never writes `loops`, so the parity survives **by construction** at zero wire cost |
+| frontier entries `{1,2}` on both halves | two-link coverage, valid once D7 fixed |
+| `clf_trials.py` rewritten | every step verified: zero confirmed, probe exit status and packet count checked, injector arm confirmed and its drop counter printed beside every verdict; failed preconditions **excluded**, never averaged in as misses |
+| agent: `X` (per-sublink counts), ranged `K <sub> lo hi`, `U` (declare an audit flow), RX register path | readout that keeps the counts; controlled partial loss; probation steering |
+| `verdict_counts()` + `STARVED` + 7 tests | BLACKHOLE keeps its exact meaning so earlier results stay comparable; STARVED is a **new** class reported separately (a PREREG amendment, not a redefinition) |
+| `bringup.sh` step 5b | runs `setup_attention.py up` and **fails** if `tbl_eg_vlink` installs 0 rows |
+
+All builds compile **11 ingress / 5 egress**, unchanged throughout.
+
+---
+
+## 4. Measured results
+
+**Detection rates** (`selective_blackhole`, first link, guard 2.0 s):
+
+| build | fault | control | IMPOSSIBLE |
+|---|---|---|---|
+| before bank fix | 9/9 | **5/9 false (56%)** | 0 |
+| after bank fix | 8/9 (89%) | 0/10 | 0 |
+| after arm-before-zero | **17/17 (100%)** | **0/19 (0%)** | **0** |
+| final build, repeat | 9/9, 10/10 | 0/9, 0/10 | 0 |
+
+**PREREG rule 1's actual comparison — what CLF sees that C-W4 cannot** (5 runs):
+IDLE (nothing sent) and DARK (60 sent, all destroyed) leave C-W4's `reg_wit_observed`
+**identical — delta 0 in all five runs** — while CLF separates them 5/5 (TX=0 RX=0 IDLE vs
+TX=60-62 RX=0 BLACKHOLE).
+
+**Sharper than "C-W4 detects 0%": C-W4 detects retroactively.** 40 clean packets leave observed at
+201; 60 destroyed leave it at **201, unchanged**; 20 packets after clearing leave it at **45** —
+the counter reset, so the gap fired at the first survivor. C-W4 is blind for exactly as long as
+the blackhole lasts. A detector that reports a link dark only after it comes back cannot drive
+mitigation while it is dark.
+
+**`all_context_blackhole`:** CLF 4/4 contexts BLACKHOLE; C-W4's counters byte-identical
+(80/680/133/42 unchanged) = 0/4. Injector dropped 84, confirmed in data. Reaching four contexts
+needed `ctx = (dscp_class << 2) | size_bin` — size bin 3 needs `total_len >= 2048` and failed with
+`Errno 90, Message too long` at MTU 1500, so the service-class dimension supplied the fourth id.
+**Kill criterion tested:** while all four contexts were dark the physical port read **`up=True`**.
+
+**STARVED on silicon** (not just unit tests): 60 packets with a ranged blackhole sparing five →
+**TX=62 RX=3, injector dropped 60**. Presence bit says HEALTHY, count says STARVED.
+
+**Survival sweep** — and a prerequisite that had to be measured first: **the witness sequence
+advances 2.0 values per packet** (`reg_wit_seq` 13859->13959 for 50 packets), since it is stamped
+on each fabric pass. So a sequence-range fault covers half the packets its width suggests, and the
+16-bit space wraps every **32768 packets per sublink, not 65536** — PREREG's `wrap` scenario uses
+the wrong figure. Across k=0..60 RX tracks k/2 monotonically, so **RX/TX is a faithful linear
+estimator of survival**.
+
+**Per-link localization** (two-link coverage, 10 packets/arm):
+
+| scenario | vlink 0 | vlink 10 |
+|---|---|---|
+| no fault | 10/10 | 10/10 |
+| first link dark | **11/0 BLACKHOLE** | *no row* -> IDLE |
+| second link dark | 10/10 HEALTHY | **10/0 BLACKHOLE** |
+
+With link 1 dark, link 2 is unexercised and reports **IDLE, not FAULTY** — the mechanism does not
+blame the innocent downstream link, because TX records commitment and the spine committed nothing.
+
+**Restoration lifecycle** (30 packets/step): healthy 30/30 -> fault 30/0 -> quarantine (production
+on **vlink1** at 30/30, **no vlink0 row**) -> fault cleared (still no vlink0 row) -> probation via
+a declared audit flow reads **vlink0 30/30** while production stays on the backup -> gate removed,
+production returns 30/30. Shows selective mitigation working, **mitigation destroying the passive
+evidence** (steps 3 and 4 are indistinguishable from the quarantined sublink — IDLE whether broken
+or repaired), and probation restoring it.
+
+**CLF priced** — same program compiled with and without the frontier:
+
+| | ingress | egress | SRAM | map RAM | stateful ALUs |
+|---|---:|---:|---:|---:|---:|
+| without CLF | 11 | **4** | 80 | 23 | 6 |
+| with CLF | 11 | **5** | 92 | 27 | 8 |
+
++1 egress stage, +2 stateful ALUs (exactly `rx_seen`/`tx_seen`), **0 wire bytes**, 1024 bytes of
+fixed on-chip state. Evidence leaving the switch, frame size measured at 1446 B:
+
+| packets | CLF readout | mirrored equivalent | ratio |
+|---:|---:|---:|---:|
+| 10 | 58 B | 14,460 B | 249x |
+| 100 | 37 B | 144,600 B | 3,908x |
+| 500 | 86 B | 723,000 B | 8,407x |
+
+The readout does **not** grow with packet count — it varies only with the number of active
+sublinks and is bounded ~1 KB for a complete read at any rate.
+
+---
+
+## 5. dShark (NSDI'19) retrieved — M1 verdict `NARROW`
+
+The last unretrieved FATAL vector, now read. It does not kill the project; **it kills one framing
+of it.**
+
+* Table 2 ships a **"Silent black hole localizer"** — *"Localize switches that drop all packets"*.
   **Stop claiming novelty for detecting or localizing silent blackholes.**
-- Its "Packet drops on middleboxes" query, *"exist ingress and egress trace"*, is a direct
-  analogue of TX-vs-RX. So this is **not a capability difference**.
-- The retransmission dependency applies only to dShark's own blackhole query (groups on duplicate
-  TCP ipid/seq); do not generalise it to dShark as a whole.
-- The real difference is mechanism, cost and actionability: dShark mirrors traffic to collector
-  servers (goal 3.33 Mpps/core, 4 cores/server at 40Gbps) and states its own capture-noise
-  problem — mirrored drops burying real drops — which a register increment cannot have. And it
-  diagnoses without producing a handle to act on.
-- **The defensible claim is cost and actionability, not capability.** Weaker than "a new
-  observability primitive"; the paper framing must change. The registers-vs-capture cost gap is
-  larger and more defensible than O(L) vs O(LK), but is **unquantified** against a real mirroring
-  baseline on this testbed.
+* Its *"Packet drops on middleboxes"* query, `exist ingress and egress trace`, is a direct analogue
+  of TX-vs-RX. **This is not a capability difference.**
+* The retransmission dependency applies only to dShark's *own* blackhole query (groups on duplicate
+  TCP `ipid`/`seq`); do not generalise it to dShark as a whole.
+* What survives: **cost of evidence acquisition** and **actionability** — dShark mirrors to
+  collector servers (3.33 Mpps/core goal, four cores/server at 40 Gbps), states its own
+  capture-noise problem (mirrored drops burying real drops), and produces no handle to act on.
 
-### Next action
-- Quantify registers-vs-mirroring on the testbed, since that is now the load-bearing claim.
-- Put STARVED_RATIO in PREREG with a margin, and characterise the noise floor at fixed k.
-- Retrieve dDrops and Speedlight, the remaining unretrieved comparators.
-- Second directed link still uncovered (aliasing, see HW-CLF-FRONTIER-PLACEMENT.md).
+Verdict written into `NOVELTY-GATE.md` as the plan requires. **The framing "a new observability
+primitive" is withdrawn**; the surviving claims are systems claims. The paper text still carries
+the old framing and has not been updated.
 
-## Status (2026-08-30, end of session) — the C-W4 comparison is measured; one claim retracted
+**P3's mandatory liveness sub-gate is satisfied**: partial conditional loss, selective total
+blackhole and all-context blackhole all demonstrated, and CLF is the liveness mechanism the
+sub-gate demanded, priced above. That clears the stop condition about an *unpriced* auxiliary
+liveness mechanism.
 
-**Retracted:** commit 7eed2f7 claimed "coverage doubles" from listing frontier entries {1,2}.
-Never measured, and false. With 10 probe packets both frontiers read TX=20 RX=20 — every count
-doubled, no second vlink row ever appeared, because md.vlink resolves to 0 at the spine's egress
-so the second link has no distinct sublink identity and its marks land in the FIRST link's slot.
-Worse than missing coverage: with the second link dark, TX=20 and RX=10 gives a ratio of 0.5 and
-reports HEALTHY, a masking hole. Reverted to {1} in c296ec8 and the accounting verified exact:
-20->20/20, 30->30/30, 50->50/50, and 30 with the context dark -> TX=31 RX=0.
-**CLF covers the FIRST directed link only.** Extending it needs each hop's outgoing sublink to
-have a distinct identity at the spine — separate work, not done.
+---
 
-**STARVED now fires on silicon** (f01ee97), not just in unit tests. A total blackhole can only
-ever give RX==0, so the discriminating band needed a partial fault: `K` takes an optional
-sequence range now (tbl_eg_fail already keys on hdr.witness.seq : range). The range must spare
-the LOW sequence numbers — a first attempt at [0..64511] dropped all 60 packets. Reading the
-sequence first and arming [seq+5..65535] spares five: **TX=62 RX=3, injector dropped 60**. On
-those measured numbers the presence bit reports HEALTHY and the count reports STARVED.
-STARVED_RATIO=8 is still a chosen number, not a measured threshold, and is not in PREREG.
+## 6. Testbed facts learned the hard way
 
-**The contribution is now measured** (`docs/review/artifacts/HW-CLF-VS-CW4.md`). C-W4's state is
-read through reg_wit_observed (increments on arrival, resets on a gap, frozen when nothing
-arrives). Across 5 runs, IDLE and DARK leave that counter **identical — delta 0 every time** —
-while CLF separates them 5/5 (TX=0 RX=0 IDLE vs TX=60-62 RX=0 BLACKHOLE).
+* The real SDE is **`/home/decps/Downloads/bf-sde-9.13.2`**. `/opt/bf-sde-9.13.2` has no
+  `site-packages` and gives `ModuleNotFoundError: bfrt_grpc`.
+* **`pgrep -f <pattern>` matches its own command line**, same family as the documented `pkill -f`
+  trap. It made a liveness check report "still running" forever. Resolve the real process via
+  `/proc/<pid>/cmdline` and match on `python3*`.
+* `bringup.sh` verifies loop pairs **before link training finishes** and reports pairs down that
+  come up on their own ~60 s later. Adding step 5b incidentally gave them that time.
+* `host_run.sh` buffers output until completion; watch progress by reading the remote process's
+  `/proc/<pid>/fd/1` target.
+* Backgrounding the agent inside a compound `ssh` often does not survive; launch it in its own
+  `ssh` call.
 
-And a sharper finding than "C-W4 detects 0%": the healthy arm's deltas were NEGATIVE, which only
-happens on a reset. Measured directly — 40 clean packets leave observed at 201; 60 destroyed
-leave it at **201, unchanged**; 20 packets after clearing leave it at **45**. So C-W4 detects a
-total blackhole **retroactively**, at the first survivor, and is blind for exactly as long as the
-blackhole lasts. The mechanisms differ in WHEN evidence exists. A detector that reports a link
-dark only after it comes back cannot drive mitigation while it is dark.
+---
 
-Regression on the corrected build: fault 9/9, control 0/9, IMPOSSIBLE 0.
+## 7. Open
 
-### Next action
-- `all_context_blackhole` — carries its own kill criterion (a fully dark link is what ordinary
-  link management already catches).
-- Sweep survival rate to set STARVED_RATIO from measurement, and add it to PREREG.
-- Instrument the mirror/gap-event path so the C-W4 comparison covers event delivery, not just
-  witness state.
-- Retrieve dShark (NSDI'19) — still the live FATAL novelty vector, still unread.
+* **P3's remaining half**: the lifecycle is **scripted**. `controller/sublink_feedback.py`'s
+  decision core (`AuditReceipt`, the bounded probation-round matcher, `probation_packets_required`,
+  flap damping) was never in the loop. The plan's *"no running **controller** has yet…"* stands.
+* Probation sizing: 30 packets was symmetry with other steps, **not** `probation_packets_required()`.
+* **The guard interval was never measured** — 2.0 s used throughout on no evidence. This was CLF
+  plan item 4 and it was skipped.
+* `STARVED_RATIO = 8` still not in PREREG. The sweep shows it means "survival below 12.5%", but at
+  k=15 the ratio is 0.133 against a 0.125 threshold — about one packet in sixty. Needs a margin or
+  hysteresis. Noise floor at fixed k uncharacterised (TX read 62 against 60 sent at one point).
+* Untested scenarios: `direction_only` (now testable with two-link coverage), reorder, wrap,
+  flapping, repair, controller restart. Size bin 3 unreachable at MTU 1500.
+* Frontier traffic accounting (CLF plan item 6) not started.
+* dDrops and Speedlight unretrieved.
+* Paper text not yet updated for the `NARROW` verdict.
 
-## Status (2026-08-30, later) — CLF frontier redesigned: counts, and counted pre-TM
-
-Four defects were fixed earlier today (see the block below and
-`docs/review/artifacts/HW-CLF-FRONTIER-HOP.md`). Investigating why all four were SILENT rather
-than loud found one cause and one deeper design flaw, both now fixed:
-`docs/review/artifacts/HW-CLF-FRONTIER-PLACEMENT.md`.
-
-1. **`v = 1` in a bit<8> register.** Seven bits unused, and the write discarded how many packets
-   arrived, so `RX > 0` meant "at least one packet, from any source, at any time this epoch".
-   A one-bit flag cannot express "implausibly few", which is why four different sources of a
-   stray RX bit all produced wrong ANSWERS instead of errors.
-2. **RX was on the wrong side of the traffic manager.** TX is post-TM on purpose so our own
-   queueing is not blamed on the link; RX was post-TM at the RECEIVER, where that argument does
-   not hold. Measured with the spine's downlink shaped to 100 kb/s and no fault injected:
-   dp164 tx +408 and dp172 rx +408 (every packet crossed link 0 and arrived) while dp174 tx +96
-   — the link delivered 408/408 and 76% of those deliveries were invisible to a post-TM RX mark.
-   Congestion on the DOWNSTREAM link was being charged to the UPSTREAM one.
-
-The presence bit hid (2) as well — 96 survivors and 408 survivors are the same bit — so PREREG
-rule 2 passed only because the encoding was insensitive. That is the same insensitivity that let
-one stray packet mask a blackhole, which is why both changes had to ship together: counting alone,
-with RX in egress, would have turned rule 2 into a false STARVED verdict on a healthy link.
-
-**Redesign:** RX marks at the receiver's INGRESS; both frontiers are saturating counters. Cost
-**11/5, unchanged** — zero extra stages, zero wire bytes. Two side effects that were not the goal:
-in ingress `md.hop` names the hop the packet is AT so entries {1,2} are simply correct, and
-coverage doubles because the destination leaf can now record the second link's arrival.
-
-**Silicon results (redesigned build):** fault 10/10, control 0/10, IMPOSSIBLE 0, zero harness
-exclusions. Under the receiver discarding 76% of traffic: still 255/255 HEALTHY.
-`STARVED` added as a NEW verdict class; BLACKHOLE keeps its exact meaning so earlier results stay
-comparable (PREREG amendment, not a redefinition).
-
-**Two harness traps paid for today, both giving the EXPECTED answer for the wrong reason:**
-`bash val.sh | head -4` let SIGPIPE kill the script after it armed a blackhole and before its
-final clear, leaving the injector armed — every port measurement afterwards read zero packets
-leaving the source and was misread as shaper behaviour. And three `$(ssh ...)` substitutions
-returned empty, so `$((A-B))` printed a delta of 0 that had never been measured. Print raw
-readings, never just the difference; a teardown a signal can skip is a fault injector left armed.
-
-### Next action
-- `all_context_blackhole` (4 K calls; `tbl_eg_fail` holds 32 entries, no P4 change needed) and
-  the C-W4 0% comparison arm — both still required by PREREG rule 1.
-- Re-measure the second directed link now that coverage extends to it.
-
-## Status (2026-08-30) — CLF frontier hop defect found and fixed; rule 5 now passes
-
-The CLF reader was rewritten twice today and both rewrites exposed a real defect.
-
-1. **The trial driver never zeroed the bank.** Its docstring specified
-   `quiesce -> zero -> quiesce -> generate -> settle -> read`; `trial()` had no zero step.
-   The "frozen" bank carried residue from every earlier run, and a stale RX bit makes
-   `TX & ~RX` come out zero for the sublink under test — a real blackhole read as HEALTHY.
-   Residue does not add noise, it deletes detections. Fixed, and the zero is now verified
-   (the trial raises `HarnessError` and is EXCLUDED, never averaged in as a miss).
-2. **`tbl_rx_frontier` marked an arrival at the source leaf.** In egress `md.hop` names the
-   NEXT hop, so the source's own egress presents hop 1 and matched `rx_frontier_mark`, at
-   index `hdr.witness.link_id` = 0 (still ingress-zeroed; `tbl_wit_link` stamps later in the
-   same apply block). Sublink 0 is a legal address, so "unstamped" and "arrived on vlink 0
-   ctx 0" are the same value. This produced the standing IMPOSSIBLE verdict that failed
-   PREREG rule 5 on every trial. Proof needs no new experiment: in the fault arm all 400
-   probes were discarded at `tbl_eg_fail`, which runs AFTER `tbl_rx_frontier`, so nothing
-   reached a downstream hop — yet RX registered an arrival.
-   Full record: `docs/review/artifacts/HW-CLF-FRONTIER-HOP.md`.
-
-**Fix:** `tbl_rx_frontier` -> `{2}`, `tbl_tx_frontier` -> `{1}` (entry 0 was dead code).
-Compiles 11/5, unchanged. Build manifest `29fed8b6f0317e14607e603923989d58a6264bca6393acf87c3ea1d3e09dcc2b`.
-After the fix: IMPOSSIBLE 0 in every trial, fault detection 3/3, false blackholes 0.
-
-**Coverage limit this exposed:** CLF observes the FIRST directed link only (source leaf ->
-spine). The spine's egress is deliberately not a TX site because the destination leaf records
-no arrival — `csig` is removed at `LAST_HOP` — and committing a link whose arrivals cannot be
-seen would report a permanent blackhole. Every reading returns a single vlink row, which is
-the evidence. Any paper claim must carry this scope.
-
-**Also fixed today:** `bringup.sh` verifies loop pairs before the links finish training and
-reported 3 of 4 pairs down; they came up on their own. A rate measured on that half-up fabric
-showed a spurious control-arm blackhole. Ports are all up now (verified via setup_skeleton).
-The real SDE on the switch is `/home/decps/Downloads/bf-sde-9.13.2`, NOT `/home/decps/bf-sde-9.13.2`
-or `/opt/bf-sde-9.13.2` — the latter has no `site-packages` and gives `No module named 'bfrt_grpc'`.
-
-### Next action
-- Finish the 10-trial rate run on the healthy fabric; decide PREREG rules 1 and 5 on the record.
-- Rule 1 also needs `all_context_blackhole` AND the C-W4 0% comparison arm; neither is measured.
-- Then item 3 (untested fault classes), item 5 (control loop), item 6 (traffic accounting).
-
-# WORKING_NOTES — MCP: "The Data Plane Decides What to Measure"
-
-Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-08-25).
+**Conflict to reconcile before building further on the agent:** untracked parallel work includes
+`p4/hw/loop/gate_agent_core.py` (+tests), `injector_ranges.py` and `multicontext_probe.py`. I
+edited `gate_agent.py` **directly** (added `X`, ranged `K`, `U`) and wrote my own multi-context
+probe, so the sequence-range logic and the probe now exist twice.
 
 ## Status (2026-08-28, later) — novelty gate tripped; the project is now TWO tracks
 
