@@ -155,3 +155,45 @@ SprayCheck arXiv:2605.03702 · OmniPath Ping (SIGCOMM'26) doi:10.1145/3789240.38
 Bellman 1957, Blackwell in Matula 1964, Black 1965) · Chaudhuri–Fellouris–Tajer arXiv:2403.16297 ·
 Xu–Mei–Moustakides IEEE TIT 2021 · Halme–Koivunen arXiv:2604.18008 · Bartolini et al.
 arXiv:1903.10636.
+
+---
+
+## M1 verdict — `NARROW` (2026-08-30)
+
+The plan's M1 gate requires a `PASS`/`NARROW`/`FAIL` verdict written here. dShark (NSDI'19), the
+last unretrieved FATAL vector, has now been retrieved and read; the full assessment with verbatim
+quotes is in [`NOVELTY-GATE-DSHARK.md`](NOVELTY-GATE-DSHARK.md).
+
+**Verdict: `NARROW`.** The lifecycle branch continues, but the following capabilities are occupied
+and are removed from the claim before any further implementation, exactly as the rubric above
+requires:
+
+| occupied capability | occupant | consequence |
+|---|---|---|
+| detecting a silent black hole | dShark Table 2, *"Silent black hole localizer"* — "Localize switches that drop all packets" | not novel; must be cited, not implied to be new |
+| localizing which hop dropped | same query, via `ipv4[:].ttl` path recovery | not novel |
+| comparing a departure record against an arrival record | dShark *"Packet drops on middleboxes"*: `Query: exist ingress and egress trace` | **not a capability difference** — this is the same idea as TX-vs-RX |
+
+**What survives the narrowing**, and is therefore what the paper may claim:
+
+1. **Cost of evidence acquisition.** dShark mirrors traffic to collector servers and sets its
+   performance goal at 3.33 Mpps per commodity core. CLF is two 8-bit registers per sublink
+   in-switch, mirroring nothing, measured at 11 ingress / 5 egress stages for the whole program.
+   **Unquantified against a real mirroring baseline on this testbed — this is now the load-bearing
+   claim and it has no measurement yet.**
+2. **Actionability.** dShark diagnoses and produces no handle to act on. A behavioural sublink is
+   an addressable resource the health gate can reroute, so detection and mitigation name the same
+   object. This depends on the restoration lifecycle, which is not yet demonstrated on silicon.
+
+Both survivors are systems claims about cost and integration, not about capability. The framing
+"a new observability primitive" is withdrawn.
+
+### Effect on the P3 liveness sub-gate
+
+`BEHAVIORAL-SUBLINK-PLAN.md` P3 requires demonstrating partial conditional loss, a selective total
+blackhole, and an all-context blackhole, and for the latter two either pricing an explicit
+liveness mechanism or narrowing the detector claim. All three are now demonstrated on silicon
+(`artifacts/HW-CLF-VS-CW4.md`, `artifacts/HW-CLF-STARVED-SWEEP.md`), and CLF is the liveness
+mechanism, priced at 11/5 stages and zero wire bytes. **That sub-gate is satisfied.** The stop
+condition "the headline fault class is unobservable without an unpriced auxiliary liveness
+mechanism" is therefore cleared — the mechanism exists and its price is measured.
