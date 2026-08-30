@@ -68,3 +68,62 @@ comes back cannot drive mitigation while the link is dark.
   about the witness state, not about end-to-end event delivery.
 * `all_context_blackhole` is still unmeasured, and it carries its own kill criterion: a fully
   dark link is what ordinary link management already detects.
+
+---
+
+# Result 3 — `all_context_blackhole`, and its kill criterion
+
+PREREG rule 1 names two scenarios. `selective_blackhole` is covered above; this is the second.
+
+## Reaching four contexts without jumbo frames
+
+`ctx = (dscp_class << 2) | size_bin`. Size bin 3 needs `total_len >= 2048`, which exceeds the
+interface MTU of 1500 — a first attempt at a 2128-byte frame failed with `OSError: [Errno 90]
+Message too long`. Varying the OTHER dimension supplies a fourth id at a small frame size, so the
+probe uses contexts 0, 1, 2 (size bins, class 0) and 4 (size bin 0, class 1). Size bin 3 is
+therefore untested at this MTU.
+
+Baseline, 20 packets per context, no fault: `20/20`, `22/22`, `20/20`, `20/20`.
+
+## Result
+
+All four sublinks armed on vlink 0, 20 packets per context:
+
+| context | CLF TX | CLF RX | CLF verdict | C-W4 observed before | after |
+|---|---:|---:|---|---:|---:|
+| 0 | 20 | 0 | BLACKHOLE | 80 | **80** |
+| 1 | 22 | 0 | BLACKHOLE | 680 | **680** |
+| 2 | 20 | 0 | BLACKHOLE | 133 | **133** |
+| 4 | 20 | 0 | BLACKHOLE | 42 | **42** |
+
+Injector drop counter: 84 (82 probe packets plus background on the same sublinks), so the fault
+is confirmed in the data and not merely on the command line.
+
+**CLF detects 4 of 4. C-W4's counters are byte-identical before and after — 0 of 4.** With every
+context dark there is no surviving packet in any context, so no discontinuity can ever be
+computed; this is the strongest form of the structural blindness, not a rate.
+
+## The kill criterion, tested
+
+The scenario carries its own objection: if an entire link goes dark, ordinary link management
+already catches it, and CLF adds nothing. Measured while all four contexts were dark:
+
+```
+dp164  BF_SPEED_25G True   True   frames_rx=375  frames_tx=4823
+```
+
+**The physical port stays `up=True`.** The failure is confined to one virtual link — one TM queue
+— on a port that remains healthy and continues carrying other virtual links, so the port-up/down
+signal that link management watches shows nothing.
+
+### Where this argument is and is not strong
+
+Honest scope: in this emulation a "directed link" is a TM queue on a shared physical port, so the
+port necessarily stays up. On a real fabric a directed link is a physical link, and an
+all-context blackhole caused by a *hard* failure would coincide with link-down, where CLF would
+indeed add nothing.
+
+The scenario is meaningful for the case this project is actually about: a **gray** failure, where
+forwarding is broken while the link stays up. The measurement shows exactly that signature — a
+port reporting healthy while every context on it is dark. It does not, and cannot from this
+testbed, establish how often real fabrics fail that way.
