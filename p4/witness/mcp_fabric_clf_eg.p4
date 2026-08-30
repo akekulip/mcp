@@ -1373,9 +1373,15 @@ control Egress(inout eg_headers_t hdr, inout eg_md_t md,
         actions = { tx_frontier_mark; @defaultonly NoAction; }
         size    = 8;
         const default_action = NoAction();
-        /* Every pass that puts a packet onto a directed link commits it: hop 0 leaving the
-         * source leaf, hop 1 leaving the spine. */
-        const entries = { 0 : tx_frontier_mark(); 1 : tx_frontier_mark(); }
+        /* md.hop in EGRESS is the hop the packet is being sent TO: ingress has already
+         * advanced hdr.fabric.hop (act_enter -> 1, act_transit -> 2).  So the source leaf's
+         * egress presents md.hop == 1, and that is the pass which commits the packet onto
+         * the source->spine link.  An entry for 0 is dead: nothing presents md.hop == 0 in
+         * egress.  The spine's egress (md.hop == 2) is NOT listed, because its arrival
+         * counterpart is never recorded -- csig is removed at LAST_HOP, so the destination
+         * leaf marks no RX.  Committing a link whose arrivals cannot be seen would report a
+         * permanent blackhole.  CLF therefore covers the first directed link only. */
+        const entries = { 1 : tx_frontier_mark(); }
     }
 
 
@@ -1384,9 +1390,14 @@ control Egress(inout eg_headers_t hdr, inout eg_md_t md,
         actions = { rx_frontier_mark; @defaultonly NoAction; }
         size    = 8;
         const default_action = NoAction();
-        /* hop 0 is a host injection with no upstream witness; hops 1 and 2 arrived over a
-         * directed link and are exactly the arrivals whose liveness we record. */
-        const entries = { 1 : rx_frontier_mark(); 2 : rx_frontier_mark(); }
+        /* md.hop in EGRESS names the NEXT hop (see tbl_tx_frontier).  The source leaf's own
+         * egress therefore presents md.hop == 1 while the packet has crossed no link at all,
+         * and hdr.witness.link_id is still the ingress-zeroed 0 because tbl_wit_link stamps
+         * later in this same apply block.  Index 0 is a legal sublink (vlink 0, ctx 0), so
+         * that mark was indistinguishable from a real arrival and produced a standing
+         * TX=0/RX=1 IMPOSSIBLE verdict on every trial.  Only md.hop == 2 -- the spine's
+         * egress -- is a genuine arrival over a directed link. */
+        const entries = { 2 : rx_frontier_mark(); }
     }
 
     table tbl_wit_stamp {

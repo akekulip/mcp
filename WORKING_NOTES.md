@@ -1,3 +1,44 @@
+## Status (2026-08-30) — CLF frontier hop defect found and fixed; rule 5 now passes
+
+The CLF reader was rewritten twice today and both rewrites exposed a real defect.
+
+1. **The trial driver never zeroed the bank.** Its docstring specified
+   `quiesce -> zero -> quiesce -> generate -> settle -> read`; `trial()` had no zero step.
+   The "frozen" bank carried residue from every earlier run, and a stale RX bit makes
+   `TX & ~RX` come out zero for the sublink under test — a real blackhole read as HEALTHY.
+   Residue does not add noise, it deletes detections. Fixed, and the zero is now verified
+   (the trial raises `HarnessError` and is EXCLUDED, never averaged in as a miss).
+2. **`tbl_rx_frontier` marked an arrival at the source leaf.** In egress `md.hop` names the
+   NEXT hop, so the source's own egress presents hop 1 and matched `rx_frontier_mark`, at
+   index `hdr.witness.link_id` = 0 (still ingress-zeroed; `tbl_wit_link` stamps later in the
+   same apply block). Sublink 0 is a legal address, so "unstamped" and "arrived on vlink 0
+   ctx 0" are the same value. This produced the standing IMPOSSIBLE verdict that failed
+   PREREG rule 5 on every trial. Proof needs no new experiment: in the fault arm all 400
+   probes were discarded at `tbl_eg_fail`, which runs AFTER `tbl_rx_frontier`, so nothing
+   reached a downstream hop — yet RX registered an arrival.
+   Full record: `docs/review/artifacts/HW-CLF-FRONTIER-HOP.md`.
+
+**Fix:** `tbl_rx_frontier` -> `{2}`, `tbl_tx_frontier` -> `{1}` (entry 0 was dead code).
+Compiles 11/5, unchanged. Build manifest `29fed8b6f0317e14607e603923989d58a6264bca6393acf87c3ea1d3e09dcc2b`.
+After the fix: IMPOSSIBLE 0 in every trial, fault detection 3/3, false blackholes 0.
+
+**Coverage limit this exposed:** CLF observes the FIRST directed link only (source leaf ->
+spine). The spine's egress is deliberately not a TX site because the destination leaf records
+no arrival — `csig` is removed at `LAST_HOP` — and committing a link whose arrivals cannot be
+seen would report a permanent blackhole. Every reading returns a single vlink row, which is
+the evidence. Any paper claim must carry this scope.
+
+**Also fixed today:** `bringup.sh` verifies loop pairs before the links finish training and
+reported 3 of 4 pairs down; they came up on their own. A rate measured on that half-up fabric
+showed a spurious control-arm blackhole. Ports are all up now (verified via setup_skeleton).
+The real SDE on the switch is `/home/decps/Downloads/bf-sde-9.13.2`, NOT `/home/decps/bf-sde-9.13.2`
+or `/opt/bf-sde-9.13.2` — the latter has no `site-packages` and gives `No module named 'bfrt_grpc'`.
+
+### Next action
+- Finish the 10-trial rate run on the healthy fabric; decide PREREG rules 1 and 5 on the record.
+- Rule 1 also needs `all_context_blackhole` AND the C-W4 0% comparison arm; neither is measured.
+- Then item 3 (untested fault classes), item 5 (control loop), item 6 (traffic accounting).
+
 # WORKING_NOTES — MCP: "The Data Plane Decides What to Measure"
 
 Plan of record: ~/.claude/plans/we-have-to-do-spicy-patterson.md (approved 2026-08-25).
@@ -550,3 +591,9 @@ Baseline before this work, measured 2026-08-29: `controller/tests` 69 passed, `s
 
 Next action: verify the three builder outputs myself (run their tests, read their diffs), then wire
 `sim/dynamic/runner.py` + `sweep.py` against the REAL controller objects and run the frozen sweep.
+
+<!-- AUTO-HANDOFF (PreCompact/auto) 2026-08-30T14:11:31Z -->
+### Compaction handoff — 2026-08-30T14:11:31Z
+- Git: branch `master`, 36 uncommitted file(s): README.md controller/hw_adapter.py controller/sublink_feedback.py controller/tests/test_epoch_loop.py controller/tests/test_sublink_feedback.py docs/review/BEHAVIORAL-SUBLINK-PLAN.md docs/review/CAMPAIGN-PLAN.md docs/review/HEALTH-GATE-RESULT.md docs/review/P2-P3-INDEPENDENT-AUDIT.md docs/review/P3-DYNAMIC-RESULT.md docs/review/P3-FEEDBACK-RESULT.md docs/review/artifacts/HW-SELECTIVE-DETECTION.md 
+- Last verification run recorded: 2026-08-30T14:09:05Z	cd /home/philip/Projects/mcp python3 - <<'PYEOF' import pathlib p = pathlib.Path("p4/hw/loop/clf_trials.py"); s = p.read
+- RESUME: re-read the Task/Status/Next-action sections above; trust this file over recollection.

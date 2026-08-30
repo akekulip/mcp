@@ -1,13 +1,24 @@
 #!/usr/bin/env python3
-"""Repeated CLF trials with a proper guard-interval reset, for rates rather than anecdotes.
+"""Repeated CLF trials with a verified reset, for rates rather than anecdotes.
 
-Every CLF reading so far is n=1 and every per-trial reset used a bare zero, which the epoch-race
-finding showed can leave RX marks from packets that straddled it (docs/review/artifacts/
-HW-CLF-CONGESTION-RACE.md). This driver enforces the discipline the frontier design requires:
+Every step here is checked, because each unchecked step has already produced a wrong number:
 
-    quiesce -> zero -> quiesce -> generate -> settle -> read
+* the bank is ZEROED and the zero is VERIFIED.  An earlier version of this driver documented
+  ``quiesce -> zero -> quiesce -> generate -> settle -> read`` and then never zeroed at all.
+  The frozen bank carried residue from every previous run, and a stale RX bit makes
+  ``TX & ~RX`` come out zero for the very sublink under test -- a real blackhole read as
+  HEALTHY.  Residue does not merely add noise; it silently deletes detections.
+* the PROBE's exit status and packet count are checked.  ``capture_output=True`` with a
+  discarded returncode turns a probe that never ran into a clean-looking miss.
+* the INJECTOR is confirmed armed, and its drop counter is reported next to every verdict, so
+  a detection claim always sits beside the measured number of packets actually dropped.
+* the bank is FROZEN before it is read: traffic marks bank B, then the source flips to 1-B and
+  we guard before reading B.  TX and RX then describe the same set of packets.
 
-so a rate measured here reflects the mechanism and not the reader.
+Coverage: CLF currently observes the FIRST directed link (source leaf -> spine).  The spine's
+egress commits no TX because the destination leaf records no arrival -- csig is removed at
+LAST_HOP -- and committing a link whose arrivals cannot be seen would report a permanent
+blackhole.  A verdict here is a statement about link 1, not about the whole path.
 """
 import argparse, socket, subprocess, sys, time
 
@@ -17,6 +28,10 @@ from sim.clf.verdict import verdict, Verdict
 
 SWITCH = "10.10.54.81"
 PORT = 47100
+
+
+class HarnessError(RuntimeError):
+    """A trial whose own preconditions failed. Never averaged into a rate."""
 
 
 def agent(cmd, timeout=25):
@@ -44,12 +59,43 @@ def frontiers():
     return out
 
 
+def injector_rows():
+    return [l.strip() for l in agent("I").splitlines() if l.startswith("I ")]
+
+
+def injector_drops():
+    """Total packets the post-TM fault injector actually discarded."""
+    n = 0
+    for row in injector_rows():
+        f = row.split()
+        if len(f) >= 5:
+            n += int(f[4])
+    return n
+
+
 def probe(script):
-    """Local: this driver already runs on the probe host."""
-    subprocess.run(["python3", script], capture_output=True, timeout=300)
+    """Local: this driver already runs on the probe host. Failure is raised, never swallowed."""
+    r = subprocess.run(["python3", script], capture_output=True, text=True, timeout=300)
+    if r.returncode != 0:
+        raise HarnessError("probe exited %d: %s" % (r.returncode, (r.stderr or "").strip()[:200]))
+    sent = 0
+    for tok in (r.stdout or "").split():
+        if tok.isdigit():
+            sent = int(tok)
+            break
+    if sent == 0:
+        raise HarnessError("probe reported no packets sent: %r" % (r.stdout or "")[:200])
+    return sent
 
 
 def classify(rows):
+    """Frozen-bank rows -> per-sublink verdicts.
+
+    gap_seen is False for every sublink: the frontier registers carry presence bits, not
+    sequence continuity, so this driver cannot distinguish HEALTHY from PARTIAL_LOSS. It
+    decides blackhole vs not-blackhole, which is what the CLF rules are about. Partial loss
+    is C-W4's job and is measured separately.
+    """
     v = {}
     for _bank, vl, tx, rx in rows:
         for ctx in range(4):
@@ -59,25 +105,35 @@ def classify(rows):
     return v
 
 
-def trial(target_sublink, guard, arm_settle=1.0):
-    """One trial. target_sublink None = healthy control."""
-    agent("C")                      # clear injectors
-    time.sleep(guard)               # quiesce BEFORE zeroing
-    agent("Z")
-    time.sleep(guard)               # let in-flight packets land before we start counting
+def trial(target_sublink, guard, arm_settle=1.0, bank=0):
+    """One trial: quiesce -> zero -> verify -> arm -> probe -> freeze -> guard -> read.
+
+    Raises HarnessError if any precondition fails, so a broken trial is reported and excluded
+    rather than being averaged in as a miss.
+    """
+    agent("C")                                  # clear injectors
+    agent("N %d" % bank)                        # make B the active bank
+    time.sleep(guard)                           # quiesce: prior in-flight lands
+
+    agent("Z")                                  # zero the frontiers; safe only while quiet
+    time.sleep(0.3)
+    residue = frontiers()
+    if residue:
+        raise HarnessError("zero did not take, %d rows remain: %s" % (len(residue), residue[:3]))
+
     if target_sublink is not None:
-        agent("K %d" % target_sublink)
-        # SETTLE AFTER ARMING. The gate write takes ~2 ms and the probe starts immediately,
-        # so early packets can cross a sublink whose injector entry has not yet landed --
-        # they arrive, RX is set, and the verdict reads HEALTHY on a link that is about to
-        # go dark. That is a race in the HARNESS, not a missed detection, and it inflates
-        # the miss count. Diagnosed from 9/100 misses all reading verdict=HEALTHY with
-        # target_seen=True, i.e. packets demonstrably arrived on the blackholed sublink.
+        reply = agent("K %d" % target_sublink)
+        if "BLACKHOLED" not in reply:
+            raise HarnessError("arm refused: %r" % reply.strip()[:120])
         time.sleep(arm_settle)
-    probe("/tmp/ctx_pilot.py")
-    time.sleep(guard)               # settle before reading
-    inj = [l for l in agent("I").splitlines() if l.startswith("I ")]
-    return classify(frontiers()), inj
+
+    sent = probe("/tmp/probe_spray0.py")        # marks bank B; raises if it did not run
+
+    agent("N %d" % (1 - bank))                  # freeze B by flipping away
+    time.sleep(guard)                           # in-flight B packets land in B, then quiet
+    drops = injector_drops()
+    rows = [r for r in frontiers() if r[0] == bank]   # read ONLY the frozen bank
+    return classify(rows), sent, drops
 
 
 def main():
@@ -91,37 +147,49 @@ def main():
     tgt = (a.sublink >> 4, a.sublink & 0xF)
 
     res = {"fault": [], "control": []}
+    broken = []
     for i in range(a.trials):
         for arm, sub in (("fault", a.sublink), ("control", None)):
-            v, inj = trial(sub, a.guard, a.arm_settle)
+            try:
+                v, sent, drops = trial(sub, a.guard, a.arm_settle, bank=i % 2)
+            except HarnessError as e:
+                broken.append((i + 1, arm, str(e)))
+                print("  trial %2d %-7s HARNESS-ERROR %s" % (i + 1, arm, e), flush=True)
+                continue
             hit = v.get(tgt) == Verdict.BLACKHOLE
             false_bh = sum(1 for k, x in v.items() if x == Verdict.BLACKHOLE and k != tgt)
             imp = sum(1 for x in v.values() if x == Verdict.IMPOSSIBLE)
             res[arm].append((hit, false_bh, imp, len(v)))
             note = ""
             if arm == "fault" and not hit:
-                # A miss must be diagnosable, not averaged away. The usual cause is that the
-                # probe delivered no packets of the target context in this window, so the
-                # source never committed it and TX=0 -- which is IDLE, not a missed detection.
                 tv = v.get(tgt)
-                note = "  MISS verdict=%s injector=[%s]" % (
-                    tv.value if tv else "ABSENT", " ".join(inj) or "NO-ENTRY")
-            print("  trial %2d %-7s detected=%-5s false_bh=%d impossible=%d observed=%d%s"
-                  % (i + 1, arm, hit, false_bh, imp, len(v), note), flush=True)
+                note = "  MISS verdict=%s" % (tv.value if tv else "ABSENT")
+            print("  trial %2d %-7s detected=%-5s false_bh=%d impossible=%d observed=%d "
+                  "sent=%d dropped=%d%s"
+                  % (i + 1, arm, hit, false_bh, imp, len(v), sent, drops, note), flush=True)
     agent("C")
 
-    print("\n=== CLF detection rates (guard %.1fs, %d trials/arm) ===" % (a.guard, a.trials))
+    print("\n=== CLF detection rates (guard %.1fs, %d trials/arm requested) ===" % (a.guard, a.trials))
     for arm in ("fault", "control"):
         r = res[arm]
         n = len(r)
+        if not n:
+            print("  %-8s n=0 -- every trial failed its preconditions; no rate reported" % arm)
+            continue
         det = sum(1 for x in r if x[0])
         fbh = sum(x[1] for x in r)
         imp = sum(x[2] for x in r)
         obs = sum(x[3] for x in r)
         print("  %-8s n=%d  target detected %d/%d (%.0f%%)  false blackholes %d  IMPOSSIBLE %d  "
-              "sublink-observations %d" % (arm, n, det, n, 100.0 * det / n if n else 0, fbh, imp, obs))
+              "sublink-observations %d" % (arm, n, det, n, 100.0 * det / n, fbh, imp, obs))
+    if broken:
+        print("\n  %d trial(s) EXCLUDED for failed preconditions (not counted as misses):" % len(broken))
+        for i, arm, e in broken[:10]:
+            print("    trial %d %s: %s" % (i, arm, e))
+
     print("\n  PREREG rule 1 needs >=95%% detection on the fault arm and 0%% on control.")
-    print("  PREREG rule 5 needs IMPOSSIBLE == 0 with a guard interval.")
+    print("  PREREG rule 5 needs IMPOSSIBLE == 0.")
+    print("  Scope: these verdicts are about the first directed link (source leaf -> spine).")
 
 
 if __name__ == "__main__":
