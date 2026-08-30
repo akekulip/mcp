@@ -1009,13 +1009,27 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
      * sources whatever the field widths, while ingress action data is unconstrained.
      * Egress then only compare-and-replaces the worst_* fields, first at this very
      * pass (worst_qdepth starts at 0, so hop 0's own queue depth is recorded). */
-    action act_enter(bit<16> next_hop, bit<16> epoch) {
+    /* CLF bank parity.  `bank` is action data the control plane flips once per measurement
+     * epoch, and it is stamped into hdr.fabric.flags bit 3 at the SOURCE so every switch the
+     * packet traverses agrees which frontier bank the packet belongs to.
+     *
+     * Without this the double buffering is inert.  Measured consequence of leaving it
+     * unimplemented: bank 0 is the only bank ever written, so a reader must ZERO the active
+     * bank -- and on a live fabric background traffic is continuous, so clearing TX while
+     * packets are already in flight sets RX with no matching TX. That is the TX=0/RX=1
+     * "IMPOSSIBLE" state, and it appeared in 50 of 50 trials once a single-context probe
+     * stopped masking it (docs/review/artifacts/HW-CLF-RATES.md).
+     *
+     * With it, a reader never clears anything: the control plane flips the parity, waits a
+     * guard interval for in-flight packets to land in the new bank, and reads the now-
+     * INACTIVE bank, which is complete and immutable. */
+    action act_enter(bit<16> next_hop, bit<16> epoch, bit<8> bank) {
         hdr.fabric.setValid();
         hdr.fabric.vsw_id = md.next_vsw;
         hdr.fabric.hop    = next_hop;
         hdr.fabric.spray  = md.spray_idx;
         hdr.fabric.loops  = 0;
-        hdr.fabric.flags  = (bit<8>)md.flags_out;
+        hdr.fabric.flags  = (bit<8>)md.flags_out | bank;
         hdr.fabric.nxt    = NXT_CSIG;
         hdr.fabric.pad    = md.ctx;   /* capsule rides the existing pad byte */
         hdr.fabric.path_id = md.attn_idx;

@@ -1027,7 +1027,18 @@ def install_vlinks(gc, bfrt, tgt, zero_ctr=True):
 # the served schema may describe a program the chip is not running, so every one of
 # these is proposed and then dropped if the switch rejects it.
 #   act_enter.epoch — the measurement epoch id; 0 until an epoch controller owns it.
-OPTIONAL_ACTION_ARGS = {"Ingress.act_enter": {"epoch": 0}}
+#   act_enter.bank  — CLF frontier bank parity, stamped into hdr.fabric.flags bit 3 at the
+#                     source so every switch on the path agrees which bank a packet belongs
+#                     to.  The control plane flips it once per measurement epoch and then
+#                     reads the now-INACTIVE bank.  Default 0.
+#
+#                     This is not cosmetic.  With the parity never stamped the double
+#                     buffering is inert, only bank 0 is ever written, and a reader has to
+#                     zero the ACTIVE bank -- which on a live fabric clears TX while packets
+#                     are in flight, so they land and set RX with no matching TX.  That
+#                     TX=0/RX=1 state appeared in 50 of 50 trials once a single-context probe
+#                     stopped masking it.
+OPTIONAL_ACTION_ARGS = {"Ingress.act_enter": {"epoch": 0, "bank": 0}}
 
 
 def install_final(gc, bfrt, tgt):

@@ -183,6 +183,36 @@ while True:
                     conn.sendall(("BLACKHOLED %d [0..65535]\n" % sub).encode())
                     print("K %d -> total blackhole armed" % sub, flush=True)
                     continue
+                elif f[0] == "N":
+                    # N <bank> -- flip the CLF epoch. Rewrites tbl_final's source-side
+                    # act_enter rows so newly entering packets are stamped with the new bank
+                    # parity in hdr.fabric.flags bit 3.
+                    #
+                    # This is what makes the frontier readable on a LIVE fabric. A reader
+                    # never zeroes: it flips, waits a guard interval for in-flight packets to
+                    # land in the new bank, and reads the now-INACTIVE bank, which is
+                    # complete and no longer being written. Zeroing the active bank instead
+                    # clears TX while packets are in flight, so they arrive and set RX with
+                    # no matching TX -- the TX=0/RX=1 state, seen in 50 of 50 trials.
+                    bank = 8 if int(f[1]) else 0
+                    t = info.table_get("pipe.Ingress.tbl_final")
+                    n = 0
+                    for d, k in t.entry_get(tgt, None, {"from_hw": True}):
+                        dd, kk = d.to_dict(), k.to_dict()
+                        if dd.get("action_name", "").endswith("act_enter") or "epoch" in dd:
+                            fields = [gc.DataTuple("next_hop", dd.get("next_hop", 1))]
+                            if "epoch" in dd:
+                                fields.append(gc.DataTuple("epoch", dd.get("epoch", 0)))
+                            fields.append(gc.DataTuple("bank", bank))
+                            try:
+                                t.entry_mod(tgt, [k], [t.make_data(fields, "Ingress.act_enter")])
+                                n += 1
+                            except Exception:
+                                pass
+                    conn.sendall(("OK %d\n" % n).encode())
+                    print("N %d -> %d act_enter rows now stamp bank %d" % (int(f[1]), n, bank),
+                          flush=True)
+                    continue
                 elif f[0] == "I":
                     # I -- injector ground truth: how many packets did tbl_eg_fail actually
                     # destroy, per entry?  "Verify the injected quantity in the DATA, not in
