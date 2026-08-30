@@ -1,3 +1,48 @@
+## Status (2026-08-30, later) — CLF frontier redesigned: counts, and counted pre-TM
+
+Four defects were fixed earlier today (see the block below and
+`docs/review/artifacts/HW-CLF-FRONTIER-HOP.md`). Investigating why all four were SILENT rather
+than loud found one cause and one deeper design flaw, both now fixed:
+`docs/review/artifacts/HW-CLF-FRONTIER-PLACEMENT.md`.
+
+1. **`v = 1` in a bit<8> register.** Seven bits unused, and the write discarded how many packets
+   arrived, so `RX > 0` meant "at least one packet, from any source, at any time this epoch".
+   A one-bit flag cannot express "implausibly few", which is why four different sources of a
+   stray RX bit all produced wrong ANSWERS instead of errors.
+2. **RX was on the wrong side of the traffic manager.** TX is post-TM on purpose so our own
+   queueing is not blamed on the link; RX was post-TM at the RECEIVER, where that argument does
+   not hold. Measured with the spine's downlink shaped to 100 kb/s and no fault injected:
+   dp164 tx +408 and dp172 rx +408 (every packet crossed link 0 and arrived) while dp174 tx +96
+   — the link delivered 408/408 and 76% of those deliveries were invisible to a post-TM RX mark.
+   Congestion on the DOWNSTREAM link was being charged to the UPSTREAM one.
+
+The presence bit hid (2) as well — 96 survivors and 408 survivors are the same bit — so PREREG
+rule 2 passed only because the encoding was insensitive. That is the same insensitivity that let
+one stray packet mask a blackhole, which is why both changes had to ship together: counting alone,
+with RX in egress, would have turned rule 2 into a false STARVED verdict on a healthy link.
+
+**Redesign:** RX marks at the receiver's INGRESS; both frontiers are saturating counters. Cost
+**11/5, unchanged** — zero extra stages, zero wire bytes. Two side effects that were not the goal:
+in ingress `md.hop` names the hop the packet is AT so entries {1,2} are simply correct, and
+coverage doubles because the destination leaf can now record the second link's arrival.
+
+**Silicon results (redesigned build):** fault 10/10, control 0/10, IMPOSSIBLE 0, zero harness
+exclusions. Under the receiver discarding 76% of traffic: still 255/255 HEALTHY.
+`STARVED` added as a NEW verdict class; BLACKHOLE keeps its exact meaning so earlier results stay
+comparable (PREREG amendment, not a redefinition).
+
+**Two harness traps paid for today, both giving the EXPECTED answer for the wrong reason:**
+`bash val.sh | head -4` let SIGPIPE kill the script after it armed a blackhole and before its
+final clear, leaving the injector armed — every port measurement afterwards read zero packets
+leaving the source and was misread as shaper behaviour. And three `$(ssh ...)` substitutions
+returned empty, so `$((A-B))` printed a delta of 0 that had never been measured. Print raw
+readings, never just the difference; a teardown a signal can skip is a fault injector left armed.
+
+### Next action
+- `all_context_blackhole` (4 K calls; `tbl_eg_fail` holds 32 entries, no P4 change needed) and
+  the C-W4 0% comparison arm — both still required by PREREG rule 1.
+- Re-measure the second directed link now that coverage extends to it.
+
 ## Status (2026-08-30) — CLF frontier hop defect found and fixed; rule 5 now passes
 
 The CLF reader was rewritten twice today and both rewrites exposed a real defect.
