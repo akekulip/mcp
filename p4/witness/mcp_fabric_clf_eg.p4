@@ -258,6 +258,8 @@ struct ig_md_t {
     bit<16> audit_src;  // H35: 1 = this ingress port may use the audit path (set_role action data)
     bit<16> fault;       // 0 none, 2 dropped, 4 corrupted (bit0 is reserved for "measured")
     bit<16> flags_out;   // fabric_h.flags to write: fault | measured
+    bit<16> clf_idx;     // (bank << 8) | upstream sublink -- RX frontier index, INGRESS
+    bit<8>  clf_rx_prev;
     MirrorId_t mirror_sid;   // bit<10>: Mirror.emit() wants a plain field, no cast/slice
     bit<48> tstamp;          // ig_intr_md.ingress_mac_tstamp copied by set_role (MAU-written = emit-safe)
     bit<16> mir_path;        // md.attn_idx copied by tbl_attn's actions: evidence packets have no
@@ -274,10 +276,8 @@ struct ig_md_t {
 }
 
 struct eg_md_t {
-    bit<16> clf_idx;      // (bank << 8) | upstream sublink   (RX)
     bit<16> clf_tx_idx;   // (bank << 8) | outgoing sublink   (TX)
     bit<8>  clf_tx_prev;
-    bit<8>  clf_rx_prev;
     bit<16> this_q;     // eg_intr_md.deq_qdepth[15:0]: a LOW slice.  §5.5's [18:3] needs a
                         // shift on intrinsic metadata and the egress PHV allocator then fails
                         // ("Unable to slice ... eg_intr_md.*"); [15:0] = 64K cells, plenty
@@ -1112,6 +1112,54 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
         const default_action = act_drop();
     }
 
+
+    /* ---- CLF receiver half, in INGRESS -------------------------------------------
+     * RX_frontier records which behavioural sublinks actually ARRIVED off the wire.
+     * It is in INGRESS, i.e. PRE-TM, and that placement is the mirror image of TX's
+     * post-TM placement, for the mirror-image reason.  TX is post-TM so OUR OWN
+     * queueing cannot be blamed on the link; RX is pre-TM so the RECEIVER'S queueing
+     * cannot be either.
+     *
+     * Measured on silicon 2026-08-30 with RX still in egress: with the spine's own
+     * downlink queue shaped to 100 kb/s and no fault injected anywhere, all 400 probe
+     * packets crossed the link and were counted at the spine's hop-1 ingress -- and
+     * at most ~6% of them survived the spine's TM to reach the egress where RX was
+     * marked.  The link delivered everything and the frontier saw almost none of it.
+     * Post-TM RX puts the receiver's queue inside the link's measurement.
+     *
+     * Indexed by md.wit_link, the UPSTREAM sublink the sender stamped, so it pairs
+     * with the sender's TX index for the same directed link.
+     *
+     * Saturating count, not a presence bit.  `v = 1` discarded how many packets
+     * arrived, so RX>0 meant "at least one packet, from any source, at any time in
+     * this epoch" -- and a single stray packet was indistinguishable from a healthy
+     * link.  Every masking failure in HW-CLF-FRONTIER-HOP.md was silent for exactly
+     * that reason: a 1-bit flag cannot express "implausibly few".  The register was
+     * already bit<8>; seven of those bits were simply unused. */
+    Register<bit<8>, bit<16>>(512, 0) reg_rx_frontier;
+    RegisterAction<bit<8>, bit<16>, bit<8>>(reg_rx_frontier) rx_seen = {
+        void apply(inout bit<8> v, out bit<8> rv) {
+            rv = v;
+            v  = v |+| 1;      // saturating at 255; see tbl_rx_frontier
+        }
+    };
+
+    action rx_frontier_mark() { md.clf_rx_prev = rx_seen.execute(md.clf_idx); }
+
+    table tbl_rx_frontier {
+        key     = { md.hop : exact; }
+        actions = { rx_frontier_mark; @defaultonly NoAction; }
+        size    = 8;
+        const default_action = NoAction();
+        /* In INGRESS md.hop names the hop the packet is AT: 0 = host injection (no
+         * upstream link), 1 = arrived at the spine over the source->spine link,
+         * 2 = arrived at the destination leaf over the spine->leaf link.  Both 1 and
+         * 2 are genuine arrivals over a directed link.  (In EGRESS the same field
+         * names the NEXT hop, which is what made the egress version mark the source
+         * leaf's own departure as an arrival.) */
+        const entries = { 1 : rx_frontier_mark(); 2 : rx_frontier_mark(); }
+    }
+
     apply {
         tbl_port_role.apply();
 
@@ -1124,6 +1172,16 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
         } else {
             tbl_dst_leaf.apply();
             tbl_context.apply();
+
+            /* CLF receiver mark.  No isValid() guard is needed and none is wanted:
+             * md.hop is 0 unless the parser lifted it out of a fabric shim, so a
+             * frame with no fabric header cannot match either entry, and an
+             * `if (hdr.fabric.isValid())` here would cost its own logical table. */
+            md.clf_idx = md.wit_link;
+            if (hdr.fabric.clf_bank != 0) {
+                md.clf_idx = md.clf_idx | 16w0x100;
+            }
+            tbl_rx_frontier.apply();
 
             /* Drawn on EVERY fabric pass (each pass crosses one virtual link), and
              * drawn here rather than next to tbl_fail so it co-places with the other
@@ -1352,15 +1410,6 @@ control Egress(inout eg_headers_t hdr, inout eg_md_t md,
      * Indexed by that sublink so no one-hot 1 << ctx is needed; this compiler cannot
      * shift a runtime value.  The control plane packs the per-link 16-bit mask on read,
      * so the batched record still crosses the wire. */
-    Register<bit<8>, bit<16>>(512, 0) reg_rx_frontier;
-    RegisterAction<bit<8>, bit<16>, bit<8>>(reg_rx_frontier) rx_seen = {
-        void apply(inout bit<8> v, out bit<8> rv) {
-            rv = v;
-            v  = 1;
-        }
-    };
-
-    action rx_frontier_mark() { md.clf_rx_prev = rx_seen.execute(md.clf_idx); }
 
     /* CLF source half.  TX_frontier records which contexts actually DEPARTED on a directed
      * link.  It is deliberately in egress, i.e. POST-TM: a packet dropped by the traffic
@@ -1376,7 +1425,7 @@ control Egress(inout eg_headers_t hdr, inout eg_md_t md,
     RegisterAction<bit<8>, bit<16>, bit<8>>(reg_tx_frontier) tx_seen = {
         void apply(inout bit<8> v, out bit<8> rv) {
             rv = v;
-            v  = 1;
+            v  = v |+| 1;      // saturating at 255, to match reg_rx_frontier
         }
     };
 
@@ -1388,31 +1437,20 @@ control Egress(inout eg_headers_t hdr, inout eg_md_t md,
         size    = 8;
         const default_action = NoAction();
         /* md.hop in EGRESS is the hop the packet is being sent TO: ingress has already
-         * advanced hdr.fabric.hop (act_enter -> 1, act_transit -> 2).  So the source leaf's
-         * egress presents md.hop == 1, and that is the pass which commits the packet onto
-         * the source->spine link.  An entry for 0 is dead: nothing presents md.hop == 0 in
-         * egress.  The spine's egress (md.hop == 2) is NOT listed, because its arrival
-         * counterpart is never recorded -- csig is removed at LAST_HOP, so the destination
-         * leaf marks no RX.  Committing a link whose arrivals cannot be seen would report a
-         * permanent blackhole.  CLF therefore covers the first directed link only. */
-        const entries = { 1 : tx_frontier_mark(); }
+         * advanced hdr.fabric.hop (act_enter -> 1, act_transit -> 2).  So md.hop == 1 is
+         * the source leaf committing onto the source->spine link and md.hop == 2 is the
+         * spine committing onto the spine->leaf link.  An entry for 0 is dead: nothing
+         * presents md.hop == 0 in egress.
+         *
+         * Both are listed now that RX is marked in INGRESS: the destination leaf records
+         * the arrival of the second link before csig is removed, so that link finally has
+         * an arrival counterpart and can safely be committed.  While RX lived in egress it
+         * did not, and committing a link whose arrivals cannot be observed would have
+         * reported a permanent, unfalsifiable blackhole -- so only entry 1 was listed. */
+        const entries = { 1 : tx_frontier_mark(); 2 : tx_frontier_mark(); }
     }
 
 
-    table tbl_rx_frontier {
-        key     = { md.hop : exact; }
-        actions = { rx_frontier_mark; @defaultonly NoAction; }
-        size    = 8;
-        const default_action = NoAction();
-        /* md.hop in EGRESS names the NEXT hop (see tbl_tx_frontier).  The source leaf's own
-         * egress therefore presents md.hop == 1 while the packet has crossed no link at all,
-         * and hdr.witness.link_id is still the ingress-zeroed 0 because tbl_wit_link stamps
-         * later in this same apply block.  Index 0 is a legal sublink (vlink 0, ctx 0), so
-         * that mark was indistinguishable from a real arrival and produced a standing
-         * TX=0/RX=1 IMPOSSIBLE verdict on every trial.  Only md.hop == 2 -- the spine's
-         * egress -- is a genuine arrival over a directed link. */
-        const entries = { 2 : rx_frontier_mark(); }
-    }
 
     table tbl_wit_stamp {
         key     = { hdr.fabric.nxt : exact; }
@@ -1525,14 +1563,9 @@ control Egress(inout eg_headers_t hdr, inout eg_md_t md,
         if (hdr.csig.isValid()) {
             tbl_eg_vlink.apply();
             tbl_ctx_index.apply();
-            /* CLF receiver mark FIRST: hdr.witness.link_id still names the UPSTREAM
-             * sublink until tbl_wit_link rewrites it below. */
-            md.clf_idx = hdr.witness.link_id;
-            if (hdr.fabric.clf_bank != 0) {
-                md.clf_idx = md.clf_idx | 16w0x100;
-            }
-            tbl_rx_frontier.apply();
-            /* TX commitment, after tbl_ctx_index has composed md.sublink. */
+            /* TX commitment, after tbl_ctx_index has composed md.sublink.  The receiver
+             * mark is no longer here: it moved to INGRESS so the receiver's own traffic
+             * manager sits OUTSIDE the link measurement. */
             md.clf_tx_idx = md.sublink;
             if (hdr.fabric.clf_bank != 0) {
                 md.clf_tx_idx = md.clf_tx_idx | 16w0x100;

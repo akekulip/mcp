@@ -254,7 +254,9 @@ while True:
                             if v: out[idx] = v
                         return out
                     tx = rdf("pipe.Egress.reg_tx_frontier", "Egress.reg_tx_frontier.f1")
-                    rx = rdf("pipe.Egress.reg_rx_frontier", "Egress.reg_rx_frontier.f1")
+                    # RX moved to INGRESS so the receiver's own TM sits outside the link
+                    # measurement; the register path moved with it.
+                    rx = rdf("pipe.Ingress.reg_rx_frontier", "Ingress.reg_rx_frontier.f1")
                     def pack(d, bank):
                         m = {}
                         for idx in d:
@@ -272,10 +274,35 @@ while True:
                                          (bank, vl, t, r, t & ~r & 0xFFFF))
                     conn.sendall(("".join(l + "\n" for l in lines)).encode())
                     conn.sendall(b"OK 0\n"); continue
+                elif f[0] == "X":
+                    # X -- per-sublink frontier COUNTS: "X <bank> <vlink> <ctx> <tx> <rx>".
+                    # F packs presence bits and therefore cannot distinguish "one stray
+                    # packet arrived" from "the link is carrying full load", which is the
+                    # property that made every masking failure silent. Both registers now
+                    # hold a saturating count (255 = saturated), so X reports what F throws
+                    # away. F is kept: a mask is still the right shape for a blackhole,
+                    # which is a count of exactly zero.
+                    def rdc(reg, fld):
+                        tt = info.table_get(reg); out = {}
+                        for d, k in tt.entry_get(tgt, None, {"from_hw": True}):
+                            idx = k.to_dict()["$REGISTER_INDEX"]["value"]
+                            v = d.to_dict().get(fld, [])
+                            v = max(v) if isinstance(v, list) and v else (v or 0)
+                            if v: out[idx] = v
+                        return out
+                    txc = rdc("pipe.Egress.reg_tx_frontier", "Egress.reg_tx_frontier.f1")
+                    rxc = rdc("pipe.Ingress.reg_rx_frontier", "Ingress.reg_rx_frontier.f1")
+                    rows = []
+                    for idx in sorted(set(txc) | set(rxc)):
+                        sub = idx & 0xFF
+                        rows.append("X %d %d %d %d %d" % (idx >> 8, sub >> 4, sub & 0xF,
+                                                          txc.get(idx, 0), rxc.get(idx, 0)))
+                    conn.sendall(("".join(r + "\n" for r in rows)).encode())
+                    conn.sendall(b"OK 0\n"); continue
                 elif f[0] == "Z":
                     # Zero both frontiers (per-epoch or per-trial reset).
                     for reg, fld in (("pipe.Egress.reg_tx_frontier", "Egress.reg_tx_frontier.f1"),
-                                     ("pipe.Egress.reg_rx_frontier", "Egress.reg_rx_frontier.f1")):
+                                     ("pipe.Ingress.reg_rx_frontier", "Ingress.reg_rx_frontier.f1")):
                         tt = info.table_get(reg)
                         tt.entry_del(tgt, None)
                     conn.sendall(b"OK 0\n"); continue

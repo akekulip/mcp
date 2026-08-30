@@ -18,6 +18,7 @@ class Verdict(str, Enum):
     PARTIAL_LOSS = "PARTIAL_LOSS"      # TX=1 RX=1, continuity discontinuous
     BLACKHOLE = "BLACKHOLE"            # TX=1 RX=0 -- the case C-W4 cannot see
     IMPOSSIBLE = "IMPOSSIBLE"          # TX=0 RX=1 -- arrival without departure
+    STARVED = "STARVED"                # TX high, RX far below it -- near-total loss
     INCONCLUSIVE = "INCONCLUSIVE"      # anything else, including missing evidence
 
 
@@ -64,3 +65,46 @@ def frontier_mask(seen_by_sublink, vlink, n_context=16):
 def compare(tx_mask, rx_mask):
     """Contexts the source committed but the receiver never saw."""
     return tx_mask & ~rx_mask & 0xFFFF
+
+
+# A sublink is STARVED when arrivals fall below this fraction of departures. Both frontier
+# registers saturate at 255, so the ratio is only meaningful while RX is small -- which is
+# exactly the regime the rule is about. Saturation costs precision only where the verdict is
+# already unambiguous: if RX has saturated, the link is carrying traffic and is not starved.
+STARVED_RATIO = 8          # RX * 8 <= TX  =>  fewer than one arrival per eight departures
+FRONTIER_SATURATION = 255
+
+
+def verdict_counts(tx, rx, gap_seen=None, evidence_complete=True):
+    """Verdict from saturating frontier COUNTS rather than presence bits.
+
+    The presence-bit form (`verdict`) cannot distinguish one stray arrival from a link at full
+    load, because `RX > 0` is all it records. That is not a cosmetic limit: on silicon it made a
+    total blackhole read HEALTHY while the injector was discarding 401 packets, and it is the
+    reason every masking defect in docs/review/artifacts/HW-CLF-FRONTIER-HOP.md was silent.
+
+    BLACKHOLE keeps its exact meaning -- RX == 0 with positive source evidence -- so results
+    decided under the presence-bit form remain comparable. STARVED is a NEW class for the band
+    the old encoding folded into HEALTHY, and it is reported separately rather than merged into
+    the blackhole metric.
+
+    This rule is only sound because RX is sampled at the receiver's INGRESS. While RX was marked
+    in egress, the receiver's own traffic manager sat inside the measurement: a link that
+    delivered 400 of 400 packets registered at most ~6% of them when the receiver's downlink
+    queue was shaped (HW-CLF-FRONTIER-HOP.md). Under that placement a count-based rule would
+    have reported STARVED for a perfectly healthy link, which is precisely why the presence bit
+    -- insensitive, and therefore accidentally safe -- passed the congestion test.
+    """
+    if not evidence_complete:
+        return Verdict.INCONCLUSIVE
+    if tx == 0 and rx == 0:
+        return Verdict.IDLE
+    if tx == 0 and rx > 0:
+        return Verdict.IMPOSSIBLE
+    if rx == 0:
+        return Verdict.BLACKHOLE
+    if rx < FRONTIER_SATURATION and rx * STARVED_RATIO <= tx:
+        return Verdict.STARVED
+    if gap_seen:
+        return Verdict.PARTIAL_LOSS
+    return Verdict.HEALTHY

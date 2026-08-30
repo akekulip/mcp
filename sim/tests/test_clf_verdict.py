@@ -55,3 +55,57 @@ class MaskTest(unittest.TestCase):
     def test_receiver_ahead_of_source_shows_as_zero_not_negative(self):
         """RX bits with no TX bit are the IMPOSSIBLE state; compare() must not go negative."""
         self.assertEqual(compare(0b0001, 0b1111), 0)
+
+
+# --- count-based frontier (saturating) -------------------------------------------------
+from sim.clf.verdict import verdict_counts, STARVED_RATIO, FRONTIER_SATURATION
+
+
+def test_counts_preserve_blackhole_meaning():
+    """BLACKHOLE must still mean exactly 'source committed, nothing arrived'.
+
+    Results decided under the presence-bit encoding stay comparable only if this holds.
+    """
+    assert verdict_counts(255, 0) is Verdict.BLACKHOLE
+    assert verdict_counts(1, 0) is Verdict.BLACKHOLE
+    assert verdict_counts(0, 0) is Verdict.IDLE          # no source evidence, never faulty
+
+
+def test_single_stray_arrival_is_not_health():
+    """The defect this encoding exists to remove.
+
+    On silicon a total blackhole read HEALTHY while the injector discarded 401 packets,
+    because one stray background packet set the presence bit. With counts that state is
+    STARVED, which is a report rather than a silence.
+    """
+    assert verdict_counts(255, 1) is Verdict.STARVED
+    assert verdict_counts(400 % 256 or 255, 1) is not Verdict.HEALTHY
+
+
+def test_saturation_only_blurs_the_unambiguous_end():
+    """Both registers saturate at 255, and that must cost nothing where it matters.
+
+    If RX has saturated the link is carrying traffic and cannot be starved, so the ratio
+    is only consulted while RX is small -- exactly the regime the rule decides.
+    """
+    assert verdict_counts(FRONTIER_SATURATION, FRONTIER_SATURATION) is Verdict.HEALTHY
+    assert verdict_counts(FRONTIER_SATURATION, FRONTIER_SATURATION - 1) is Verdict.HEALTHY
+
+
+def test_starved_threshold_is_the_declared_ratio():
+    tx = 240
+    boundary = tx // STARVED_RATIO
+    assert verdict_counts(tx, boundary) is Verdict.STARVED
+    assert verdict_counts(tx, boundary + 1) is Verdict.HEALTHY
+
+
+def test_impossible_still_reported_not_classified():
+    assert verdict_counts(0, 7) is Verdict.IMPOSSIBLE
+
+
+def test_missing_evidence_is_never_faulty():
+    assert verdict_counts(255, 0, evidence_complete=False) is Verdict.INCONCLUSIVE
+
+
+def test_gap_evidence_still_yields_partial_loss():
+    assert verdict_counts(255, 255, gap_seen=True) is Verdict.PARTIAL_LOSS
