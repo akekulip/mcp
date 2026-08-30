@@ -183,6 +183,25 @@ while True:
                     conn.sendall(("BLACKHOLED %d [0..65535]\n" % sub).encode())
                     print("K %d -> total blackhole armed" % sub, flush=True)
                     continue
+                elif f[0] == "I":
+                    # I -- injector ground truth: how many packets did tbl_eg_fail actually
+                    # destroy, per entry?  "Verify the injected quantity in the DATA, not in
+                    # the flags" (repo doctrine).  A miss with a zero counter means the entry
+                    # never matched; a miss with a large counter means something else set RX.
+                    ft = info.table_get("pipe.Egress.tbl_eg_fail")
+                    try:
+                        ft.operations_execute(tgt, "SyncCounters")
+                    except Exception:
+                        pass
+                    out = []
+                    for d, k in ft.entry_get(tgt, None, {"from_hw": True}):
+                        dd, kk = d.to_dict(), k.to_dict()
+                        out.append("I %s %s %s %s" % (
+                            kk["md.sublink"]["value"],
+                            kk["hdr.witness.seq"]["low"], kk["hdr.witness.seq"]["high"],
+                            dd.get("$COUNTER_SPEC_PKTS", 0)))
+                    conn.sendall(("".join(x + "\n" for x in out)).encode())
+                    conn.sendall(b"OK 0\n"); continue
                 elif f[0] == "C":
                     # Clear every injector entry (per-trial reset).
                     ft = info.table_get("pipe.Egress.tbl_eg_fail")
