@@ -154,3 +154,56 @@ Compiles 11 ingress / 5 egress — unchanged, as with the hop fix.
 Both defects were found the same way and neither needed a new experiment: the code was
 checked against its own stated intent. A comment that says what a mechanism does is a
 testable claim about the implementation, and in both cases the implementation disagreed.
+
+---
+
+# Rates on the corrected build, and a third masking window
+
+## Result after the bank fix (10 trials/arm, guard 2.0 s, one directed link)
+
+| metric | before bank fix | after bank fix | PREREG |
+|---|---|---|---|
+| control false-blackhole rate | 56% (5/9) | **0% (0/10)** | rule 1 requires 0% — **met** |
+| IMPOSSIBLE verdicts | 1 per trial, every trial | **0** | rule 5 requires 0 — **met** |
+| fault detection | 9/9 | 8/9 (89%) | rule 1 requires >= 95% — **not yet met** |
+| false blackholes (non-target) | 1 | 0 | — |
+
+Rule 5 is satisfied and the control half of rule 1 is satisfied. The fault half is not, and
+the single miss has an identified cause rather than being noise.
+
+## The miss: a third way an RX bit can mask a blackhole
+
+Trial 6 reported HEALTHY for the target sublink with **401 packets dropped** by the injector.
+A blackholed sublink cannot legitimately show an arrival, so something else set RX.
+
+The driver's own ordering was the cause:
+
+```
+N bank -> guard -> Z (zero) -> verify -> K (arm) -> settle -> probe
+                               ^^^^^^^^^^^^^^^^^^ ~0.8 s with the target LIVE
+```
+
+Between the reset and the arm, the target sublink still forwards. One stray background packet
+arriving in that window sets RX=1, and that bit masks the blackhole for the whole trial.
+
+This is the *third* distinct source of the same failure — an RX bit that does not belong to
+the measured traffic reads as evidence of health:
+
+1. stale residue from earlier runs (no zero step at all);
+2. the source leaf marking its own egress as an arrival (the hop defect);
+3. a background packet arriving between the zero and the arm (this one).
+
+The fabric is not silent: `dropped=401` and `402` against `sent=400` show background traffic
+on the target sublink, and one trial was excluded outright for `zero did not take,
+rows [(1, 0, 2, 2)]` — background traffic marking both TX and RX immediately after the reset.
+
+**Fix:** arm before zeroing. Once the injector is armed, nothing can mark RX for the target,
+so the reset is the last thing to touch that sublink before the probe.
+
+## Standing caveat
+
+`TX & ~RX` is only as trustworthy as the claim that RX was set by the traffic under
+measurement. Every defect in this document is a different way that claim failed. A blackhole
+result should therefore always be reported beside the injector's drop count, which is what
+`clf_trials.py` now prints on every line: a detection with `dropped=0`, or a miss with
+`dropped>0`, is a harness statement before it is a result.

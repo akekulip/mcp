@@ -106,7 +106,7 @@ def classify(rows):
 
 
 def trial(target_sublink, guard, arm_settle=1.0, bank=0):
-    """One trial: quiesce -> zero -> verify -> arm -> probe -> freeze -> guard -> read.
+    """One trial: quiesce -> arm -> zero -> verify -> probe -> freeze -> guard -> read.
 
     Raises HarnessError if any precondition fails, so a broken trial is reported and excluded
     rather than being averaged in as a miss.
@@ -115,17 +115,22 @@ def trial(target_sublink, guard, arm_settle=1.0, bank=0):
     agent("N %d" % bank)                        # make B the active bank
     time.sleep(guard)                           # quiesce: prior in-flight lands
 
-    agent("Z")                                  # zero the frontiers; safe only while quiet
-    time.sleep(0.3)
-    residue = frontiers()
-    if residue:
-        raise HarnessError("zero did not take, %d rows remain: %s" % (len(residue), residue[:3]))
-
+    # ARM BEFORE ZEROING.  The reverse order leaves the target sublink live between the reset
+    # and the arm, and a single stray background packet arriving in that window sets RX=1 --
+    # which masks the blackhole exactly the way stale residue did, reporting HEALTHY for a
+    # sublink that is dark.  Observed directly: a fault trial with 401 packets dropped read
+    # HEALTHY.  Arming first means nothing can mark RX for the target after the zero.
     if target_sublink is not None:
         reply = agent("K %d" % target_sublink)
         if "BLACKHOLED" not in reply:
             raise HarnessError("arm refused: %r" % reply.strip()[:120])
         time.sleep(arm_settle)
+
+    agent("Z")                                  # zero the frontiers; safe only while quiet
+    time.sleep(0.3)
+    residue = frontiers()
+    if residue:
+        raise HarnessError("zero did not take, %d rows remain: %s" % (len(residue), residue[:3]))
 
     sent = probe("/tmp/probe_spray0.py")        # marks bank B; raises if it did not run
 
