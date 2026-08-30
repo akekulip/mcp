@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # bringup.sh — load a program onto the freed chip and prove the fabric is actually up.
 #
-#   1. Refuse if anything already owns the chip (run takeover.sh first).
+#   1. Refuse unless the chip is free or exactly one bf_switchd serves this program.
 #   2. Rewrite the compiler-generated .conf to ABSOLUTE paths.  bf-p4c emits a conf
 #      whose "context"/"config"/"bfrt-config" paths are RELATIVE, so bf_switchd only
 #      finds them if its cwd happens to be the build directory.  The one hand-made
@@ -9,10 +9,8 @@
 #      reason; this script stops that being a manual step.
 #   3. Launch bf_switchd under tmux with LD_LIBRARY_PATH set and stdin kept open —
 #      a bare nohup closes stdin and bf_switchd exits (H11).
-#   4. Wait for the bfrt gRPC readiness line in the log.  The pattern is taken from
-#      the SDE binary itself (strings install/lib/libdriver.so):
-#          "bfruntime gRPC server started on %s"
-#      and the listening socket is checked as a second, independent witness.
+#   4. Wait for the bfrt gRPC listener.  Some SDE builds omit the expected readiness
+#      log line, so the socket is authoritative and the log is corroboration only.
 #   5. Run  setup_skeleton.py --program <program> up .
 #   6. Verify port state on BOTH sides of every cage-5/cage-6 loop pair, reading the
 #      D_P (dev_port) column.
@@ -53,25 +51,44 @@ CONF_SRC="${REMOTE_DIR}/${PROG}.tofino/${PROG}.conf"
 CONF_ABS="${REMOTE_DIR}/${PROG}_abs.conf"
 SWLOG="${REMOTE_DIR}/${PROG}.switchd.log"
 SETUP_REMOTE="${REMOTE_DIR}/setup_skeleton.py"
+BUILD_MANIFEST="${REMOTE_DIR}/${PROG}.build-manifest.sha256"
+LOAD_RECEIPT="${REMOTE_DIR}/${PROG}.loaded-build.sha256"
 
 # ================================================================ 0. chip ownership
 hw_step "0. who owns the chip? (CLAUDE.md: check before ANY port or table write)"
 OWNER=$(hw_ssh_script "chip ownership" <<'EOF'
 set -u
-P=$(pgrep -x bf_switchd | tr '\n' ' ' || true)
-echo "pgrep -x bf_switchd: '${P}'"
-for p in $P; do sudo tr '\0' ' ' < "/proc/$p/cmdline"; echo; done
+PIDS=$(pgrep -x bf_switchd || true)
+set -- $PIDS
+echo "pgrep -x bf_switchd: '$(printf '%s ' "$@")'"
+if [ "$#" -eq 0 ]; then
+    echo "OWNER_STATUS=FREE"
+elif [ "$#" -ne 1 ]; then
+    echo "OWNER_STATUS=MULTIPLE count=$#"
+    for p in "$@"; do printf 'pid=%s cmd=' "$p"; sudo tr '\0' ' ' < "/proc/$p/cmdline"; echo; done
+else
+    p=$1
+    CMD=$(sudo tr '\0' ' ' < "/proc/$p/cmdline" 2>/dev/null || true)
+    printf 'pid=%s cmd=%s\n' "$p" "$CMD"
+    echo "OWNER_STATUS=ONE pid=$p"
+fi
 EOF
 )
 if is_dry; then
-    hw_say "[dry-run] would then REFUSE to continue unless 'pgrep -x bf_switchd' is empty,"
-    hw_say "[dry-run] naming the program that owns the chip and pointing at p4/hw/takeover.sh."
+    hw_say "[dry-run] would then continue only if no bf_switchd exists or exactly one process"
+    hw_say "[dry-run] names ${CONF_ABS}; multiple or foreign owners fail closed."
 else
     printf '%s\n' "$OWNER" | sed 's/^/   /'
-    if printf '%s\n' "$OWNER" | grep -qE "^pgrep -x bf_switchd: '[0-9]"; then
-        hw_die "the chip is still owned by a running bf_switchd (above). Run p4/hw/takeover.sh first."
-    fi
-    hw_pass "chip is free"
+    case "$OWNER" in
+        *OWNER_STATUS=FREE*) hw_pass "chip is free" ;;
+        *OWNER_STATUS=MULTIPLE*) hw_die "multiple bf_switchd processes own the chip (above); run p4/hw/takeover.sh first" ;;
+        *OWNER_STATUS=ONE*)
+            printf '%s\n' "$OWNER" | grep -qF -- "${CONF_ABS}" \
+                || hw_die "the chip is owned by a different bf_switchd (above); run p4/hw/takeover.sh first"
+            hw_pass "exactly one bf_switchd owns the expected conf"
+            ;;
+        *) hw_die "could not establish chip ownership; refusing to continue" ;;
+    esac
 fi
 
 # ================================================================ 1. control plane
@@ -130,11 +147,60 @@ else
     printf '%s\n' "$CONFOUT" | sed 's/^/   /'
 fi
 
+# ============================================ 2b. are the artifacts one sealed build?
+# deploy.sh creates this manifest only after bf-p4c succeeds.  Checking every hash is
+# an identity check, unlike comparing mtimes, and catches stale or partially replaced
+# source/schema/context/binary sets before a process is launched or reused.
+hw_step "2b. provenance: verify the sealed compiler inputs and loadable outputs"
+PROV=$(hw_ssh_script "build provenance" <<EOF
+set -eu
+cd '${REMOTE_DIR}'
+MAN='${PROG}.build-manifest.sha256'
+[ -f "\$MAN" ] || { echo "MISSING \$MAN — run p4/hw/deploy.sh ${PROG}"; exit 6; }
+sha256sum -c "\$MAN"
+echo "BUILD_ID=\$(sha256sum "\$MAN" | awk '{print \$1}')"
+EOF
+) || { printf '%s\n' "$PROV" | sed 's/^/   /'; hw_die "build artifacts do not match the deploy manifest"; }
+if is_dry; then
+    hw_say "[dry-run] would require every SHA-256 entry in ${BUILD_MANIFEST} to match."
+else
+    printf '%s\n' "$PROV" | sed 's/^/   /'
+fi
+
 # ================================================================ 3. launch
 # NOTE: sudo STRIPS LD_LIBRARY_PATH (and every LD_*) from the environment even with -E;
 # that is a sudo security behaviour, not a quoting bug.  Exporting it before sudo is not
 # enough and fails as 'libdriver.so: cannot open shared object file'.  It must be set on
 # the sudo'd child via env(1).  Do not 'simplify' this back to a plain export.
+ALREADY=$(hw_ssh_script "already serving?" <<EOF
+pids=\$(pgrep -x bf_switchd || true)
+set -- \$pids
+if [ "\$#" -eq 0 ]; then
+    echo "NO_PROCESS"
+    exit 0
+fi
+[ "\$#" -eq 1 ] || { echo "REFUSE_MULTIPLE count=\$#"; exit 0; }
+p=\$1
+cmd=\$(sudo tr '\\0' ' ' < "/proc/\$p/cmdline" 2>/dev/null || true)
+case "\$cmd" in *'${CONF_ABS}'*) ;; *) echo "REFUSE_OTHER pid=\$p"; exit 0 ;; esac
+ss -ltn 2>/dev/null | grep -q ':${GRPC_PORT}' || { echo "REFUSE_NO_LISTENER pid=\$p"; exit 0; }
+[ -f '${LOAD_RECEIPT}' ] || { echo "REFUSE_NO_RECEIPT pid=\$p"; exit 0; }
+build_id=\$(sha256sum '${BUILD_MANIFEST}' | awk '{print \$1}')
+read -r loaded_pid loaded_id < '${LOAD_RECEIPT}' || { echo "REFUSE_BAD_RECEIPT pid=\$p"; exit 0; }
+[ "\$loaded_pid" = "\$p" ] && [ "\$loaded_id" = "\$build_id" ] \
+    || { echo "REFUSE_STALE_RECEIPT pid=\$p"; exit 0; }
+echo "SERVING pid=\$p build_id=\$build_id"
+EOF
+) || true
+if ! is_dry && printf '%s\n' "$ALREADY" | grep -q '^SERVING '; then
+    hw_say "3. bf_switchd is ALREADY serving this conf with a live gRPC listener — not relaunching"
+    hw_say "   $(printf '%s' "$ALREADY" | grep SERVING)"
+    hw_say "   (relaunching would drop a running experiment; use takeover.sh if you really want a fresh load)"
+else
+if ! is_dry && ! printf '%s\n' "$ALREADY" | grep -q '^NO_PROCESS$'; then
+    printf '%s\n' "$ALREADY" | sed 's/^/   /'
+    hw_die "an existing bf_switchd cannot be proven to serve this exact sealed build; run takeover.sh before relaunching"
+fi
 hw_step "3. launch bf_switchd under tmux (LD_LIBRARY_PATH via sudo env, stdin kept open — H11)"
 LAUNCH=$(hw_ssh_script "launch bf_switchd" <<EOF
 set -u
@@ -157,6 +223,7 @@ if is_dry; then
 else
     printf '%s\n' "$LAUNCH" | sed 's/^/   /'
 fi
+fi
 
 # ================================================================ 4. readiness
 hw_step "4. wait up to ${READY_TIMEOUT}s for: ${BFRT_READY_RE}"
@@ -164,8 +231,15 @@ READY=$(hw_ssh_script "wait for bfrt gRPC" <<EOF
 set -u
 deadline=\$(( \$(date +%s) + ${READY_TIMEOUT} ))
 while [ "\$(date +%s)" -lt "\$deadline" ]; do
-    if grep -q '${BFRT_READY_RE}' '${SWLOG}' 2>/dev/null; then
-        echo "READY: \$(grep -m1 '${BFRT_READY_RE}' '${SWLOG}')"
+    # H41(c): the LISTENER is the primary witness.  This SDE never prints
+    # '${BFRT_READY_RE}' at all -- grep -c over a healthy run returns 0 -- so a
+    # log-string probe times out on a perfectly good server.  Check the socket
+    # first and treat any log line as corroboration only.
+    if ss -ltn 2>/dev/null | grep -q ':${GRPC_PORT}'; then
+        echo "READY: listener on ${GRPC_PORT}"
+        grep -m1 '${BFRT_READY_RE}' '${SWLOG}' 2>/dev/null \
+            && echo "  (log line also present)" \
+            || echo "  (this SDE prints no matching log line; the listener is authoritative)"
         break
     fi
     if ! pgrep -x bf_switchd >/dev/null; then
@@ -175,20 +249,32 @@ while [ "\$(date +%s)" -lt "\$deadline" ]; do
     fi
     sleep 2
 done
-grep -q '${BFRT_READY_RE}' '${SWLOG}' 2>/dev/null || { echo "TIMEOUT after ${READY_TIMEOUT}s"; tail -30 '${SWLOG}'; exit 5; }
+ss -ltn 2>/dev/null | grep -q ':${GRPC_PORT}' || { echo "TIMEOUT after ${READY_TIMEOUT}s: no listener on ${GRPC_PORT}"; tail -30 '${SWLOG}'; exit 5; }
 echo "pid: \$(pgrep -x bf_switchd | tr '\n' ' ')"
 echo "socket:"
-ss -ltnp 2>/dev/null | grep ':${GRPC_PORT}' || echo "  (port ${GRPC_PORT} not visible to this user; the log line above is authoritative)"
+ss -ltnp 2>/dev/null | grep ':${GRPC_PORT}' || echo "  (listener was visible to ss -ltn but process details are hidden from this user)"
 EOF
 ) || { printf '%s\n' "$READY" | sed 's/^/   /'; hw_die "bf_switchd never reached bfrt gRPC readiness"; }
 if is_dry; then
-    hw_say "[dry-run] two independent witnesses are required: the log line, and a listener on ${GRPC_PORT}."
+    hw_say "[dry-run] would require a live listener on ${GRPC_PORT}; the readiness log is corroboration when present."
     hw_say "[dry-run] would record the bf_switchd pid to ${ARTIFACT_DIR}/switchd.pid for canary.sh."
     hw_mkdir "$ARTIFACT_DIR"
 else
     printf '%s\n' "$READY" | sed 's/^/   /'
     hw_mkdir "$ARTIFACT_DIR"
     printf '%s\n' "$READY" | awk '/^pid: /{print $2}' | hw_write_file "${ARTIFACT_DIR}/switchd.pid"
+    LOAD_SEAL=$(hw_ssh_script "record loaded build identity" <<EOF
+set -eu
+set -- \$(pgrep -x bf_switchd || true)
+[ "\$#" -eq 1 ] || { echo "expected one bf_switchd, found \$#"; exit 8; }
+build_id=\$(sha256sum '${BUILD_MANIFEST}' | awk '{print \$1}')
+tmp='${LOAD_RECEIPT}.tmp.'\$\$
+printf '%s %s\n' "\$1" "\$build_id" > "\$tmp"
+mv "\$tmp" '${LOAD_RECEIPT}'
+echo "pid=\$1 build_id=\$build_id"
+EOF
+) || { printf '%s\n' "$LOAD_SEAL" | sed 's/^/   /'; hw_die "could not record the loaded build identity"; }
+    printf '%s\n' "$LOAD_SEAL" | sed 's/^/   /'
     hw_pass "bfrt gRPC up; pid recorded in ${ARTIFACT_DIR}/switchd.pid"
 fi
 
@@ -215,6 +301,31 @@ cd '${REMOTE_DIR}'
 python3 setup_skeleton.py --program '${PROG}' up
 EOF
 ) || { printf '%s\n' "$SETUP" | sed 's/^/   /'; hw_die "setup_skeleton.py up failed"; }
+
+# ---------------------------------------------------------------- 5b. attention tables
+# setup_skeleton does NOT install tbl_eg_vlink; setup_attention does.  That table maps
+# (egress_port, egress_qid) -> virtual link and composes md.sublink, and its miss action is
+# set_eg_vlink(0, 0).  So when it is empty the chip does not fail -- every packet silently
+# reports virtual link 0, and any per-link measurement collapses onto one link while still
+# looking plausible.  That cost a full misdiagnosis on 2026-08-30: a per-link frontier read
+# vlink 0 for traffic the ingress counters put on vlink 1, and the disagreement between the
+# two instruments was the only thing that exposed it.  Bring-up installs it from now on.
+hw_step "5b. setup_attention.py --program ${PROG} up  (tbl_eg_vlink — see note in source)"
+ATTN=$(hw_ssh_script "setup_attention up" <<EOF
+set -u
+export SDE='${SDE}'
+export SDE_INSTALL='${SDE_INSTALL}'
+export LD_LIBRARY_PATH="\$SDE_INSTALL/lib"
+P="\$SDE_INSTALL/lib/python3.8/site-packages"
+export PYTHONPATH="\$P/tofino:\$P/tofino/bfrt_grpc:\$P"
+cd '${REMOTE_DIR}'
+python3 setup_attention.py --program '${PROG}' up
+EOF
+) || { printf '%s\n' "$ATTN" | sed 's/^/   /'; hw_die "setup_attention.py up failed"; }
+printf '%s\n' "$ATTN" | grep -E 'eg_vlink|rows installed' | sed 's/^/   /' || true
+if ! printf '%s\n' "$ATTN" | grep -q 'tbl_eg_vlink: [1-9][0-9]* rows installed'; then
+    hw_die "tbl_eg_vlink installed 0 rows — every packet would report virtual link 0"
+fi
 if is_dry; then
     hw_say "[dry-run] would then require every table write to be accepted and no 'required ports DOWN' warning."
 else

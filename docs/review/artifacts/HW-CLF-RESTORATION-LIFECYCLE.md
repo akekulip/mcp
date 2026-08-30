@@ -88,3 +88,56 @@ is proven, the autonomous decision path is not.
 Also unmeasured: how much probation traffic is *sufficient*. Step 5 used 30 packets because that
 is what the other steps used, not because
 `probation_packets_required(p_restore_target, restore_alpha)` said so.
+
+---
+
+# Two-link coverage restored, and per-link localization measured
+
+With `tbl_eg_vlink` populated, the `{1,2}` frontier entries reverted in `c296ec8` were restored
+and re-tested. Compiles **11 ingress / 5 egress**, unchanged.
+
+## The aliasing is gone
+
+Ten probe packets, both hops marking:
+
+| row | link | TX | RX |
+|---|---|---:|---:|
+| `X 0 0 2` | vlink 0, up L0->S0 | 11 | 11 |
+| `X 0 10 2` | **vlink 10, down S0->L2** | **10** | **10** |
+| `X 0 2 2`, `X 0 8 2` | background on other links | 1, 2 | 1, 2 |
+
+Each directed link now has its own counters and each marks exactly once per packet. The earlier
+`TX=20 RX=20` was entirely the empty `tbl_eg_vlink`, confirming that `c296ec8`'s reasoning was
+wrong and its revert unnecessary.
+
+## Per-link fault localization
+
+Ten packets per arm, fault injected on one link at a time:
+
+| scenario | vlink 0 (first link) | vlink 10 (second link) | verdict |
+|---|---|---|---|
+| no fault | `TX=10 RX=10` | `TX=10 RX=10` | both HEALTHY |
+| first link dark (`K 2`) | `TX=11 RX=0` | *no row* | **BLACKHOLE on link 1**, link 2 IDLE |
+| second link dark (`K 162`) | `TX=10 RX=10` | `TX=10 RX=0` | link 1 HEALTHY, **BLACKHOLE on link 2** |
+
+CLF identifies **which** of the two directed links failed, which is the localization the project
+is named for and which the single-link build could not do.
+
+The first-link case is the one worth reading carefully. With link 1 dark nothing reaches the
+spine, so link 2 is never exercised — and it returns TX=0 RX=0, which the frozen truth table
+classifies as **IDLE, not FAULTY**. The mechanism does not blame the innocent downstream link for
+carrying no traffic, because TX records commitment and the spine committed nothing.
+
+## Scope correction
+
+This supersedes the "CLF covers the FIRST directed link only" statement in
+`HW-CLF-FRONTIER-PLACEMENT.md` and in `c296ec8`. Coverage is both directed links of the emulated
+path, each independently counted. `sim/clf/PREREG.md`'s `direction_only` scenario is now testable
+and remains unmeasured.
+
+## Bring-up hardened so this cannot recur
+
+`bringup.sh` now runs `setup_attention.py up` as step 5b and **fails the bring-up** if
+`tbl_eg_vlink` installs zero rows. An empty table does not break the chip — every packet simply
+reports virtual link 0 and per-link measurement collapses onto one link while still looking
+plausible. Only the disagreement between the frontier and the ingress vlink counters exposed it.

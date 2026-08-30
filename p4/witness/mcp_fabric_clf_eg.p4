@@ -1157,11 +1157,11 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
          * same field names the NEXT hop, which is what made the egress version mark the
          * source leaf's own departure as an arrival.)
          *
-         * Only entry 1 is listed, matching tbl_tx_frontier: the second link has no
-         * distinct sublink identity, so marking its arrival would land in the first
-         * link's slot.  Measured -- 10 packets read TX=20 RX=20 with both entries
-         * listed.  See tbl_tx_frontier for why that aliasing masks a dark second link. */
-        const entries = { 1 : rx_frontier_mark(); }
+         * Both are listed, matching tbl_tx_frontier: hop 1 is the arrival at the spine over
+         * the source->spine link and hop 2 the arrival at the destination leaf over the
+         * spine->leaf link.  See tbl_tx_frontier for why these were briefly reverted to
+         * {1} and why that reasoning was wrong (tbl_eg_vlink was empty). */
+        const entries = { 1 : rx_frontier_mark(); 2 : rx_frontier_mark(); }
     }
 
     apply {
@@ -1446,17 +1446,19 @@ control Egress(inout eg_headers_t hdr, inout eg_md_t md,
          * spine committing onto the spine->leaf link.  An entry for 0 is dead: nothing
          * presents md.hop == 0 in egress.
          *
-         * ONLY entry 1 is listed, and the reason is measured, not assumed.  Listing 2 as
-         * well was tried and reverted: with exactly 10 probe packets the frontier read
-         * TX=20 RX=20, i.e. every count was doubled, because md.vlink resolves to 0 at the
-         * spine's egress too.  The second link has no distinct sublink identity, so its
-         * marks land in the FIRST link's slot instead of its own.
+         * Both hops that put a packet onto a directed link commit it: md.hop == 1 is the
+         * source leaf committing onto the source->spine link, md.hop == 2 the spine
+         * committing onto the spine->leaf link.
          *
-         * That aliasing is not merely a lost measurement, it is a masking hole: with the
-         * second link dark, TX would be 20 (both hops commit) and RX 10 (only the first
-         * link delivers), a ratio of 0.5, which reports HEALTHY.  Until a hop's outgoing
-         * sublink is distinct at the spine, CLF covers the FIRST directed link only. */
-        const entries = { 1 : tx_frontier_mark(); }
+         * These were briefly reverted to {1} after 10 probe packets read TX=20 RX=20, which
+         * was diagnosed as the second link having no distinct sublink identity.  The
+         * doubling was real but the diagnosis was wrong: tbl_eg_vlink was simply EMPTY,
+         * because it is installed by setup_attention.py and bring-up only ran
+         * setup_skeleton.py.  Its miss action is set_eg_vlink(0, 0), so every packet
+         * reported virtual link 0 and both hops indexed the same slot.  With the table
+         * populated the two hops resolve to different vlinks and each link gets its own
+         * counters.  bringup.sh now installs and verifies that table. */
+        const entries = { 1 : tx_frontier_mark(); 2 : tx_frontier_mark(); }
     }
 
 
