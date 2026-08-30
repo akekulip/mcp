@@ -1,3 +1,54 @@
+## Status (2026-08-30, later still) — rule 1 fully measured; dShark read; framing must change
+
+**PREREG rule 1 is now measured on both its scenarios** (`docs/review/artifacts/HW-CLF-VS-CW4.md`):
+- `selective_blackhole`: fault 9/9 or 10/10, control 0/N, IMPOSSIBLE 0 across repeated runs.
+- `all_context_blackhole`: CLF 4/4 contexts BLACKHOLE; C-W4's observed counters byte-identical
+  before and after (80/680/133/42 unchanged) = 0/4. Injector dropped 84, confirmed in data.
+- The comparison arm rule 1 actually turns on: IDLE and DARK are **indistinguishable to C-W4**
+  (delta 0 in all 5 runs) and CLF separates them 5/5.
+- Sharper than "C-W4 detects 0%": C-W4 detects a total blackhole **retroactively**. Measured —
+  40 clean packets leave observed at 201; 60 destroyed leave it at **201, unchanged**; 20 after
+  clearing leave it at **45**, so the gap fires at the first survivor. It is blind for exactly as
+  long as the blackhole lasts.
+- Kill criterion tested: while all four contexts were dark the physical port read **up=True**.
+  Scope stated honestly — in this emulation a directed link is a TM queue on a shared port, so a
+  hard all-context failure on a real fabric would coincide with link-down and CLF would add
+  nothing there. The scenario is meaningful for the gray failure this project is about.
+
+**STARVED threshold sweep** (`artifacts/HW-CLF-STARVED-SWEEP.md`). A prerequisite had to be
+measured first: **the witness sequence advances 2.0 values per packet** (reg_wit_seq 13859->13959
+for 50 packets), because it is stamped on each fabric pass. So a sequence-range fault covers half
+as many packets as its width suggests, and the 16-bit space wraps every **32768 packets per
+sublink, not 65536** — the wrap scenario in PREREG should use that figure. Across k=0..60, RX
+tracks k/2 monotonically, so **RX/TX is a faithful linear estimator of survival**. That makes
+STARVED_RATIO=8 a policy statement (survival below 12.5%) rather than an arbitrary constant, but
+it does NOT settle where the boundary belongs: at k=15 the ratio is 0.133 against a 0.125
+threshold, about one packet in sixty. Still not in PREREG, still provisional, noise floor
+uncharacterised.
+
+**dShark (NSDI'19) retrieved and read** (`docs/review/NOVELTY-GATE-DSHARK.md`). It was the one
+unretrieved FATAL vector. It does not kill the project; it kills one framing of it.
+- Table 2 ships a **"Silent black hole localizer"** — "Localize switches that drop all packets".
+  **Stop claiming novelty for detecting or localizing silent blackholes.**
+- Its "Packet drops on middleboxes" query, *"exist ingress and egress trace"*, is a direct
+  analogue of TX-vs-RX. So this is **not a capability difference**.
+- The retransmission dependency applies only to dShark's own blackhole query (groups on duplicate
+  TCP ipid/seq); do not generalise it to dShark as a whole.
+- The real difference is mechanism, cost and actionability: dShark mirrors traffic to collector
+  servers (goal 3.33 Mpps/core, 4 cores/server at 40Gbps) and states its own capture-noise
+  problem — mirrored drops burying real drops — which a register increment cannot have. And it
+  diagnoses without producing a handle to act on.
+- **The defensible claim is cost and actionability, not capability.** Weaker than "a new
+  observability primitive"; the paper framing must change. The registers-vs-capture cost gap is
+  larger and more defensible than O(L) vs O(LK), but is **unquantified** against a real mirroring
+  baseline on this testbed.
+
+### Next action
+- Quantify registers-vs-mirroring on the testbed, since that is now the load-bearing claim.
+- Put STARVED_RATIO in PREREG with a margin, and characterise the noise floor at fixed k.
+- Retrieve dDrops and Speedlight, the remaining unretrieved comparators.
+- Second directed link still uncovered (aliasing, see HW-CLF-FRONTIER-PLACEMENT.md).
+
 ## Status (2026-08-30, end of session) — the C-W4 comparison is measured; one claim retracted
 
 **Retracted:** commit 7eed2f7 claimed "coverage doubles" from listing frontier entries {1,2}.
