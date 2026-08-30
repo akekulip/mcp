@@ -1,5 +1,13 @@
 # Novelty gate 3 — carrier/transport OAM vs the behavioural sublink (2026-08-29)
 
+> **CORRECTION, 2026-08-30 (see `NOVELTY-GATE-4.md`).** This gate concludes below that the
+> standardised chain never carries a (link x class) pair past the counter stage into ACTION. That is
+> true of the ITU-T G.803x chain examined here and **FALSE of the IETF MTR chain**: US 9,161,259 B2
+> (Cisco, granted 2015) removes a link from a class-specific multi-topology-routing topology on
+> measured degradation, leaving other classes on the same physical link. The surviving distinction is
+> narrower than stated below — in MTR the trigger is a SCALAR link property against a class-specific
+> watermark, so the class never supplies its own evidence. Recorded, not edited away.
+
 Closes the item `NOVELTY-GATE-2.md` listed as unassessed. Two adversarial passes, both reading
 primary standards rather than secondary descriptions. **Verdict: SERIOUS, not FATAL.** The
 measurement half of the primitive is prior art; the action half is not, and the standards say so
