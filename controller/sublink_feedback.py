@@ -40,7 +40,7 @@ from __future__ import annotations
 import logging
 import math
 from dataclasses import dataclass, field
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, Iterable, List, Optional, Tuple
 
 from controller import infer
 
@@ -48,6 +48,7 @@ log = logging.getLogger("controller.sublink_feedback")
 
 QUARANTINED, PROBATION, HEALTHY = "QUARANTINED", "PROBATION", "HEALTHY"
 AUDIT_UDP_DST = 4792
+AUDIT_SRC_ALLOWED = 1             # matches tbl_port_role.audit_src and tbl_audit_steer
 AUDIT_ROUND_MAX_TOKENS = 16      # ``tbl_audit_steer`` capacity: the packets one round can declare
 EPOCH_US = 100000                # the controller epoch the frozen layer is fed with
 REORDER_CREDIT_MAX = 16          # gaps in 1..this are reorder receipts, never loss
@@ -288,6 +289,7 @@ class BfrtAuditSteer:
 
     def _key(self, token: int):
         return self.table.make_key([
+            self.gc.KeyTuple("md.audit_src", AUDIT_SRC_ALLOWED),
             self.gc.KeyTuple("hdr.udp.dst_port", AUDIT_UDP_DST),
             self.gc.KeyTuple("hdr.udp.src_port", token),
         ])
@@ -325,8 +327,12 @@ class SublinkFeedback:
                  alt_spray_for: Optional[Callable[[int, int, int, int], int]] = None,
                  reorder_credit_max: int = REORDER_CREDIT_MAX,
                  p_restore_target: float = 1e-3,
-                 restore_alpha: float = 0.05):
+                 restore_alpha: float = 0.05,
+                 install_many: Optional[
+                     Callable[[Tuple[Tuple[int, int, int, int, int], ...]], None]
+                 ] = None):
         self.install, self.remove, self.h = install, remove, h
+        self.install_many = install_many
         self.clean_epochs_to_restore = clean_epochs_to_restore
         self.alt_spray_for = alt_spray_for or (lambda src, dst, spray, ctx: 1 - spray)
         self.reorder_credit_max = reorder_credit_max
@@ -425,15 +431,17 @@ class SublinkFeedback:
 
     def _release(self, sublink: int) -> Optional[str]:
         """Deliver the event held for one sublink, at its netted loss."""
-        held = self.held.pop(sublink, None)
+        held = self.held.get(sublink)
         if held is None:
             return None
-        return self._decide(held.event, held.lost)
+        action = self._decide(held.event, held.lost)
+        del self.held[sublink]
+        return action
 
     def _decide(self, ev: GapEvent, lost: int) -> Optional[str]:
         """Feed one event at its NETTED loss to the frozen layer and act on the verdict."""
         st = self._st(ev.sublink)
-        self.infer_state = infer.update(
+        candidate_state = infer.update(
             self.infer_state,
             [infer.Sample(element="sublink:%d" % ev.sublink,
                           # ``observed_packets`` counts packets that arrived. The modular gap
@@ -442,21 +450,38 @@ class SublinkFeedback:
                           delivered=ev.observed_packets,
                           lost=lost, latency_us=(), t_us=ev.epoch * EPOCH_US)],
             {}, baseline_mode="pooled")
-        loc = infer.localize(self.infer_state, k=1, h=self.h)
+        loc = infer.localize(candidate_state, k=1, h=self.h)
         if not (loc.anomaly and loc.suspects and
                 loc.suspects[0] == "sublink:%d" % ev.sublink):
+            self.infer_state = candidate_state
             return None
 
+        gate_keys = gate_keys_for_sublink(ev.vlink, ev.context)
+        rows = []
+        for src_leaf, dst_leaf, spray, context in gate_keys:
+            alt_spray = self.alt_spray_for(src_leaf, dst_leaf, spray, context)
+            rows.append((src_leaf, dst_leaf, spray, context, alt_spray))
+        if self.install_many is not None:
+            self.install_many(tuple(rows))
+        else:
+            for row in rows:
+                self.install(*row)
+
+        # The decision and the hardware actuation are one transaction.  Commit
+        # statistical evidence only after the complete gate write succeeds; if it
+        # fails, _release() retains the held event and a retry starts from the same
+        # immutable inference snapshot instead of counting the loss twice.
+        self.infer_state = candidate_state
+        # Commit controller state only after every required hardware row succeeds.
+        # A failed batch must remain retryable; marking it quarantined first would
+        # coalesce the retry while the switch still forwarded on the unsafe path.
         st.state = QUARANTINED
         st.epoch_installed = ev.epoch
         st.quarantines += 1
         st.clean_epochs = 0
         st.clean_packets = 0
-        st.gate_keys = gate_keys_for_sublink(ev.vlink, ev.context)
+        st.gate_keys = gate_keys
         self.installs += 1
-        for src_leaf, dst_leaf, spray, context in st.gate_keys:
-            alt_spray = self.alt_spray_for(src_leaf, dst_leaf, spray, context)
-            self.install(src_leaf, dst_leaf, spray, context, alt_spray)
         log.info("quarantined sublink vlink=%d ctx=%d at epoch %d (quarantine #%d)",
                  ev.vlink, ev.context, ev.epoch, st.quarantines)
         return "QUARANTINE"
@@ -467,11 +492,28 @@ class SublinkFeedback:
         This is what gives the decision a background rate it did not have to assume: the other
         behavioural sublinks are carrying production right now, and the same witness sees them.
         """
+        self.observe_clean_batch([(vlink, context, packets)], epoch)
+
+    def observe_clean_batch(self, observations: Iterable[Tuple[int, int, int]],
+                            epoch: int) -> None:
+        """Feed one fabric census as one frozen-localizer epoch.
+
+        ``infer.update`` discounts the pooled posterior once per call.  A BFRT census
+        returns many sublinks at once, so calling :meth:`observe_clean` once per row
+        would discount the same epoch repeatedly, make the result depend on register
+        iteration order, and violate the frozen detector's one-pool-update-per-epoch
+        contract.  Keep the adapter boundary explicit and batch the rows here.
+        """
+        samples = [
+            infer.Sample(element="sublink:%d" % ((vlink << 4) | context),
+                         delivered=packets, lost=0, latency_us=(),
+                         t_us=epoch * EPOCH_US)
+            for vlink, context, packets in observations if packets > 0
+        ]
+        if not samples:
+            return
         self.infer_state = infer.update(
-            self.infer_state,
-            [infer.Sample(element="sublink:%d" % ((vlink << 4) | context),
-                          delivered=packets, lost=0, latency_us=(), t_us=epoch * EPOCH_US)],
-            {}, baseline_mode="pooled")
+            self.infer_state, samples, {}, baseline_mode="pooled")
 
     def probation_packets_needed(self, vlink: int, context: int) -> int:
         """The packet budget this particular sublink must show, after flap damping."""

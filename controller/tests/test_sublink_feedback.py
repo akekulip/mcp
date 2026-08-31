@@ -1,5 +1,7 @@
 """P3 feedback path: coalescing, epoch/stale handling, reorder netting, evidence-sized probation."""
+import json
 import math
+import pathlib
 import unittest
 
 from controller import sublink_feedback
@@ -132,6 +134,27 @@ class TestSublinkFeedback(unittest.TestCase):
             (1, 2, 0, 3, 1), (1, 3, 0, 3, 1),
         ])
 
+    def test_hardware_census_is_one_pooled_update_per_epoch(self):
+        """A census is one fabric observation, not one observation per sublink.
+
+        Applying ``forget_rho`` separately to every row makes the result depend on
+        BFRT register iteration order and lets the fault sample replace its own
+        reference population.  This is the hardware shape: four equally active
+        contexts, five clean census epochs, then a 655-packet discontinuity after a
+        saturated 16-bit clean run.  Batched evidence must retain enough sibling
+        background to quarantine at the frozen h=6.5 operating point.
+        """
+        for epoch in range(1, 6):
+            self.fb.observe_clean_batch(
+                [(0, context, 6000) for context in range(4)], epoch)
+        self.assertEqual(self.fb.infer_state.pool.n_obs_loss, 5)
+
+        self.fb.begin_epoch(6)
+        actions = deliver(self.fb, GapEvent(0, 2, 6, 0xFD71, 65536))
+
+        self.assertEqual(actions, ["QUARANTINE"])
+        self.assertEqual({context for _, _, _, context, _ in self.rec.installed}, {2})
+
     def test_healthy_sublink_is_not_quarantined(self):
         warm(self.fb)
         self.fb.begin_epoch(4)
@@ -223,6 +246,45 @@ class TestSublinkFeedback(unittest.TestCase):
             (1, 0, 0, 3, 1), (1, 1, 0, 3, 1),
             (1, 2, 0, 3, 1), (1, 3, 0, 3, 1),
         ], "an uplink fault must protect every destination sharing that directed link")
+
+    def test_quarantine_can_install_all_exact_keys_as_one_batch(self):
+        batches = []
+        feedback = SublinkFeedback(
+            self.rec.install, self.rec.remove,
+            install_many=lambda rows: batches.append(tuple(rows)))
+        warm(feedback)
+        feedback.begin_epoch(4)
+
+        deliver(feedback, GapEvent(2, 3, 4, 0xFFF0, 150000))
+
+        self.assertEqual(self.rec.installed, [], "the scalar compatibility path must not run")
+        self.assertEqual(batches, [(
+            (1, 0, 0, 3, 1), (1, 1, 0, 3, 1),
+            (1, 2, 0, 3, 1), (1, 3, 0, 3, 1),
+        )])
+
+    def test_failed_batch_does_not_commit_a_false_quarantined_state(self):
+        def fail(_rows):
+            raise RuntimeError("switch write failed")
+
+        feedback = SublinkFeedback(
+            self.rec.install, self.rec.remove, install_many=fail)
+        warm(feedback)
+        feedback.begin_epoch(4)
+        feedback.on_gap(GapEvent(2, 3, 4, 0xFFF0, 150000))
+        inference_before = feedback.infer_state
+
+        with self.assertRaisesRegex(RuntimeError, "switch write failed"):
+            feedback.flush_held()
+
+        state = feedback.state[(2 << 4) | 3]
+        self.assertEqual(state.state, HEALTHY)
+        self.assertEqual(state.gate_keys, ())
+        self.assertEqual(feedback.installs, 0)
+        self.assertIn((2 << 4) | 3, feedback.held,
+                      "failed hardware evidence must remain retryable")
+        self.assertIs(feedback.infer_state, inference_before,
+                      "failed actuation must not commit or duplicate inference evidence")
 
     def test_gate_key_expansion_covers_both_link_directions(self):
         self.assertEqual(sublink_feedback.gate_keys_for_sublink(2, 7), (
@@ -378,7 +440,8 @@ class TestBfrtAuditSteer(unittest.TestCase):
             FakeGC, FakeBfrt(table, "pipe.Ingress.tbl_audit_steer"), "target")
         writer.install(40001, spray=0)
         writer.remove(40001)
-        key = (("hdr.udp.dst_port", sublink_feedback.AUDIT_UDP_DST),
+        key = (("md.audit_src", 1),
+               ("hdr.udp.dst_port", sublink_feedback.AUDIT_UDP_DST),
                ("hdr.udp.src_port", 40001))
         self.assertEqual(table.added, [
             ("target", key, ("Ingress.set_audit_spray", (("spray", 0),))),
@@ -400,6 +463,17 @@ class TestBfrtAuditSteer(unittest.TestCase):
             writer.install(65536, spray=0)
         with self.assertRaisesRegex(ValueError, "spray"):
             writer.install(40001, spray=2)
+
+    def test_writer_key_matches_the_checked_in_current_bfrt_schema(self):
+        schema_path = (pathlib.Path(__file__).resolve().parents[2] /
+                       "p4/hw/schema/mcp_fabric_gate_event.bfrt.json")
+        schema = json.loads(schema_path.read_text())
+        table = next(t for t in schema["tables"]
+                     if t["name"] == "pipe.Ingress.tbl_audit_steer")
+        self.assertEqual(
+            [field["name"] for field in table["key"]],
+            ["md.audit_src", "hdr.udp.dst_port", "hdr.udp.src_port"],
+        )
 
 
 class TestReorderCredit(unittest.TestCase):

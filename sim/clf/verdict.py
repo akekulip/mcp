@@ -67,11 +67,11 @@ def compare(tx_mask, rx_mask):
     return tx_mask & ~rx_mask & 0xFFFF
 
 
-# A sublink is STARVED when arrivals fall below this fraction of departures. Both frontier
+# A sublink is STARVED when arrivals are at or below this fraction of departures. Both frontier
 # registers saturate at 255, so the ratio is only meaningful while RX is small -- which is
 # exactly the regime the rule is about. Saturation costs precision only where the verdict is
 # already unambiguous: if RX has saturated, the link is carrying traffic and is not starved.
-STARVED_RATIO = 8          # RX * 8 <= TX  =>  fewer than one arrival per eight departures
+STARVED_RATIO = 8          # RX * 8 <= TX  =>  at most one arrival per eight departures
 FRONTIER_SATURATION = 255
 
 
@@ -88,12 +88,9 @@ def verdict_counts(tx, rx, gap_seen=None, evidence_complete=True):
     the old encoding folded into HEALTHY, and it is reported separately rather than merged into
     the blackhole metric.
 
-    This rule is only sound because RX is sampled at the receiver's INGRESS. While RX was marked
-    in egress, the receiver's own traffic manager sat inside the measurement: a link that
-    delivered 400 of 400 packets registered at most ~6% of them when the receiver's downlink
-    queue was shaped (HW-CLF-FRONTIER-HOP.md). Under that placement a count-based rule would
-    have reported STARVED for a perfectly healthy link, which is precisely why the presence bit
-    -- insensitive, and therefore accidentally safe -- passed the congestion test.
+    This rule is only sound because RX is sampled at the receiver's INGRESS, before the receiver's
+    own traffic manager can make delivered packets look lost. With that placement, the inclusive
+    STARVED boundary is a statement about the link: while unsaturated, RX/TX <= 1/8 is STARVED.
     """
     if not evidence_complete:
         return Verdict.INCONCLUSIVE

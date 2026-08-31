@@ -8,7 +8,7 @@ from sim.sublink import feedback
 
 
 class FeedbackReportTest(unittest.TestCase):
-    def test_default_report_does_not_present_f6_attention_as_cw4_feedback(self):
+    def test_default_report_uses_measured_partial_loss_feedback_not_f6_attention(self):
         """The 97.4 us measurement is a same-switch congestion-attention result, not the
         downstream-C-W4-to-upstream-health-gate path this report is supposed to model.
         """
@@ -17,7 +17,10 @@ class FeedbackReportTest(unittest.TestCase):
             feedback.main()
         report = out.getvalue()
         self.assertNotIn("data plane, measured tau_fast", report)
-        self.assertIn("no end-to-end C-W4 feedback latency has been measured", report)
+        self.assertNotIn("97.4", report)
+        self.assertIn("4.998 ms is the measured partial-loss attributed-batch median", report)
+        self.assertIn("measured attributed batch median", report)
+        self.assertIn("minimal controller reference", report)
 
 
 if __name__ == "__main__":

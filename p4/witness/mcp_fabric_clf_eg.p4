@@ -1153,9 +1153,9 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
         const default_action = NoAction();
         /* In INGRESS md.hop names the hop the packet is AT: 0 = host injection (no
          * upstream link), 1 = arrived at the spine over the source->spine link,
-         * 2 = arrived at the destination leaf over the spine->leaf link.  (In EGRESS the
-         * same field names the NEXT hop, which is what made the egress version mark the
-         * source leaf's own departure as an arrival.)
+         * 2 = arrived at the destination leaf over the spine->leaf link.  In the old
+         * egress placement, the same field named the NEXT hop and could mark the
+         * source leaf's own departure as an arrival.
          *
          * Both are listed, matching tbl_tx_frontier: hop 1 is the arrival at the spine over
          * the source->spine link and hop 2 the arrival at the destination leaf over the
@@ -1399,23 +1399,9 @@ control Egress(inout eg_headers_t hdr, inout eg_md_t md,
      * Class 13: link_id and seq share a 32-bit container and their sources differ
      * (tbl_eg_vlink action data vs the SALU return), so they are written by two
      * actions in two tables — the csig_replace_a / csig_replace_b precedent. */
-    /* ===================== CONTEXT LIVENESS FRONTIER (CLF), receiver half ==========
-     * Recorded in EGRESS rather than ingress, deliberately.  The ingress placement
-     * compiles (12/4) but costs an ingress stage purely by DISPLACEMENT: the mark sits in
-     * the dependency chain behind md.wit_link and pushes tbl_audit_steer, tbl_attn,
-     * tbl_evid_fwd, tbl_final and the gap-event tables each one stage later, exhausting
-     * the last ingress stage for a table that is itself only 2 SRAM blocks.  Egress has
-     * eight stages free and sees every arrival, so the same evidence costs nothing scarce.
-     *
-     * It must run BEFORE tbl_wit_link, which overwrites hdr.witness.link_id with the
-     * DOWNSTREAM sublink for the next hop.  Read first, and the field still names the
-     * link the packet arrived on -- which is the link whose liveness we are recording.
-     *
-     * Indexed by that sublink so no one-hot 1 << ctx is needed; this compiler cannot
-     * shift a runtime value.  The control plane packs the per-link 16-bit mask on read,
-     * so the batched record still crosses the wire. */
-
-    /* CLF source half.  TX_frontier records which contexts actually DEPARTED on a directed
+    /* ===================== CONTEXT LIVENESS FRONTIER (CLF), sender half ============
+     * The receiver half is in ingress above, before the receiver's TM.  This egress half
+     * records which contexts actually DEPARTED on a directed
      * link.  It is deliberately in egress, i.e. POST-TM: a packet dropped by the traffic
      * manager never reaches here, so congestion loss inside our own switch can never be
      * mistaken for the link having gone dark.  That is the difference between "we sent it"

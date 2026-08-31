@@ -117,15 +117,13 @@ def is_contextual_program(program, bfrt=None):
     The compiled schema already knows the answer: a contextual program's set_eg_vlink action
     takes a `vlink_base` parameter (the pre-shifted value, supplied because the compiler
     cannot shift a runtime action parameter).  Ask the schema, not a list."""
-    if bfrt is not None:
-        try:
-            t = bfrt.table_get("pipe.Egress.tbl_eg_vlink")
-            for act in t.info.action_name_list_get():
-                if "set_eg_vlink" in act:
-                    return "vlink_base" in t.info.data_field_name_list_get(act)
-        except Exception:
-            pass
-    return program in CONTEXTUAL_PROGRAMS
+    if bfrt is None:
+        return program in CONTEXTUAL_PROGRAMS
+    t = bfrt.table_get("pipe.Egress.tbl_eg_vlink")
+    for act in t.info.action_name_list_get():
+        if "set_eg_vlink" in act:
+            return "vlink_base" in t.info.data_field_name_list_get(act)
+    raise RuntimeError("live BFRT schema has no set_eg_vlink action")
 
 
 def vlink_up(leaf, spine):
@@ -181,6 +179,82 @@ def eg_vlink_action_fields(vlink, contextual=False):
     if contextual:
         fields += (("vlink_base", vlink << 4),)
     return fields
+
+
+def _plain_value(value):
+    if isinstance(value, dict) and "value" in value:
+        return value["value"]
+    return value
+
+
+def _row_field(mapping, name):
+    try:
+        return _plain_value(mapping[name])
+    except KeyError as e:
+        raise ValueError(f"malformed tbl_eg_vlink row: missing {name}") from e
+
+
+def _row_action(row):
+    action = row.get("action")
+    if action is None:
+        data = row.get("data", {})
+        action = data.get("$ACTION_NAME") or data.get("action_name")
+    return action
+
+
+def _row_data(row):
+    data = row.get("data", {})
+    # BFRT adds entry metadata to ``Data.to_dict()``.  It is not action data
+    # and varies by SDK/runtime, so exclude the one documented field while
+    # retaining strict rejection of every unknown action parameter.
+    ignored = {"$ACTION_NAME", "action_name", "is_default_entry"}
+    return {name: _plain_value(data[name]) for name in data
+            if name not in ignored}
+
+
+def expected_eg_vlink_snapshot(contextual=False):
+    return {
+        (port, qid): {
+            "action": "Egress.set_eg_vlink",
+            "data": dict(eg_vlink_action_fields(vlink, contextual)),
+        }
+        for port, qid, vlink in plan_eg_vlink()
+    }
+
+
+def verify_eg_vlink_snapshot(rows, contextual=False):
+    """Verify a SDK-free snapshot of pipe.Egress.tbl_eg_vlink exactly.
+
+    ``rows`` is intentionally plain data so unit tests can exercise the contract
+    without a BFRT runtime:
+      {"key": {"eg_intr_md.egress_port": {"value": 164},
+               "eg_intr_md.egress_qid": {"value": 0}},
+       "action": "Egress.set_eg_vlink",
+       "data": {"vlink": 0, "vlink_base": 0}}
+    """
+    expected = expected_eg_vlink_snapshot(contextual)
+    seen = {}
+    for row in rows:
+        key = row.get("key", {})
+        cur = (_row_field(key, "eg_intr_md.egress_port"),
+               _row_field(key, "eg_intr_md.egress_qid"))
+        if cur not in expected:
+            raise ValueError(f"stale row in tbl_eg_vlink: {cur}")
+        if cur in seen:
+            raise ValueError(f"duplicate row in tbl_eg_vlink: {cur}")
+        seen[cur] = row
+        want = expected[cur]
+        got_action = _row_action(row)
+        if got_action != want["action"]:
+            raise ValueError(f"wrong action for tbl_eg_vlink {cur}: {got_action!r}")
+        got_data = _row_data(row)
+        if got_data != want["data"]:
+            raise ValueError(f"wrong data for tbl_eg_vlink {cur}: got {got_data!r} want {want['data']!r}")
+
+    missing = sorted(set(expected) - set(seen))
+    if missing:
+        raise ValueError(f"missing row in tbl_eg_vlink: {missing[0]}")
+    return f"tbl_eg_vlink verified: {len(expected)} exact rows"
 
 
 def plan_gate():
@@ -295,6 +369,27 @@ def install_eg_vlink(gc, bfrt, tgt, contextual=False):
                                           gc.KeyTuple("eg_intr_md.egress_qid", cur[1])])])
             stale += 1
     print(f"tbl_eg_vlink: {len(plan_eg_vlink())} rows installed, {stale} stale rows removed")
+    verify_live_eg_vlink(bfrt, tgt, contextual)
+
+
+def read_eg_vlink_snapshot(bfrt, tgt, from_hw=True):
+    t = bfrt.table_get("pipe.Egress.tbl_eg_vlink")
+    rows = []
+    for d, k in list(t.entry_get(tgt, flags={"from_hw": from_hw})):
+        dd = d.to_dict()
+        rows.append({
+            "key": k.to_dict(),
+            "action": dd.get("$ACTION_NAME") or dd.get("action_name"),
+            "data": dd,
+        })
+    return rows
+
+
+def verify_live_eg_vlink(bfrt, tgt, contextual=False):
+    msg = verify_eg_vlink_snapshot(read_eg_vlink_snapshot(bfrt, tgt, from_hw=True),
+                                   contextual=contextual)
+    print(msg)
+    return msg
 
 
 def set_thresh_evid(gc, bfrt, tgt, loss_lo, rtt_lo):
@@ -381,6 +476,8 @@ def main():
             set_thresh_csig(gc, bfrt, tgt, 4096)        # 4096 cells ~ 320 KB queued
             install_mirrors(gc, bfrt, tgt, a.collector)
             install_evid_fwd(gc, bfrt, tgt)
+        elif a.cmd in ("verify-eg-vlink", "verify_eg_vlink"):
+            verify_live_eg_vlink(bfrt, tgt, contextual=is_contextual_program(a.program, bfrt))
         elif a.cmd == "seed":
             seed_attn(gc, bfrt, tgt, int(a.args[0]))
         elif a.cmd == "params":

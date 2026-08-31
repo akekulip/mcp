@@ -99,6 +99,12 @@ def test_starved_threshold_is_the_declared_ratio():
     assert verdict_counts(tx, boundary + 1) is Verdict.HEALTHY
 
 
+def test_starved_boundary_is_inclusive_at_one_eighth():
+    """The implemented Phase A boundary is RX/TX <= 1/8 while unsaturated."""
+    assert verdict_counts(64, 8) is Verdict.STARVED
+    assert verdict_counts(64, 9) is Verdict.HEALTHY
+
+
 def test_impossible_still_reported_not_classified():
     assert verdict_counts(0, 7) is Verdict.IMPOSSIBLE
 

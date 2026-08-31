@@ -79,6 +79,8 @@ CONST_TABLE_ATTR = "ConstTable"
 EXEMPT: Dict[str, str] = {
     "tbl_fail": "fault injector; setup_skeleton.clear_fail() empties it during `up`, "
                 "and hw_adapter.py:496 reads its counters as ground truth",
+    "tbl_eg_fail": "post-stamp fault injector; empty is the healthy state and hardware "
+                   "campaigns arm exact sublink/sequence ranges only for controlled trials",
     "tbl_health_gate": "quarantine state written at run time by "
                        "controller/sublink_feedback.py:257; empty = nothing quarantined",
     "tbl_audit_steer": "armed per audit round by controller/sublink_feedback.py:287, "

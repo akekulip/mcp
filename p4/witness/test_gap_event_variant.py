@@ -52,6 +52,28 @@ class TestGapEventVariant(unittest.TestCase):
             self.source,
         )
 
+    def test_audit_bypass_requires_authorized_ingress_provenance(self) -> None:
+        self.assertIn("bit<16> audit_src;", self.source)
+        self.assertIn(
+            "action set_role(bit<16> role, bit<16> src_leaf, bit<16> audit_src)",
+            self.source,
+        )
+        self.assertIn("md.audit_src     : exact;", self.source)
+        self.assertIn("const default_action = set_role(ROLE_OTHER, 0, 0);", self.source)
+
+    def test_fault_injector_drops_after_the_witness_sequence_is_consumed(self) -> None:
+        self.assertIn("table tbl_eg_fail", self.source)
+        self.assertIn("hdr.witness.seq : range;", self.source)
+        self.assertIn("DirectCounter<bit<64>>(CounterType_t.PACKETS_AND_BYTES) eg_fail_ctr;", self.source)
+        self.assertLess(
+            self.source.index("tbl_wit_link.apply();"),
+            self.source.index("tbl_eg_fail.apply();"),
+        )
+        self.assertLess(
+            self.source.index("tbl_eg_fail.apply();"),
+            self.source.index("tbl_csig_diff.apply();"),
+        )
+
     def test_capsule_parser_uses_same_width_copy_before_low_nibble_composition(self) -> None:
         self.assertIn("bit<8>  ctx;        // capsule read off the shim", self.source)
         self.assertIn("md.ctx = hdr.fabric.pad;", self.source)

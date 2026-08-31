@@ -502,11 +502,127 @@ AUDIT_STEER = """
 
     table tbl_audit_steer {
         key = {
+            md.audit_src     : exact;   /* H35: controller provenance, from tbl_port_role */
             hdr.udp.dst_port : exact;
             hdr.udp.src_port : exact;
         }
         actions = { set_audit_spray; @defaultonly NoAction; }
         size = 16;
+        const default_action = NoAction();
+    }
+"""
+
+AUDIT_PROVENANCE = """
+    /* ---- H35: provenance for the audit path (campaign blocker B5) ---------------
+     * tbl_audit_steer admits a packet to a DELIBERATE tbl_health_gate bypass -- that
+     * bypass is how probation traffic reaches a sublink the gate has emptied -- on
+     * (udp.dst_port == 4792, udp.src_port == declared_token) alone.  Nothing in the
+     * key said the packet came from the controller, so any host that could emit UDP
+     * to 4792 and guess a 16-bit token could push traffic onto a link the system had
+     * just decided was faulty.  That is an authorization boundary with no
+     * authentication on it, and a selective-drop adversary wants exactly that
+     * primitive.  md.audit_src carries the missing provenance.
+     *
+     * The discriminator, chosen after rejecting the obvious one.  md.role does NOT
+     * work: in this testbed the controller shares dp9 with production traffic and
+     * dp9 must stay ROLE_HOST (tbl_vlink and the injected-fabric-frame drop both key
+     * on it), and Hulk on dp10 is ROLE_HOST too -- so a role key would admit both
+     * host ports and authenticate nothing.  The finest provenance the chip actually
+     * has is the ingress dev_port, which tbl_port_role already matches on, so the
+     * permission rides as action data on the row that is already there.
+     *
+     * Why action data and not a second table keyed on ingress_port: measured on
+     * bf-p4c 9.13.1, a separate tbl_audit_port costs ONE INGRESS STAGE (11 -> 12)
+     * even though the critical path stays at 11 -- tbl_audit_steer slips from stage
+     * 4 to stage 5 and every table below it shifts down.  As action data it is free.
+     *
+     * Why the flag is not folded into md.role instead: `md.role == ROLE_HOST` is a
+     * gateway predicate and tbl_vlink keys on md.role, so a new role value or a spare
+     * bit in that field would change both.
+     *
+     * Why this is a PER-PORT permission and not simply "the controller's port":
+     * tbl_audit_steer re-fires on EVERY hop.  The ingress parser reaches hdr.udp on
+     * fabric passes as well as at the source leaf, and md.is_audit is re-derived at
+     * each hop -- the audit RECEIPT mirror at the destination leaf is gated on
+     * `md.hop != 0 && md.is_audit != 0`.  So the LOOP ports must also carry
+     * audit_src = 1 or P3 liveness evidence disappears while the program still
+     * compiles.  The bypass itself is a hop-0 decision (`md.hop == 0 &&
+     * md.is_audit == 0` guards tbl_health_gate) and a frame carrying the internal
+     * fabric ethertype is dropped on arrival at a host port, so an off-path host can
+     * only ever enter at hop 0 -- which is the point this authenticates.
+     *
+     * WHAT THIS GUARANTEES, AND WHERE:
+     *   deployment (dedicated controller port, audit_src = 1 on it and on the fabric
+     *     links only): the bypass is unreachable from every leaf host port.  This is
+     *     the property H35 asks for.
+     *   THIS EMULATION: the controller and production traffic share dp9, so dp9 must
+     *     carry audit_src = 1 and any process on Vision retains the old capability.
+     *     The surface shrinks from "any host anywhere on the fabric" (Hulk on dp10
+     *     included) to "the one machine on the controller's port"; it does not go to
+     *     zero, and the testbed cannot demonstrate the deployment guarantee.  Do not
+     *     claim that it does.
+     *
+     * CONTROL PLANE, and this is the H39b failure mode: set_role's arity changes
+     * from (role, src_leaf) to (role, src_leaf, audit_src).  A writer that still
+     * passes two arguments fails as wrong action arity or a silently empty table.
+     * tbl_port_role's default is set_role(ROLE_OTHER, 0, 0), so an unclassified port
+     * has no audit path at all -- fail-closed -- and a switch whose role rows have
+     * not been reinstalled has no audit path either. */
+"""
+
+EVENT_EG_FAIL = """
+    /* ---- H39a: POST-STAMP fault injection (campaign blocker B1) -----------------
+     * The ingress injector tbl_fail cannot produce a witness gap.  It runs AFTER
+     * tbl_wit_check, so a packet is counted by the downstream witness and only then
+     * discarded, and the next arrival lands exactly where the witness expects: the
+     * sequence stays contiguous and no discontinuity is ever observable.  A gap
+     * requires loss strictly BETWEEN the upstream egress deparser and the downstream
+     * ingress check, and until now no table occupied that window.
+     *
+     * This table does.  It runs immediately after tbl_wit_stamp / tbl_wit_link, so
+     * the packet has already consumed a sequence number from reg_wit_seq and already
+     * carries it in hdr.witness.seq; eg_dprsr_md.drop_ctl then discards the frame in
+     * the egress deparser.  The counter advances, the packet never arrives, and the
+     * next packet on that sublink shows the downstream witness a hole.
+     *
+     * Key shape, deliberately:
+     *   md.sublink : exact  — the injected fault IS a behavioural-sublink fault, on
+     *       the SAME index (vlink << 4 | ctx) the witness stamps and checks, so the
+     *       injector and the detector cannot disagree about which stratum a packet
+     *       is in.  It is written by tbl_eg_vlink + tbl_ctx_index, both upstream.
+     *   hdr.witness.seq : range  — one field, both modes.  A width-1 range is a
+     *       controller-armed deterministic ONE-SHOT (read reg_wit_seq[sublink], arm
+     *       [S,S] a little ahead, drop exactly the packet that draws S) which is what
+     *       the end-to-end latency reps need; a range of width p*65536 is a periodic
+     *       rate for the lifecycle figure.  It is the value THIS hop just stamped,
+     *       not an upstream one: the enclosing hdr.csig.isValid() gate is exactly the
+     *       NXT_CSIG condition under which wit_stamp ran (the egress parser extracts
+     *       csig and witness together, only on NXT_CSIG).
+     *
+     * DirectCounter, not an assumption: "the injector fired N times" must be readable
+     * independently of "the witness saw N gaps", because equating them is precisely
+     * the thing the campaign is trying to measure.  Only eg_fail_drop counts; a miss
+     * is not an event.
+     *
+     * Class 2: one 16-bit range key consumes 4 of the 5 available range nibbles.  DO
+     * NOT add a second range field to this table.  A Bernoulli (rate-without-arming)
+     * arm needs its own table with its own Random<bit<16>>; the precedent is
+     * mcp_fabric_w4_egdrop.p4 tbl_eg_fail. */
+    DirectCounter<bit<64>>(CounterType_t.PACKETS_AND_BYTES) eg_fail_ctr;
+
+    action eg_fail_drop() {
+        eg_dprsr_md.drop_ctl = 1;
+        eg_fail_ctr.count();
+    }
+
+    table tbl_eg_fail {
+        key = {
+            md.sublink      : exact;
+            hdr.witness.seq : range;
+        }
+        actions  = { eg_fail_drop; @defaultonly NoAction; }
+        counters = eg_fail_ctr;
+        size     = 32;
         const default_action = NoAction();
     }
 """
@@ -817,14 +933,37 @@ def build(variant, arm=False, egdrop=False, ctx=False, capsule=False, gate=False
                 "const bit<16> AUDIT_UDP_DST = 4792;", "P3 audit UDP constant")
         t = sub(t, ANCHOR_METADATA, EVENT_TYPES + ANCHOR_METADATA, "P3 event types")
         t = sub(t, "    bit<16> do_measure;",
-                "    bit<16> do_measure;\n    bit<16> is_audit;   // reserved P3 probation/liveness packet",
+                "    bit<16> do_measure;\n"
+                "    bit<16> is_audit;   // reserved P3 probation/liveness packet\n"
+                "    bit<16> audit_src;  // H35: 1 = this ingress port may use the audit path (set_role action data)",
                 "P3 audit metadata")
         t = sub(t, "    bit<16> wit_gap;     // expected_seq - observed_seq; 0 <=> no discontinuity",
                 "    wit_result_t wit_result; // gap plus saturating arrivals since prior gap",
                 "P3 event metadata")
         t = sub(t, "        md.do_measure = 0;",
-                "        md.do_measure = 0;\n        md.is_audit   = 0;",
+                "        md.do_measure = 0;\n"
+                "        md.is_audit   = 0;\n"
+                "        md.audit_src  = 0;",
                 "P3 audit parser init")
+        t = sub(t,
+                "    action set_role(bit<16> role, bit<16> src_leaf) {\n"
+                "        md.role     = role;\n"
+                "        md.src_leaf = src_leaf;\n"
+                "        md.tstamp   = ig_intr_md.ingress_mac_tstamp;   // for mirror_h.tstamp (H7 tau_fast)\n"
+                "    }",
+                "    action set_role(bit<16> role, bit<16> src_leaf, bit<16> audit_src) {\n"
+                "        md.role      = role;\n"
+                "        md.src_leaf  = src_leaf;\n"
+                "        md.audit_src = audit_src;\n"
+                "        md.tstamp   = ig_intr_md.ingress_mac_tstamp;   // for mirror_h.tstamp (H7 tau_fast)\n"
+                "    }",
+                "P3 audit provenance action data")
+        t = sub(t, "        const default_action = set_role(ROLE_OTHER, 0);",
+                "        const default_action = set_role(ROLE_OTHER, 0, 0);",
+                "P3 audit provenance default")
+        t = sub(t, "\n    /* ---- S1: destination leaf",
+                AUDIT_PROVENANCE.lstrip("\n") + "\n\n    /* ---- S1: destination leaf",
+                "P3 audit provenance rationale")
         t = sub(t, "        md.wit_gap    = 0;",
                 "        md.wit_result.gap = 0;\n        md.wit_result.observed = 0;",
                 "P3 event parser init")
@@ -832,6 +971,15 @@ def build(variant, arm=False, egdrop=False, ctx=False, capsule=False, gate=False
                 "P3 audit steering")
         t = sub(t, ANCHOR_IG_INSERT, GAP_EVENT_ACTION.lstrip("\n") + "\n" + ANCHOR_IG_INSERT,
                 "P3 event action")
+        t = sub(t, "    action set_eg_vlink(bit<16> vlink, bit<16> vlink_base) {",
+                EVENT_EG_FAIL.lstrip("\n") +
+                "\n    action set_eg_vlink(bit<16> vlink, bit<16> vlink_base) {",
+                "P3 post-stamp fault injection")
+        t = sub(t, "            tbl_wit_link.apply();\n            tbl_csig_diff.apply();",
+                "            tbl_wit_link.apply();\n"
+                "            tbl_eg_fail.apply();     /* H39a: drop AFTER the sequence is consumed */\n"
+                "            tbl_csig_diff.apply();",
+                "P3 post-stamp fault injection apply")
         t = sub(t, "                tbl_spray_mode.apply();\n                tbl_health_gate.apply();\n            }",
                 "                tbl_spray_mode.apply();\n"
                 "            }\n"
@@ -878,7 +1026,113 @@ VARIANTS = [
 # compile but do not arm -- md.exceed in wit_loss, and arm-in-wit_measure/clear-in-wit_ok --
 # were validated as broken on the model and are recorded in p4/ptf/PTF-MODEL.md; their source
 # files were removed so nothing regenerates or builds them by accident.
-for name, kw in VARIANTS:
-    src = build(**kw)
-    (HERE / (name + ".p4")).write_text(src)
-    print("wrote %-26s %4d lines" % (name + ".p4", len(src.splitlines())))
+
+CLF_RX_DECL = '''    Register<bit<8>, bit<16>>(512, 0) reg_rx_frontier;
+    RegisterAction<bit<8>, bit<16>, bit<8>>(reg_rx_frontier) rx_seen = {
+        void apply(inout bit<8> v, out bit<8> rv) {
+            rv = v;
+            v  = v |+| 1;      // saturating at 255; see tbl_rx_frontier
+        }
+    };
+
+    action rx_frontier_mark() { md.clf_rx_prev = rx_seen.execute(md.clf_idx); }
+
+    table tbl_rx_frontier {
+        key     = { md.hop : exact; }
+        actions = { rx_frontier_mark; @defaultonly NoAction; }
+        size    = 8;
+        const default_action = NoAction();
+        /* In INGRESS md.hop names the hop the packet is AT: 0 = host injection (no
+         * upstream link), 1 = arrived at the spine over the source->spine link,
+         * 2 = arrived at the destination leaf over the spine->leaf link.  In the old
+         * egress placement, the same field named the NEXT hop and could mark the
+         * source leaf's own departure as an arrival.
+         *
+         * Both are listed, matching tbl_tx_frontier: hop 1 is the arrival at the spine over
+         * the source->spine link and hop 2 the arrival at the destination leaf over the
+         * spine->leaf link.  See tbl_tx_frontier for why these were briefly reverted to
+         * {1} and why that reasoning was wrong (tbl_eg_vlink was empty). */
+        const entries = { 1 : rx_frontier_mark(); 2 : rx_frontier_mark(); }
+    }
+
+'''
+
+CLF_RX_APPLY = '''            md.clf_idx = md.wit_link;
+            if (hdr.fabric.clf_bank != 0) {
+                md.clf_idx = md.clf_idx | 16w0x100;
+            }
+            tbl_rx_frontier.apply();
+'''
+
+CLF_TX_DECL = '''    Register<bit<8>, bit<16>>(512, 0) reg_tx_frontier;
+    RegisterAction<bit<8>, bit<16>, bit<8>>(reg_tx_frontier) tx_seen = {
+        void apply(inout bit<8> v, out bit<8> rv) {
+            rv = v;
+            v  = v |+| 1;      // saturating at 255, to match reg_rx_frontier
+        }
+    };
+
+    action tx_frontier_mark() { md.clf_tx_prev = tx_seen.execute(md.clf_tx_idx); }
+
+    table tbl_tx_frontier {
+        key     = { md.hop : exact; }
+        actions = { tx_frontier_mark; @defaultonly NoAction; }
+        size    = 8;
+        const default_action = NoAction();
+        /* md.hop in EGRESS is the hop the packet is being sent TO: ingress has already
+         * advanced hdr.fabric.hop (act_enter -> 1, act_transit -> 2).  So md.hop == 1 is
+         * the source leaf committing onto the source->spine link and md.hop == 2 is the
+         * spine committing onto the spine->leaf link.  An entry for 0 is dead: nothing
+         * presents md.hop == 0 in egress.
+         *
+         * Both hops that put a packet onto a directed link commit it: md.hop == 1 is the
+         * source leaf committing onto the source->spine link, md.hop == 2 the spine
+         * committing onto the spine->leaf link.
+         *
+         * These were briefly reverted to {1} after 10 probe packets read TX=20 RX=20, which
+         * was diagnosed as the second link having no distinct sublink identity.  The
+         * doubling was real but the diagnosis was wrong: tbl_eg_vlink was simply EMPTY,
+         * because it is installed by setup_attention.py and bring-up only ran
+         * setup_skeleton.py.  Its miss action is set_eg_vlink(0, 0), so every packet
+         * reported virtual link 0 and both hops indexed the same slot.  With the table
+         * populated the two hops resolve to different vlinks and each link gets its own
+         * counters.  bringup.sh now installs and verifies that table. */
+        const entries = { 1 : tx_frontier_mark(); 2 : tx_frontier_mark(); }
+    }
+
+'''
+
+CLF_TX_APPLY = '''            md.clf_tx_idx = md.sublink;
+            if (hdr.fabric.clf_bank != 0) {
+                md.clf_tx_idx = md.clf_tx_idx | 16w0x100;
+            }
+            tbl_tx_frontier.apply();
+'''
+
+
+def derive_noclf_from_clf(source):
+    """Remove only the CLF frontier measurement code from the CLF source."""
+    t = source
+    for old, what in (
+            (CLF_RX_DECL, "CLF ingress RX frontier declaration"),
+            (CLF_RX_APPLY, "CLF ingress RX frontier apply"),
+            (CLF_TX_DECL, "CLF egress TX frontier declaration"),
+            (CLF_TX_APPLY, "CLF egress TX frontier apply")):
+        t = sub(t, old, "", what)
+    return t
+
+
+def main():
+    for name, kw in VARIANTS:
+        src = build(**kw)
+        (HERE / (name + ".p4")).write_text(src)
+        print("wrote %-26s %4d lines" % (name + ".p4", len(src.splitlines())))
+
+    clf_source = (HERE / "mcp_fabric_clf_eg.p4").read_text()
+    noclf = derive_noclf_from_clf(clf_source)
+    (HERE / "mcp_fabric_noclf.p4").write_text(noclf)
+    print("wrote %-26s %4d lines" % ("mcp_fabric_noclf.p4", len(noclf.splitlines())))
+
+
+if __name__ == "__main__":
+    main()

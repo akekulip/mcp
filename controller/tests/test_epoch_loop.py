@@ -6,6 +6,8 @@ a minimal fake honouring its contract is installed in sys.modules.
 """
 import csv
 import os
+import pathlib
+import socket
 import struct
 import sys
 import tempfile
@@ -82,6 +84,21 @@ class TestParseCopy(unittest.TestCase):
         self.assertEqual(c["inner_etype"], 0x0800)
         self.assertIsNone(c["fabric"]); self.assertIsNone(c["csig"]); self.assertIsNone(c["worst_tdelta_ns"])
         self.assertEqual(c["length"], 30 + 14 + 20)
+
+    def test_plain_inner_exposes_exact_ipv4_udp_probe_identity(self) -> None:
+        ipv4 = struct.pack(
+            "!BBHHHBBH4s4s", 0x45, 0, 28, 0, 0, 64, 17, 0,
+            socket.inet_aton("10.0.1.1"), socket.inet_aton("10.0.1.3"))
+        udp = struct.pack("!HHHH", 41000, 4449, 8, 0)
+        inner = bytes(12) + b"\x08\x00" + ipv4 + udp
+
+        copy = hw.parse_copy(self._mirror(1, 1, 5, 4096, 0x1, 100) + inner)
+
+        self.assertEqual(copy["ipv4"], {
+            "diffserv": 0, "total_len": 28, "protocol": 17,
+            "src": "10.0.1.1", "dst": "10.0.1.3",
+        })
+        self.assertEqual(copy["udp"], {"src_port": 41000, "dst_port": 4449})
 
     def test_sid1_spine_copy_fabric_csig(self) -> None:
         fabric = struct.pack("!HHHHBBBB", 2, 1, 1, 5, 0, 1, 1, 0)         # nxt == 1 -> csig follows
@@ -450,7 +467,7 @@ class TestProgramFlag(unittest.TestCase):
                          ("mcp_fabric_gate_event", ["up"]))
         # setup_attention builds its parser inline in main(), so its convention is checked
         # at the source: the same flag spelling, defaulting to the same program.
-        src = open(attention.__file__).read()
+        src = pathlib.Path(attention.__file__).read_text()
         self.assertIn('ap.add_argument("--program", default=PROG,', src)
 
 

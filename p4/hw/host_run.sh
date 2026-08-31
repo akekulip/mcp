@@ -22,7 +22,13 @@ AS_ROOT=1
 TARGET="${1:?usage: host_run.sh [--user] <vision|hulk|IP> '<command>'}"; shift
 CMD="${*:?no command given}"
 
-set -a; . "$REPO/.env"; set +a
+if [ -f "$REPO/.env" ]; then
+    set -a
+    # shellcheck source=/dev/null
+    . "$REPO/.env"
+    set +a
+fi
+# shellcheck source=/dev/null
 . "$HOME/.lab_env" 2>/dev/null || true
 : "${SSHPASS:?SSHPASS not set — source ~/.lab_env}"
 : "${HOST_SUDO_PASS:?HOST_SUDO_PASS not set — see .env}"
@@ -45,11 +51,33 @@ else
         "bash -c $(printf '%q' "$CMD") > $REMOTE_OUT 2>&1; echo \$? > $REMOTE_OUT.rc" >/dev/null 2>&1
 fi
 
-# fetch output and exit status separately, then remove them from the host
-sshpass -e ssh -o StrictHostKeyChecking=no "$USER_NAME@$IP" \
+# Fetch output and exit status separately, then remove them from the host.  Keep the
+# SSH status: piping directly through tr used to mask fetch failures.  Also fail closed
+# if the remote .rc file is absent; `exit ---RC---` previously hid the real harness
+# failure behind bash's "numeric argument required" diagnostic.
+LOCAL_RAW="/tmp/host_run.raw.$$"
+LOCAL_OUT="/tmp/host_run.local.$$"
+if ! sshpass -e ssh -o StrictHostKeyChecking=no "$USER_NAME@$IP" \
     "cat $REMOTE_OUT 2>/dev/null; echo '---RC---'; cat $REMOTE_OUT.rc 2>/dev/null; \
-     rm -f $REMOTE_OUT $REMOTE_OUT.rc" 2>/dev/null | tr -d '\r' > "/tmp/host_run.local.$$"
-sed '/^---RC---$/,$d' "/tmp/host_run.local.$$"
-RC=$(sed -n '/^---RC---$/,$p' "/tmp/host_run.local.$$" | tail -1)
-rm -f "/tmp/host_run.local.$$"
-exit "${RC:-1}"
+     rm -f $REMOTE_OUT $REMOTE_OUT.rc" > "$LOCAL_RAW" 2>/dev/null; then
+    rm -f "$LOCAL_RAW" "$LOCAL_OUT"
+    echo "host_run: could not fetch remote output or exit status" >&2
+    exit 1
+fi
+tr -d '\r' < "$LOCAL_RAW" > "$LOCAL_OUT"
+rm -f "$LOCAL_RAW"
+
+sed '/^---RC---$/,$d' "$LOCAL_OUT"
+RC=$(sed -n '/^---RC---$/,$p' "$LOCAL_OUT" | sed '1d')
+rm -f "$LOCAL_OUT"
+case "$RC" in
+    ''|*[!0-9]*)
+        echo "host_run: missing or invalid remote exit status" >&2
+        exit 1
+        ;;
+esac
+[ "$RC" -le 255 ] || {
+    echo "host_run: missing or invalid remote exit status" >&2
+    exit 1
+}
+exit "$RC"

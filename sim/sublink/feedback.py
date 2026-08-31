@@ -6,15 +6,18 @@ decision lands the moment the evidence exists. It does not. The downstream witne
 but the spray choice is made UPSTREAM, so something has to carry the event back, and production
 keeps flowing onto the faulty sublink until it arrives.
 
-The repository has measured controller-path references, but it has NOT measured the end-to-end
-path required here (downstream C-W4 event -> event transport -> upstream health-table update):
+The repository now has one end-to-end partial-loss measurement and two older controller-path
+references:
 
+* 4.998 ms: median downstream gap-event -> exact first packet observed on the backup, 20 Tofino
+  trials with a targeted four-sublink census and one four-row BFRT batch;
 * 106.6 ms: median of the existing full-sweep Python loop;
 * 2.20 ms: a minimal one-slot register read+write path.
 
-Neither is the actual downstream-C-W4-event -> P2-table-update path. In particular, the 97.4 us F6
-number used by an older version is a same-switch congestion-attention reaction and cannot be used
-as C-W4 loss feedback. ``--candidate-fast-us`` adds an explicitly unmeasured design target.
+Only 4.998 ms is the actual downstream-C-W4-event -> P2-gate -> backup-packet path. In particular,
+the 97.4 us F6 number used by an older version is a same-switch congestion-attention reaction and
+cannot be used as C-W4 loss feedback. ``--candidate-fast-us`` adds an explicitly unmeasured design
+target.
 
 Detection time remains a sequential-test approximation. Flapping and stale-event rates are not
 modelled here; they require replay through the implemented epoch state machine and event transport.
@@ -25,6 +28,7 @@ from dataclasses import dataclass
 
 TAU_SWEEP_S = 0.1066
 TAU_MIN_SLOT_S = 0.00220
+TAU_MEASURED_S = 0.004998
 LINK_BPS = 25e9
 MTU = 1500
 PKT_RATE = LINK_BPS / (MTU * 8)      # ~2.08 M packets/s on a 25 G link
@@ -68,13 +72,14 @@ def main():
 
     paths = [("instantaneous (lower bound)", 0.0),
              ("minimal controller reference", TAU_MIN_SLOT_S),
+             ("measured attributed batch median", TAU_MEASURED_S),
              ("full-sweep controller reference", TAU_SWEEP_S)]
     if a.candidate_fast_us is not None:
         paths.append(("UNMEASURED candidate fast path", a.candidate_fast_us / 1e6))
     print(f"# 25 G link, {MTU} B packets = {PKT_RATE/1e6:.2f} M pkt/s; affected context carries "
           f"{100*a.share:.0f}% of them")
-    print("# no end-to-end C-W4 feedback latency has been measured; nonzero defaults are "
-          "controller-path references, not P3 results\n")
+    print("# 4.998 ms is the measured partial-loss attributed-batch median; 2.20 ms and "
+          "106.6 ms remain controller-path references\n")
     print("| fault rate | detection time | feedback | unsafe packets | feedback share of exposure |")
     print("|---|---|---|---|---|")
     rows = {}
@@ -86,10 +91,10 @@ def main():
             print(f"| {p:.0e} | {o.detect_s*1e3:8.2f} ms | {name:32s} | {o.unsafe:10.1f} | "
                   f"{100*frac:5.1f} % |")
         sweep = rows[(p, "full-sweep controller reference")].unsafe
-        minimal = rows[(p, "minimal controller reference")].unsafe
-        gain = (sweep - minimal) / sweep * 100 if sweep else 0.0
-        print(f"|  | | **scope sensitivity** | **{sweep-minimal:.1f} packets** | **{gain:.1f}% comes "
-              f"from choosing a full sweep rather than an attributed update** |")
+        measured = rows[(p, "measured attributed batch median")].unsafe
+        gain = (sweep - measured) / sweep * 100 if sweep else 0.0
+        print(f"|  | | **scope sensitivity** | **{sweep-measured:.1f} packets** | **{gain:.1f}% comes "
+              f"from choosing a full sweep rather than the measured attributed batch** |")
 
 
 if __name__ == "__main__":

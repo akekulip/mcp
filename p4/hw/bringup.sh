@@ -11,9 +11,11 @@
 #      a bare nohup closes stdin and bf_switchd exits (H11).
 #   4. Wait for the bfrt gRPC listener.  Some SDE builds omit the expected readiness
 #      log line, so the socket is authoritative and the log is corroboration only.
-#   5. Run  setup_skeleton.py --program <program> up .
-#   6. Verify port state on BOTH sides of every cage-5/cage-6 loop pair, reading the
-#      D_P (dev_port) column.
+#   5. Verify the sealed setup scripts shipped by deploy.sh, then run
+#      setup_skeleton.py --program <program> up .
+#   6. Wait a bounded interval for cold-link training, then verify port state on
+#      BOTH sides of every cage-5/cage-6 loop pair, reading the D_P (dev_port)
+#      column.
 #
 # EXPECTED AND NOT A BUG: a cold bf_switchd load has NO $PORT entries at all, so
 # between step 3 and step 5 nothing forwards and every port query is empty.  That is
@@ -21,7 +23,8 @@
 # printed loudly below so nobody spends an hour debugging it.
 #
 # Usage:
-#   p4/hw/bringup.sh <program> [--dry-run] [--switch user@host] [--ready-timeout N]
+#   p4/hw/bringup.sh <program> [--dry-run] [--switch user@host]
+#                          [--ready-timeout N] [--port-timeout N]
 set -euo pipefail
 
 HERE=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
@@ -31,6 +34,8 @@ hw_open_narration
 
 PROG=""
 READY_TIMEOUT=180
+PORT_TIMEOUT=60
+PORT_POLL=2
 TMUX_SESSION=${TMUX_SESSION:-mcp_switchd}
 while [ $# -gt 0 ]; do
     if hw_parse_common_flag "$1" "${2:-}"; then
@@ -39,19 +44,22 @@ while [ $# -gt 0 ]; do
     fi
     case $1 in
         --ready-timeout) READY_TIMEOUT=${2:?--ready-timeout needs a value}; shift 2 ;;
+        --port-timeout)  PORT_TIMEOUT=${2:?--port-timeout needs a value}; shift 2 ;;
         -h|--help)       sed -n '2,28p' "$0"; exit 0 ;;
         -*)              hw_die "unknown flag: $1" ;;
         *)               [ -z "$PROG" ] || hw_die "only one program name accepted"; PROG=$1; shift ;;
     esac
 done
 [ -n "$PROG" ] || hw_die "usage: bringup.sh <program> [--dry-run]"
+case $READY_TIMEOUT in *[!0-9]*|'') hw_die "--ready-timeout must be a non-negative integer" ;; esac
+case $PORT_TIMEOUT in *[!0-9]*|'') hw_die "--port-timeout must be a non-negative integer" ;; esac
 
 hw_banner "bringup ${PROG}"
 CONF_SRC="${REMOTE_DIR}/${PROG}.tofino/${PROG}.conf"
 CONF_ABS="${REMOTE_DIR}/${PROG}_abs.conf"
 SWLOG="${REMOTE_DIR}/${PROG}.switchd.log"
-SETUP_REMOTE="${REMOTE_DIR}/setup_skeleton.py"
 BUILD_MANIFEST="${REMOTE_DIR}/${PROG}.build-manifest.sha256"
+SETUP_MANIFEST="${REMOTE_DIR}/${PROG}.setup-manifest.sha256"
 LOAD_RECEIPT="${REMOTE_DIR}/${PROG}.loaded-build.sha256"
 
 # ================================================================ 0. chip ownership
@@ -91,12 +99,8 @@ else
     esac
 fi
 
-# ================================================================ 1. control plane
-hw_step "1. ship the control plane (setup_skeleton.py) next to the build"
-hw_scp_up "${REPO_ROOT}/p4/control/setup_skeleton.py" "$SETUP_REMOTE"
-
-# ================================================================ 2. absolute conf
-hw_step "2. rewrite ${PROG}.conf to absolute paths -> ${CONF_ABS}"
+# ================================================================ 1. absolute conf
+hw_step "1. rewrite ${PROG}.conf to absolute paths -> ${CONF_ABS}"
 CONFOUT=$(hw_ssh_script "absolute conf" <<EOF
 set -eu
 python3 - <<'PY'
@@ -147,11 +151,11 @@ else
     printf '%s\n' "$CONFOUT" | sed 's/^/   /'
 fi
 
-# ============================================ 2b. are the artifacts one sealed build?
+# ============================================ 1b. are the artifacts one sealed build?
 # deploy.sh creates this manifest only after bf-p4c succeeds.  Checking every hash is
 # an identity check, unlike comparing mtimes, and catches stale or partially replaced
 # source/schema/context/binary sets before a process is launched or reused.
-hw_step "2b. provenance: verify the sealed compiler inputs and loadable outputs"
+hw_step "1b. provenance: verify the sealed compiler inputs and loadable outputs"
 PROV=$(hw_ssh_script "build provenance" <<EOF
 set -eu
 cd '${REMOTE_DIR}'
@@ -165,6 +169,26 @@ if is_dry; then
     hw_say "[dry-run] would require every SHA-256 entry in ${BUILD_MANIFEST} to match."
 else
     printf '%s\n' "$PROV" | sed 's/^/   /'
+fi
+
+# ================================================ 1c. are the setup scripts sealed?
+# deploy.sh ships setup_skeleton.py and setup_attention.py and writes this separate
+# manifest.  It is intentionally not part of BUILD_MANIFEST/LOAD_RECEIPT: changing
+# setup policy must fail closed before setup runs, but must not force a binary reload.
+hw_step "1c. setup provenance: verify shipped setup scripts"
+SETUP_PROV=$(hw_ssh_script "setup provenance" <<EOF
+set -eu
+cd '${REMOTE_DIR}'
+MAN='${PROG}.setup-manifest.sha256'
+[ -f "\$MAN" ] || { echo "MISSING \$MAN — run p4/hw/deploy.sh ${PROG}"; exit 6; }
+sha256sum -c "\$MAN"
+echo "SETUP_ID=\$(sha256sum "\$MAN" | awk '{print \$1}')"
+EOF
+) || { printf '%s\n' "$SETUP_PROV" | sed 's/^/   /'; hw_die "setup scripts do not match the deploy manifest"; }
+if is_dry; then
+    hw_say "[dry-run] would require every SHA-256 entry in ${SETUP_MANIFEST} to match before setup_skeleton.py or setup_attention.py runs."
+else
+    printf '%s\n' "$SETUP_PROV" | sed 's/^/   /'
 fi
 
 # ================================================================ 3. launch
@@ -322,13 +346,14 @@ cd '${REMOTE_DIR}'
 python3 setup_attention.py --program '${PROG}' up
 EOF
 ) || { printf '%s\n' "$ATTN" | sed 's/^/   /'; hw_die "setup_attention.py up failed"; }
-printf '%s\n' "$ATTN" | grep -E 'eg_vlink|rows installed' | sed 's/^/   /' || true
-if ! printf '%s\n' "$ATTN" | grep -q 'tbl_eg_vlink: [1-9][0-9]* rows installed'; then
-    hw_die "tbl_eg_vlink installed 0 rows — every packet would report virtual link 0"
-fi
 if is_dry; then
+    hw_say "[dry-run] would require setup_attention.py to print: tbl_eg_vlink verified: 16 exact rows"
     hw_say "[dry-run] would then require every table write to be accepted and no 'required ports DOWN' warning."
 else
+    printf '%s\n' "$ATTN" | grep -E 'eg_vlink|rows installed|exact rows' | sed 's/^/   /' || true
+    if ! printf '%s\n' "$ATTN" | grep -qF 'tbl_eg_vlink verified: 16 exact rows'; then
+        hw_die "setup_attention did not prove the exact tbl_eg_vlink readback"
+    fi
     printf '%s\n' "$SETUP" | sed 's/^/   /'
     if printf '%s\n' "$SETUP" | grep -q 'required ports DOWN'; then
         hw_warn "setup_skeleton reported ports DOWN — see the port check below"
@@ -336,9 +361,12 @@ else
 fi
 
 # ================================================================ 6. port check
-hw_step "6. verify BOTH sides of every loop pair, reading the D_P (dev_port) column"
+hw_step "6. wait up to ${PORT_TIMEOUT}s for all loop pairs and host ports"
 hw_info "loop pairs (5/k <-> 6/k): ${LOOP_PAIRS[*]}   host ports: ${HOST_DPS[*]}"
-PORTS=$(hw_ssh_script "setup_skeleton ports" <<EOF
+hw_info "training poll every ${PORT_POLL}s; final verdict reads the D_P (dev_port) column"
+
+read_ports() {
+    hw_ssh_script "setup_skeleton ports" <<EOF
 set -u
 export SDE='${SDE}'
 export SDE_INSTALL='${SDE_INSTALL}'
@@ -348,7 +376,23 @@ export PYTHONPATH="\$P/tofino:\$P/tofino/bfrt_grpc:\$P"
 cd '${REMOTE_DIR}'
 python3 setup_skeleton.py --program '${PROG}' ports
 EOF
-) || { printf '%s\n' "$PORTS" | sed 's/^/   /'; hw_die "could not read the port table"; }
+}
+
+port_up() {   # $1 = dev_port -> echoes True/False/ABSENT from current PORTS
+    printf '%s\n' "$PORTS" | awk -v want="dp$1" '$1==want {print $4; found=1} END{if(!found) print "ABSENT"}'
+}
+
+all_ports_up() {
+    local pair a b dp
+    for pair in "${LOOP_PAIRS[@]}"; do
+        a=${pair%%:*}; b=${pair##*:}
+        [ "$(port_up "$a")" = "True" ] && [ "$(port_up "$b")" = "True" ] || return 1
+    done
+    for dp in "${HOST_DPS[@]}"; do
+        [ "$(port_up "$dp")" = "True" ] || return 1
+    done
+    return 0
+}
 
 if is_dry; then
     hw_say "[dry-run] setup_skeleton.py's 'dp' column IS \$PORT.\$DEV_PORT, i.e. the ucli D_P column."
@@ -361,11 +405,21 @@ if is_dry; then
     done
     hw_say "[dry-run] a pair with one side up and one down is a half-link and fails bringup."
 else
+    deadline=$(( $(date +%s) + PORT_TIMEOUT ))
+    polls=0
+    while :; do
+        polls=$((polls + 1))
+        if ! PORTS=$(read_ports); then
+            printf '%s\n' "$PORTS" | sed 's/^/   /'
+            hw_die "could not read the port table"
+        fi
+        all_ports_up && break
+        [ "$(date +%s)" -ge "$deadline" ] && break
+        hw_info "ports still training after poll ${polls}; retrying in ${PORT_POLL}s"
+        sleep "$PORT_POLL"
+    done
     printf '%s\n' "$PORTS" | sed 's/^/   /'
     bad=0
-    port_up() {   # $1 = dev_port -> echoes True/False/ABSENT
-        printf '%s\n' "$PORTS" | awk -v want="dp$1" '$1==want {print $4; found=1} END{if(!found) print "ABSENT"}'
-    }
     for pair in "${LOOP_PAIRS[@]}"; do
         a=${pair%%:*}; b=${pair##*:}
         ua=$(port_up "$a"); ub=$(port_up "$b")

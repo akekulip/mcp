@@ -12,6 +12,7 @@ Protocol, one line per request, so the wire cost is a single small TCP segment:
     G <path_id>\n                                            -> read attention state, reply
     T <path_id> <attn> <clean>\n                           -> set attention state, reply "OK <us>\n"
     P\n                                                    -> ping,              reply "OK 0\n"
+    V\n                                                    -> report sealed program/build/runtime identity
     R [sublink ...]\n                                      -> dump selected/all witness state
 
 Reads go through this agent too, and that is not incidental: SDE 9.13.2 lets only ONE client bind
@@ -23,14 +24,37 @@ The reply carries the agent's own bfrt write time in microseconds, so the host-s
 switch-side components of the path can be separated afterwards.
 """
 import os, socket, sys, time
-from gate_agent_core import add_batch_strict, clear_entries_strict, is_not_found, peer_allowed
+from gate_agent_core import (
+    add_batch_strict,
+    clear_entries_strict,
+    format_arm_reply,
+    format_blackhole_reply,
+    is_not_found,
+    parse_bank_command,
+    parse_blackhole_command,
+    parse_epoch_command,
+    peer_allowed,
+    rewrite_act_enter_field,
+    sync_counters_strict,
+    verify_loaded_build,
+    verify_sha256_manifest,
+)
 from injector_ranges import modular_drop_ranges
+
+PROG = os.environ.get("MCP_PROG")
+if not PROG:
+    raise SystemExit("MCP_PROG is required; refusing an implicit pipeline binding")
+RUNTIME_ROOT = os.path.dirname(os.path.abspath(__file__))
+RUNTIME_FILES = ("gate_agent.py", "gate_agent_core.py", "injector_ranges.py")
+RUNTIME_ID = verify_sha256_manifest(
+    RUNTIME_ROOT, PROG + ".runtime-manifest.sha256", expected_files=RUNTIME_FILES)
+BUILD_ID = verify_sha256_manifest(RUNTIME_ROOT, PROG + ".build-manifest.sha256")
+SWITCHD_PID = verify_loaded_build(RUNTIME_ROOT, PROG, BUILD_ID)
+
 sys.path.append("/home/decps/Downloads/bf-sde-9.13.2/install/lib/python3.8/site-packages/tofino")
 sys.path.append("/home/decps/Downloads/bf-sde-9.13.2/install/lib/python3.8/site-packages")
 import bfrt_grpc.client as gc
 
-import os
-PROG = os.environ.get("MCP_PROG", "mcp_fabric_gate_event")
 PORT = 47100
 ALLOWED_PEERS = frozenset(
     peer.strip() for peer in
@@ -57,8 +81,8 @@ def scalar(value):
 srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 srv.bind(("0.0.0.0", PORT)); srv.listen(4)
-print("gate_agent listening on %d, bound to %s, allowed peers %s" %
-      (PORT, PROG, ",".join(sorted(ALLOWED_PEERS))), flush=True)
+print("gate_agent listening on %d, bound to %s, build %s, runtime %s, allowed peers %s" %
+      (PORT, PROG, BUILD_ID, RUNTIME_ID, ",".join(sorted(ALLOWED_PEERS))), flush=True)
 
 while True:
     conn, peer = srv.accept()
@@ -158,8 +182,7 @@ while True:
                             for lo, hi in ranges]
                     data = [ft.make_data([], "Egress.eg_fail_drop") for _ in keys]
                     ft.entry_add(tgt, keys, data)
-                    encoded = " ".join("%d %d" % bounds for bounds in ranges)
-                    conn.sendall(("ARMED %d %s\n" % (sub, encoded)).encode())
+                    conn.sendall(format_arm_reply(sub, ranges).encode())
                     print("A %d %d -> armed seq %s" % (sub, ndrop, ranges), flush=True)
                     continue
                 elif f[0] == "U":
@@ -206,11 +229,7 @@ while True:
                     # Needed because a total blackhole only ever exercises RX == 0, so the
                     # band between "nothing arrived" and "everything arrived" was never tested
                     # on silicon.
-                    sub = int(f[1])
-                    lo = int(f[2]) if len(f) > 3 else 0
-                    hi = int(f[3]) if len(f) > 3 else 0xFFFF
-                    if not (0 <= lo <= hi <= 0xFFFF):
-                        raise ValueError("sequence range outside 0..65535")
+                    sub, lo, hi = parse_blackhole_command(f)
                     ft = info.table_get("pipe.Egress.tbl_eg_fail")
                     fk = ft.make_key([gc.KeyTuple("md.sublink", sub),
                                       gc.KeyTuple("hdr.witness.seq", low=lo, high=hi),
@@ -220,7 +239,7 @@ while True:
                         ft.entry_add(tgt, [fk], [fd])
                     except gc.BfruntimeRpcException:
                         ft.entry_mod(tgt, [fk], [fd])
-                    conn.sendall(("BLACKHOLED %d [%d..%d]\n" % (sub, lo, hi)).encode())
+                    conn.sendall(format_blackhole_reply(sub, lo, hi).encode())
                     print("K %d -> total blackhole armed" % sub, flush=True)
                     continue
                 elif f[0] == "N":
@@ -234,24 +253,20 @@ while True:
                     # complete and no longer being written. Zeroing the active bank instead
                     # clears TX while packets are in flight, so they arrive and set RX with
                     # no matching TX -- the TX=0/RX=1 state, seen in 50 of 50 trials.
-                    bank = 1 if int(f[1]) else 0   # hdr.fabric.clf_bank, a dedicated byte
+                    bank = parse_bank_command(f)   # hdr.fabric.clf_bank, a dedicated byte
                     t = info.table_get("pipe.Ingress.tbl_final")
-                    n = 0
-                    for d, k in t.entry_get(tgt, None, {"from_hw": True}):
-                        dd, kk = d.to_dict(), k.to_dict()
-                        if dd.get("action_name", "").endswith("act_enter") or "epoch" in dd:
-                            fields = [gc.DataTuple("next_hop", dd.get("next_hop", 1))]
-                            if "epoch" in dd:
-                                fields.append(gc.DataTuple("epoch", dd.get("epoch", 0)))
-                            fields.append(gc.DataTuple("bank", bank))
-                            try:
-                                t.entry_mod(tgt, [k], [t.make_data(fields, "Ingress.act_enter")])
-                                n += 1
-                            except Exception:
-                                pass
+                    n = rewrite_act_enter_field(t, tgt, gc.DataTuple, "bank", bank)
                     conn.sendall(("OK %d\n" % n).encode())
-                    print("N %d -> %d act_enter rows now stamp bank %d" % (int(f[1]), n, bank),
+                    print("N %d -> %d act_enter rows now stamp bank %d" % (bank, n, bank),
                           flush=True)
+                    continue
+                elif f[0] == "E":
+                    epoch = parse_epoch_command(f)
+                    t = info.table_get("pipe.Ingress.tbl_final")
+                    n = rewrite_act_enter_field(t, tgt, gc.DataTuple, "epoch", epoch)
+                    conn.sendall(("OK %d\n" % n).encode())
+                    print("E %d -> %d act_enter rows now stamp epoch %d" %
+                          (epoch, n, epoch), flush=True)
                     continue
                 elif f[0] == "I":
                     # I -- injector ground truth: how many packets did tbl_eg_fail actually
@@ -259,10 +274,7 @@ while True:
                     # the flags" (repo doctrine).  A miss with a zero counter means the entry
                     # never matched; a miss with a large counter means something else set RX.
                     ft = info.table_get("pipe.Egress.tbl_eg_fail")
-                    try:
-                        ft.operations_execute(tgt, "SyncCounters")
-                    except Exception:
-                        pass
+                    sync_counters_strict(ft, tgt)
                     out = []
                     for d, k in ft.entry_get(tgt, None, {"from_hw": True}):
                         dd, kk = d.to_dict(), k.to_dict()
@@ -358,13 +370,25 @@ while True:
                             idx = k.to_dict()["$REGISTER_INDEX"]["value"]
                             v = d.to_dict().get(fld, [])
                             v = max(v) if isinstance(v, list) and v else (v or 0)
-                            if v: out[idx] = v
+                            if requested or v:
+                                out[idx] = v
                         return out
                     seq = rd("pipe.Egress.reg_wit_seq", "Egress.reg_wit_seq.f1")
                     obs = rd("pipe.Ingress.reg_wit_observed", "Ingress.reg_wit_observed.f1")
+                    rows = sorted(requested if requested else seq)
+                    missing = [i for i in rows if i not in seq or i not in obs]
+                    if missing:
+                        raise RuntimeError("missing census rows: %s" % missing[:8])
                     payload = "".join("S %d %d %d %d %d\n" % (i, i >> 4, i & 0xF, seq[i],
-                                                              obs.get(i, 0)) for i in sorted(seq))
-                    conn.sendall(payload.encode()); conn.sendall(b"OK 0\n"); continue
+                                                              obs[i]) for i in rows)
+                    conn.sendall(payload.encode())
+                    conn.sendall(("OK %d\n" % len(rows)).encode()); continue
+                elif f[0] == "V":
+                    if len(f) != 1:
+                        raise ValueError("V takes no arguments")
+                    conn.sendall(("IDENTITY %s %s %s %d\n" %
+                                  (PROG, BUILD_ID, RUNTIME_ID, SWITCHD_PID)).encode())
+                    continue
                 elif f[0] != "P":
                     conn.sendall(b"ERR unknown\n"); continue
                 dt = (time.perf_counter_ns() - t0) // 1000

@@ -126,7 +126,9 @@ class GapEventBase(BfRuntimeTest):
                            (LOOP_IN, ROLE_LOOP), (LOOP_B, ROLE_LOOP),
                            (COLLECTOR, ROLE_HOST)):
             key = table.make_key([gc.KeyTuple("ig_intr_md.ingress_port", port)])
-            data = table.make_data([gc.DataTuple("role", role), gc.DataTuple("src_leaf", 0)],
+            audit_src = int(port in (HOST_IN, LOOP_IN, LOOP_B))
+            data = table.make_data([gc.DataTuple("role", role), gc.DataTuple("src_leaf", 0),
+                                    gc.DataTuple("audit_src", audit_src)],
                                    "Ingress.set_role")
             self._upsert(table, key, data)
 
@@ -249,6 +251,7 @@ class Test51AuditBypassesQuarantineButReceiptsRequireArrival(GapEventBase):
         t = b.table_get("pipe.Ingress.tbl_audit_steer")
         for token in (AUDIT_TOKEN, MISSING_TOKEN):
             self._upsert(t, t.make_key([
+                gc.KeyTuple("md.audit_src", 1),
                 gc.KeyTuple("hdr.udp.dst_port", AUDIT_UDP_DST),
                 gc.KeyTuple("hdr.udp.src_port", token)]),
                 t.make_data([gc.DataTuple("spray", 0)], "Ingress.set_audit_spray"))
@@ -258,8 +261,8 @@ class Test51AuditBypassesQuarantineButReceiptsRequireArrival(GapEventBase):
         self._reg_set("pipe.Ingress.reg_wit_expect", AUDIT_SUBLINK, 0)
         self._reg_set("pipe.Ingress.reg_wit_observed", AUDIT_SUBLINK, 0)
 
-    def _source_output(self, packet, port):
-        send_packet(self, HOST_IN, packet)
+    def _source_output(self, packet, port, ingress_port=HOST_IN):
+        send_packet(self, ingress_port, packet)
         _, _, raw, _ = testutils.dp_poll(
             self, device_number=0, port_number=port, timeout=1)
         self.assertIsNotNone(raw, "source packet did not leave on the expected physical path")
@@ -269,6 +272,14 @@ class Test51AuditBypassesQuarantineButReceiptsRequireArrival(GapEventBase):
         production = self._source_output(host_packet(1234, 4791), LOOP_B)
         self.assertEqual(Ether(production)[Wit].link_id, BACKUP_VLINK << 4,
                          "production in the quarantined context must use the backup")
+
+        unauthorized = self._source_output(
+            host_packet(AUDIT_TOKEN, AUDIT_UDP_DST), LOOP_B, ingress_port=COLLECTOR)
+        self.assertEqual(
+            Ether(unauthorized)[Wit].link_id,
+            BACKUP_VLINK << 4,
+            "an audit-shaped packet from an unauthorized host must not bypass quarantine",
+        )
 
         audit = self._source_output(host_packet(AUDIT_TOKEN, AUDIT_UDP_DST), LOOP_IN)
         self.assertEqual(Ether(audit)[Wit].link_id, AUDIT_SUBLINK,
