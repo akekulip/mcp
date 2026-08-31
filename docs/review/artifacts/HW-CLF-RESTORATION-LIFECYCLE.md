@@ -110,6 +110,18 @@ Each directed link now has its own counters and each marks exactly once per pack
 `TX=20 RX=20` was entirely the empty `tbl_eg_vlink`, confirming that `c296ec8`'s reasoning was
 wrong and its revert unnecessary.
 
+An independent repeat of the same measurement landed separately and agrees, with a cleaner
+reading because no background traffic touched ctx 2 in that window:
+
+| row | link | TX | RX |
+|---|---|---:|---:|
+| `X 0 0 2` | vlink 0 | **10** | **10** |
+| `X 0 10 2` | vlink 10 | **10** | **10** |
+| `X 0 2 1`, `X 0 8 1` | background, ctx 1 | 1 | 1 |
+
+Exactly 10 marks per link for 10 packets, so the `11` in the first run was the background packet
+it says it was, not a residual double-count.
+
 ## Per-link fault localization
 
 Ten packets per arm, fault injected on one link at a time:
