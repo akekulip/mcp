@@ -1626,3 +1626,26 @@ and monitored; no further unrequested expansion of scope.
   bit<16>>(1024, 0)` (line 1424). So only seq wraps; obs is 32-bit. MAIN3 cycle 1 carried sublinks
   6/10/14 across their own 65536 boundary (they were at 65520-65527, +40 per cycle) and reported
   them clean: the mod-2^16 differencing is verified live, not just in the offline self-test.
+
+### mcp-51 check-in 09:00 UTC
+- MAIN3 101/1000, 0 bad, driver alive, switch up, no new switchd errors.
+
+### mcp-51 check-in 09:51 UTC
+- MAIN3 301/1000, 0 bad, driver alive, switch up, no new switchd errors.
+
+### mcp-51 check-in 10:43 UTC
+- MAIN3 504/1000, 0 bad, driver alive, switch up, no new switchd errors.
+
+### mcp-51 check-in 11:34 UTC
+- MAIN3 704/1000, 0 bad, driver alive, switch up, no new switchd errors.
+
+### mcp-51 check-in 12:25 UTC
+- MAIN3 903/1000, 0 bad, driver alive, switch up, no new switchd errors.
+
+### mcp-51 12:50 UTC / 08:50 EDT — MAIN3 COMPLETE: 1000/1000 clean
+- 1000 cycles, 0 mismatches, 0 first-read transients, 5000 injected drops recovered exactly,
+  ~80k clean probe packets balanced on every sublink, across the 16-bit seq wrap on sublinks
+  6/10/14 (cycle 1) and no stop of any kind. Switch untouched, switchd ERROR count still 11.
+- Night total: MAIN 1344 + MAIN2 223 + MAIN3 1000 = 2567 clean cycles (~12,835 injected drops
+  recovered exactly). Relaunching as MAIN4 (1000 cycles) to keep the switch exercised until
+  Philip decides otherwise.
