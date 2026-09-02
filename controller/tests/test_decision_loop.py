@@ -278,6 +278,22 @@ class FleetDecisionLoopTest(unittest.TestCase):
         self.assertAlmostEqual(math.log(decisions[2].wealth), correct_log_lr, places=6)
         self.assertNotAlmostEqual(math.log(decisions[2].wealth), leaked_log_lr, places=2)
 
+    def test_restoration_grid_is_rebuilt_from_the_current_floor_each_call(self):
+        # Direct regression for round-3 CRITICAL B / round-4's mutant-testing
+        # finding: a full revert of _restoration_grid's floor-coupling (using
+        # a fixed value instead of `current_floor`) passed the entire suite
+        # undetected before this test existed. The grid must track whatever
+        # floor is handed to it, not a value fixed at construction.
+        loop = make_loop(restoration_grid_low=1e-8, restoration_grid_count=4)
+        grid_low_floor = loop._restoration_grid(1e-4)
+        grid_high_floor = loop._restoration_grid(1e-2)
+        self.assertIsNotNone(grid_low_floor)
+        self.assertIsNotNone(grid_high_floor)
+        self.assertNotEqual(grid_low_floor, grid_high_floor)
+        self.assertLessEqual(max(grid_low_floor), 1e-4 * (1 + 1e-9))
+        self.assertLessEqual(max(grid_high_floor), 1e-2 * (1 + 1e-9))
+        self.assertGreater(max(grid_high_floor), max(grid_low_floor))
+
     def test_restoration_never_arms_unrestorable(self):
         # arm() now rejects a suspect_rate at or below every healthy
         # alternative, decision_loop only calls arm() with a previsible,
