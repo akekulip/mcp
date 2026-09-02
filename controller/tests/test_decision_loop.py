@@ -1,14 +1,13 @@
 import random
 import unittest
 
-from controller.absolute_eprocess import log_spaced_alternatives
 from controller.decision_loop import FleetDecisionLoop
 
 
 def make_loop(**overrides):
     config = {
         "alpha": 0.05,
-        "alternatives": log_spaced_alternatives(1e-3, 0.5, count=12),
+        "ratios": (2.0, 5.0, 10.0, 50.0, 200.0),
         "restoration_grid_low": 1e-8,
         "restoration_grid_count": 8,
         "floor_window_epochs": 20,
@@ -129,7 +128,7 @@ class FleetDecisionLoopTest(unittest.TestCase):
         self.assertLess(decisions[2].weight, 0.5)
         # now feed healthy traffic and expect restoration
         recovered = False
-        for _ in range(400):
+        for _ in range(600):
             decisions = tick_with_siblings(1e-5)
             epoch += 1
             if not decisions[2].restoring and decisions[2].weight >= 0.999:
@@ -201,7 +200,11 @@ class FleetDecisionLoopTest(unittest.TestCase):
             decisions = loop.tick(epoch, snapshots)
         # now a brand-new, actually healthy sublink joins while every
         # existing sublink is still marked unhealthy -- its leave-one-out
-        # pool is empty and must censor rather than false-alarm
+        # pool is empty. With 100% of the fleet mitigated we are deep in an
+        # incident regime (Q3), so it gets the frozen historical baseline as
+        # a fallback floor instead of pure censoring -- the point of Q3 is
+        # exactly to avoid the old permanent-censoring deadlock. Either way,
+        # genuinely clean traffic must never be falsely flagged.
         healthy_false_alarms = 0
         for epoch in range(epoch + 1, epoch + 6):
             snapshots = {s: (300, 300 - sum(1 for _ in range(300) if rng.random() < 0.3))
@@ -210,7 +213,7 @@ class FleetDecisionLoopTest(unittest.TestCase):
             rx = tx - sum(1 for _ in range(tx) if rng.random() < 1e-4)  # genuinely clean
             snapshots[2] = (tx, rx)
             decisions = loop.tick(epoch, snapshots)
-            self.assertTrue(decisions[2].censored)
+            self.assertTrue(decisions[2].censored or decisions[2].incident_fallback)
             if decisions[2].fleet_rejected:
                 healthy_false_alarms += 1
         self.assertEqual(healthy_false_alarms, 0)
@@ -218,9 +221,10 @@ class FleetDecisionLoopTest(unittest.TestCase):
     def test_floor_is_previsible_not_leaked_from_a_siblings_same_epoch_shock(self):
         # CRITICAL 2, deterministic: a sibling's shock THIS epoch must not
         # enter the floor used to judge another sublink THIS SAME epoch.
-        # Two sublinks, a single fixed alternative (0.5) for a hand-checkable
-        # mixture, no randomness.
-        loop = make_loop(alpha=0.05, alternatives=(0.5,),
+        # Two sublinks, a single ratio (5.0) for a hand-checkable mixture, no
+        # randomness. With the previsible floor at 0.1 (below), the realized
+        # alternative is floor*ratio = 0.5, matching the pre-Q1 pin exactly.
+        loop = make_loop(alpha=0.05, ratios=(5.0,),
                         restoration_grid_low=1e-6, restoration_grid_count=1,
                         floor_window_epochs=20)
         # epoch 0: both sublinks report identically; both pools are empty
@@ -282,6 +286,56 @@ class FleetDecisionLoopTest(unittest.TestCase):
             }
             decisions = loop.tick(epoch, snapshots)  # must not raise
         self.assertIn(2, decisions)
+
+    # --- end-to-end regressions for the redesign proposal
+    # (docs/review/artifacts/STATS-LAYER-REDESIGN-PROPOSAL-2026-09-02.md)
+    # implemented after the round-3 review found a permanent, fleet-wide
+    # absorbing deadlock and a restoration action rate of 0/8. ---
+
+    def _run_single_fault_fleet(self, seed, degraded_rate, horizon, num_sublinks=16):
+        loop = make_loop(ratios=(2.0, 5.0, 10.0, 50.0, 200.0))
+        rng = random.Random(seed)
+        sublinks = list(range(num_sublinks))
+        bad = 0
+        max_mitigated = 0
+        recovered_at = None
+        last_decisions = None
+        for epoch in range(horizon):
+            snapshots = {}
+            for sublink in sublinks:
+                tx = 200
+                rate = degraded_rate if (sublink == bad and 100 <= epoch < 200) else 1e-3
+                rx = sum(1 for _ in range(tx) if rng.random() >= rate)
+                snapshots[sublink] = (tx, rx)
+            decisions = loop.tick(epoch, snapshots)
+            last_decisions = decisions
+            max_mitigated = max(max_mitigated,
+                                sum(1 for d in decisions.values() if d.weight < 1.0))
+            if (recovered_at is None and epoch > 200 and
+                    decisions[bad].weight >= 0.999 and not decisions[bad].restoring):
+                recovered_at = epoch
+        return max_mitigated, recovered_at, last_decisions
+
+    def test_a_single_fault_does_not_cascade_into_a_fleet_wide_deadlock(self):
+        # The round-3 CRITICAL 1 scenario exactly: one link degraded for 100
+        # epochs on a 16-sublink fleet. Previously this measured 15/16
+        # sublinks mitigated by epoch 2500 and still 100% mitigated at epoch
+        # 4999 (4800 epochs after the fault's own 100-epoch window closed).
+        max_mitigated, recovered_at, decisions = self._run_single_fault_fleet(
+            seed=42, degraded_rate=0.20, horizon=5000)
+        self.assertEqual(max_mitigated, 1)  # only the genuinely bad link, ever
+        self.assertIsNotNone(recovered_at)
+        self.assertEqual(sum(1 for d in decisions.values() if d.weight < 1.0), 0)
+
+    def test_restoration_action_rate_meets_the_design_target(self):
+        # brainstorm H2/H3: action rate >= 0.9 per repaired fault. Previously
+        # measured 0/8 at both of these exact degraded rates.
+        for rate in (0.20, 0.05):
+            outcomes = [self._run_single_fault_fleet(seed, rate, horizon=3000)[1] is not None
+                       for seed in range(8)]
+            action_rate = sum(outcomes) / len(outcomes)
+            self.assertGreaterEqual(action_rate, 0.9,
+                                    f"rate={rate}: only {sum(outcomes)}/8 recovered")
 
 
 if __name__ == "__main__":
