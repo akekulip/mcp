@@ -1737,3 +1737,74 @@ autonomous patching). Reported this status to Philip rather than continuing to i
 problem that has now shown up independently twice.
 
 Hardware track unaffected throughout, MAIN4 soak past 459 clean cycles.
+
+## Status (2026-09-02, later) — soak MAIN4 stopped at cycle 638: one real, minor, disclosed anomaly; SprayCheck-Z/FlowPulse-θ baseline arms built and independently verified
+
+MAIN4 soak (1000-cycle target) stopped itself correctly at cycle 638/1000 on a genuine mismatch:
+`recovered_loss=0` against `expected_loss=5`, coinciding with sublink 2's `reg_wit_seq` (confirmed
+16-bit, `p4/witness/mcp_fabric_ledger.p4:1424`) wrapping past 65536. Investigated rather than
+dismissed or over-reacted to: (1) ruled out cross-contamination from a separate, unrelated
+`nsdi_task10_calibration` campaign found running in another worktree -- confirmed via `ps aux` that
+its actual python process exited over a day ago (last file write 2026-09-01 12:45), only an idle
+tmux shell remains; (2) the large absolute gap between `reg_wit_observed` (32-bit, 114677) and
+`reg_wit_seq` (16-bit, wrapped, 20) is consistent with the cumulative total of every deliberate
+5-packet drop injected across all of today's MAIN/MAIN2/MAIN3/MAIN4 cycles (many thousands of
+intentional, already-correctly-measured losses), not an inconsistency. The actual defect is
+narrower: this one cycle's armed drop range didn't intercept any real traffic, most likely a rare
+race in the TEST HARNESS's own arm command (it reads "current sequence" once to compute the drop
+range; a packet landing between that read and the range taking effect could shift the real window
+by a few sequence numbers) -- not a defect in the receiver-ledger mechanism itself, which the
+injector/arming path is external to. Given 637 clean cycles preceded it and the anomaly is
+isolated, disclosed, and understood in mechanism (even if not root-caused to the exact P4/timing
+detail), not relaunching the soak again tonight -- the active thread is the evaluation-methodology
+work below, not further hardware soaking.
+
+**Built and independently verified: faithful SprayCheck-Z and FlowPulse-θ baseline replay arms**
+(`sim/baselines/spraycheck_z.py`, `sim/baselines/flowpulse_theta.py`), per Philip's explicit
+instruction that comparative evaluation must use the baselines' OWN mechanisms and metrics, not an
+invented currency. Both built from PRIMARY SOURCES fetched and read this session (arXiv:2605.03702
+HTML for SprayCheck; the HotNets'25 PDF in full for FlowPulse), not from the earlier LITERATURE.md
+summary alone. Each is structurally prevented from seeing information its real switch wouldn't have
+(SprayCheck-Z's `detect_flow` signature only accepts an RX-only per-spine dict; no TX/drop column
+exists to pass by mistake).
+
+- SprayCheck-Z implements the paper's exact quoted Z-test (`t = lambda - s*sqrt(N/k)`) and
+  reproduces its own two-step calibration procedure (§5.3) rather than guessing the undocumented
+  sensitivity constant `s`. Fidelity check, independently re-run and confirmed by me directly: at
+  the paper's literal calibration floor (8 spines, 500K packets, 0.4% drop) the i.i.d. noise model
+  the Z-test's own formula is built on genuinely CANNOT reach perfect detection -- confirmed as a
+  hard analytical limit (asserted as a test expecting `calibrate_s` to raise), not a bug. Calibrating
+  at a scaled-up point instead, the 1/p^2 scaling law and the ~20-27x absolute-packet-count gap
+  (attributable to the paper's real deployment using lower-variance adaptive JSQ(2) spraying, not
+  i.i.d.) both reproduce as predicted. Decisively for this project, independently confirmed by
+  direct re-run: **at MCP's target loss regime (1e-3, 1e-4), SprayCheck-Z detects nothing at any
+  packet budget up to 2 million packets/spine** -- off the paper's own operating chart entirely.
+- FlowPulse-theta implements the paper's per-spine-ingress-port byte-count-vs-load-model comparison
+  with its one exactly-stated constant (the 1% deviation threshold, quoted verbatim from §5.3).
+  Fidelity check reproduces the paper's own reported shape (TPR>95%/FPR<1% at 1.5% drop; TPR<10% at
+  0.08-0.32% drop) at a disclosed, stated noise-scale judgment call (the paper's ns-3 setup isn't
+  specified precisely enough to reconstruct exactly); the radix-32-collapse effect (Fig. 5b) is
+  reproduced qualitatively only, explicitly flagged as such.
+- 21 new tests (`sim/baselines/tests/`), all passing; existing 222 `controller/tests` unaffected.
+  Localization logic for both arms is implemented from each paper's stated rule but explicitly NOT
+  fidelity-checked (neither paper publishes a localization-accuracy number to check against) --
+  disclosed, not silently assumed equally trustworthy.
+
+**Not yet done**: the actual head-to-head comparison of MCP's own mechanism against these two
+validated arms under identical simulated fault conditions -- deliberately stopped short of this per
+instruction, to get the baseline arms individually validated and accepted first.
+
+**Literature recheck** (dispatched in parallel earlier): confirmed no work published since the
+brainstorm's own cutoff anticipates or scoops the specific open common-mode-shock gap, or the
+CUSUM-anchored-restoration / floor-relative e-process combination -- two adjacent-but-distinct
+papers found (arXiv:2408.14015 robust e-values; arXiv:2609.00536 reference-set contamination in
+sequential testing, temporal not cross-sectional) are related-work citations only, no spine impact.
+
+**PREREG amendment v1.9** landed (`paper/PREREG.md`), adopting the September 1 spine by reference
+(renamed H10/H11/H12 to avoid colliding with the retired design's H1-H9 namespace), filing the
+common-mode fix as H13 (explicitly deferred, owned, out of the Holm family), and correcting both
+stale success criteria (H10's inherited power figures flagged non-authoritative pending
+re-derivation under the current detector; H11 now requires reporting premature-restoration rate
+alongside action rate). Honestly flagged its own reconciliation debt: §1's hypothesis table, §3's
+baseline set, and §7.4's frozen (but plan-obsoleted) attention rule still describe the retired
+design and were not rewritten, per the document's append-only convention.
