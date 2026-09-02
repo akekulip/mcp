@@ -29,15 +29,22 @@ class EBHRejectTest(unittest.TestCase):
         self.assertEqual(e_bh_reject(evalues, alpha=0.1), frozenset({1, 2}))
 
     def test_non_monotone_qualifying_k_is_still_found(self):
-        # construct a case where a later k requalifies after an earlier one fails,
-        # confirming the scan does not stop at the first failure
         # n=3, alpha=0.5 -> thresholds: k=1 -> 6, k=2 -> 3, k=3 -> 2
         evalues = {1: 5.0, 2: 1.0, 3: 2.0}
         # sorted desc: 5.0, 2.0, 1.0
-        # k=1: 5.0 >= 6 -> fails
-        # k=2: 2.0 >= 3 -> fails
-        # k=3: 1.0 >= 2 -> fails
+        # k=1: 5.0 >= 6 -> fails; k=2: 2.0 >= 3 -> fails; k=3: 1.0 >= 2 -> fails
+        # every k fails here, so this case alone cannot distinguish a
+        # break-on-first-failure scan from a full scan -- see the next test,
+        # which does, by construction (docs/review/artifacts/STATS-LAYER-REVIEW-2026-09-02.md).
         self.assertEqual(e_bh_reject(evalues, alpha=0.5), frozenset())
+
+    def test_a_later_k_requalifies_after_an_earlier_one_fails(self):
+        # n=3, alpha=0.5 -> thresholds k=1,2,3 are 6, 3, 2
+        # k=1: 5 >= 6 fails; k=2: 4 >= 3 holds; k=3: 3 >= 2 holds -> k*=3
+        # A break-on-first-failure implementation would stop at k=1 and
+        # reject nothing; the correct largest-qualifying-k search rejects all 3.
+        evalues = {1: 5.0, 2: 4.0, 3: 3.0}
+        self.assertEqual(e_bh_reject(evalues, alpha=0.5), frozenset({1, 2, 3}))
 
     def test_rejects_out_of_range_alpha(self):
         with self.assertRaises(ValueError):

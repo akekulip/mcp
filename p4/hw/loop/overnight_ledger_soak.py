@@ -96,6 +96,14 @@ def arm_injector(sublink: int, ndrop: int) -> str:
     return gate_command(f"A {sublink} {ndrop}")
 
 
+def clear_injector() -> str:
+    """gate_agent.py's own 'per-trial reset' -- each `A` call only ADDS a new
+    TCAM range entry and never removes the previous one, so repeated arming
+    without this eventually exhausts the injector table (RESOURCE_EXHAUSTED,
+    observed in this soak's own cycle 28 after 27 unclearred arms)."""
+    return gate_command("C")
+
+
 def deltas_since(baseline: Dict[int, Dict[str, int]],
                   current: Dict[int, Dict[str, int]]) -> Dict[int, Dict[str, int]]:
     result = {}
@@ -125,6 +133,7 @@ def run_cycle(cycle: int, log_path: Path, baseline: Dict[int, Dict[str, int]],
     send_clean_traffic(count_per_context, pps)
     after_inject = read_census()
     inject_deltas = deltas_since(baseline, after_inject)
+    clear_reply = clear_injector()
 
     target = inject_deltas.get(inject_sublink, {"delta_seq": 0, "delta_obs": 0})
     recovered_loss = target["delta_seq"] - target["delta_obs"]
@@ -140,6 +149,7 @@ def run_cycle(cycle: int, log_path: Path, baseline: Dict[int, Dict[str, int]],
         "timestamp": time.time(),
         "clean_mismatches": clean_mismatches,
         "arm_reply": arm_reply.strip(),
+        "clear_reply": clear_reply.strip(),
         "recovered_loss": recovered_loss,
         "expected_loss": inject_ndrop,
         "loss_matches": recovered_loss == inject_ndrop,

@@ -82,6 +82,22 @@ class RestorationEProcessTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             restoration.arm(suspect_rate=0.0)
 
+    def test_rejects_a_suspect_rate_at_or_below_every_healthy_alternative(self):
+        # healthy_alternatives top out at 1e-3; a suspect_rate of 1e-4 would
+        # make every mixture component bet the wrong way and never restore
+        restoration = self.make_restoration()
+        with self.assertRaises(ValueError):
+            restoration.arm(suspect_rate=1e-4)
+        with self.assertRaises(ValueError):
+            restoration.arm(suspect_rate=1e-3)  # exactly at the boundary, still rejected
+
+    def test_censored_epoch_does_not_move_restoration_wealth(self):
+        restoration = self.make_restoration()
+        restoration.arm(suspect_rate=0.05)
+        before = restoration.ingest(epoch=0, tx=100, rx=99).wealth
+        after = restoration.ingest(epoch=1, tx=100, rx=0, censored=True).wealth
+        self.assertAlmostEqual(after, before)
+
 
 if __name__ == "__main__":
     unittest.main()

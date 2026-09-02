@@ -11,12 +11,15 @@ Procedure: sort e-values descending; k* = max{k : e_(k) >= n/(k*alpha)}; reject
 the top k* sublinks (or none, if no such k exists).
 """
 
+import math
 from typing import Dict, FrozenSet
 
 
 def e_bh_reject(evalues: Dict[int, float], alpha: float) -> FrozenSet[int]:
     if not 0.0 < alpha < 1.0:
         raise ValueError("alpha must lie in (0, 1)")
+    if any(math.isnan(value) for value in evalues.values()):
+        raise ValueError("e-values must not be NaN")
     if any(value < 0.0 for value in evalues.values()):
         raise ValueError("e-values must be non-negative")
     n = len(evalues)

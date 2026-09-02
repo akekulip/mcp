@@ -4,9 +4,9 @@ from controller.floor_estimator import FleetFloorEstimator
 
 
 class FleetFloorEstimatorTest(unittest.TestCase):
-    def test_cold_start_returns_min_floor(self):
+    def test_cold_start_returns_none(self):
         estimator = FleetFloorEstimator(window_epochs=10, min_floor=1e-5)
-        self.assertEqual(estimator.floor_for(2), 1e-5)
+        self.assertIsNone(estimator.floor_for(2))
 
     def test_excludes_the_sublink_itself(self):
         estimator = FleetFloorEstimator(window_epochs=10, min_floor=1e-6)
@@ -22,6 +22,12 @@ class FleetFloorEstimatorTest(unittest.TestCase):
         floor = estimator.floor_for(2)
         self.assertAlmostEqual(floor, 0.001, places=6)
 
+    def test_returns_none_when_every_sibling_is_unhealthy(self):
+        estimator = FleetFloorEstimator(window_epochs=10, min_floor=1e-6)
+        estimator.record_epoch(6, epoch=0, tx=1000, rx=500, healthy=False)
+        estimator.record_epoch(10, epoch=0, tx=1000, rx=500, healthy=False)
+        self.assertIsNone(estimator.floor_for(2))
+
     def test_pools_across_multiple_healthy_siblings(self):
         estimator = FleetFloorEstimator(window_epochs=10, min_floor=1e-6)
         estimator.record_epoch(6, epoch=0, tx=1000, rx=999, healthy=True)
@@ -29,14 +35,28 @@ class FleetFloorEstimatorTest(unittest.TestCase):
         floor = estimator.floor_for(2)
         self.assertAlmostEqual(floor, 3.0 / 2000.0, places=6)
 
-    def test_window_trims_epochs_older_than_the_window(self):
+    def test_window_prunes_by_epoch_age_not_call_count(self):
         estimator = FleetFloorEstimator(window_epochs=2, min_floor=1e-6)
-        estimator.record_epoch(6, epoch=0, tx=1000, rx=0, healthy=True)  # 100% loss, old
+        estimator.record_epoch(6, epoch=0, tx=1000, rx=0, healthy=True)   # 100% loss, old
         estimator.record_epoch(6, epoch=1, tx=1000, rx=999, healthy=True)
         estimator.record_epoch(6, epoch=2, tx=1000, rx=999, healthy=True)
+        # epoch 0 is now older than (current epoch 2) - (window 2) = epoch 0, so it
+        # is pruned; a sublink reporting on a different epoch cadence still ages
+        # out correctly because pruning keys off the stored epoch, not the count
+        # of calls made so far.
         floor = estimator.floor_for(2)
-        # epoch 0 has fallen out of the 2-epoch window; only epochs 1 and 2 remain
         self.assertAlmostEqual(floor, 2.0 / 2000.0, places=6)
+
+    def test_a_sublink_that_stops_reporting_still_ages_out_of_the_pool(self):
+        estimator = FleetFloorEstimator(window_epochs=2, min_floor=1e-6)
+        estimator.record_epoch(6, epoch=0, tx=1000, rx=0, healthy=True)  # 100% loss
+        # sublink 6 never reports again; sublink 10 keeps advancing the clock
+        for epoch in range(1, 5):
+            estimator.record_epoch(10, epoch=epoch, tx=1000, rx=999, healthy=True)
+        # sublink 6's stale, never-pruned-by-a-later-call-to-itself sample must
+        # not poison sublink 2's floor once the fleet clock has moved past it
+        floor = estimator.floor_for(2)
+        self.assertAlmostEqual(floor, 1.0 / 1000.0, places=6)
 
     def test_estimate_is_clamped_below_one(self):
         estimator = FleetFloorEstimator(window_epochs=10, min_floor=1e-6)

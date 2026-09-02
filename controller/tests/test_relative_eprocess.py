@@ -1,3 +1,4 @@
+import math
 import random
 import unittest
 
@@ -47,6 +48,20 @@ class RelativeExchangeabilityTestTest(unittest.TestCase):
             if test.alarmed:
                 break
         self.assertTrue(test.alarmed)
+
+    def test_wealth_matches_the_hand_computed_likelihood_ratio_exactly(self):
+        # Deterministic pin, not a statistical estimate -- see the matching
+        # test in test_absolute_eprocess.py for why (heavy-tailed wealth
+        # makes a Monte Carlo E[wealth]=1 check numerically impractical as a
+        # fast unit test; a hand-computed exact value is equally
+        # mutation-sensitive and non-flaky).
+        test = self.make_test(excess_shares=(0.5,))
+        result = test.ingest(RelativeEpochRecord(epoch=0, stratum_total_losses=40,
+                                                   sublink_losses=15))
+        n, k = 40, 15
+        expected_log_lr = (k * math.log(0.5 / 0.25) +
+                           (n - k) * math.log((1.0 - 0.5) / (1.0 - 0.25)))
+        self.assertAlmostEqual(result, math.exp(expected_log_lr), places=12)
 
     def test_monte_carlo_false_alarm_rate_under_the_true_null(self):
         # Ville's inequality: P(ever crossing 1/alpha) <= alpha under a true null.

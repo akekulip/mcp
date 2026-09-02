@@ -101,6 +101,28 @@ class FleetAbsoluteEProcessTest(unittest.TestCase):
                 break
         self.assertTrue(alarmed)
 
+    def test_wealth_matches_the_hand_computed_likelihood_ratio_exactly(self):
+        # Deterministic pin on the exact log-LR formula, not a statistical
+        # estimate: a single alternative makes the mixture trivial (wealth =
+        # exp(log-LR) directly), so this catches an exact-arithmetic
+        # regression (delivered/tx swap, sign flip, floor/alternative swap)
+        # immediately and without Monte Carlo flakiness
+        # (docs/review/artifacts/STATS-LAYER-REVIEW-2026-09-02.md, weak-test
+        # finding: the existing tolerance-based Monte Carlo checks did not
+        # catch a "use tx instead of delivered" mutation).
+        import math
+        process = FleetAbsoluteEProcess(alpha=0.05, alternatives=(0.5,))
+        result = process.ingest(FleetEpochRecord(epoch=0, tx=10, rx=7, floor=0.2))
+        delivered, lost = 7, 3
+        expected_log_lr = (delivered * math.log((1.0 - 0.5) / (1.0 - 0.2)) +
+                           lost * math.log(0.5 / 0.2))
+        self.assertAlmostEqual(result.wealth, math.exp(expected_log_lr), places=12)
+
+        # a "use tx instead of delivered" mutation would instead produce this:
+        mutant_log_lr = (10 * math.log((1.0 - 0.5) / (1.0 - 0.2)) +
+                         lost * math.log(0.5 / 0.2))
+        self.assertNotAlmostEqual(result.wealth, math.exp(mutant_log_lr), places=6)
+
     def test_monte_carlo_false_alarm_rate_under_a_true_and_moving_floor(self):
         # The floor is redrawn every epoch (previsible: computed independent of
         # this trial's own outcome) and data is generated at exactly that

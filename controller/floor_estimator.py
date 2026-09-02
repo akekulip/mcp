@@ -6,14 +6,28 @@ C2: "a floor estimated continuously from the fleet's own healthy sublinks").
 This estimator answers "what loss rate do this sublink's healthy siblings show
 right now", excluding the sublink itself and any sublink currently outside the
 healthy pool, so a genuinely bad link cannot inflate the floor used to judge it
-or its siblings. Excluding the sublink's own counts also keeps the estimate
-previsible with respect to that sublink's own next outcome, which the primary
-e-process's validity depends on.
+or its siblings.
+
+`floor_for` returns `None` when the leave-one-out pool has too little traffic
+to trust (cold start, a single-sublink fleet, or every sibling currently under
+mitigation). Substituting a fallback number there was tried and rejected
+(`docs/review/artifacts/STATS-LAYER-REVIEW-2026-09-02.md`, CRITICAL 1): a
+fixed anti-conservative floor such as `min_floor` makes every epoch look like
+overwhelming evidence of loss and produced 200/200 false alarms on a fully
+healthy fleet in the reachable single-sublink case. The caller must treat
+`None` the same way it treats any other invalid-null epoch: censored, a
+factor of one, no reset.
+
+Each sublink keeps a running (tx, lost) total over its own currently-healthy,
+unexpired samples, incrementally updated on insert and eviction, rather than
+re-summing its whole window on every query (the same review's M2 finding:
+re-summing made `floor_for` O(S*W) per call, measured at 1.76s for a single
+tick at the design's own 1024-sublink target scale). `floor_for` is now O(S).
 """
 
 from collections import deque
 from dataclasses import dataclass
-from typing import Deque, Dict
+from typing import Deque, Dict, Optional
 
 
 @dataclass(frozen=True)
@@ -22,6 +36,26 @@ class _EpochSample:
     tx: int
     lost: int
     healthy: bool
+
+
+class _SublinkWindow:
+    def __init__(self) -> None:
+        self.samples: Deque[_EpochSample] = deque()
+        self.running_tx = 0
+        self.running_lost = 0
+
+    def append(self, sample: _EpochSample) -> None:
+        self.samples.append(sample)
+        if sample.healthy:
+            self.running_tx += sample.tx
+            self.running_lost += sample.lost
+
+    def prune(self, cutoff_epoch: int) -> None:
+        while self.samples and self.samples[0].epoch <= cutoff_epoch:
+            evicted = self.samples.popleft()
+            if evicted.healthy:
+                self.running_tx -= evicted.tx
+                self.running_lost -= evicted.lost
 
 
 class FleetFloorEstimator:
@@ -38,7 +72,8 @@ class FleetFloorEstimator:
         self.window_epochs = int(window_epochs)
         self.min_floor = float(min_floor)
         self.min_pool_tx = int(min_pool_tx)
-        self._samples: Dict[int, Deque[_EpochSample]] = {}
+        self._windows: Dict[int, _SublinkWindow] = {}
+        self._latest_epoch: Optional[int] = None
 
     def record_epoch(self, sublink: int, epoch: int, tx: int, rx: int,
                       healthy: bool) -> None:
@@ -46,25 +81,34 @@ class FleetFloorEstimator:
             raise ValueError("counts must be non-negative")
         if rx > tx:
             raise ValueError("rx cannot exceed tx")
-        window = self._samples.setdefault(sublink, deque())
+        self._latest_epoch = (epoch if self._latest_epoch is None
+                              else max(self._latest_epoch, epoch))
+        window = self._windows.setdefault(sublink, _SublinkWindow())
         window.append(_EpochSample(epoch=epoch, tx=tx, lost=tx - rx,
                                     healthy=healthy))
-        while len(window) > self.window_epochs:
-            window.popleft()
+        window.prune(epoch - self.window_epochs)
 
-    def floor_for(self, sublink: int) -> float:
-        """Leave-one-out p0 estimate excluding `sublink` and unhealthy siblings."""
+    def floor_for(self, sublink: int) -> Optional[float]:
+        """Leave-one-out p0 estimate excluding `sublink` and unhealthy siblings.
+
+        Returns `None` when the pool has too little traffic to trust -- the
+        caller must censor that epoch rather than substitute a number. Every
+        sibling's window is pruned against the fleet's own latest-seen epoch
+        before reading its running total, not just its own last-write epoch,
+        so a sublink that has stopped reporting still ages out of the pool.
+        """
         pool_tx = 0
         pool_lost = 0
-        for other, window in self._samples.items():
+        cutoff = (None if self._latest_epoch is None
+                 else self._latest_epoch - self.window_epochs)
+        for other, window in self._windows.items():
             if other == sublink:
                 continue
-            for sample in window:
-                if not sample.healthy:
-                    continue
-                pool_tx += sample.tx
-                pool_lost += sample.lost
+            if cutoff is not None:
+                window.prune(cutoff)
+            pool_tx += window.running_tx
+            pool_lost += window.running_lost
         if pool_tx < self.min_pool_tx:
-            return self.min_floor
+            return None
         estimate = pool_lost / pool_tx
         return max(self.min_floor, min(estimate, 1.0 - self.min_floor))
