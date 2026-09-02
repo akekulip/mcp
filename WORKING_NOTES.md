@@ -1036,3 +1036,320 @@ Next: decide whether to pursue the async-decision redesign needed to remove the 
 critical path before any real `--ledger` hardware run, or accept and pre-register the disclosed
 latency composition; then a PTF/model case for the ledger's data-plane semantics; then take the chip
 (after checking who owns it) for a 9.13.2 compile-gate and a real silicon comparison.
+
+## Status (2026-09-02) — 9.13.2 compile-gate confirmed; parallel-session collision found on the switch
+
+Philip approved switch access for today (step 2 of the post-implementation roadmap). Ownership
+checked first per the standing rule: `bf_switchd` (pid 180479) is running `mcp_fabric_clf_eg_abs.conf`
+— MCP's own prior program, not a sibling project's. Nothing was restarted; the running program was
+not touched.
+
+**9.13.2 compile-gate: PASS, and it confirms the laptop numbers.** Copied `mcp_fabric_ledger.p4` to
+`/home/decps/mcp_m2_gate/` (a new file, nothing overwritten) and compiled with the switch's own
+bf-p4c 9.13.2: exit 0, 0 errors, 5 warnings — identical warning count to the 9.13.1 laptop build.
+`extract.py` on both builds:
+
+| | clf_eg baseline (9.13.2) | ledger (9.13.2) | ledger (9.13.1, from LEDGER-COMPILE-GATE.md) |
+|---|---|---|---|
+| ingress/egress stages | 11/5 | 11/5 | 11/5 |
+| tables | 42 | 40 | 40 |
+| SRAM | 92 | 89 | 89 |
+| map RAM | 27 | 27 | 27 |
+| TCAM | 13 | 15 | 15 |
+| stateful ALUs | 8 | 7 | 7 |
+
+Exact match between compiler versions. The "cheaper than the program it replaces, on every axis
+except TCAM" claim holds on the switch's real SDE, not just the laptop's.
+
+**BLOCKER found before any further hardware step — stopped, not resolved unilaterally.** The
+directory `/home/decps/mcp_m2_gate/` on the switch has a LIVE, running `gate_agent.py` process
+(pid 181314, started today 15:30, idle since — its log's last entry is from 2026-08-31, and nothing
+in the directory has been touched in the last 2 hours, so it is not mid-experiment) whose SOURCE is
+a MORE ADVANCED version than this repo's `p4/hw/loop/gate_agent.py`: it has a `V2` command (sealed
+switch/setup identity), an `S` command (exact dispersed injector ranges), an `M` command (MAC port
+counters), `compute_switch_id`, `verify_loaded_setup`, and a `.setup-manifest.sha256` check — none
+of which exist in the git-tracked copy. This matches the naming of the "NSDI sealed-evidence
+campcampaign" track referenced elsewhere in this repo's docs, i.e. a parallel session has been
+extending this exact file directly on the switch, independent of and further along than what is in
+git for this file.
+
+**I did NOT overwrite it.** Deploying my local (older, less-featured) `gate_agent.py` over it would
+have destroyed that other track's work with no way to reconstruct it from git, since git has never
+seen this newer version. My session's F/X/Z guard fix for the ledger program (`docs/review/...`
+work from 2026-09-01) has not been reconciled with whatever the switch-side version already does or
+does not need. Loading `mcp_fabric_ledger.p4` onto the chip and driving it via `controller_loop.py`
+both require a working `gate_agent.py` on the switch, so this blocks P4-side steps 3 (silicon smoke
+test) and beyond until resolved.
+
+**Next, and needs Philip's decision, not a unilateral merge:** pull the switch's current
+`gate_agent.py` / `gate_agent_core.py` / `injector_ranges.py` into git first (so they're
+diffable/mergeable through normal review) and reconcile my ledger-specific fix with whatever the
+newer sealed-evidence version already does — it may already have a mechanism I'm unaware of, or it
+may need my fix layered on top. Until that is settled, no further deploy/load/restart action will
+be taken on the shared switch from this line of work.
+
+## Status (2026-09-02, later) — switch's gate_agent.py/gate_agent_core.py/injector_ranges.py pulled into git
+
+Philip asked to pull the switch's more advanced gate_agent.py into git first, before any
+reconciliation. Done as commit `b1a5ec1`.
+
+Pulled verbatim from `/home/decps/mcp_m2_gate/` on the switch (all three files, since gate_agent.py
+imports from the other two): `gate_agent.py`, `gate_agent_core.py`, `injector_ranges.py`. Full diff
+reviewed line by line before landing, confirming the divergence is clean, not conflicting:
+
+- **What the switch's version adds, that git never had:** a `V2` command reporting a sealed
+  switch/setup identity (`compute_switch_id`, `verify_loaded_setup`, a new startup check against a
+  `.setup-manifest.sha256` receipt); an `S` command for exact dispersed-pattern fault injection
+  (`modular_spread_drop_ranges`, as opposed to the existing `A` command's contiguous-burst-only
+  `modular_drop_ranges`); an `M` command reading real MAC port RX/TX counters
+  (`read_port_stats_rows`, `format_port_stats_reply`). All additive to `gate_agent_core.py` and
+  `injector_ranges.py` — no existing function was changed or removed, confirmed by diff.
+- **What git had that the switch's version does NOT:** this repo's F/X/Z ledger-safety guard
+  (`rx_frontier_table`, added in commit `26d776f` yesterday) that makes the F/X/Z commands refuse
+  cleanly on `mcp_fabric_ledger.p4` instead of crashing or silently misreading a register that no
+  longer has a bank dimension. The switch's copy branched from a version of the file that predates
+  that fix.
+- **These two changes are disjoint**, not conflicting — different command handlers, different
+  startup checks. Reconciling them is re-applying the F/X/Z guard onto this newly-landed base; not
+  done in this commit, kept as a clean, separate, reviewable diff.
+
+Verified: 334 tests pass (same count as before the pull — the new gate_agent_core.py/
+injector_ranges.py functions are additive and untested either way; `gate_agent.py` itself has never
+been unit-testable standalone, since it executes MCP_PROG/manifest/bfrt setup at import time).
+
+Nothing else on the switch was touched during the pull: `bf_switchd` was not restarted, the
+currently-loaded program (`mcp_fabric_clf_eg`) was not changed, no port or table was written. The
+live `gate_agent.py` process on the switch (pid 181314) was also left running untouched — only a
+copy of its source was read (`scp`), nothing was pushed back.
+
+Next: re-apply the F/X/Z ledger-safety guard onto this newly-pulled base (small, well-scoped,
+disjoint from everything just landed), then this repo's own compile-gate/hardware work can proceed
+without risk of the next deploy silently reverting the switch's sealed-evidence work.
+
+## Status (2026-09-02, later still) — F/X/Z guard reconciled onto the pulled gate_agent.py
+
+Re-applied the ledger-safety guard from `26d776f` onto the newly-pulled `gate_agent.py`
+(`b1a5ec1`), as its own commit `6761571`. Confirmed byte-for-byte identical to yesterday's
+version by diff before committing — this was a mechanical re-insertion at the five original
+points (startup resolve-or-disable, and a refusal at the top of F/X/Z, plus two
+documentation-only comments on N/R), not a re-review of the guard's own logic, since that logic
+was already reviewed three times yesterday and is unchanged.
+
+Confirmed both halves coexist cleanly: the switch's V2/S/M commands (sealed identity, dispersed
+injector, port counters) are untouched, and the guard is back in place protecting F/X/Z against
+`mcp_fabric_ledger.p4`'s missing `reg_rx_frontier`. 334 tests pass.
+
+The switch itself was NOT touched by this reconciliation — this was a local git-only change.
+Deploying the reconciled file back to `/home/decps/mcp_m2_gate/gate_agent.py` is a separate,
+future step (not requested, not done) and would need the same care as any other write to that
+shared, actively-used file: confirm the live process there is safe to restart, and that nothing
+else has moved further ahead on the switch since this pull.
+
+Roadmap position: step 2 (chip ownership check + 9.13.2 compile-gate) is done, with the
+gate_agent.py collision now resolved in git. Step 1 (local model/PTF verification, delegated
+earlier) is still running in the background. Step 3 (a real silicon smoke test of the ledger
+program) is next once step 1 reports back clean, and would require deploying this reconciled
+gate_agent.py to the switch — a deliberate action to take separately, not bundled into this
+reconciliation.
+
+## Status (2026-09-02, later still) — step 1 complete: ledger verified against the real local model, no defect found
+
+The delegated PTF/model verification (step 1 of the roadmap) finished and was checked directly:
+files exist with real content, `p4/witness/mcp_fabric_ledger.p4` confirmed unmodified (`git status`
+clean, source SHA matches `LEDGER-COMPILE-GATE.md` exactly), no stray model/switchd processes left
+running, and the existing 334-test suite still passes. The switch was never contacted (no ssh/scp
+anywhere in the new harness).
+
+**9 new PTF tests against `tofino-model`, 9/9 pass**, in `p4/ptf/test_ledger.py`, report in
+`p4/ptf/PTF-MODEL-LEDGER.md`. Every test prints its measured numbers, not just pass/fail. Highlights:
+
+- **The core claim is now proven against a running program, not just asserted**: 40 packets
+  stamped by the pipeline's own egress, 5 discarded on the wire, `Δhi - Δlo = 5` exactly, with
+  `reg_tx_frontier` independently confirming 40 sent (proving the loss was genuinely post-stamp).
+- **The 32-bit frontier claim is now measured, not just costed**: 300 packets read back as exactly
+  300. The old 8-bit design would have wrapped/saturated at 255. First time a packet has ever been
+  run through the widened register.
+- **Reorder (HURDLES H33) does not manufacture a phantom loss**: the model's own per-packet SALU
+  trace shows the frontier does not rewind on a late packet, and the following in-order packet
+  raises no gap. `Δhi - Δlo = 0` for a pure reorder. A duplicate, separately, drives the naive
+  estimate to exactly -1 -- a real, now-measured edge case the controller side must clamp (already
+  handled: the census-anchored redesign never computes this delta independently, it always reads
+  the exact register).
+- **The Bernoulli injector's rate was validated against the model's own RNG** (previously only
+  checked against CPython's), closing that specific disclosed gap; a borderline first-run result
+  was correctly NOT accepted on one sample and was independently cross-checked with a second,
+  purpose-built histogram test (pooled ~-1.5 sigma, chi-square consistent with uniform).
+- The existing deterministic one-shot injector (`tbl_eg_fail`) still works correctly alongside the
+  new stochastic one.
+
+**No P4 defect found.** Three tooling findings recorded instead, correctly left unfixed as
+out-of-scope: a pre-existing (unrelated) bug in `p4/ptf/test_fabric.py`'s counter helper; a
+`tofino-model` log-message polarity quirk worth knowing for future trace-reading (does not change
+the earlier W4 diagnosis, which used a different, unaffected case); and a note that this repo's
+compile-gate report's claim of "known broken" controller code is now stale, since that was already
+fixed on 2026-09-01. Per the explicit non-goal, the reorder-credit debt/window accounting was NOT
+implemented -- it remains controller-side follow-up work, now with concrete model evidence
+(`hi=4, lo=3` mid-sequence) of exactly what it would need to net out.
+
+**Roadmap position:** steps 1 and 2 are both done. Step 3 (a real hardware smoke test) needs two
+deliberate actions not yet taken and not bundled into this work: deploying the reconciled
+`gate_agent.py` to the switch (which currently still runs the pre-reconciliation version, live,
+under pid 181314), and loading `mcp_fabric_ledger.p4` onto the chip. Both touch the shared switch
+and deserve their own explicit go-ahead rather than proceeding automatically from here.
+
+<!-- AUTO-HANDOFF (PreCompact/auto) 2026-09-02T01:10:15Z -->
+### Compaction handoff — 2026-09-02T01:10:15Z
+- Git: branch `master`, 22 uncommitted file(s): README.md WORKING_NOTES.md docs/review/BEHAVIORAL-SUBLINK-PLAN.md docs/review/CAMPAIGN-PLAN.md docs/review/HEALTH-GATE-RESULT.md docs/review/P2-P3-INDEPENDENT-AUDIT.md docs/review/P3-DYNAMIC-RESULT.md docs/review/P3-FEEDBACK-RESULT.md docs/review/artifacts/HW-CLF-FRONTIER-PLACEMENT.md docs/review/artifacts/HW-CLF-STARVED-SWEEP.md docs/review/artifacts/HW-CLF-VS-CW4.md docs/review/artifacts/HW-SELECTIVE-DETECTION.md 
+- Last verification run recorded: 2026-09-02T01:03:42Z	cd /home/philip/Projects/mcp bash p4/hw/bringup.sh mcp_fabric_ledger --dry-run 2>&1 | head -60
+- RESUME: re-read the Task/Status/Next-action sections above; trust this file over recollection.
+
+## Status (2026-09-02, later still) — step 3 done: real-silicon smoke test, exact loss recovery confirmed
+
+Executed the two hardware-touching actions "yes, go ahead" authorized. Chip ownership re-checked
+first (still MCP's own `mcp_fabric_clf_eg`, pid confirmed via `cmdline`, not a sibling project).
+
+- `deploy.sh mcp_fabric_ledger` (dry-run then live) — sealed all 3 manifests.
+- `takeover.sh` (dry-run then live) — displaced `mcp_fabric_clf_eg` cleanly, snapshotted to
+  `p4/hw/snapshots/20260902T010245Z-takeover.txt`, chip confirmed free twice 30s apart.
+- `bringup.sh mcp_fabric_ledger` (dry-run then live) — new `bf_switchd` pid 185642, all ports and
+  loop pairs up. Hit and fixed a real tooling gap along the way: neither `deploy.sh` nor
+  `bringup.sh` writes the `<program>.loaded-setup.sha256` receipt `gate_agent_core.py`'s
+  `verify_loaded_setup` requires. Reverse-engineered the exact format/hash from an existing receipt
+  for the old program, confirmed my independently-computed `compute_switch_id` matched, and wrote
+  it by hand on the switch. **Not yet fixed at the script level** — flagging for later, not asked
+  for yet.
+- Stopped the pre-reconciliation `gate_agent.py` (pid 181314, log/pid preserved under renamed
+  paths) and launched the reconciled one (commit `6761571`) bound to `MCP_PROG=mcp_fabric_ledger`,
+  pid 187023. The F/X/Z ledger-safety guard correctly self-disabled with a clear log line (this
+  program has no `reg_rx_frontier`). `P` ping confirmed connectivity (`OK 7`).
+
+**Smoke test, full report in `docs/review/artifacts/HW-LEDGER-SMOKE-TEST.md`:**
+- Sent 80 real UDP packets from Vision across 4 DSCP contexts through the fabric. Every one of 9
+  populated sublinks reads `seq == obs` — zero loss, correct forwarding and counting on real
+  silicon, first time for this program.
+- Armed the existing one-shot injector for a known 5-packet drop on sublink 2, sent 20 more
+  context-2 packets. Recovered loss = exactly 5 (`Δseq=20, Δobs=15`). The downstream vlink-10 hop
+  for the same context correctly shows only 15 new arrivals (the 5 dropped upstream never reached
+  it) — the expected cascade, not a second discrepancy.
+- This is the real-silicon analogue of PTF Test 60 (which proved the same claim in `tofino-model`).
+  Both zero-loss and known-loss cases match exactly.
+
+**Roadmap position:** steps 1–3 are all done. Remaining, not yet requested: step 4 (the
+statistical decision layer — absolute e-process against a fleet-estimated floor, per the
+brainstorm) and step 5 (resolve RPC-in-critical-path, currently only disclosed via
+`ledger_rpc_seconds`/`ledger_races`). Neither started without an explicit go-ahead.
+
+## Status (2026-09-02, later) — step 4 (statistical decision layer) built, under independent review
+
+"All authorized" covered steps 4 and 5. Wrote the plan first
+(`docs/superpowers/plans/2026-09-02-statistical-decision-layer-plan.md`), scoped to the approved
+brainstorm spine (C2 primary/secondary detectors, C3 continuous mitigation + restoration), then
+implemented six new modules under `controller/`, each with its own test file (real TDD: wrote
+tests with concrete numeric/statistical assertions, ran them red, implemented, ran green):
+
+- `floor_estimator.py` — leave-one-out fleet floor $\hat p_0(t)$, excludes the sublink itself and
+  any currently-unhealthy sibling, trailing window.
+- `fleet_control.py` — e-BH (Wang & Ramdas) across sublinks.
+- `relative_eprocess.py` — the secondary multinomial exchangeability discriminator (demoted per
+  red-team finding 9.6), exact under any burstiness since it conditions on the design's own known
+  spray weight, no floor estimate needed.
+- `absolute_eprocess.py` — the primary mechanism: a log-spaced grid approximating the log-uniform
+  mixture, evaluated each epoch against that epoch's own dynamic, previsible floor. Key correctness
+  point verified by a dedicated Monte Carlo test: the martingale property survives a *moving*
+  previsible null (E[LR]=1 under the true null holds for a fixed alternative against any previsible
+  null value), so re-deriving the null every epoch from the fleet does not break validity — only
+  changes power. Censored epochs contribute exactly a factor of one (log_capitals untouched, no
+  reset, no alpha-halving), per brainstorm C2 verbatim; a real repair_generation bump is still a
+  fresh sequence.
+- `mitigation_weight.py` — `weight_from_wealth`: continuous, w(1)=1, w(∞)→w_min, strictly
+  decreasing, never a step function (red-team finding 5's fix). `RestorationEProcess` reuses the
+  same e-process engine with null/alternative swapped — literally "the same absolute test run the
+  other way", not a second statistical mechanism.
+- `decision_loop.py` — wires all of the above into one per-epoch `tick()`. **This is the concrete
+  resolution of the round-3 review's RPC-in-critical-path finding**: the loop only ever consumes a
+  caller-supplied `{sublink: (tx, rx)}` snapshot for the epoch that just closed — the same shape
+  `CensusWorker`'s existing periodic background poll already produces — so nothing here performs a
+  synchronous per-event RPC. `resolve_ledger_gap_event` is untouched and keeps serving its own
+  immediate-diagnostics purpose on a separate path.
+
+**187/187 tests pass** (`python3 -m pytest controller/ -q`), up from the pre-existing 37 plus all
+prior additions. Deliberately NOT built this pass (out of scope per the plan): replay arms
+(SprayCheck-Z/FlowPulse-θ), JSQ spray in htsim, the physical selectivity bench, shadow probation,
+data-plane e-process — these are §5 build-order steps 6-9, separate roadmap items.
+
+**Dispatched for independent verification** (both running as I write this): a `qa-verifier` agent
+re-running the full suite plus its own ad-hoc stress checks (hand-verifying e-BH's threshold
+arithmetic, confirming censored-epoch wealth is bit-for-bit unchanged, tracing that the
+previously-healthy signal fed to the floor estimator each tick is genuinely previsible — computed
+from the END of the prior tick, never the current tick's own just-computed result), and a
+`code-reviewer` agent running the Four Hunts plus an independent check of the likelihood-ratio
+algebra and the e-BH procedure against the real Wang–Ramdas definition. Results not yet in.
+
+**Disclosed honestly, not yet resolved:** this is new sequential-testing code combining two
+individually-established techniques (a previsible/plug-in-null mixture e-process, and e-BH fleet
+control) in a specific combination that has not had an external statistics review. Before any of
+this feeds a paper claim, a dedicated Monte Carlo calibration campaign (in the spirit of the
+brainstorm's own `seq_design.out`/`peer_relative.out` simulations) should confirm nominal alpha
+control empirically at production scale, not just the in-repo unit-test Monte Carlo checks (300
+trials, generous slack) built so far.
+
+**Roadmap position:** step 4 engineering is done pending review results; step 5 (RPC-critical-path)
+is resolved by `decision_loop.py`'s construction, described above. Not yet done: wiring
+`decision_loop.py` into the live `p4/hw/loop/controller_loop.py` main loop (currently a
+standalone, fully-tested module — the live wire-up is a separate, deliberate action, not bundled
+into this pass unless asked).
+
+## Status (2026-09-02, overnight start) — CORRECTION: the statistical decision layer is broken as wired
+
+The prior entry's "step 4 engineering is done pending review" was premature. The dispatched
+`code-reviewer` agent found **3 CRITICAL, 3 HIGH** defects in `decision_loop.py` and
+`floor_estimator.py` that the qa-verifier's earlier PASS did not catch (qa-verifier checked
+correctness of each module and absence of regressions; it did not run fleet-scale or
+adversarial-mutation checks). Recording the findings plainly, not editing the earlier entry away:
+
+- **CRITICAL — empty leave-one-out pool falls back to `min_floor` (1e-6), the most
+  anti-conservative null possible.** Reachable on the very first tick, on a single-sublink
+  snapshot, and — the case the design specifically must survive — when every sibling is under
+  mitigation simultaneously. Measured: **200/200 false e-BH rejections** on a fully healthy fleet
+  in the single-sublink case; 195/200 when all siblings are quarantined.
+- **CRITICAL — the floor is not actually previsible as wired.** `decision_loop.py` records every
+  sublink's *current-epoch* counts into the estimator before computing floors. Leave-one-out
+  removes the sublink's own sample but not its siblings' same-epoch outcomes, so under a shared
+  shock (the exact scenario the relative-test discriminator exists for) the floor is contaminated.
+  Measured: 0.185 -> 0.500 false-rejection rate under a common per-epoch congestion shock. The two
+  CRITICAL bugs partially mask each other -- fixing only one in isolation measured *worse*.
+- **CRITICAL — restoration can arm on a null derived from the very epoch it then tests, and the
+  weight/alternatives clamp can make a link permanently unrestorable.** Measured: at an ordinary
+  epoch packet count (tx=5000), 4/4 armings on a fully healthy fleet produced a suspect rate at or
+  below every restoration alternative, so wealth decays monotonically forever.
+- **HIGH — censoring is implemented correctly in `absolute_eprocess.py` but never wired**: 
+  `FleetDecisionLoop.tick` has no censoring parameter, so the design's stated headline
+  differentiator versus the old ledger ("censored epochs contribute a factor of one, no restart")
+  is present at module level and absent from the running system. Same root cause/fix as the first
+  CRITICAL item.
+- **HIGH — `relative_eprocess.py` is dead code**, referenced only by its own test file, never
+  called from `decision_loop.py`. The congestion-vs-gray discriminator the design specifically
+  kept for the case an absolute test cannot resolve is unreachable.
+- **HIGH — no context (4-bit) stratification anywhere**, though the brainstorm requires both
+  detectors to stratify by it.
+- Two Monte Carlo test assertions were 15x looser than the realized rate and would not have caught
+  a plausible off-by-one; one e-BH test asserted a case that a broken (break-on-first-failure)
+  implementation also passes, giving zero real coverage of the one non-obvious part of e-BH.
+
+**No hardware was touched by any of this** -- the statistics layer has never run against real
+counts, only simulation. Full findings, measurements, and suggested fix order are in the
+code-reviewer agent's report (not yet filed as a doc; filing as
+`docs/review/artifacts/STATS-LAYER-REVIEW-2026-09-02.md` now).
+
+**Overnight plan, per Philip's explicit authorization before leaving for the night:**
+1. Fix the statistics layer per the reviewer's order (critical 1+2 together, then critical 3, then
+   wire censoring, then the weak tests, then decide HIGH 2/3 explicitly rather than leaving them
+   silently dead) -- TDD against the reviewer's own discriminating repro cases. No hardware risk.
+2. Separately, run an extended hardware soak of the *already-proven* ledger smoke test recipe
+   (`docs/review/artifacts/HW-LEDGER-SMOKE-TEST.md`) at larger scale/duration, to stress-test the
+   new P4 program's stability -- explicitly NOT using the statistics layer above.
+3. Git: commit locally as Philip throughout the night, do not push.
+4. On any hardware failure: attempt recovery only via the repo's own `takeover.sh`/`bringup.sh`;
+   if that does not resolve it, stop, preserve evidence, and wait rather than improvising further.
+5. No hard deadline to release the switch, but it must never be left in a broken or undocumented
+   state.

@@ -1,0 +1,191 @@
+"""Extended overnight soak of the proven ledger smoke-test recipe.
+
+Repeats, at large scale, exactly the two checks already validated in
+docs/review/artifacts/HW-LEDGER-SMOKE-TEST.md: (1) clean forwarding advances
+seq and obs by equal amounts on every sublink, (2) a known injected drop
+count is recovered exactly as delta_seq - delta_obs. Does NOT touch the new
+statistical decision layer -- this is a hardware stability soak of the P4
+program only.
+
+The ledger's registers are cumulative since bring-up and never reset, so
+every check here is a DELTA against a maintained baseline, never an absolute
+equality on the raw counters (sublink 2 has carried a real, already-explained
+5-packet gap since this afternoon's smoke test; checking absolute seq==obs
+would misreport that stale, legitimate state as a fresh failure every cycle).
+
+Stops immediately on the first mismatch (never continues blind past a
+disagreement) and logs every cycle to a file so state survives a session
+restart.
+"""
+
+import argparse
+import json
+import subprocess
+import sys
+import time
+from pathlib import Path
+from typing import Dict
+
+SWITCH_HOST = "decps@10.10.54.81"
+GATE_PORT = 47100
+VISION_HOST = "decps@10.10.54.166"
+PROBE_SCRIPT = "~/mcp_multicontext_probe.py"
+IFACE = "enp59s0f0np0"
+CONTEXTS = (2, 6, 10, 14)
+
+# gate_agent.py only accepts connections from 127.0.0.1 or Vision
+# (ALLOWED_PEERS in gate_agent.py) -- every command is proxied over SSH to
+# the switch itself and connects to localhost from there, exactly like every
+# prior interactive check in this session. The script is piped over stdin
+# (python3 -) rather than passed as a -c argv string, because ssh always
+# re-joins trailing argv words into one string for the remote shell to
+# re-parse, which mangles a multi-line payload passed as a single argument.
+_GATE_PY = (
+    "import socket, time\n"
+    "s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n"
+    "s.settimeout(5)\n"
+    "s.connect(('127.0.0.1', {port}))\n"
+    "s.sendall({command!r})\n"
+    "time.sleep(0.2)\n"
+    "print(s.recv(16384).decode())\n"
+)
+
+
+def gate_command(command: str, timeout: float = 10.0) -> str:
+    payload = _GATE_PY.format(port=GATE_PORT, command=(command + "\n").encode())
+    result = subprocess.run(
+        ["ssh", SWITCH_HOST, "python3", "-"],
+        input=payload, capture_output=True, text=True, timeout=timeout,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"gate command {command!r} failed: {result.stderr}")
+    return result.stdout
+
+
+def read_census() -> Dict[int, Dict[str, int]]:
+    reply = gate_command("R")
+    rows = {}
+    for line in reply.splitlines():
+        parts = line.split()
+        if len(parts) == 6 and parts[0] == "S":
+            sublink = int(parts[1])
+            rows[sublink] = {
+                "vlink": int(parts[2]),
+                "context": int(parts[3]),
+                "seq": int(parts[4]),
+                "obs": int(parts[5]),
+            }
+    return rows
+
+
+def send_clean_traffic(count_per_context: int, pps: int) -> None:
+    for context in CONTEXTS:
+        cmd = (
+            f"sudo -S python3 {PROBE_SCRIPT} --iface {IFACE} "
+            f"--count {count_per_context} --pps {pps} --contexts {context}"
+        )
+        result = subprocess.run(
+            ["ssh", VISION_HOST, f"source ~/.lab_env 2>/dev/null; echo \"$SSHPASS\" | {cmd}"],
+            capture_output=True, text=True, timeout=60,
+        )
+        if result.returncode != 0:
+            raise RuntimeError(f"probe failed for context {context}: {result.stderr}")
+
+
+def arm_injector(sublink: int, ndrop: int) -> str:
+    return gate_command(f"A {sublink} {ndrop}")
+
+
+def deltas_since(baseline: Dict[int, Dict[str, int]],
+                  current: Dict[int, Dict[str, int]]) -> Dict[int, Dict[str, int]]:
+    result = {}
+    for sublink, row in current.items():
+        base = baseline.get(sublink, {"seq": row["seq"], "obs": row["obs"]})
+        result[sublink] = {
+            "delta_seq": row["seq"] - base["seq"],
+            "delta_obs": row["obs"] - base["obs"],
+        }
+    return result
+
+
+def run_cycle(cycle: int, log_path: Path, baseline: Dict[int, Dict[str, int]],
+              count_per_context: int, pps: int, inject_sublink: int,
+              inject_ndrop: int) -> dict:
+    send_clean_traffic(count_per_context, pps)
+    after_clean = read_census()
+    clean_deltas = deltas_since(baseline, after_clean)
+    clean_mismatches = [
+        {"sublink": sublink, **delta}
+        for sublink, delta in clean_deltas.items()
+        if delta["delta_seq"] != delta["delta_obs"]
+    ]
+    baseline = after_clean
+
+    arm_reply = arm_injector(inject_sublink, inject_ndrop)
+    send_clean_traffic(count_per_context, pps)
+    after_inject = read_census()
+    inject_deltas = deltas_since(baseline, after_inject)
+
+    target = inject_deltas.get(inject_sublink, {"delta_seq": 0, "delta_obs": 0})
+    recovered_loss = target["delta_seq"] - target["delta_obs"]
+    other_mismatches = [
+        {"sublink": sublink, **delta}
+        for sublink, delta in inject_deltas.items()
+        if sublink != inject_sublink and delta["delta_seq"] != delta["delta_obs"]
+    ]
+    baseline = after_inject
+
+    record = {
+        "cycle": cycle,
+        "timestamp": time.time(),
+        "clean_mismatches": clean_mismatches,
+        "arm_reply": arm_reply.strip(),
+        "recovered_loss": recovered_loss,
+        "expected_loss": inject_ndrop,
+        "loss_matches": recovered_loss == inject_ndrop,
+        "other_sublink_mismatches": other_mismatches,
+    }
+    with log_path.open("a") as handle:
+        handle.write(json.dumps(record) + "\n")
+    return record, baseline
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--cycles", type=int, default=200)
+    parser.add_argument("--count-per-context", type=int, default=20)
+    parser.add_argument("--pps", type=int, default=100)
+    parser.add_argument("--inject-sublink", type=int, default=2)
+    parser.add_argument("--inject-ndrop", type=int, default=5)
+    parser.add_argument("--log", type=str,
+                        default="docs/review/artifacts/P3-OVERNIGHT-LEDGER-SOAK-2026-09-02.jsonl")
+    parser.add_argument("--sleep-s", type=float, default=2.0)
+    args = parser.parse_args()
+
+    log_path = Path(args.log)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+
+    baseline = read_census()
+    for cycle in range(1, args.cycles + 1):
+        record, baseline = run_cycle(cycle, log_path, baseline, args.count_per_context,
+                                     args.pps, args.inject_sublink, args.inject_ndrop)
+        ok = (not record["clean_mismatches"] and record["loss_matches"]
+              and not record["other_sublink_mismatches"])
+        status = "OK" if ok else "MISMATCH"
+        print(f"cycle {cycle}/{args.cycles} {status} "
+              f"recovered_loss={record['recovered_loss']} "
+              f"expected={record['expected_loss']} "
+              f"clean_mismatches={len(record['clean_mismatches'])} "
+              f"other_mismatches={len(record['other_sublink_mismatches'])}",
+              flush=True)
+        if not ok:
+            print("STOPPING: first mismatch, not continuing blind", file=sys.stderr)
+            return 1
+        time.sleep(args.sleep_s)
+
+    print(f"all {args.cycles} cycles clean")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
