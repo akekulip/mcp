@@ -1498,3 +1498,99 @@ statistics-layer stop.
 the statistics layer; use remaining time for lower-risk work (documentation, brainstorming/framing
 toward NDSI that doesn't require introducing more unverified statistical code) per Philip's
 standing authorization, and prepare a clear morning briefing covering both tracks.
+
+## Status (2026-09-03, overnight, ~00:15) — design proposal delivered; hardware soak still healthy
+
+Dispatched `research-scientist` for a design-only proposal (no code) addressing the four open
+questions from the stop-and-replan decision above. Delivered
+`docs/review/artifacts/STATS-LAYER-REDESIGN-PROPOSAL-2026-09-02.md` (2280 words, committed as
+`4dd0974`), reviewed directly before committing. Substantive, well-grounded work:
+
+- **Q1** (moving-floor grid): re-parameterize the primary detector's alternatives as fixed ratios
+  above the floor (not absolute rates), so `log_capitals` stays indexed by ratio and nothing needs
+  resetting each tick. Argues this specifically neutralizes the wrong-high-floor direction that
+  caused the measured 1.2e+74 explosion, while flagging that a wrong-low floor could still cause the
+  mirrored failure and needs its own check.
+- **Q2** (suspect-rate anchoring): drop the fixed trailing window; use a CUSUM change-point estimate
+  on the primary process's own accumulated log-capitals to find where the degradation actually
+  started, then estimate the suspect rate from raw counts only after that point. This is standard
+  sequential-change-point theory (Page 1954), not a bespoke construction. Explicitly rejects seeding
+  restoration's capital from the primary process's own capital as double-counting evidence.
+- **Q3** (fleet-wide unhealthy state): a calibrated incident-regime circuit breaker (threshold on
+  fraction mitigated) that freezes a slow historical baseline during incidents rather than expanding
+  the live pool (which was assessed as reintroducing the same contamination loop more slowly).
+- **Q4**: argues the round-2 common-mode shock and the round-3 cascade are causally distinct
+  (exogenous shared cause vs. endogenous floor-bookkeeping artifact) and that the relative
+  discriminator only helps the cascade if used to GATE mitigation actions (require corroborating
+  excess share) rather than run as an independent parallel stream -- with an honest self-starving
+  risk flagged (a falsely-mitigated link carries less traffic, meaning less corroborating evidence,
+  exactly when it's needed).
+
+Recommended build order: incident-regime circuit breaker first (cheapest, bounds worst-case blast
+radius) -> ratio-relative primary grid -> CUSUM-anchored suspect rate -> relative-discriminator
+gating last (needs real stratification plumbing not yet built anywhere) -- with the two
+mutant-surviving regression tests fixed before any of it. This is a proposal for Philip's decision,
+not an approved implementation plan; no code was touched.
+
+**Hardware soak remains fully healthy**, now past 200 clean cycles with correct exact-loss recovery
+every cycle throughout.
+
+This closes out the major workstreams for tonight. Remaining time: keep the hardware soak running
+and monitored; no further unrequested expansion of scope.
+
+### mcp-51 check-in 03:40 UTC / 23:40 EDT
+- Soak: 304/2000 cycles, 0 bad, 13.3 s/cycle (slower than the 11.2 s measured on validation2;
+  ETA ~6.3 h -> ~10:00 UTC / 06:00 EDT). Driver pid 2986059 alive, log fresh (6 s old).
+- Switch: switchd + gate_agent up. The 11 ERROR lines in `mcp_fabric_ledger.switchd.log` are ALL
+  pre-takeover: 01:04 cold-init (`pipe_mgr_exm_tbl_init` "No system resources" for
+  `Ingress.tbl_wit_verdict` + two assertion failures, plus two platform ChkSum lines) and the
+  01:51 tbl_eg_fail RESOURCE_EXHAUSTED already explained. Zero new errors during the soak. The
+  01:04 tbl_wit_verdict alloc failure is worth a morning look (unclear whether that table is on
+  the ledger path; the soak's recovered-loss checks pass, so the ledger registers are unaffected).
+- Track B (mcp-6c, from git): f3c92b0 fixed CRITICAL A/B + HIGH D from review round 2; eb048c5
+  round 3 found a fleet-wide absorbing deadlock (100% mitigated 4800 epochs after fault repair)
+  and restoration action rate 0/8 vs required >=0.9, so it declared the stats layer NOT production
+  ready and STOPPED autonomous iteration (prime-directive re-plan); 4dd0974 is a design-only
+  redesign proposal for Philip (`STATS-LAYER-REDESIGN-PROPOSAL-2026-09-02.md`). 206/206 tests pass.
+
+### mcp-51 check-in 04:24 UTC / 00:24 EDT
+- Soak 502/2000, 0 bad, 13.3 s/cycle, ETA ~5.5 h (~10:00 UTC). Driver alive, log 6 s old.
+- Switch: switchd + gate_agent up, still 11 ERROR lines (no new ones), 12.2 GB RAM free.
+- Track B: mcp-6c quiet since 03:24 UTC (last commit 4dd0974); it stopped autonomous iteration
+  by design. Nothing to do there tonight.
+
+### mcp-51 check-in 05:08 UTC
+- Soak 705/2000, 0 bad, driver alive, switch up, no new switchd errors.
+
+### mcp-51 check-in 05:52 UTC
+- Soak 903/2000, 0 bad, driver alive, switch up, no new switchd errors.
+
+### mcp-51 check-in 06:36 UTC
+- Soak 1101/2000, 0 bad, driver alive, switch up, no new switchd errors.
+
+### mcp-51 check-in 07:21 UTC
+- Soak 1303/2000, 0 bad, driver alive, switch up, no new switchd errors.
+
+### mcp-51 07:32 UTC / 03:32 EDT — MAIN soak stopped itself at cycle 1345; audited as a HARNESS race, not silicon
+- Record: cycles 1-1344 clean; cycle 1345 `loss_matches` true (5/5) and clean phase clean, but
+  `other_sublink_mismatches` = sublink 14 (delta_seq 20, delta_obs **21**) and sublink 142
+  (delta_seq 0, delta_obs **1**). obs LEADING seq by one is impossible for a drop (a packet is
+  stamped before it can be observed) — it is the signature of a non-atomic read.
+- Cross-check 1 (read-only census ~2 min later): sublink 14 = 56566/56566, 142 = 6/6, every
+  non-injected sublink seq == obs. The gap did not persist. Sublink 2 gap 56612-49507 = 7105
+  (legacy 5 + first soak 27x5 + validation2 50x3 + MAIN 1345x5 = 7015; the remaining 90 is
+  presumably the 40-cycle first validation run whose ndrop I do not have — unreconciled, noted).
+- Cross-check 2 (code): `gate_agent.py` R command (`p4/hw/loop/gate_agent.py:469-470`) bulk-reads
+  `reg_wit_seq` FIRST, then `reg_wit_observed`. A probe packet landing between the two reads
+  shows obs = seq+1 for its sublink. Once in 1345 cycles matches a ms-scale window.
+- Switch: no new switchd ERROR lines (still 11), switchd + gate_agent up. Nothing touched on the
+  switch beyond the read-only R.
+- Fix (driver only, no P4/agent change): `overnight_ledger_soak.py` now (a) sleeps `--settle-s`
+  (1.0 s) before every census read, (b) on any first-read mismatch re-reads once after
+  `--recheck-s` (2.0 s) and only counts a mismatch that persists; the first-read disagreement is
+  kept in the record as `*_first_read` so transients are logged, never hidden. Offline self-test
+  with a faked racing census passes. Relaunched as MAIN2 (1200 cycles, fresh log
+  `P3-OVERNIGHT-LEDGER-SOAK-MAIN2-2026-09-02.jsonl`, ETA ~4.4 h -> ~12:00 UTC / 08:00 EDT).
+- Verdict for the paper: 1344 consecutive clean cycles (~6,720 injected drops recovered exactly,
+  ~215k clean probe packets with seq == obs on every sublink); the single stop was the reader,
+  and the fixed reader distinguishes the two cases from now on.

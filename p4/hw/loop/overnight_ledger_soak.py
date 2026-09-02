@@ -116,49 +116,71 @@ def deltas_since(baseline: Dict[int, Dict[str, int]],
     return result
 
 
+def census_after_settle(settle_s: float) -> Dict[int, Dict[str, int]]:
+    """Read the census only after in-flight probe packets have landed.
+
+    gate_agent.py's R command bulk-reads reg_wit_seq first and
+    reg_wit_observed second; a packet that lands between those two reads shows
+    obs = seq + 1 for its sublink. Seen once in 1345 cycles (2026-09-02 soak,
+    sublinks 14 and 142, both equal again on the very next read). Settling
+    before the read closes the window; the recheck below catches the rest."""
+    time.sleep(settle_s)
+    return read_census()
+
+
+def mismatches_vs(baseline: Dict[int, Dict[str, int]],
+                  current: Dict[int, Dict[str, int]], skip: int = -1) -> list:
+    return [{"sublink": s, **d} for s, d in deltas_since(baseline, current).items()
+            if s != skip and d["delta_seq"] != d["delta_obs"]]
+
+
 def run_cycle(cycle: int, log_path: Path, baseline: Dict[int, Dict[str, int]],
               count_per_context: int, pps: int, inject_sublink: int,
-              inject_ndrop: int) -> dict:
+              inject_ndrop: int, settle_s: float, recheck_s: float) -> dict:
     send_clean_traffic(count_per_context, pps)
-    after_clean = read_census()
-    clean_deltas = deltas_since(baseline, after_clean)
-    clean_mismatches = [
-        {"sublink": sublink, **delta}
-        for sublink, delta in clean_deltas.items()
-        if delta["delta_seq"] != delta["delta_obs"]
-    ]
+    after_clean = census_after_settle(settle_s)
+    clean_first = mismatches_vs(baseline, after_clean)
+    clean_recheck = None
+    if clean_first:
+        # A disagreement on the first read is re-read once before it counts:
+        # a read-order race resolves, a real drop or phantom does not.
+        time.sleep(recheck_s)
+        after_clean = read_census()
+        clean_recheck = mismatches_vs(baseline, after_clean)
     baseline = after_clean
 
     arm_reply = arm_injector(inject_sublink, inject_ndrop)
     send_clean_traffic(count_per_context, pps)
-    after_inject = read_census()
-    inject_deltas = deltas_since(baseline, after_inject)
+    after_inject = census_after_settle(settle_s)
     clear_reply = clear_injector()
+    other_first = mismatches_vs(baseline, after_inject, skip=inject_sublink)
+    other_recheck = None
+    if other_first:
+        time.sleep(recheck_s)
+        after_inject = read_census()
+        other_recheck = mismatches_vs(baseline, after_inject, skip=inject_sublink)
+    inject_deltas = deltas_since(baseline, after_inject)
+    baseline = after_inject
 
     target = inject_deltas.get(inject_sublink, {"delta_seq": 0, "delta_obs": 0})
     recovered_loss = target["delta_seq"] - target["delta_obs"]
-    other_mismatches = [
-        {"sublink": sublink, **delta}
-        for sublink, delta in inject_deltas.items()
-        if sublink != inject_sublink and delta["delta_seq"] != delta["delta_obs"]
-    ]
-    baseline = after_inject
 
     record = {
         "cycle": cycle,
         "timestamp": time.time(),
-        "clean_mismatches": clean_mismatches,
+        "clean_mismatches": clean_recheck if clean_recheck is not None else clean_first,
+        "clean_mismatches_first_read": clean_first if clean_recheck is not None else None,
         "arm_reply": arm_reply.strip(),
         "clear_reply": clear_reply.strip(),
         "recovered_loss": recovered_loss,
         "expected_loss": inject_ndrop,
         "loss_matches": recovered_loss == inject_ndrop,
-        "other_sublink_mismatches": other_mismatches,
+        "other_sublink_mismatches": other_recheck if other_recheck is not None else other_first,
+        "other_mismatches_first_read": other_first if other_recheck is not None else None,
     }
     with log_path.open("a") as handle:
         handle.write(json.dumps(record) + "\n")
     return record, baseline
-
 
 def main() -> int:
     parser = argparse.ArgumentParser()
@@ -170,6 +192,8 @@ def main() -> int:
     parser.add_argument("--log", type=str,
                         default="docs/review/artifacts/P3-OVERNIGHT-LEDGER-SOAK-2026-09-02.jsonl")
     parser.add_argument("--sleep-s", type=float, default=2.0)
+    parser.add_argument("--settle-s", type=float, default=1.0)
+    parser.add_argument("--recheck-s", type=float, default=2.0)
     args = parser.parse_args()
 
     log_path = Path(args.log)
@@ -178,7 +202,8 @@ def main() -> int:
     baseline = read_census()
     for cycle in range(1, args.cycles + 1):
         record, baseline = run_cycle(cycle, log_path, baseline, args.count_per_context,
-                                     args.pps, args.inject_sublink, args.inject_ndrop)
+                                     args.pps, args.inject_sublink, args.inject_ndrop,
+                                     args.settle_s, args.recheck_s)
         ok = (not record["clean_mismatches"] and record["loss_matches"]
               and not record["other_sublink_mismatches"])
         status = "OK" if ok else "MISMATCH"
@@ -186,7 +211,8 @@ def main() -> int:
               f"recovered_loss={record['recovered_loss']} "
               f"expected={record['expected_loss']} "
               f"clean_mismatches={len(record['clean_mismatches'])} "
-              f"other_mismatches={len(record['other_sublink_mismatches'])}",
+              f"other_mismatches={len(record['other_sublink_mismatches'])} "
+              f"transient_first_read={int(record['clean_mismatches_first_read'] is not None or record['other_mismatches_first_read'] is not None)}",
               flush=True)
         if not ok:
             print("STOPPING: first mismatch, not continuing blind", file=sys.stderr)
