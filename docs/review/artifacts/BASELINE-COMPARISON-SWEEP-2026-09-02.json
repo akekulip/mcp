@@ -2,190 +2,430 @@
   "0.015": {
     "mcp": {
       "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
       "median": 10.0,
-      "n": 8,
+      "iqr": [
+        10.0,
+        10.0
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "spraycheck": {
       "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
       "median": 11.0,
-      "n": 8,
+      "iqr": [
+        11.0,
+        11.0
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "flowpulse": {
       "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
       "median": 10.0,
-      "n": 8,
+      "iqr": [
+        10.0,
+        10.0
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "mcp_packets": {
       "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
       "median": 22000000.0,
-      "n": 8,
+      "iqr": [
+        22000000.0,
+        22000000.0
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "spraycheck_packets": {
       "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
       "median": 24000000.0,
-      "n": 8,
+      "iqr": [
+        24000000.0,
+        24000000.0
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "flowpulse_packets": {
       "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
       "median": 22000000.0,
-      "n": 8,
+      "iqr": [
+        22000000.0,
+        22000000.0
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     }
   },
   "0.01": {
     "mcp": {
       "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
       "median": 10.0,
-      "n": 8,
+      "iqr": [
+        10.0,
+        10.0
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "spraycheck": {
       "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
       "median": 12.0,
-      "n": 8,
+      "iqr": [
+        12.0,
+        13.0
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "flowpulse": {
       "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
       "median": 10.0,
-      "n": 8,
+      "iqr": [
+        10.0,
+        11.0
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "mcp_packets": {
       "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
       "median": 22000000.0,
-      "n": 8,
+      "iqr": [
+        22000000.0,
+        22000000.0
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "spraycheck_packets": {
       "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
       "median": 26000000.0,
-      "n": 8,
+      "iqr": [
+        26000000.0,
+        28000000.0
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "flowpulse_packets": {
       "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
       "median": 22000000.0,
-      "n": 8,
+      "iqr": [
+        22000000.0,
+        24000000.0
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     }
   },
   "0.005": {
     "mcp": {
       "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
       "median": 10.0,
-      "n": 8,
+      "iqr": [
+        10.0,
+        10.0
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "spraycheck": {
       "action_rate": 1.0,
-      "median": 14.5,
-      "n": 8,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 15.0,
+      "iqr": [
+        14.75,
+        17.0
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "flowpulse": {
-      "action_rate": 0.125,
+      "action_rate": 0.38,
+      "action_rate_ci95": [
+        0.2586259584257722,
+        0.5184980497760643
+      ],
       "median": 43,
-      "n": 8,
+      "iqr": [
+        22.0,
+        65.0
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "mcp_packets": {
       "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
       "median": 22000000.0,
-      "n": 8,
+      "iqr": [
+        22000000.0,
+        22000000.0
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "spraycheck_packets": {
       "action_rate": 1.0,
-      "median": 31000000.0,
-      "n": 8,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 32000000.0,
+      "iqr": [
+        31500000.0,
+        36000000.0
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "flowpulse_packets": {
-      "action_rate": 0.125,
+      "action_rate": 0.38,
+      "action_rate_ci95": [
+        0.2586259584257722,
+        0.5184980497760643
+      ],
       "median": 88000000,
-      "n": 8,
+      "iqr": [
+        46000000.0,
+        132000000.0
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     }
   },
   "0.001": {
     "mcp": {
       "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
       "median": 10.0,
-      "n": 8,
+      "iqr": [
+        10.0,
+        10.0
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "spraycheck": {
-      "action_rate": 0.625,
-      "median": 36,
-      "n": 8,
+      "action_rate": 0.78,
+      "action_rate_ci95": [
+        0.6475818431054045,
+        0.8724621377569771
+      ],
+      "median": 56,
+      "iqr": [
+        40.0,
+        73.0
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "flowpulse": {
       "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
       "median": null,
-      "n": 8,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "mcp_packets": {
       "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
       "median": 22000000.0,
-      "n": 8,
+      "iqr": [
+        22000000.0,
+        22000000.0
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "spraycheck_packets": {
-      "action_rate": 0.625,
-      "median": 74000000,
-      "n": 8,
+      "action_rate": 0.78,
+      "action_rate_ci95": [
+        0.6475818431054045,
+        0.8724621377569771
+      ],
+      "median": 114000000,
+      "iqr": [
+        82000000.0,
+        148000000.0
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "flowpulse_packets": {
       "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
       "median": null,
-      "n": 8,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     }
   },
   "0.0001": {
     "mcp": {
       "action_rate": 1.0,
-      "median": 11.0,
-      "n": 8,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 10.0,
+      "iqr": [
+        10.0,
+        11.0
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "spraycheck": {
       "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
       "median": null,
-      "n": 8,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "flowpulse": {
       "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
       "median": null,
-      "n": 8,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "mcp_packets": {
       "action_rate": 1.0,
-      "median": 24000000.0,
-      "n": 8,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 22000000.0,
+      "iqr": [
+        22000000.0,
+        24000000.0
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "spraycheck_packets": {
       "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
       "median": null,
-      "n": 8,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     },
     "flowpulse_packets": {
       "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
       "median": null,
-      "n": 8,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
       "false_positive_rate": 0.0
     }
   }

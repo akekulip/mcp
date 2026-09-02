@@ -214,13 +214,33 @@ class SprayCheckDetectorCalibration:
 
 
 def summarize(trial_results, key: str):
-    """Median detection epoch/packets (None = never detected within the
-    horizon), fraction detected, and false-positive rate."""
+    """Median (with an IQR and a Wilson 95% CI on the action rate -- the
+    binomial quantity a handful of seeds estimates least reliably), fraction
+    detected, and false-positive rate."""
     values = [getattr(r, key) for r in trial_results]
     detected = [v for v in values if v is not None]
-    action_rate = len(detected) / len(values)
+    n = len(values)
+    action_rate = len(detected) / n
     median = statistics.median(detected) if detected else None
+    q1 = q3 = None
+    if len(detected) >= 4:
+        quantiles = statistics.quantiles(detected, n=4)
+        q1, q3 = quantiles[0], quantiles[2]
     fp_key = key.split("_")[0] + "_false_positive"
-    fp_rate = sum(1 for r in trial_results if getattr(r, fp_key)) / len(trial_results)
-    return {"action_rate": action_rate, "median": median, "n": len(values),
+    fp_rate = sum(1 for r in trial_results if getattr(r, fp_key)) / n
+    return {"action_rate": action_rate, "action_rate_ci95": wilson_ci(len(detected), n),
+           "median": median, "iqr": (q1, q3), "n": n,
            "false_positive_rate": fp_rate}
+
+
+def wilson_ci(successes: int, n: int, z: float = 1.96) -> Tuple[float, float]:
+    """Wilson score interval for a binomial proportion -- well-behaved at the
+    small n and extreme (0 or 1) proportions this sweep actually produces,
+    unlike the normal (Wald) approximation."""
+    if n == 0:
+        return (0.0, 0.0)
+    p = successes / n
+    denom = 1 + z * z / n
+    center = (p + z * z / (2 * n)) / denom
+    half_width = (z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n))) / denom
+    return (max(0.0, center - half_width), min(1.0, center + half_width))

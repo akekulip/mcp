@@ -31,7 +31,7 @@ def main() -> None:
     # `tests/test_flowpulse_theta.py` -- disclosed here, not silently fixed
     # without a trace.
     results = sweep(loss_rates, k=8, healthy_rate=1e-5, packets_per_epoch=2_000_000,
-                    bootstrap_epochs=10, max_post_onset_epochs=80, trials=8,
+                    bootstrap_epochs=10, max_post_onset_epochs=80, trials=50,
                     spraycheck_calibration_lam=2_500_000)
 
     report = {}
@@ -48,8 +48,11 @@ def main() -> None:
         for method in ("mcp", "spraycheck", "flowpulse"):
             r = report[p][method]
             pk = report[p][method + "_packets"]
+            ci_lo, ci_hi = r["action_rate_ci95"]
             print(f"  {method}: action_rate={r['action_rate']:.2f} "
-                  f"median_epoch={r['median']} median_packets={pk['median']} "
+                  f"(95% CI [{ci_lo:.2f}, {ci_hi:.2f}], n={r['n']}) "
+                  f"median_epoch={r['median']} "
+                  f"median_packets={pk['median']} iqr_packets={pk['iqr']} "
                   f"fpr={r['false_positive_rate']:.2f}", flush=True)
 
     with open(OUTPUT_PATH, "w") as f:
