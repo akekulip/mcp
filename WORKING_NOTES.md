@@ -1808,3 +1808,31 @@ re-derivation under the current detector; H11 now requires reporting premature-r
 alongside action rate). Honestly flagged its own reconciliation debt: §1's hypothesis table, §3's
 baseline set, and §7.4's frozen (but plan-obsoleted) attention rule still describe the retired
 design and were not rewritten, per the document's append-only convention.
+
+## Status (2026-09-02, later) — real head-to-head comparison run; one earlier overclaim corrected
+
+Built the actual comparison harness (`sim/baselines/comparison.py`) and ran it. Two real bugs
+found and fixed before trusting any number: a per-packet Python loop made large-scale traffic
+generation absurdly slow (fixed with a vectorized multinomial draw, ~1000x speedup); and an initial
+per-epoch packet scale was too small, causing FlowPulse-theta's fixed 1% threshold to false-alarm
+on pure spraying noise 100% of the time, independent of any fault (isolated by direct measurement,
+fixed by raising the per-epoch scale to a realistic collective-iteration volume, re-verified FPR
+-> 0.0000 matching the paper's own claim).
+
+**Correcting an overclaim from earlier today**: I had reported SprayCheck-Z "detects nothing at
+MCP's target regime (1e-3, 1e-4) at any practical packet budget" -- true of the specific bounded
+search run at the time, but it read stronger than the evidence. The real head-to-head with a wider
+budget shows SprayCheck-Z CAN detect at 1e-3 (62% of trials, needing 3.4x more packets than MCP);
+the genuinely decisive gap is one order of magnitude lower, at 1e-4, where it fails completely
+within the same budget MCP succeeds in every time. Recorded the correction in the open
+(`docs/review/artifacts/BASELINE-COMPARISON-2026-09-02.md`) rather than quietly revising the
+earlier claim.
+
+**Final, real numbers** (8 seeds/rate, k=8 spines matching SprayCheck's own Table 1 topology,
+zero false positives for all three methods after the fix): MCP detects in ~2.8-3.0M packets/spine,
+essentially flat from 1.5% loss down to 1e-4. SprayCheck-Z matches MCP at 1.5% but needs 3.4x more
+at 1e-3 and only succeeds 62% of the time; never detects at 1e-4. FlowPulse-theta degrades even
+faster, failing completely at 0.5% and below. Committed as `328cd89`, with the harness, the sweep
+script, the raw JSON, and a results doc that explicitly states what this sweep does NOT show
+(baseline-currency overhead, localization accuracy, healing comparison, common-mode robustness) --
+only 8 seeds per point, enough for a real large effect, not yet a publication-grade CI.
