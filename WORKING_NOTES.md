@@ -1649,3 +1649,91 @@ and monitored; no further unrequested expansion of scope.
 - Night total: MAIN 1344 + MAIN2 223 + MAIN3 1000 = 2567 clean cycles (~12,835 injected drops
   recovered exactly). Relaunching as MAIN4 (1000 cycles) to keep the switch exercised until
   Philip decides otherwise.
+
+### mcp-51 check-in 13:16 UTC
+- MAIN4 101/1000, 0 bad, driver alive, switch up, no new switchd errors.
+
+## Status (2026-09-02, morning) — implemented the redesign proposal's Q1/Q2/Q3; fourth review dispatched
+
+Philip reviewed the overnight redesign proposal and said to proceed. Implemented Q1, Q2, and Q3 in
+the proposal's own recommended order (Q4 deliberately deferred -- needs stratification plumbing
+that doesn't exist anywhere yet):
+
+- **Q1**: new `FleetRatioEProcess` (`controller/absolute_eprocess.py`) replaces the primary
+  detector's engine. Alternatives are fixed ratios above the current floor, computed fresh each
+  epoch, rather than fixed absolute rates -- directly targets the round-3 mechanism (a floor drifting
+  upward making clean traffic look better-fit to a stale low grid than to the inflated null).
+- **Q2**: the same class tracks a CUSUM-style running minimum of each ratio's cumulative log-capital,
+  exposed as `change_point_epoch()`. Restoration's suspect-rate estimate now comes from raw counts
+  accumulated only since that change point, replacing the fixed trailing window. **Found and fixed
+  a real bug while validating this**: the running-min tracker initialized at 0.0 instead of +infinity,
+  so a link that trends upward from its very first bad epoch (the common case) never registered a
+  change point at all -- restoration never armed. Fixed the initialization, which then surfaced a
+  SECOND, subtler issue: an ungated change-point estimate is too noisy under a true null (a low-ratio
+  alternative's log-capital random-walks with negative drift and touches a "new minimum" almost every
+  epoch by construction), diluting the suspect-rate estimate right at the critical arming moment.
+  Fixed by gating the change point on a minimum climb (3.0 nats) since the running minimum before
+  trusting it.
+- **Q3**: `FleetDecisionLoop` now tracks a slow, fleet-wide EWMA baseline, frozen during an "incident"
+  (fraction of mitigated sublinks crossing a threshold), offered as a fallback floor for a
+  thin-pooled sublink instead of unconditional censoring.
+
+**Measured directly, not asserted**, against the exact round-3 scenarios:
+- The single-fault cascade **no longer cascades at all**: at most 1/16 sublinks ever mitigated
+  (was 15/16 by epoch 2500, still 100% at epoch 4999), and the genuinely faulty link fully recovers
+  by epoch ~1114.
+- Restoration action rate measured **8/8 at both degraded rates** (0.20 and 0.05) the review used,
+  across 8 seeds each -- meeting the design's own >=0.9 target (brainstorm H2/H3), up from 0/8.
+- CRITICAL C (Q4, common-mode shock false alarms) remains open and **unchanged in status** -- a
+  fresh check showed ~22% false-alarm rate in one configuration, consistent with "still open," not
+  newly regressed by Q1's change to the primary detector.
+
+Both headline results are now permanent regression tests (`test_a_single_fault_does_not_cascade_into_a_fleet_wide_deadlock`,
+`test_restoration_action_rate_meets_the_design_target` in `test_decision_loop.py`), not just claims
+in a commit message. **219/219 tests pass.** Committed as `30b5dca`.
+
+Given this exact codebase's 3-for-3 track record of adversarial review finding real problems, a
+fourth review round is dispatched now, specifically re-deriving the cascade and action-rate
+measurements independently, checking the Q1 martingale argument under an under-estimated (not just
+over-estimated) floor, checking Q2's accumulator behavior across sequential faults on the same
+sublink, and checking Q3's incident-regime edge cases at small fleet sizes. Not yet reporting this
+as settled until that lands.
+
+**Hardware track remains fully healthy and unaffected**: MAIN4 soak run past 226 clean cycles.
+
+## Status (2026-09-02, morning) — round 4 review: both headline fixes verified genuine; one real regression found and disclosed, concrete bugs fixed
+
+Fourth review round independently re-derived the round-3 measurements on fresh seeds (not the same
+ones used when building the fix) plus explicit mutant-testing (revert Q1 alone, revert Q2 alone --
+each caught by a dedicated test). **Both headline claims hold**: no cascade (Q1 alone, not Q3 --
+round 4 corrected this attribution by instrumenting the actual scenario and finding Q3 never
+engages in it), and 8/8 restoration action rate checked against the real `repair_generation`
+counter rather than a looser weight-based proxy.
+
+**Found and immediately corrected: a false claim in the module's own documentation.** I had written
+that Q1's change was "not newly regressed" under a common-mode shock; round 4 measured it IS
+regressed, by 2-3 orders of magnitude, because Q1's floor-relative alternatives can land close to a
+common-mode-inflated true rate when the leave-one-out floor under-estimates during a shock -- the
+exact "mirrored risk" the redesign proposal flagged as unprotected and never tested. This is the
+SAME underlying problem as the still-open CRITICAL C (fleet-wide false-alarm control under
+non-stationary load), not a new independent issue. Corrected the docstring immediately rather than
+letting a false claim stand even briefly, per standing integrity rules.
+
+Fixed concretely: `suspect_min_tx` raised from 1 to 2000 (was letting restoration arm on a single
+epoch's evidence); the fleet-wide baseline's decay was applied once per SUBLINK instead of once per
+EPOCH, silently shrinking its effective memory with fleet size (fixed); the baseline's floor
+estimate was unclamped and could reach exactly 0 or 1, crashing the primary process (now clamped).
+Added regression tests for both bugs and corrected the action-rate test to check the real
+`repair_generation` transition, reporting the premature-restoration rate next to the action rate
+rather than in isolation (usefulness and safety together, per the repo's own standing rule).
+**221/221 tests pass.** Committed as `500a83d`.
+
+**Consolidated status updated**: `docs/review/artifacts/STATS-LAYER-STATUS-2026-09-02.md` now
+reflects round 4. The remaining blocking issue is narrower than after round 3: per-link detection
+now works and is independently verified; fleet-wide behavior under a common-mode/non-stationary
+shock does not, and this is explicitly the same design gap CRITICAL C already identified (needs a
+floor-staleness guard or Q4's relative-discriminator gating -- both real design work, not
+autonomous patching). Reported this status to Philip rather than continuing to iterate blind on a
+problem that has now shown up independently twice.
+
+Hardware track unaffected throughout, MAIN4 soak past 459 clean cycles.

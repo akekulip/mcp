@@ -92,6 +92,49 @@ diminishing returns and rising risk of a subtler fourth-order bug. This needs Ph
    on for a paper claim, given how far the current implementation is from the design's own
    H2/H3 targets.
 
+## Update: Q1/Q2/Q3 implemented and independently verified (round 4)
+
+Philip reviewed the redesign proposal and approved proceeding. Q1 (ratio-relative primary grid),
+Q2 (CUSUM-anchored suspect-rate estimation), and Q3 (incident-regime circuit breaker) were
+implemented in the proposal's recommended order (commit `30b5dca`). Q4 (relative-discriminator
+gating) remains deferred -- it needs stratification plumbing that does not exist anywhere yet.
+
+**A fourth review round independently re-derived the two headline round-3 measurements on fresh
+seeds and confirmed both genuinely hold**, each protected by a test that catches its own reversion:
+
+- The single-fault cascade no longer cascades: at most 1-2 of 16 sublinks are ever mitigated
+  simultaneously (was 15/16 by epoch 2500, still 100% at epoch 4999), and the fault recovers.
+  **Round 4 also corrected the attribution: this is Q1 alone, not Q3** -- instrumenting the exact
+  cascade scenario showed Q3 (the incident-regime fallback) never engages in it at all.
+- Restoration's action rate measured 8/8 at both of round 3's degraded rates, checked against the
+  actual `repair_generation` counter (not just a weight threshold) -- meeting the design's own
+  >=0.9 target. No cross-fault state leakage on sequential or concurrent faults.
+
+**Round 4 also found real new problems**, addressed in commit `500a83d`:
+
+- **A genuine regression, not a false alarm: Q1 measurably makes the common-mode-shock case worse**
+  (2-3 orders of magnitude), because its floor-relative alternatives can land close to a
+  common-mode-inflated true rate when the leave-one-out floor under-estimates during a shock --
+  exactly the "mirrored risk" the redesign proposal flagged as unprotected. **This is the same
+  underlying problem as the still-open CRITICAL C** (fleet-wide false-alarm control under
+  non-stationary/common-mode load), not a separate issue -- one seen from the single-link side, one
+  from the fleet-FDR side. Neither is fixed; both need a floor-staleness guard or Q4, which is real
+  design work. An earlier version of this session's own documentation incorrectly claimed Q1 was
+  "not newly regressed" here -- corrected once measured.
+- Restoration can prematurely declare a fault repaired at severities very close to the floor;
+  disclosed as likely an inherent bounded-alpha property rather than something eliminable by tuning
+  alone, with the premature-restoration rate now reported next to the action rate rather than in
+  isolation.
+- Two concrete implementation bugs (a per-sublink instead of per-epoch decay that silently shrank
+  the "slow" fleet baseline's memory at scale; an unclamped baseline that could reach exactly 0 or
+  1 and crash the primary process) were found and fixed with dedicated regression tests.
+
+**Status: still not production ready**, but the blocking issue has narrowed from "the control loop
+does not work end-to-end" (round 3) to "per-link detection works and is verified; fleet-wide
+behavior under a common-mode/non-stationary shock does not, and needs the same design work CRITICAL
+C already called for." 221/221 tests pass. No production caller of this module exists anywhere in
+the repo, so nothing live has been at risk at any point across all four rounds.
+
 ## What happens next
 
 - No further autonomous code changes to this module tonight. The module's own docstring
