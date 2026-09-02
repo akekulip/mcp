@@ -18,8 +18,30 @@ clock, no PTP and no calibration enters the headline number:
     t1 = mirror_h.tstamp on the first copy whose mirror_h.vlink is the BACKUP vlink
          (a data packet has demonstrably taken the new path, i.e. the gate is LIVE)
     end-to-end = t1 - t0
+
+Pass --ledger when --program is a receiver-ledger-style build (p4/witness/
+mcp_fabric_ledger.p4 or a descendant). That program's `reg_wit_observed` is a bit<32>
+register that never resets (the base/CLF programs' bit<16> register resets to 0 on every
+gap and saturates at 0xFFFF -- see `observed_delta`), which changes two things:
+
+1. The periodic census's saturation ceiling must be disabled (`observed_delta`'s
+   `saturation=None`), or every real delta past 65535 lifetime arrivals on a sublink is
+   silently discarded as "saturated".
+2. A gap-event mirror's `attn` slot is no longer a self-contained since-last-gap delta
+   (see `controller.hw_adapter.gap_event_from_copy`'s docstring for why an earlier
+   attempt to recover one from that 16-bit mirror field was wrong at this project's own
+   1e-5 sweep floor, and double-counted against the census). Instead, on every gap
+   event this loop issues one synchronous, TARGETED single-sublink census read
+   (`GateClient.census([sublink])`) and folds it into the exact same shared baseline
+   (`CensusWorker.previous`, `CensusWorker.consume_single`) the periodic census uses --
+   so the two evidence paths can never double-count, and the number is always an exact
+   32-bit count, never a 16-bit heuristic that could alias.
+
+This is NOT auto-detected from --program, because that fact is not visible in the bfrt
+schema (a heuristic warning fires if the verified program name and --ledger disagree,
+but it is advisory only).
 """
-import argparse, ctypes, queue, socket, struct, sys, threading, time
+import argparse, ctypes, dataclasses, queue, socket, struct, sys, threading, time
 from dataclasses import dataclass
 sys.path.insert(0, "/home/decps/mcp_ctl")
 
@@ -184,14 +206,42 @@ def parse_census_reply(payload, requested_sublinks=()):
     return out
 
 
-def observed_delta(previous, current):
-    """Conservative lower bound from the ingress observed clean-run counter."""
-    if current.observed >= CENSUS_SATURATION_VALUE:
-        return 0
-    if previous.observed >= CENSUS_SATURATION_VALUE:
-        return 0
+def observed_delta(previous, current, saturation=CENSUS_SATURATION_VALUE):
+    """Conservative lower bound from the ingress observed clean-run counter.
+
+    `saturation` guards a specific 16-bit register behaviour and must be `None` when
+    driving a receiver-ledger-style program (`mcp_fabric_ledger.p4`): there
+    `reg_wit_observed` is `bit<32>` and never saturates within a session, so a hardcoded
+    0xFFFF ceiling would misread an ordinary count in [0xFFFF, 0xFFFFFFFF) as saturated
+    and silently discard every real delta once a sublink passes 65535 lifetime arrivals
+    -- minutes at most, milliseconds at line rate -- which is exactly the H28 failure
+    mode ("a controller fed only gap events never warms up") this census path exists to
+    avoid. Pass `saturation=None` to disable the check entirely for that program.
+
+    Returns `None`, not `0`, specifically when `saturation is None` and `current` is
+    BEHIND `previous`: a never-reset lifetime counter cannot legitimately decrease. The
+    dominant real cause, in `--ledger` mode, is a benign race between the periodic
+    census (`CensusWorker.poll_once`) and a gap-event-triggered targeted read
+    (`CensusWorker.consume_single`): the periodic poll's own switch-side snapshot can be
+    NEWER than a targeted read's, so the targeted read looks "behind" a baseline the
+    periodic poll has already advanced -- see `resolve_ledger_gap_event`'s retry, which
+    exists specifically for this case. It is NOT caused by `gate_agent`'s `rd()`
+    (`p4/hw/loop/gate_agent.py`), whose `max()` across pipes is itself monotone
+    non-decreasing and cannot produce a decrease on its own. `None` tells the caller to
+    REJECT the reading outright -- not advance its baseline to it -- because doing so
+    would inflate the NEXT good reading's delta by the gap the bad reading introduced.
+    Every other outcome, including a genuine zero-growth reading, returns an `int` and
+    is safe for the caller to advance its baseline to.
+    """
+    if saturation is not None:
+        if current.observed >= saturation:
+            return 0
+        if previous.observed >= saturation:
+            return 0
     if current.observed >= previous.observed:
         return current.observed - previous.observed
+    if saturation is None:
+        return None
     return current.observed
 
 
@@ -321,12 +371,12 @@ class GateClient:
     def remove(self, src, dst, spray, ctx):
         return self._send("D %d %d %d %d\n" % (src, dst, spray, ctx))
 
-    def census_request(self):
-        suffix = "" if not self.census_sublinks else " " + " ".join(
-            str(sublink) for sublink in self.census_sublinks)
+    def census_request(self, sublinks=None):
+        requested = self.census_sublinks if sublinks is None else tuple(sorted(set(sublinks)))
+        suffix = "" if not requested else " " + " ".join(str(sublink) for sublink in requested)
         return ("R%s\n" % suffix).encode()
 
-    def census(self):
+    def census(self, sublinks=None):
         """Return TX sequence diagnostics plus ingress arrival clean-run counters.
 
         The decision core needs a POOLED BASELINE, not just events.  controller/infer.py
@@ -336,14 +386,21 @@ class GateClient:
         decisions.  In simulation the fabric supplies clean observations for every sublink
         every epoch; on hardware the equivalent is the arrival count the witness already
         keeps, polled per epoch and fed to observe_clean as deltas.
+
+        Pass `sublinks` to read a specific set instead of `self.census_sublinks` -- used
+        for a targeted single-sublink read on a gap event (`--ledger` mode) regardless of
+        what the periodic census is configured to watch.
         """
+        requested = self.census_sublinks if sublinks is None else tuple(sorted(set(sublinks)))
+        if any(not 0 <= sublink < 1024 for sublink in requested):
+            raise ValueError("census sublink must fit the 1024-cell C-W4 register")
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         s.settimeout(15.0)
         buf = b""
         try:
             s.connect((self.host, self.port))
-            s.sendall(self.census_request())
+            s.sendall(self.census_request(sublinks))
             while len(buf) < 256 * 1024:
                 chunk = s.recv(65536)
                 if not chunk:
@@ -355,7 +412,7 @@ class GateClient:
                         break
         finally:
             s.close()
-        return parse_census_reply(buf, self.census_sublinks)
+        return parse_census_reply(buf, requested)
 
 
 class CensusWorker(threading.Thread):
@@ -365,31 +422,68 @@ class CensusWorker(threading.Thread):
     packet loop deterministically left the socket unread for most of every epoch.
     This worker emits one wrap-safe, batched fabric observation per completed read;
     the capture thread remains the sole owner of ``SublinkFeedback`` state.
+
+    `self.previous` is the single shared baseline: on a ledger-style program (`--ledger`,
+    `saturation=None`) the capture thread also folds gap-event-triggered targeted reads
+    into this SAME dict via `consume_single`, so the periodic poll below and a targeted
+    read can never both report evidence for the same interval. `self.lock` serialises
+    every read-compute-advance of `self.previous` across the two threads that touch it
+    (this worker's `run()`, and the capture thread calling `consume_single`).
     """
 
-    def __init__(self, census, interval_s):
+    def __init__(self, census, interval_s, saturation=CENSUS_SATURATION_VALUE):
         super().__init__(name="mcp-census", daemon=True)
         self.census = census
         self.interval_s = interval_s
+        self.saturation = saturation
         self.results = queue.Queue()
-        self.previous = {}
+        self.previous = {}     # NEVER read or write this outside `self.lock`
+        self.lock = threading.Lock()
         self._stop_requested = threading.Event()
         self._epoch_for = lambda: 0
 
     def poll_once(self, epoch):
         now = self.census()
-        if not self.previous:
-            self.previous.update(now)
-            return []
-        observations = []
-        for sublink, cell in sorted(now.items()):
-            if sublink not in self.previous:
-                continue
-            delta = observed_delta(self.previous[sublink], cell)
-            if delta:
-                observations.append((sublink >> 4, sublink & 0xF, delta))
-        self.previous.update(now)
-        return observations
+        with self.lock:
+            if not self.previous:
+                self.previous.update(now)
+                return []
+            observations = []
+            for sublink, cell in sorted(now.items()):
+                baseline = self.previous.get(sublink)
+                if baseline is None:
+                    self.previous[sublink] = cell
+                    continue
+                delta = observed_delta(baseline, cell, self.saturation)
+                if delta is None:
+                    continue    # rejected reading: baseline left exactly as it was
+                self.previous[sublink] = cell
+                if delta:
+                    observations.append((sublink >> 4, sublink & 0xF, delta))
+            return observations
+
+    def consume_single(self, sublink, cell):
+        """Fold one targeted, out-of-band reading into the shared baseline.
+
+        Thread-safe: called from the CAPTURE thread on a gap event, while `poll_once`
+        (this worker's own thread) may be mutating the same `self.previous` dict
+        concurrently. Returns the delta since the previous baseline for `sublink`, or
+        `None` if there is no prior baseline yet (first-ever reading for this sublink)
+        or the reading was rejected as a bad/racy decrease (`observed_delta`). In both
+        `None` cases the caller must treat this occurrence as having no evidence, not a
+        zero -- a reading that means "we don't yet know" is not the same claim as a
+        reading that means "we know zero packets arrived".
+        """
+        with self.lock:
+            baseline = self.previous.get(sublink)
+            if baseline is None:
+                self.previous[sublink] = cell
+                return None
+            delta = observed_delta(baseline, cell, self.saturation)
+            if delta is None:
+                return None    # rejected reading: baseline left exactly as it was
+            self.previous[sublink] = cell
+            return delta
 
     def start(self, epoch_for=None):
         if epoch_for is not None:
@@ -414,6 +508,69 @@ class CensusWorker(threading.Thread):
     def stop(self):
         self._stop_requested.set()
         self.join(timeout=20.0)
+
+
+def resolve_ledger_gap_event(gate, census, ev, retries=1):
+    """Replace a gap event's `observed_packets` with an exact 32-bit reading (`--ledger`
+    mode only; do not call this for a base/CLF program, whose mirror-derived value from
+    `hw.gap_event_from_copy` is already exact and self-contained).
+
+    Issues one synchronous, targeted single-sublink census read for `ev.sublink` and
+    folds it into `census`'s shared baseline via `CensusWorker.consume_single`, so this
+    reading and the periodic census can never both report evidence for the same
+    interval. Returns `(event, rpc_seconds, None)` with `observed_packets` replaced, or
+    `(None, rpc_seconds, reason)` if nothing was decidable, `reason` one of
+    `"rpc_error"`, `"no_baseline"`, `"race_exhausted"` -- the caller should count
+    `"race_exhausted"` separately and prominently: it means real loss evidence
+    (`ev.lost`) was discarded, a missed-detection risk, not merely an imprecise count.
+    `rpc_seconds` is the time spent in
+    the RPC(s) this call made -- IMPORTANT: this is real network latency the caller adds
+    to whatever timing it measures around this call, unlike every other program this
+    loop drives, where `observed_packets` comes for free out of the mirror copy already
+    in hand. Callers computing the event-to-reroute latency headline number MUST report
+    this time explicitly and separately; folding it silently into that number changes
+    what the number means relative to every non-ledger measurement in this project.
+
+    A rejected reading (`CensusWorker.consume_single` returning `None`) is retried up to
+    `retries` times ONLY when a baseline already existed for this sublink: the dominant
+    cause is a benign race with the periodic census (it read a snapshot taken LATER on
+    the switch and advanced the baseline before this targeted read's slightly-earlier
+    snapshot was consumed) -- a second attempt, moments later, is virtually always ahead
+    of whatever the periodic poll last advanced to. A missing baseline (first-ever
+    reading for this sublink) is never retried; the read has already seeded it for next
+    time, and retrying cannot produce a baseline that does not yet exist.
+
+    `None` must be treated as "no evidence this occurrence", never as an event with
+    `observed_packets=0`: dropping the event silently would hide a real detection, and
+    fabricating a delivered count callers thought they didn't have would reintroduce
+    exactly the failure mode this design replaces. Every drop path prints why.
+    """
+    t0 = time.perf_counter()
+    for attempt in range(retries + 1):
+        try:
+            fresh = gate.census([ev.sublink])[ev.sublink]
+        except (OSError, RuntimeError) as error:
+            # Transport (OSError) and protocol (RuntimeError, from parse_census_reply)
+            # failures only. A ValueError (malformed sublink) or KeyError here would be
+            # a programming error, not a transient hiccup, and must propagate.
+            print("  GAP EVENT sublink=%d: targeted census read failed (%s); dropped"
+                  % (ev.sublink, error), flush=True)
+            return None, time.perf_counter() - t0, "rpc_error"
+        # Diagnostic-only, deliberately unlocked: a stale read only mislabels the log
+        # line below ("no baseline" vs "rejected"), never the data path, which goes
+        # through consume_single's own lock regardless.
+        had_baseline = ev.sublink in census.previous
+        delta = census.consume_single(ev.sublink, fresh)
+        if delta is not None:
+            return (dataclasses.replace(ev, observed_packets=delta),
+                    time.perf_counter() - t0, None)
+        if not had_baseline:
+            print("  GAP EVENT sublink=%d: no census baseline yet; dropped, seeded for "
+                  "next time" % ev.sublink, flush=True)
+            return None, time.perf_counter() - t0, "no_baseline"
+    print("  GAP EVENT sublink=%d: rejected census reading after %d attempt(s); LOSS "
+          "EVIDENCE DROPPED (lost=%d)" % (ev.sublink, retries + 1, ev.lost), flush=True)
+    return None, time.perf_counter() - t0, "race_exhausted"
 
 
 def is_rerouted_probe(copy, backup_vlink, context, diffserv,
@@ -475,6 +632,13 @@ def main():
                     help="exit after the first exact reroute proof (campaign mode)")
     ap.add_argument("--expected-epoch-rows", type=int, default=4,
                     help="number of tbl_final act_enter rows that must accept each epoch stamp")
+    ap.add_argument("--ledger", action="store_true",
+                    help="pass when --program is a receiver-ledger-style build "
+                         "(mcp_fabric_ledger.p4 or a descendant): reg_wit_observed is "
+                         "bit<32> and never resets, so a gap event's observed_packets is "
+                         "derived from a targeted single-sublink census read instead of "
+                         "the mirror's attn field, and the periodic census's 16-bit "
+                         "saturation ceiling is disabled -- see the module docstring")
     a = ap.parse_args()
 
     census_sublinks = tuple(int(value) for value in a.census_sublinks.split(",") if value)
@@ -487,6 +651,20 @@ def main():
     print("gate identity: program=%s build=%s runtime=%s switchd_pid=%d" %
           (identity["program"], identity["build_id"], identity["runtime_id"],
            identity["switchd_pid"]), flush=True)
+    # Heuristic only, not authoritative -- the switch-confirmed program name is the best
+    # signal this process has of "receiver ledger" without a capability round trip to
+    # gate_agent.py (which already resolves reg_rx_frontier's presence at its own
+    # startup, gate_agent.py:70-82, but does not expose that fact over the wire). A
+    # false positive/negative here is a print, not a block, because a future descendant
+    # program's name is not guaranteed to contain "ledger".
+    looks_ledger = "ledger" in identity["program"].lower()
+    if looks_ledger != a.ledger:
+        print("WARNING: program=%r %s 'ledger' but --ledger=%s; a mismatch either derives "
+              "observed_packets from an unreliable mirror field on the ledger program, or "
+              "runs an unnecessary targeted census read per gap event on a program that "
+              "did not need it -- see the module docstring" %
+              (identity["program"], "contains" if looks_ledger else "does not contain",
+               a.ledger), flush=True)
     installs = []
 
     def do_install(src, dst, spray, ctx, alt):
@@ -540,6 +718,8 @@ def main():
     held_deadline = None
     census_reads = []
     census_errors = 0
+    ledger_rpc_seconds = []     # per-gap-event targeted-read latency (--ledger only)
+    ledger_races = 0            # gap events dropped after exhausting the reject-retry
 
     def epoch_now():
         return int((time.time() - epoch0) * 1000.0 / a.epoch_ms)
@@ -550,9 +730,23 @@ def main():
             decided_at = decided_at or time.time()
             print("    DECISION: %s" % action, flush=True)
 
-    census = CensusWorker(gate.census,
-                           interval_s=a.epoch_ms * a.census_every / 1000.0)
-    census.start(epoch_now)
+    census_worker = CensusWorker(gate.census,
+                           interval_s=a.epoch_ms * a.census_every / 1000.0,
+                           saturation=None if a.ledger else CENSUS_SATURATION_VALUE)
+    if a.ledger:
+        # Seed the shared baseline BEFORE capture starts (a one-time cost outside the
+        # measured campaign window), so the first gap event of the run is not
+        # unconditionally dropped for lack of a prior reading (consume_single returns
+        # None on first sight for every sublink -- see its docstring). This does not
+        # help a sublink excluded from --census-sublinks; that sublink's first event
+        # still drops, now with a printed reason instead of silently.
+        try:
+            census_worker.poll_once(epoch=epoch_now())
+        except Exception as error:
+            print("WARNING: could not seed the census baseline before capture (%s); "
+                  "the first gap event on each sublink this run will be dropped for "
+                  "lack of a baseline" % error, flush=True)
+    census_worker.start(epoch_now)
 
     try:
         while time.time() < t_end:
@@ -568,7 +762,7 @@ def main():
             # state itself, so event/census ordering remains deterministic here.
             while True:
                 try:
-                    kind, census_epoch, payload, duration = census.results.get_nowait()
+                    kind, census_epoch, payload, duration = census_worker.results.get_nowait()
                 except queue.Empty:
                     break
                 census_reads.append(duration)
@@ -576,9 +770,20 @@ def main():
                     census_errors += 1
                     print("  census failed: %s" % payload[:60], flush=True)
                     continue
-                if apply_census_result(fb, census_epoch, payload, quarantine_target):
+                # In --ledger mode, quarantine_target's exclusion is unnecessary AND
+                # harmful: resolve_ledger_gap_event already makes double-counting
+                # structurally impossible via the shared baseline (CensusWorker.
+                # consume_single), so this crude single-sublink filter only discards
+                # legitimate clean evidence for the sublink under investigation, for
+                # the rest of the run (nothing in this script currently clears
+                # quarantine_target on restore). On base/CLF programs the filter is
+                # unchanged: the register resets on gap, so the two streams were
+                # already disjoint and this exclusion, while now also unnecessary
+                # there, is at least not harmful, and is out of scope to touch here.
+                exclude = None if a.ledger else quarantine_target
+                if apply_census_result(fb, census_epoch, payload, exclude):
                     fed[0] += sum(row[2] for row in payload
-                                  if ((row[0] << 4) | row[1]) != quarantine_target)
+                                  if a.ledger or ((row[0] << 4) | row[1]) != quarantine_target)
 
             if held_deadline is not None and time.monotonic() >= held_deadline:
                 report_actions(fb.flush_held())
@@ -603,10 +808,21 @@ def main():
                     # Hardware epoch is authoritative.  Do not let a stale/future
                     # event set t0, choose the quarantine target, or suppress its
                     # census row merely because the decision core would decline it.
+                    # Checked BEFORE any --ledger targeted census read: apply_gap_event
+                    # short-circuits without calling on_gap for a mismatched epoch, so
+                    # resolving observed_packets first would spend a synchronous RPC
+                    # and consume the shared baseline for evidence nothing uses.
                     apply_gap_event(fb, ev)
                     print("  DROPPED GAP EVENT epoch=%d current=%d sublink=%d"
                           % (ev.epoch, fb.current_epoch, ev.sublink), flush=True)
                     continue
+                if a.ledger:
+                    ev, rpc_seconds, reason = resolve_ledger_gap_event(gate, census_worker, ev)
+                    ledger_rpc_seconds.append(rpc_seconds)
+                    if ev is None:
+                        if reason == "race_exhausted":
+                            ledger_races += 1
+                        continue
                 gaps += 1
                 print("  GAP EVENT t_switch=%d sublink=%d (vlink %d ctx %d) gap=0x%04X lost=%d obs=%d"
                       % (copy["tstamp_ns"], ev.sublink, ev.vlink, ev.context, ev.gap, ev.lost,
@@ -635,7 +851,7 @@ def main():
                     if campaign_complete(a.stop_after_result, t1_switch):
                         break
     finally:
-        census.stop()
+        census_worker.stop()
         report_actions(fb.flush_held())
 
     print("\n--- summary ---", flush=True)
@@ -647,6 +863,19 @@ def main():
         ordered = sorted(census_reads)
         print("census reads         : %d ; median %.1f ms ; errors %d (capture ran concurrently)"
               % (len(ordered), ordered[len(ordered) // 2] * 1000.0, census_errors))
+    if a.ledger:
+        # --ledger's per-gap-event targeted census read runs SYNCHRONOUSLY inside the
+        # decision path, unlike every other program this loop drives, where
+        # observed_packets comes free out of the mirror copy already in hand. This
+        # latency is real and is included in the measured END-TO-END number below --
+        # it must never be reported as, or compared against, a non-ledger run's number
+        # without accounting for it explicitly.
+        if ledger_rpc_seconds:
+            ordered = sorted(ledger_rpc_seconds)
+            print("ledger targeted reads: %d ; median %.1f ms ; INCLUDED in END-TO-END below"
+                  % (len(ordered), ordered[len(ordered) // 2] * 1000.0))
+        print("ledger evidence drops: %d gap event(s) with LOSS EVIDENCE DISCARDED "
+              "after exhausting the reject-retry (missed-detection risk)" % ledger_races)
     if gate.write_us:
         rtts = sorted(x[0] for x in gate.write_us)
         ags = sorted(x[1] for x in gate.write_us if x[1] >= 0)

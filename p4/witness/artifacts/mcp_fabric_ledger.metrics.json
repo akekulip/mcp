@@ -1,0 +1,189 @@
+{
+ "program": "mcp_fabric_ledger",
+ "compiler": "9.13.1",
+ "table_summary.log": {
+  "stages_total": 11,
+  "stages_ingress": 11,
+  "stages_egress": 5,
+  "critical_path_len": 11,
+  "tables_allocated": 40
+ },
+ "stages_from_resources.json_logical_tables": {
+  "egress": {
+   "n_stages": 5,
+   "stages": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ]
+  },
+  "ingress": {
+   "n_stages": 11,
+   "stages": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "resources.json": {
+  "nStages_available": 12,
+  "mau_stages_populated": 11,
+  "sram_blocks": {
+   "ingress": 72.0,
+   "egress": 17.0
+  },
+  "sram_blocks_total": 89.0,
+  "map_rams": {
+   "ingress": 19.0,
+   "egress": 8.0
+  },
+  "tcam_blocks": {
+   "ingress": 11.0,
+   "egress": 4.0
+  },
+  "tcam_blocks_total": 15.0,
+  "meter_alus_salu": {
+   "ingress": 5,
+   "egress": 2
+  },
+  "meter_alu_detail": {
+   "ingress": [
+    "st1:Ingress.reg_spray_rr(stateful_ram)",
+    "st2:Ingress.spray_sel_impl(select_ram)",
+    "st3:Ingress.reg_wit_expect(stateful_ram)",
+    "st3:Ingress.reg_wit_observed(stateful_ram)",
+    "st7:Ingress.reg_attn(stateful_ram)"
+   ],
+   "egress": [
+    "st2:Egress.reg_wit_seq(stateful_ram)",
+    "st3:Egress.reg_tx_frontier(stateful_ram)"
+   ]
+  },
+  "statistic_alus": {
+   "egress": 2,
+   "ingress": 3
+  },
+  "statistic_alu_detail": {
+   "egress": [
+    "st3:Egress.eg_fail_ctr(statistics_ram)",
+    "st4:Egress.eg_bern_ctr(statistics_ram)"
+   ],
+   "ingress": [
+    "st4:Ingress.wit_ctr(statistics_ram)",
+    "st6:Ingress.vlink_ctr(statistics_ram)",
+    "st7:Ingress.fail_ctr(statistics_ram)"
+   ]
+  },
+  "logical_table_ids": {
+   "ingress": 28,
+   "egress": 12
+  },
+  "logical_table_ids_total": 40
+ },
+ "phv_allocation_summary_0.log": {
+  "Overall PHV Usage": [
+   "81 ( 36.2 %)",
+   "1375 ( 33.6 %)",
+   "1025 (  25  %)",
+   "350 ( 8.54 %)",
+   "1407 ( 34.4 %)",
+   "1057 ( 25.8 %)",
+   "350 ( 8.54 %)",
+   "4096"
+  ],
+  "Usage for 8b": [
+   "20 ( 31.2 %)",
+   "145 ( 28.3 %)",
+   "123 (  24  %)",
+   "22 (  4.3 %)",
+   "145 ( 28.3 %)",
+   "123 (  24  %)",
+   "22 (  4.3 %)",
+   "512"
+  ],
+  "Usage for 16b": [
+   "40 ( 41.7 %)",
+   "607 ( 39.5 %)",
+   "454 ( 29.6 %)",
+   "153 ( 9.96 %)",
+   "623 ( 40.6 %)",
+   "470 ( 30.6 %)",
+   "153 ( 9.96 %)",
+   "1536"
+  ],
+  "Usage for 32b": [
+   "21 ( 32.8 %)",
+   "623 ( 30.4 %)",
+   "448 ( 21.9 %)",
+   "175 ( 8.54 %)",
+   "639 ( 31.2 %)",
+   "464 ( 22.7 %)",
+   "175 ( 8.54 %)",
+   "2048"
+  ],
+  "columns": [
+   "Containers Used",
+   "Bits Used",
+   "Bits Used on Ingress",
+   "Bits Used on Egress",
+   "Bits Allocated",
+   "Bits Alloc Ingress",
+   "Bits Alloc Egress",
+   "Available Bits"
+  ],
+  "mau_groups_containers_bits": {
+   "B0-15": [
+    "16 (  100 %)",
+    "123 ( 96.1 %)"
+   ],
+   "B16-31": [
+    "4 (  25  %)",
+    "22 ( 17.2 %)"
+   ],
+   "H0-15": [
+    "16 (  100 %)",
+    "237 ( 92.6 %)"
+   ],
+   "H16-31": [
+    "10 ( 62.5 %)",
+    "153 ( 59.8 %)"
+   ],
+   "H32-47": [
+    "14 ( 87.5 %)",
+    "217 ( 84.8 %)"
+   ],
+   "W0-15": [
+    "14 ( 87.5 %)",
+    "448 ( 87.5 %)"
+   ],
+   "W16-31": [
+    "7 ( 43.8 %)",
+    "175 ( 34.2 %)"
+   ]
+  },
+  "tagalong_Total": [
+   "10 ( 31.2 %)",
+   "20 ( 41.7 %)",
+   "12 ( 37.5 %)",
+   "784 ( 38.3 %)",
+   "1040 ( 50.8 %)"
+  ]
+ },
+ "resources.json_parser_deparser": {
+  "parser": {
+   "nParsers": 18,
+   "parsers": "\u2026"
+  }
+ }
+}

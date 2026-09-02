@@ -795,6 +795,244 @@ Next action: verify the three builder outputs myself (run their tests, read thei
 
 <!-- AUTO-HANDOFF (PreCompact/auto) 2026-08-30T14:11:31Z -->
 ### Compaction handoff — 2026-08-30T14:11:31Z
-- Git: branch `master`, 36 uncommitted file(s): README.md controller/hw_adapter.py controller/sublink_feedback.py controller/tests/test_epoch_loop.py controller/tests/test_sublink_feedback.py docs/review/BEHAVIORAL-SUBLINK-PLAN.md docs/review/CAMPAIGN-PLAN.md docs/review/HEALTH-GATE-RESULT.md docs/review/P2-P3-INDEPENDENT-AUDIT.md docs/review/P3-DYNAMIC-RESULT.md docs/review/P3-FEEDBACK-RESULT.md docs/review/artifacts/HW-SELECTIVE-DETECTION.md 
+- Git: branch `master`, 36 uncommitted file(s): README.md controller/hw_adapter.py controller/sublink_feedback.py controller/tests/test_epoch_loop.py controller/tests/test_sublink_feedback.py docs/review/BEHAVIORAL-SUBLINK-PLAN.md docs/review/CAMPAIGN-PLAN.md docs/review/HEALTH-GATE-RESULT.md docs/review/P2-P3-INDEPENDENT-AUDIT.md docs/review/P3-DYNAMIC-RESULT.md docs/review/P3-FEEDBACK-RESULT.md docs/review/artifacts/HW-SELECTIVE-DETECTION.md
 - Last verification run recorded: 2026-08-30T14:09:05Z	cd /home/philip/Projects/mcp python3 - <<'PYEOF' import pathlib p = pathlib.Path("p4/hw/loop/clf_trials.py"); s = p.read
 - RESUME: re-read the Task/Status/Next-action sections above; trust this file over recollection.
+
+## Status (2026-09-01) — whole-repo assessment written
+
+`docs/review/ASSESSMENT-2026-09-01.md` consolidates five independent audits (code vs claims, artifacts
+vs claims, adversarial PC review, literature + creative directions, methodology). Load-bearing
+findings: (1) 8-bit frontier counters at 40 pkt/epoch, 200 pps, 2 s unmeasured guard cannot operate
+at production rate — every epoch would saturate and censor; (2) the 0.99 e-process null declares 1 %
+loss healthy while CAMPAIGN-PLAN targets 1e-3..1e-5 (mixture power 0 % at 99.5 % survival); (3) the
+calibrated ledger is not on the online quarantine/restore path — `sublink_feedback.py:453` still acts
+on the CUSUM knob h=6.5; PROBATION is a dead state; ledger wedges at epoch wrap. Bursty loss gives
+11–16 % false alarms under the stated null (Monte Carlo vs the real ledger). The 108-task NSDI plan
+has 0 tasks done and builds on the weakest framing. Recommendation in §4: one paper, spine =
+sub-1 % spray-invariant attribution (A) + exposure-bounded half-open restoration (B); context
+promoted only if the physical size-selectivity bench shows selectivity. Nothing in code was changed.
+Tests fresh: 433 pass.
+
+## Status (2026-09-01, later) — brainstorm run, new spine drafted and red-teamed
+
+Full brainstorm session against the assessment: superpowers:brainstorming + creative-thinking
+frameworks + a 6-agent panel (PI, sdn-networks-expert, p4-dataplane-engineer with 9 local bf-p4c
+compiles in scratchpad, research-scientist, statistics theorist with 3 simulations, hyperscaler
+operator persona), then a self-run red team (2 dispatched red-team agents were cut off by a session
+rate limit; I completed the adversarial pass myself). Written to
+`docs/review/BRAINSTORM-2026-09-01.md`.
+
+New candidate spine: treat per-packet spraying as a randomized experiment. The post-TM witness
+already records the assignment; loss becomes a labelled outcome. Headline mechanism (after the red
+team corrected an initial mistake): an ABSOLUTE anytime-valid e-process against a floor estimated
+continuously from the fleet's own healthy sublinks (not a fixed 0.99 null), with mitigation as a
+CONTINUOUS function of the e-process wealth (never a step at threshold) so quarantine is never
+triggered by one bad packet. A sibling-exchangeability test is kept only as a secondary
+congestion-vs-gray discriminator inside queue-depth strata (the panel's first draft made this the
+headline; simulation showed it costs 14x more packets and degrades as (excess/background)^2,
+which gives back the sub-1% regime the project targets — this is documented in the red-team section
+as the load-bearing correction).
+
+P4 feasibility (9 local compiles, bf-p4c 9.13.1, nothing touched the switch): widening the CLF
+frontier to 32 bits is FREE (same RAM-block quantization); a receiver-side RTCP-style ledger
+(advance-only highest-seq + arrivals) replaces the epoch/bank/guard entirely and compiles at 11
+ingress / 5 egress with FEWER resources than today's program, including a Bernoulli fault injector.
+Deleting the old ingress attention/sampling-gate control loop (tied to the retired bandit thesis,
+already ruled non-novel by the 2026-08-27 panel) frees a stage for JSQ spraying; CSIG's egress
+queue-depth telemetry must be kept (needed for congestion stratification), only the ingress control
+loop goes.
+
+Statistics (3 simulations in scratchpad): drops-to-decision d* = ceil(ln(1/alpha)/ln(p/p0)) is the
+headline quantity (1 drop at 1e-3 vs a 1e-5 floor); attribution entropy (bits of link identity per
+lost packet) is proposed as a unifying currency, 6.6 bits for the witness vs 7e-4 for a
+destination-side distribution test. Alpha must never be spent by restarting on censored epochs
+(58% false alarms in simulation); carry capital instead, valid if the censor decision is
+epoch-history-measurable. e-BH across 1024 sublinks for fleet-level FDR control.
+
+Operator persona (checked against Meta RoCE SIGCOMM'24, Alibaba HPN/Aegis, Broadcom/NVIDIA
+telemetry docs, all cited with URLs): the per-link witness is the only unconditional yes; the
+context dimension should be deployed only after a physical size-selectivity bench; the deployable
+artifact on non-P4 switches is the evidence CONTRACT as a spec, not the Tofino program.
+
+Open decisions for Philip (BRAINSTORM doc section 8): approve the corrected spine; spend one day
+building a physically degraded link for the selectivity bench (Hulk cable, FEC mode / serdes
+de-tuning as repeatable knobs); pick SIGCOMM'27 (statistics-heavy) vs NSDI'28 (systems-heavy);
+delete the attention/gate control loop from the deployed program. Nothing in code was changed this
+session; all P4 compiles and Python sims are scratchpad-only, copied into
+docs/review/artifacts/brainstorm-2026-09-01/ for the record.
+
+## Status (2026-09-01, later still) — receiver-ledger P4 redesign built and compile-gated
+
+Philip approved the corrected brainstorm spine and asked to start the receiver-ledger P4 redesign
+(`docs/superpowers/plans/2026-09-01-receiver-ledger-plan.md`). Implemented by p4-dataplane-engineer,
+verified by me.
+
+**Built:** `p4/witness/mcp_fabric_ledger.p4` (copy of `mcp_fabric_clf_eg.p4` with three isolated
+changes): TX frontier widened to 32-bit; the CLF epoch/bank/guard scheme replaced by a receiver
+ledger (`reg_wit_expect` made advance-only = hi, `reg_wit_observed` widened to 32-bit with its reset
+removed = lo, `reg_rx_frontier` and both bank-parity indices deleted); a per-sublink Bernoulli fault
+injector (`tbl_eg_bern`) added alongside the existing deterministic `tbl_eg_fail`. `hdr.fabric.clf_bank`
+stays on the wire unused (retiring it means an out-of-scope control-plane signature change).
+
+**Compile gate** (`docs/review/artifacts/LEDGER-COMPILE-GATE.md`, bf-p4c 9.13.1 local, switch NOT
+contacted): exit 0/0 errors both, **11 ingress / 5 egress stages, same as base**, tables 42->40,
+SRAM 92->89, SALU 8->7, TCAM 13->15 (+2). Both source SHA-256 hashes recorded.
+
+**Tests:** 35 new tests in `p4/witness/test_ledger_program.py` (315 total local suite, 0 failed,
+re-run by me independently). One test mechanically forbids the phrase "exact at any instant"
+anywhere in the source, per the red team's finding 4 correction.
+
+**Disclosed, not solved, in the compile-gate report:**
+1. Reorder-credit accounting (debt opened on a gap, retired by later out-of-order arrivals, only
+   debt outstanding after one BDP scored as loss) is NOT implemented anywhere — controller-side
+   follow-up, explicitly out of this pass's scope.
+2. `controller/hw_adapter.py:218` now mis-reads the mirror's `attn` slot: it was "arrivals since
+   last gap", it is now the low 16 bits of a lifetime counter, and the `+1` no longer means
+   anything. Needs a diff-of-successive-reads fix before this program is driven live.
+3. `p4/hw/loop/gate_agent.py` breaks against this program in three ways: hard failure (`table_get`
+   on the now-deleted `reg_rx_frontier`, three call sites), a SILENT mis-attribution (its bank/sublink
+   index decode assumes the deleted bank bit), and a stale saturating-counter comment. Not touched
+   this pass — must be fixed before any silicon run of this program.
+4. No PTF/tofino-model run yet (needs a `p4/ptf/` case); no 9.13.2 numbers (switch never contacted).
+
+The subagent's own code-reviewer pass caught the gate_agent.py incompatibility, a sign error in
+Δhi-Δlo under a duplicate arrival, and an arithmetically wrong "register width is free" justification
+in its own draft report before finishing — all fixed and now correctly qualified in the written report.
+
+No commit made (not requested). Next: fix `hw_adapter.py`'s attn-slot read and `gate_agent.py`'s
+three breaks before this program can be driven on the switch; then a PTF/model case for the ledger
+semantics; then the controller-side reorder-credit accounting; only after that, take the chip
+(after checking who owns it) for a 9.13.2 compile-gate and a real silicon comparison.
+
+## (superseded by the next section — the "attn_state"/"--lifetime-attn" design below was
+## replaced by a census-anchored redesign the same day; kept per repo convention, not edited away)
+## Status (2026-09-01, later still) — hw_adapter.py and gate_agent.py fixed for the ledger, one open design question flagged
+
+Philip asked to fix the two harness incompatibilities the receiver-ledger compile-gate report
+disclosed. Two rounds of independent code review caught real bugs in my own fix before I called it
+done; both are recorded here rather than smoothed over.
+
+**Fixed, verified (329 local tests pass, up from 315):**
+- `controller/hw_adapter.py`: `gap_event_from_copy` takes an optional `attn_state` dict. Default
+  (`None`) is byte-for-byte the old "attn + 1" behavior, used by every existing caller. Passing a
+  dict switches to lifetime-counter mode for `mcp_fabric_ledger.p4`: returns `None` (no event, not
+  a fabricated number) when there is no baseline yet, when the computed delta is exactly 0 (proven
+  impossible -- the triggering packet itself increments the counter), or when the delta is in the
+  top half of the 16-bit space (looks like a reading behind the stored baseline). `BfrtAdapter`
+  gained a `lifetime_attn: bool = False` constructor flag.
+- `p4/hw/loop/gate_agent.py`: F, X, Z now check `reg_rx_frontier`'s presence once at startup and
+  raise a short, actionable error (not an opaque table_get exception, and not a partial destructive
+  reset) when it's absent, as on the ledger program. N and R got documentation-only comments on
+  their changed semantics. The startup check logs what it swallowed instead of failing silently.
+- `p4/hw/loop/controller_loop.py` (the ACTUAL live hardware consumer -- the first review found my
+  original hw_adapter.py-only fix was unreachable from here): new `--lifetime-attn` flag threads
+  `attn_state` into the real gap-event call site and disables `observed_delta`'s 16-bit saturation
+  ceiling (`reg_wit_observed` is `bit<32>` on the ledger and does not saturate at 0xFFFF -- the old
+  hardcoded check was silently discarding every census delta past 65535 lifetime arrivals). A
+  decrease on a never-reset counter now reports 0, not a fabricated up-to-4-billion-packet count. A
+  heuristic (non-blocking) warning fires if `--lifetime-attn` and the switch-verified program name
+  disagree on whether this looks like a ledger build.
+
+**NOT fixed, disclosed instead of papered over (both documented at length in
+`controller/hw_adapter.py`'s `gap_event_from_copy` docstring):**
+1. The `>= 0x8000` "looks like reorder" rule only reliably works when consecutive gap events on one
+   sublink are within ~32767 arrivals of each other. At the frozen operating point (1e-4) that
+   holds; at the pre-registered 1e-5 sweep floor it does not, and the rule silently ACCEPTS roughly
+   half of the aliased backward readings as plausible small forward deltas.
+2. Once the ledger removes the reset-on-gap that the base/CLF programs had, the gap-event delta and
+   the census delta cover overlapping (not partitioned) time windows, so a sublink's `delivered`
+   count is fed twice into `infer.Sample` -- deflating the estimated loss rate and potentially
+   suppressing a quarantine that should have fired.
+
+Both stem from the same root cause: trusting the mirror's 16-bit `attn` slot as evidence at all,
+rather than always deriving `observed_packets` from the unambiguous 32-bit census read
+(`reg_wit_observed` via the `R` command). That is a controller-architecture change, not a bug fix --
+it overlaps with the reorder-credit accounting the original plan (task 3a) already deferred as
+controller-side follow-up -- and it changes the statistical validity of any campaign run against
+this program, so it needs a decision, not a unilateral rewrite. Flagged here for Philip rather than
+implemented.
+
+No commit made. Next: decide whether to redesign `observed_packets` around the census read before
+any real hardware session against `mcp_fabric_ledger.p4`, or accept the disclosed operating-point
+restriction (valid at delta_loss >= 1e-4, not at the 1e-5 sweep floor) and pin it as a PREREG
+amendment instead.
+
+## Status (2026-09-01, final for this thread) — observed_packets redesigned around the census read; three rounds of review, all findings fixed or disclosed
+
+Philip approved redesigning `observed_packets` around the 32-bit census read instead of the mirror
+field, per the open decision flagged above. This required reverting the `attn_state`/`--lifetime-attn`
+design entirely (superseded, not extended) and building a new mechanism. A third round of code review
+found real problems in the new design too; all mechanical ones are fixed, one architectural cost is
+disclosed rather than hidden.
+
+**The redesign.** `controller/hw_adapter.py`'s `gap_event_from_copy`/`_fill`/`BfrtAdapter` were
+reverted to their original simple form (no `attn_state` parameter) — proven correct for base/CLF
+programs, and the ledger program no longer uses this function's `observed_packets` at all.
+`p4/hw/loop/controller_loop.py` gained:
+- `observed_delta(..., saturation=None)` now returns `None` (not `0`) for a rejected (backward)
+  reading, signalling "do not advance any baseline to this", not just "report zero packets".
+- `CensusWorker` gained a `threading.Lock` guarding `self.previous` (the shared baseline dict) and
+  a `consume_single(sublink, cell)` method letting the capture thread fold one out-of-band,
+  targeted reading into the SAME dict the periodic `poll_once` uses — the two evidence streams can
+  therefore never double-count, by construction (proven: the emitted evidence for a sublink always
+  telescopes to `final - initial` across any interleaving of the two threads).
+- `GateClient.census(sublinks=...)` accepts a targeted-read override.
+- `resolve_ledger_gap_event(gate, census, ev, retries=1)`: on a gap event, does one synchronous
+  `gate.census([ev.sublink])`, folds it via `consume_single`, retries once on a rejected reading
+  (the dominant real cause is a benign race with the periodic poll, not a bad read), and returns
+  `(event_or_none, rpc_seconds, reason)` — `reason` one of `rpc_error`/`no_baseline`/
+  `race_exhausted`, the last of which discards real loss evidence and is counted separately in the
+  run summary as a missed-detection risk, never silent.
+- `--lifetime-attn` renamed to `--ledger` (the old name described a mechanism that no longer exists).
+
+**What the third review found and what was fixed:**
+1. The epoch-authority check was happening AFTER the targeted census read consumed the shared
+   baseline, so a stale/future event's `observed_packets` was silently discarded along with evidence
+   that could have gone to the periodic census instead. Fixed: epoch check now runs first, before any
+   RPC is spent (also saves the RPC entirely for events that were never going to be decided anyway).
+2. The very first gap event on any sublink was unconditionally, silently dropped (no baseline to
+   diff against). Fixed: the baseline is seeded with one synchronous `poll_once` before capture
+   starts (a one-time cost outside the measured campaign window); every drop path now prints why.
+3. A benign race with the periodic poll could cause a real, loss-bearing gap event to be discarded
+   entirely (not merely imprecisely counted). Fixed: `resolve_ledger_gap_event` retries once before
+   giving up, and an exhausted-retry drop is counted (`ledger_races`) and printed loudly, distinct
+   from every other drop reason.
+4. `apply_census_result`'s pre-existing `quarantine_target` exclusion — harmless under the old
+   resetting counter — became a permanent one-way discard of legitimate clean evidence for the
+   sublink under investigation once the shared-baseline design made it redundant. Fixed: the
+   exclusion is now skipped entirely in `--ledger` mode (base/CLF behavior is unchanged).
+5. `observed_delta`'s docstring blamed the wrong cause for a decrease (`gate_agent`'s `max()` across
+   pipes, which is itself monotone and cannot produce one); corrected to name the actual cause (the
+   race between the periodic poll and a targeted read).
+6. The concurrency claim ("the lock prevents double-counting") had no test that would actually catch
+   a regression — confirmed empirically: deleting the lock left all existing tests green. A
+   deterministic test was built (a dict subclass that pauses the first caller mid-critical-section)
+   that does fail when the lock is removed, verified both ways this session.
+7. Local variable `census` shadowed `gate.census` the method; renamed to `census_worker` throughout.
+8. This section of WORKING_NOTES.md, describing the superseded `attn_state` design, is marked
+   superseded above rather than deleted.
+
+**Disclosed, not fixed — a genuine architecture cost, not a bug:** `resolve_ledger_gap_event`'s
+synchronous RPC now sits inside the exact window the project measures as "detection-to-reroute
+latency" (the 4.998 ms headline number is from the OLD CLF-based program and is NOT affected by this
+change — no hardware run has yet exercised `--ledger` mode). The RPC's own latency is now tracked
+(`ledger_rpc_seconds`) and printed explicitly and separately in the run summary, with an explicit
+warning that it must never be compared against a non-ledger run's number without accounting for it.
+Eliminating the RPC from the critical path entirely is a bigger redesign (e.g. deciding fast on the
+gap's own `lost` value and reconciling `observed_packets` asynchronously) that was not attempted here
+— it goes beyond "redesign observed_packets around the census read" into redesigning when the
+decision itself is made, and deserves its own explicit go-ahead before any hardware latency campaign
+runs under `--ledger`.
+
+**Verified:** 334 local tests pass (up from 330), including a deterministic lock-regression test
+confirmed both to pass against the real code and to fail when the lock is deliberately removed, and
+tests for the epoch-check reordering, the seeded baseline, the retry-then-loud-drop path, and the
+`quarantine_target` bypass. No commit made. Files touched this pass:
+`controller/hw_adapter.py`, `controller/tests/test_epoch_loop.py`, `p4/hw/loop/controller_loop.py`,
+`p4/hw/loop/test_controller_loop.py`, `WORKING_NOTES.md`.
+
+Next: decide whether to pursue the async-decision redesign needed to remove the RPC from the
+critical path before any real `--ledger` hardware run, or accept and pre-register the disclosed
+latency composition; then a PTF/model case for the ledger's data-plane semantics; then take the chip
+(after checking who owns it) for a 9.13.2 compile-gate and a real silicon comparison.

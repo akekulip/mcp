@@ -3,6 +3,8 @@ import pathlib
 import socket
 import struct
 import queue
+import threading
+import time
 import unittest
 from unittest import mock
 
@@ -144,6 +146,83 @@ class TestCensusWorker(unittest.TestCase):
         self.assertEqual(worker.poll_once(epoch=7), [])
         self.assertEqual(worker.poll_once(epoch=8), [(0, 0, 7)])
 
+    def test_saturation_none_disables_the_16_bit_ceiling_for_a_32_bit_ledger_register(self):
+        # 0xFFFF (65535) is an ordinary value for a bit<32> lifetime counter -- it must
+        # NOT be treated as saturated when saturation=None (the ledger case).
+        replies = iter((
+            {0: controller_loop.CensusCell(tx_seq=10, observed=65_500)},
+            {0: controller_loop.CensusCell(tx_seq=11, observed=65_560)},
+        ))
+        worker = controller_loop.CensusWorker(lambda: next(replies), interval_s=1.0,
+                                              saturation=None)
+        self.assertEqual(worker.poll_once(epoch=7), [])
+        self.assertEqual(worker.poll_once(epoch=8), [(0, 0, 60)])
+
+    def test_default_saturation_is_unchanged(self):
+        self.assertEqual(
+            controller_loop.CensusWorker(lambda: {}, interval_s=1.0).saturation,
+            controller_loop.CENSUS_SATURATION_VALUE)
+
+    def test_saturation_none_rejects_a_decrease_rather_than_reporting_a_value(self):
+        # A never-reset lifetime counter cannot legitimately decrease. Unlike the
+        # default (saturation set) case, where a decrease means a gap-triggered reset
+        # and `current.observed` is the correct post-reset count, a decrease here is a
+        # bad/racy read: None tells the caller to reject it outright (not advance its
+        # baseline to it), never to report it as up to 2**32-1 fabricated packets or
+        # even as a legitimate zero.
+        previous = controller_loop.CensusCell(tx_seq=10, observed=5_000)
+        current = controller_loop.CensusCell(tx_seq=11, observed=100)
+        self.assertIsNone(controller_loop.observed_delta(previous, current, saturation=None))
+        # the default-saturation case is unchanged: a decrease there IS the reset count
+        self.assertEqual(controller_loop.observed_delta(previous, current), 100)
+
+    def test_poll_does_not_advance_the_baseline_past_a_rejected_decrease(self):
+        # A bad/racy read on the ledger must not corrupt the baseline: the NEXT good
+        # reading has to compute its delta from the OLD (pre-bad-read) baseline, or the
+        # gap the bad reading introduced gets silently absorbed into the next delta.
+        replies = iter((
+            {0: controller_loop.CensusCell(tx_seq=10, observed=5_000)},
+            {0: controller_loop.CensusCell(tx_seq=11, observed=100)},     # bad/racy decrease
+            {0: controller_loop.CensusCell(tx_seq=12, observed=5_030)},   # good, growth from 5000
+        ))
+        worker = controller_loop.CensusWorker(lambda: next(replies), interval_s=1.0,
+                                              saturation=None)
+        self.assertEqual(worker.poll_once(epoch=7), [])
+        self.assertEqual(worker.poll_once(epoch=8), [])   # decrease rejected, no fabricated evidence
+        self.assertEqual(worker.poll_once(epoch=9), [(0, 0, 30)])   # correct delta from 5000, not 100
+
+    def test_consume_single_seeds_the_baseline_on_first_sight(self):
+        worker = controller_loop.CensusWorker(lambda: {}, interval_s=1.0, saturation=None)
+        cell = controller_loop.CensusCell(tx_seq=1, observed=50_000)
+        self.assertIsNone(worker.consume_single(0, cell))
+        self.assertEqual(worker.previous[0], cell)
+
+    def test_consume_single_reports_the_delta_against_the_shared_baseline(self):
+        worker = controller_loop.CensusWorker(lambda: {}, interval_s=1.0, saturation=None)
+        worker.consume_single(0, controller_loop.CensusCell(tx_seq=1, observed=1_000))
+        delta = worker.consume_single(0, controller_loop.CensusCell(tx_seq=2, observed=1_030))
+        self.assertEqual(delta, 30)
+        self.assertEqual(worker.previous[0].observed, 1_030)
+
+    def test_consume_single_rejects_a_decrease_without_corrupting_the_baseline(self):
+        worker = controller_loop.CensusWorker(lambda: {}, interval_s=1.0, saturation=None)
+        worker.consume_single(0, controller_loop.CensusCell(tx_seq=1, observed=5_000))
+        self.assertIsNone(
+            worker.consume_single(0, controller_loop.CensusCell(tx_seq=2, observed=100)))
+        self.assertEqual(worker.previous[0].observed, 5_000)   # unchanged, not corrupted to 100
+
+    def test_consume_single_and_periodic_poll_share_one_baseline_with_no_double_count(self):
+        # A gap event consumes a chunk of the growth via consume_single; the NEXT
+        # periodic poll must see only the REMAINING growth, never the same packets twice.
+        worker = controller_loop.CensusWorker(lambda: self._next_reply, interval_s=1.0,
+                                              saturation=None)
+        self._next_reply = {0: controller_loop.CensusCell(tx_seq=1, observed=1_000)}
+        self.assertEqual(worker.poll_once(epoch=1), [])   # bootstrap
+        delta = worker.consume_single(0, controller_loop.CensusCell(tx_seq=2, observed=1_020))
+        self.assertEqual(delta, 20)
+        self._next_reply = {0: controller_loop.CensusCell(tx_seq=3, observed=1_050)}
+        self.assertEqual(worker.poll_once(epoch=2), [(0, 0, 30)])   # 1050-1020, not 1050-1000
+
     def test_background_poll_does_not_block_the_capture_thread(self):
         release = controller_loop.threading.Event()
 
@@ -160,6 +239,273 @@ class TestCensusWorker(unittest.TestCase):
         finally:
             release.set()
             worker.stop()
+
+
+class FakeCensusGate:
+    """Stub `GateClient` for `resolve_ledger_gap_event`: only `.census(sublinks)`.
+
+    `reply` may be a single dict (returned on every call) or a list of dicts (one
+    consumed per call, exhausted replies repeat the last one) -- the latter models a
+    retry succeeding on a later attempt.
+    """
+
+    def __init__(self, reply=None, error=None):
+        self._replies = reply if isinstance(reply, list) else None
+        self._reply, self._error = reply, error
+        self.requested = []
+
+    def census(self, sublinks):
+        self.requested.append(tuple(sublinks))
+        if self._error is not None:
+            raise self._error
+        if self._replies is not None:
+            index = min(len(self.requested) - 1, len(self._replies) - 1)
+            return self._replies[index]
+        return self._reply
+
+
+class TestResolveLedgerGapEvent(unittest.TestCase):
+    def _ev(self, sublink=(2 << 4) | 3):
+        return controller_loop.GapEvent(vlink=sublink >> 4, context=sublink & 0xF,
+                                        epoch=7, gap=0xFFFB, observed_packets=999)
+
+    def test_success_replaces_observed_packets_from_the_targeted_read(self):
+        sublink = (2 << 4) | 3
+        census = controller_loop.CensusWorker(lambda: {}, interval_s=1.0, saturation=None)
+        census.consume_single(sublink, controller_loop.CensusCell(tx_seq=1, observed=1_000))
+        gate = FakeCensusGate(reply={sublink: controller_loop.CensusCell(tx_seq=2, observed=1_030)})
+
+        resolved, rpc_seconds, reason = controller_loop.resolve_ledger_gap_event(
+            gate, census, self._ev(sublink))
+
+        self.assertEqual(resolved.observed_packets, 30)
+        self.assertEqual(resolved.vlink, 2)
+        self.assertEqual(resolved.context, 3)
+        self.assertIsNone(reason)
+        self.assertGreaterEqual(rpc_seconds, 0.0)
+        self.assertEqual(gate.requested, [(sublink,)])
+
+    def test_first_ever_reading_for_the_sublink_returns_none_not_retried(self):
+        sublink = (2 << 4) | 3
+        census = controller_loop.CensusWorker(lambda: {}, interval_s=1.0, saturation=None)
+        gate = FakeCensusGate(reply={sublink: controller_loop.CensusCell(tx_seq=1, observed=50_000)})
+
+        resolved, _, reason = controller_loop.resolve_ledger_gap_event(
+            gate, census, self._ev(sublink))
+
+        self.assertIsNone(resolved)
+        self.assertEqual(reason, "no_baseline")
+        self.assertEqual(census.previous[sublink].observed, 50_000)   # baseline seeded
+        self.assertEqual(gate.requested, [(sublink,)])   # never retried: no baseline to recover
+
+    def test_persistent_rejected_decrease_exhausts_retries_and_drops_loss_evidence(self):
+        sublink = (2 << 4) | 3
+        census = controller_loop.CensusWorker(lambda: {}, interval_s=1.0, saturation=None)
+        census.consume_single(sublink, controller_loop.CensusCell(tx_seq=1, observed=5_000))
+        gate = FakeCensusGate(reply={sublink: controller_loop.CensusCell(tx_seq=2, observed=100)})
+
+        resolved, _, reason = controller_loop.resolve_ledger_gap_event(
+            gate, census, self._ev(sublink))
+
+        self.assertIsNone(resolved)
+        self.assertEqual(reason, "race_exhausted")
+        self.assertEqual(census.previous[sublink].observed, 5_000)   # not corrupted
+        self.assertEqual(len(gate.requested), 2)   # one retry attempted (default retries=1)
+
+    def test_a_rejected_decrease_that_recovers_on_retry_is_not_dropped(self):
+        # The dominant real cause of a rejected reading is a benign race with the
+        # periodic poll; a second attempt, moments later, should typically be ahead of
+        # whatever the periodic poll last advanced to.
+        sublink = (2 << 4) | 3
+        census = controller_loop.CensusWorker(lambda: {}, interval_s=1.0, saturation=None)
+        census.consume_single(sublink, controller_loop.CensusCell(tx_seq=1, observed=5_000))
+        gate = FakeCensusGate(reply=[
+            {sublink: controller_loop.CensusCell(tx_seq=2, observed=100)},    # rejected
+            {sublink: controller_loop.CensusCell(tx_seq=3, observed=5_040)},  # recovers
+        ])
+
+        resolved, _, reason = controller_loop.resolve_ledger_gap_event(
+            gate, census, self._ev(sublink))
+
+        self.assertIsNone(reason)
+        self.assertEqual(resolved.observed_packets, 40)
+        self.assertEqual(len(gate.requested), 2)
+
+    def test_targeted_read_failure_returns_none_rather_than_raising(self):
+        sublink = (2 << 4) | 3
+        census = controller_loop.CensusWorker(lambda: {}, interval_s=1.0, saturation=None)
+        gate = FakeCensusGate(error=RuntimeError("gate-agent unreachable"))
+
+        resolved, _, reason = controller_loop.resolve_ledger_gap_event(
+            gate, census, self._ev(sublink))
+        self.assertIsNone(resolved)
+        self.assertEqual(reason, "rpc_error")
+
+    def test_a_programming_error_in_census_propagates_rather_than_being_swallowed(self):
+        sublink = (2 << 4) | 3
+        census = controller_loop.CensusWorker(lambda: {}, interval_s=1.0, saturation=None)
+        gate = FakeCensusGate(error=ValueError("census sublink must fit the 1024-cell C-W4 register"))
+
+        with self.assertRaises(ValueError):
+            controller_loop.resolve_ledger_gap_event(gate, census, self._ev(sublink))
+
+    def test_consumes_from_and_advances_the_same_baseline_the_periodic_poll_uses(self):
+        # Exercises the actual double-count fix end to end through the public entry point.
+        sublink = (2 << 4) | 3
+        census = controller_loop.CensusWorker(lambda: {}, interval_s=1.0, saturation=None)
+        census.consume_single(sublink, controller_loop.CensusCell(tx_seq=1, observed=1_000))
+        gate = FakeCensusGate(reply={sublink: controller_loop.CensusCell(tx_seq=2, observed=1_020)})
+        controller_loop.resolve_ledger_gap_event(gate, census, self._ev(sublink))
+
+        # the periodic poll's next reading must see only the REMAINING growth
+        next_now = {sublink: controller_loop.CensusCell(tx_seq=3, observed=1_050)}
+        worker = controller_loop.CensusWorker(lambda: next_now, interval_s=1.0, saturation=None)
+        worker.previous = census.previous   # simulate the shared dict in the real loop
+        self.assertEqual(worker.poll_once(epoch=8), [(sublink >> 4, sublink & 0xF, 30)])
+
+
+class _PausingDict(dict):
+    """A dict whose FIRST `.get` call blocks until released; every later call (from
+    any thread) returns immediately.
+
+    Lets a test force one thread to pause WHILE HOLDING `CensusWorker.lock` (the lock
+    must already be acquired before `.get` runs inside `consume_single`/`poll_once`),
+    then check whether a SECOND thread's `.get` call has already happened -- if the
+    lock genuinely serialises the two calls, the second thread cannot have reached
+    `.get` yet (it is blocked acquiring the lock), so `get_calls` stays at 1 until the
+    first call is released. If the lock were missing, the second call reaches `.get`
+    immediately (it is not the first call, so it does not itself block) and completes
+    long before release. A statistical race is too narrow to hit reliably in
+    pure-Python thread scheduling (confirmed empirically this session); this makes the
+    interleaving deterministic instead of hoping for a scheduler accident.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.get_calls = 0
+        self._counter_lock = threading.Lock()   # protects get_calls itself, not CensusWorker's
+        self.first_paused = threading.Event()
+        self.release = threading.Event()
+
+    def get(self, *args, **kwargs):
+        with self._counter_lock:
+            self.get_calls += 1
+            is_first = self.get_calls == 1
+        result = super().get(*args, **kwargs)
+        if is_first:
+            self.first_paused.set()
+            self.release.wait(5.0)
+        return result
+
+
+class TestCensusWorkerConcurrency(unittest.TestCase):
+    def test_lock_serialises_consume_single_against_a_concurrent_call(self):
+        """Mutation check: replacing `with self.lock:` with `if True:` must fail this.
+
+        Forces thread A to pause mid-critical-section (inside `consume_single`, having
+        already acquired `self.lock` and while `previous.get` is blocked) and asserts
+        thread B's own `consume_single` call for the SAME sublink has NOT completed
+        while A is paused -- it must be blocked waiting for the lock. Verified against
+        the actual mutation before trusting it (see the session record): with the lock
+        removed, B's call returns almost immediately instead of blocking.
+        """
+        sublink = 5
+        worker = controller_loop.CensusWorker(lambda: {}, interval_s=1.0, saturation=None)
+        worker.previous[sublink] = controller_loop.CensusCell(tx_seq=0, observed=1_000)
+        paused = _PausingDict(worker.previous)
+        worker.previous = paused
+
+        result_a = {}
+
+        def call_a():
+            result_a["delta"] = worker.consume_single(
+                sublink, controller_loop.CensusCell(tx_seq=1, observed=1_010))
+
+        thread_a = threading.Thread(target=call_a)
+        thread_a.start()
+        self.assertTrue(paused.first_paused.wait(2.0), "thread A never reached the pause point")
+
+        b_done = threading.Event()
+
+        def call_b():
+            worker.consume_single(sublink, controller_loop.CensusCell(tx_seq=2, observed=1_050))
+            b_done.set()
+
+        thread_b = threading.Thread(target=call_b)
+        thread_b.start()
+        time.sleep(0.1)   # give B every chance to race ahead if nothing is serialising it
+        # With the lock held by A, B cannot have reached previous.get() yet.
+        self.assertEqual(paused.get_calls, 1,
+                         "a second thread reached previous.get() while the lock was "
+                         "held -- the two threads were not serialised")
+        self.assertFalse(b_done.is_set())
+
+        paused.release.set()
+        thread_a.join(2.0)
+        thread_b.join(2.0)
+        self.assertEqual(result_a["delta"], 10)
+        self.assertTrue(b_done.is_set())
+        self.assertEqual(paused.get_calls, 2)
+
+    def test_concurrent_consume_single_and_poll_never_double_count(self):
+        """8 threads call `consume_single` 200 times each with a monotonically
+        increasing reading while a 9th thread repeatedly calls `poll_once` against the
+        SAME underlying counter; the sum of every emitted/returned delta must equal
+        exactly (final reading - initial reading). Statistical, not deterministic --
+        kept alongside the deterministic lock test above, which is what actually
+        catches a missing lock; this one documents the end-to-end invariant under
+        realistic concurrent use even though it did not reproduce the race when tried
+        against the mutated (lock-removed) code in this session.
+        """
+        sublink = 5
+        lock = threading.Lock()
+        counter = [1_000]   # the "hardware" counter; only ever increases, +1 per step
+        steps_per_thread = 200
+        n_threads = 8
+
+        def read_hw():
+            with lock:
+                return controller_loop.CensusCell(tx_seq=0, observed=counter[0])
+
+        worker = controller_loop.CensusWorker(
+            lambda: {sublink: read_hw()}, interval_s=1.0, saturation=None)
+        worker.consume_single(sublink, read_hw())   # seed the baseline
+        initial = counter[0]
+
+        emitted = queue.Queue()
+        stop = threading.Event()
+
+        def bump_and_consume():
+            for _ in range(steps_per_thread):
+                with lock:
+                    counter[0] += 1
+                    cell = controller_loop.CensusCell(tx_seq=0, observed=counter[0])
+                delta = worker.consume_single(sublink, cell)
+                if delta:
+                    emitted.put(delta)
+
+        def poll_repeatedly():
+            while not stop.is_set():
+                for _, _, delta in worker.poll_once(epoch=0):
+                    emitted.put(delta)
+
+        pollers = threading.Thread(target=poll_repeatedly, daemon=True)
+        pollers.start()
+        bumpers = [threading.Thread(target=bump_and_consume) for _ in range(n_threads)]
+        for t in bumpers:
+            t.start()
+        for t in bumpers:
+            t.join(timeout=10.0)
+        stop.set()
+        pollers.join(timeout=2.0)
+        # one final poll to collect whatever the last bump left unconsumed
+        for _, _, delta in worker.poll_once(epoch=0):
+            emitted.put(delta)
+
+        total = 0
+        while not emitted.empty():
+            total += emitted.get_nowait()
+        self.assertEqual(total, counter[0] - initial)
 
 
 class TestReroutedProbeIdentity(unittest.TestCase):
@@ -288,6 +634,19 @@ class TestGateClient(unittest.TestCase):
     def test_empty_target_set_retains_full_census_compatibility(self):
         gate = controller_loop.GateClient("switch.test")
         self.assertEqual(gate.census_request(), b"R\n")
+
+    def test_census_request_override_ignores_the_configured_sublinks(self):
+        # A gap-event-triggered targeted read must be able to name a sublink that is
+        # NOT part of the periodic census's configured set (--census-sublinks may be a
+        # curated subset for performance; the faulty sublink might not be in it).
+        gate = controller_loop.GateClient("switch.test", census_sublinks=(2, 6))
+        self.assertEqual(gate.census_request([99]), b"R 99\n")
+        self.assertEqual(gate.census_request(), b"R 2 6\n")   # unaffected without an override
+
+    def test_census_override_rejects_an_out_of_range_sublink(self):
+        gate = controller_loop.GateClient("switch.test")
+        with self.assertRaises(ValueError):
+            gate.census([1024])
 
     def test_set_epoch_requires_expected_modified_count(self):
         gate = controller_loop.GateClient("switch.test")

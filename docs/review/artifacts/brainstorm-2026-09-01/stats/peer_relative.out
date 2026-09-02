@@ -1,0 +1,22 @@
+  logw[:, j, :] += L[:, j][:, None] * lr_j + np.where(other[:, None] > 0, other[:, None] * lr_o, 0.0)
+SECTION 8: k=2 siblings, 1000 packets/epoch total, horizon 8e5 packets, alpha=0.05, 1000 runs
+Validity under the null (no excess loss), symmetric background:
+  null q=0.001 iid equal weights                 alarm=  2.9%  median packets(total)=    13,000  named faulty sibling=48.3%
+  null q=0.001 iid ADAPTIVE weights              alarm=  2.8%  median packets(total)=    48,500  named faulty sibling=42.9%
+  null q=0.01 iid equal weights                  alarm=  2.3%  median packets(total)=    38,000  named faulty sibling=65.2%
+  null q=0.01 iid ADAPTIVE weights               alarm=  2.7%  median packets(total)=    17,000  named faulty sibling=63.0%
+  null q=0.01 bursty equal weights               alarm=  2.9%  median packets(total)=    39,000  named faulty sibling=55.2%
+  null q=0.01 bursty ADAPTIVE weights            alarm=  1.7%  median packets(total)=    13,000  named faulty sibling=58.8%
+Power at excess delta=1e-3 on sibling 0; absolute detector shown with p0=1e-5 and p0=2e-2:
+  bg q=0, equal weights, abs p0=1e-05            alarm=100.0%  median packets(total)=    14,000  named faulty sibling=100.0% | absolute: faulty=100.0%, healthy sibling= 0.0%
+  bg q=0, equal weights, abs p0=0.02             alarm=100.0%  median packets(total)=    14,000  named faulty sibling=100.0% | absolute: faulty= 0.0%, healthy sibling= 0.0%
+  bg q=0, ADAPTIVE weights                       alarm=100.0%  median packets(total)=    15,000  named faulty sibling=100.0%
+  bg q=0.001, equal weights, abs p0=1e-05        alarm=100.0%  median packets(total)=    54,000  named faulty sibling=99.9% | absolute: faulty=100.0%, healthy sibling=100.0%
+  bg q=0.001, equal weights, abs p0=0.02         alarm=100.0%  median packets(total)=    54,000  named faulty sibling=100.0% | absolute: faulty= 0.0%, healthy sibling= 0.0%
+  bg q=0.001, ADAPTIVE weights                   alarm=100.0%  median packets(total)=    59,000  named faulty sibling=100.0%
+  bg q=0.01, equal weights, abs p0=1e-05         alarm= 88.0%  median packets(total)=   357,500  named faulty sibling=99.7% | absolute: faulty=100.0%, healthy sibling=100.0%
+  bg q=0.01, equal weights, abs p0=0.02          alarm= 86.6%  median packets(total)=   352,500  named faulty sibling=99.9% | absolute: faulty= 0.0%, healthy sibling= 0.0%
+  bg q=0.01, ADAPTIVE weights                    alarm= 89.8%  median packets(total)=   397,000  named faulty sibling=99.6%
+  analytic q=0: share of losses on faulty=1.000, KL/loss=0.6931 nats -> ~4 losses ~ 8,644 packets total
+  analytic q=0.001: share of losses on faulty=0.667, KL/loss=0.0566 nats -> ~53 losses ~ 35,265 packets total
+  analytic q=0.01: share of losses on faulty=0.524, KL/loss=0.0011 nats -> ~2641 losses ~ 251,546 packets total

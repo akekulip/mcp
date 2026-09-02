@@ -28,6 +28,14 @@ connecting, reading counters, reading and writing `reg_attn`, and honouring
 explicit keys).  That run used the default program `mcp_fabric`; the `program=` argument
 and `verify_program` are newer and have NOT been exercised on the switch.  Idioms are copied from
 p4/control/setup_attention.py (connect, reg_attn) and setup_skeleton.py (counters).
+
+NOT YET DRIVEN: `mcp_fabric_ledger.p4` (`docs/review/artifacts/LEDGER-COMPILE-GATE.md`).
+`gap_event_from_copy`'s `observed_packets` is exact and self-contained for every program
+this module has driven so far, but is NOT usable as-is against that program -- see its
+docstring. The hardware P3 loop for that program, `p4/hw/loop/controller_loop.py`
+(`--ledger` mode), derives `observed_packets` from a targeted census read instead and
+discards the value this function computes; `BfrtAdapter` has no equivalent path yet.
+Neither has been exercised against a live agent or the switch, only by unit tests.
 """
 import logging
 import socket
@@ -206,7 +214,30 @@ def build_copy(vlink: int, pid: int, flags: int, tstamp_ns: int, attn: int = 409
 
 
 def gap_event_from_copy(copy: Dict[str, Any]) -> Optional[Any]:
-    """Convert one validated event copy into the P3 decision-core record."""
+    """Convert one validated event copy into the P3 decision-core record.
+
+    `observed_packets` is `int(copy["attn"]) + 1`: on the base/CLF-frontier programs
+    (`mcp_fabric`, `mcp_fabric_clf_eg`, ...) the mirror's `attn` slot is already
+    "arrivals since the previous gap on this sublink" (the advance-only SALU resets to 0
+    on a gap and returns the PRE-reset value), so the triggering packet itself is
+    credited with the `+ 1`. This is exact and self-contained for those programs.
+
+    On the receiver-ledger program (`p4/witness/mcp_fabric_ledger.p4`) the same mirror
+    slot instead carries the low 16 bits of the ledger's never-reset lifetime arrivals
+    counter (`reg_wit_observed`), so a single copy no longer names a self-contained
+    delta -- an EARLIER version of this function tried to recover one from the mirror
+    field alone (a `(lifetime - previous) & 0xFFFF` wraparound heuristic) and two review
+    passes found it decision-affecting-wrong: it aliased at this project's own
+    pre-registered 1e-5 sweep floor, and it double-counted against the periodic census's
+    independent clean-evidence stream once the ledger's counters stopped resetting.
+    **For that program, the CALLER must not use this function's `observed_packets` at
+    all** -- see `p4/hw/loop/controller_loop.py`'s `--ledger` mode, which derives it
+    instead from a targeted, exact 32-bit census read (`reg_wit_observed` via the `R`
+    command) folded into the SAME shared baseline the periodic census uses, so the two
+    evidence paths can never overlap. The `vlink`/`context`/`epoch`/`gap` fields this
+    function parses remain correct and are still used; only `observed_packets` is
+    discarded and replaced by the caller.
+    """
     if not copy.get("gap_event"):
         return None
     from controller.sublink_feedback import GapEvent

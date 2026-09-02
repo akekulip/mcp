@@ -6,7 +6,11 @@ Every number printed names the exact file and field it came from.
 import json, os, re, sys, collections
 
 prog = sys.argv[1]
-root = "/home/decps/mcp_m2_gate/%s.tofino" % prog
+# argv[2], when given, is the directory holding <prog>.tofino -- used for LOCAL
+# (laptop SDE 9.13.1) builds.  With no argv[2] the default is the switch's build
+# directory, so the COMPILE-GATE.md reproduction recipe is unchanged.
+build_dir = sys.argv[2] if len(sys.argv) > 2 else "/home/decps/mcp_m2_gate"
+root = os.path.join(build_dir, "%s.tofino" % prog)
 res = json.load(open(os.path.join(root, "pipe/logs/resources.json")))["resources"]
 ctx = json.load(open(os.path.join(root, "pipe/context.json")))
 tsum = open(os.path.join(root, "pipe/logs/table_summary.log")).read()

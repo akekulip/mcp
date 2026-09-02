@@ -1,0 +1,55 @@
+Table allocation done 1 time(s), state = INITIAL
+Number of stages in table allocation: 11
+  Number of stages for ingress table allocation: 11
+  Number of stages for egress table allocation: 5
+Critical path length through the table dependency graph: 11
+Number of tables allocated: 42
++-------+-----------------+---------------------------+
+| Stage | Min / Max Stage |        Table Name         |
++-------+-----------------+---------------------------+
+|   0   |    [ 0, 1 ]     |   Ingress.tbl_port_role   |
+|   0   |    [ -, - ]     |    Egress.tbl_eg_vlink    |
+|   1   |    [ -, - ]     |       tbl_base1184        |
+|   1   |    [ 1, 5 ]     |   Ingress.tbl_dst_leaf    |
+|   1   |    [ 1, 5 ]     |    Ingress.tbl_context    |
+|   1   |    [ 1, 4 ]     |       tbl_base1194        |
+|   1   |    [ -, - ]     |       tbl_base1200        |
+|   1   |    [ 1, 3 ]     |       tbl_base1204        |
+|   1   |    [ 1, 8 ]     |   Egress.tbl_ctx_index    |
+|   1   |   [ 1, 10 ]     |   Egress.tbl_csig_diff    |
+|   1   |   [ 1, 11 ]     |       tbl_base1175        |
+|   2   |    [ 2, 3 ]     |   Ingress.tbl_spray_sel   |
+|   2   |    [ 2, 9 ]     |       tbl_base1566        |
+|   2   |   [ 2, 10 ]     |   Egress.tbl_wit_stamp    |
+|   2   |   [ 2, 11 ]     | Egress.tbl_csig_replace_b |
+|   2   |   [ 2, 11 ]     | Egress.tbl_csig_replace_a |
+|   3   |    [ 3, 4 ]     |  Ingress.tbl_spray_mode   |
+|   3   |   [ 2, 10 ]     |       tbl_base1186        |
+|   3   |    [ 1, 7 ]     |       tbl_base1193        |
+|   3   |    [ 1, 6 ]     |  Ingress.tbl_exceed_evid  |
+|   3   |    [ 1, 6 ]     |  Ingress.tbl_exceed_csig  |
+|   3   |    [ 1, 6 ]     |   Ingress.tbl_wit_check   |
+|   3   |   [ 3, 10 ]     |       tbl_base1568        |
+|   3   |   [ 3, 11 ]     |    Egress.tbl_eg_fail     |
+|   3   |   [ 2, 11 ]     |    Egress.tbl_wit_link    |
+|   4   |    [ 2, 7 ]     |    Ingress.tbl_wit_arm    |
+|   4   |   [ 2, 10 ]     |   Ingress.tbl_wit_count   |
+|   4   |   [ 2, 10 ]     |  Ingress.tbl_wit_verdict  |
+|   4   |   [ 3, 11 ]     |  Ingress.tbl_rx_frontier  |
+|   4   |    [ 4, 5 ]     |  Ingress.tbl_audit_steer  |
+|   4   |   [ 4, 11 ]     |  Egress.tbl_tx_frontier   |
+|   5   |    [ 5, 6 ]     |  Ingress.tbl_health_gate  |
+|   6   |    [ 6, 7 ]     |     Ingress.tbl_vlink     |
+|   7   |    [ 7, 8 ]     |     Ingress.tbl_fail      |
+|   7   |    [ 7, 8 ]     |     Ingress.tbl_attn      |
+|   8   |    [ 8, 9 ]     |     Ingress.tbl_gate      |
+|   8   |    [ -, - ]     |   Ingress.tbl_evid_fwd    |
+|   9   |   [ 9, 10 ]     |     Ingress.tbl_final     |
+|  10   |   [ 10, 11 ]    |          cond-29          |
+|  10   |   [ 10, 11 ]    |     tbl_set_gap_event     |
+|  10   |   [ 10, 11 ]    |  tbl_set_audit_gap_event  |
+|  10   |   [ 10, 11 ]    |   tbl_set_audit_receipt   |
++-------+-----------------+---------------------------+
+
+NOTES:  - A '*' next to the min / max stage column indicates the table is placed outside its allowed scope
+

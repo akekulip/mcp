@@ -67,6 +67,20 @@ info = cli.bfrt_info_get(PROG)
 tgt = gc.Target(device_id=0, pipe_id=0xFFFF)
 gate = info.table_get("pipe.Ingress.tbl_health_gate")
 attn_reg = info.table_get("pipe.Ingress.reg_attn")
+try:
+    rx_frontier_table = info.table_get("pipe.Ingress.reg_rx_frontier")
+except Exception as e:
+    # e.g. mcp_fabric_ledger: the receiver ledger (advance-only reg_wit_expect +
+    # never-reset reg_wit_observed) replaces the CLF frontier scheme entirely, so this
+    # program never had this table.  F/X/Z below refuse to run rather than either raise
+    # an opaque table_get error or, worse, silently apply the old bank/sublink index
+    # decode (idx >> 8 / idx & 0xFF) to a register that no longer has a bank dimension.
+    # "bfrt raises KeyError; wrappers vary" (verify_program's own comment in
+    # hw_adapter.py) -- print what was actually swallowed so a transient gRPC error or
+    # bind race is never silently misdiagnosed as "this program has no CLF frontier".
+    rx_frontier_table = None
+    print("F/X/Z disabled: reg_rx_frontier not resolved for program %s (%s: %s)" %
+          (PROG, type(e).__name__, e), flush=True)
 
 def key_for(src, dst, spray, ctx):
     return gate.make_key([gc.KeyTuple("md.src_leaf", src), gc.KeyTuple("md.dst_leaf", dst),
@@ -253,6 +267,11 @@ while True:
                     # complete and no longer being written. Zeroing the active bank instead
                     # clears TX while packets are in flight, so they arrive and set RX with
                     # no matching TX -- the TX=0/RX=1 state, seen in 50 of 50 trials.
+                    #
+                    # On the receiver ledger (mcp_fabric_ledger.p4) this command still runs
+                    # -- act_enter{epoch, bank} is unchanged on the wire -- but nothing reads
+                    # clf_bank any more, so it is a no-op for measurement: newly entering
+                    # packets get stamped with the new parity and nothing downstream cares.
                     bank = parse_bank_command(f)   # hdr.fabric.clf_bank, a dedicated byte
                     t = info.table_get("pipe.Ingress.tbl_final")
                     n = rewrite_act_enter_field(t, tgt, gc.DataTuple, "bank", bank)
@@ -293,6 +312,12 @@ while True:
                     print("C -> cleared %d injector entries" % len(keys), flush=True)
                     continue
                 elif f[0] == "F":
+                    if rx_frontier_table is None:
+                        # Actionable remediation first: replies and the log line are
+                        # truncated to 80 chars (see the generic except below), so a
+                        # long "why" pushes "use R" out of what the caller ever sees.
+                        raise RuntimeError(
+                            "use R, not F: reg_rx_frontier absent from program %s" % PROG)
                     # Read both CLF frontiers and pack the per-link 16-bit masks.
                     # The data plane stores a byte per sublink (a per-link mask would need a
                     # one-hot 1 << ctx and the compiler cannot shift a runtime value); packing
@@ -327,6 +352,9 @@ while True:
                     conn.sendall(("".join(l + "\n" for l in lines)).encode())
                     conn.sendall(b"OK 0\n"); continue
                 elif f[0] == "X":
+                    if rx_frontier_table is None:
+                        raise RuntimeError(
+                            "use R, not X: reg_rx_frontier absent from program %s" % PROG)
                     # X -- per-sublink frontier COUNTS: "X <bank> <vlink> <ctx> <tx> <rx>".
                     # F packs presence bits and therefore cannot distinguish "one stray
                     # packet arrived" from "the link is carrying full load", which is the
@@ -352,6 +380,17 @@ while True:
                     conn.sendall(("".join(r + "\n" for r in rows)).encode())
                     conn.sendall(b"OK 0\n"); continue
                 elif f[0] == "Z":
+                    if rx_frontier_table is None:
+                        # Also protects reg_tx_frontier: without this guard the loop below
+                        # would zero it (a real, executed side effect) before failing on
+                        # reg_rx_frontier's absence. reg_tx_frontier is not itself the
+                        # ledger's (hi, lo) pair -- that is reg_wit_expect/reg_wit_observed
+                        # -- but on the receiver ledger it too is a deliberately
+                        # never-reset lifetime counter (the widened CLF TX side), so
+                        # zeroing it mid-interval is a real regression, not a no-op.
+                        raise RuntimeError(
+                            "no Z, ledger never resets: reg_rx_frontier absent from %s"
+                            % PROG)
                     # Zero both frontiers (per-epoch or per-trial reset).
                     for reg, fld in (("pipe.Egress.reg_tx_frontier", "Egress.reg_tx_frontier.f1"),
                                      ("pipe.Ingress.reg_rx_frontier", "Ingress.reg_rx_frontier.f1")):
@@ -359,6 +398,12 @@ while True:
                         tt.entry_del(tgt, None)
                     conn.sendall(b"OK 0\n"); continue
                 elif f[0] == "R":
+                    # `obs` (reg_wit_observed) means different things on different programs.
+                    # On the base/CLF programs it is a since-last-gap count. On the receiver
+                    # ledger (mcp_fabric_ledger.p4) its reset was removed, so it is instead a
+                    # never-reset lifetime arrivals count ("lo" in Delta(hi)-Delta(lo)); a
+                    # caller reading this program's census must diff two R reads for the
+                    # same sublink to recover a delta, not read one line in isolation.
                     requested = [int(x) for x in f[1:]]
                     if any(not 0 <= sublink < 1024 for sublink in requested):
                         raise ValueError("census sublink outside 0..1023")

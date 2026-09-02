@@ -1,0 +1,18 @@
+base.p4(295): [--Wwarn=uninitialized_out_param] warning: out parameter 'md' may be uninitialized when 'IgParser' terminates
+parser IgParser(packet_in pkt, out headers_t hdr, out ig_md_t md,
+                                                              ^^
+base.p4(295)
+parser IgParser(packet_in pkt, out headers_t hdr, out ig_md_t md,
+       ^^^^^^^^
+base.p4(1295): [--Wwarn=uninitialized_out_param] warning: out parameter 'md' may be uninitialized when 'EgParser' terminates
+parser EgParser(packet_in pkt, out eg_headers_t hdr, out eg_md_t md,
+                                                                 ^^
+base.p4(1295)
+parser EgParser(packet_in pkt, out eg_headers_t hdr, out eg_md_t md,
+       ^^^^^^^^
+warning: Parser state min_parse_depth_accept_loop will be unrolled up to 3 times due to @pragma max_loop_depth.
+warning: Parser state min_parse_depth_accept_loop will be unrolled up to 3 times due to @pragma max_loop_depth.
+[--Wwarn=substitution] warning: Ingress.tbl_gate: Table key name not supported. Replacing "md.attn[15:8]" with "md.attn".
+
+0 errors, 5 warnings generated.
+

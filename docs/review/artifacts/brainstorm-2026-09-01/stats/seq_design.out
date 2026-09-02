@@ -1,0 +1,67 @@
+/tmp/claude-1002/-home-philip-Projects-mcp/4b1e773d-30bf-4d4e-9873-c54935a3ac2b/scratchpad/seq_design.py:209: RuntimeWarning: invalid value encountered in multiply
+  inc_c = L[:, :, None] * lc[None, None, :] + S[:, :, None] * np.log((1 - cert_alts) / (1 - pt))[None, None, :]
+==============================================================================
+SECTION 1: absolute one-sided binomial e-processes, null loss <= p0
+
+p_true=0.001  p0=1e-05  epoch=100  horizon=30000 packets
+  Wald info floor ln(1/a)/KL = 829 packets;  1/p = 1,000;  drops needed d*=ceil(ln(1/a)/ln(p/p0)) = 1  -> quantised floor d*/p = 1,000
+  oracle-SPRT              alarm=100.0%  mean packets=     1,275  median=       700
+  log-uniform mixture      alarm=100.0%  mean packets=     1,665  median=     1,300
+  KT plug-in               alarm= 92.0%  mean packets=    20,107  median=    20,200
+  repo six-alt vs 0.99     alarm=  0.0%  mean packets=       nan  median=       nan
+
+p_true=0.0001  p0=1e-05  epoch=500  horizon=300000 packets
+  Wald info floor ln(1/a)/KL = 21,358 packets;  1/p = 10,000;  drops needed d*=ceil(ln(1/a)/ln(p/p0)) = 2  -> quantised floor d*/p = 20,000
+  oracle-SPRT              alarm=100.0%  mean packets=    27,138  median=    16,500
+  log-uniform mixture      alarm=100.0%  mean packets=    36,748  median=    30,000
+  KT plug-in               alarm=  0.0%  mean packets=       nan  median=       nan
+  repo six-alt vs 0.99     alarm=  0.0%  mean packets=       nan  median=       nan
+
+p_true=3e-05  p0=1e-05  epoch=2000  horizon=5000000 packets
+  Wald info floor ln(1/a)/KL = 231,178 packets;  1/p = 33,333;  drops needed d*=ceil(ln(1/a)/ln(p/p0)) = 3  -> quantised floor d*/p = 100,000
+  oracle-SPRT              alarm=100.0%  mean packets=   258,453  median=   190,000
+  log-uniform mixture      alarm=100.0%  mean packets=   410,318  median=   352,000
+  KT plug-in               alarm=  0.0%  mean packets=       nan  median=       nan
+  repo six-alt vs 0.99     alarm=  0.0%  mean packets=       nan  median=       nan
+
+NULL p_true=1e-05, horizon 2e6 packets:  oracle-SPRT: FA=0.00%, log-uniform mixture: FA=1.10%, KT plug-in: FA=0.00%
+
+NULL p_true=5e-06, horizon 2e6 packets:  oracle-SPRT: FA=0.00%, log-uniform mixture: FA=0.10%, KT plug-in: FA=0.00%
+
+==============================================================================
+SECTION 2: bursty loss.  Repo setting n=32/epoch, 50 epochs, null delivery>=0.99, 2000 runs
+  IID loss 0.005                     packetwise six-alt FA=  0.0%   epoch-level betting FA=  0.1%
+  GE mean loss .005, burst 5         packetwise six-alt FA= 12.3%   epoch-level betting FA=  1.3%
+  GE mean loss .005, burst 10        packetwise six-alt FA= 16.6%   epoch-level betting FA=  1.8%
+  GE .005 burst 10 + guard reset     packetwise six-alt FA= 16.7%   epoch-level betting FA=  0.7%
+  IID loss 0.01 (boundary)           packetwise six-alt FA=  0.7%   epoch-level betting FA=  2.3%
+  Power at IID (survival .98 / .985 / .97), same horizon:
+    loss 0.020: packetwise six-alt power= 58.0% (median epoch 20.0), epoch betting power= 80.7% (median epoch 21.0)
+    loss 0.015: packetwise six-alt power= 12.3% (median epoch 18.0), epoch betting power= 28.9% (median epoch 24.0)
+    loss 0.030: packetwise six-alt power= 99.2% (median epoch 11.0), epoch betting power=100.0% (median epoch 9.0)
+  Target regime: p0=1e-4, epochs of 200 packets, 2500 epochs (5e5 packets), IID p=1e-3:
+    packetwise grid mixture: power=100.0%, median packets=2,600;  epoch betting: power=100.0%, median packets=2,600
+    (both valid; the epoch-level test pays for burst-robustness in packets)
+  Bursty at target regime: GE mean loss 1e-4 burst 10, 200-pkt epochs, 2000 epochs:
+    packetwise grid FA=44.8%   epoch betting FA=1.2%
+
+==============================================================================
+SECTION 3: censoring. p0=1e-4, 200-pkt epochs, grid mixture, 2000 runs
+  NULL p=1e-4  no censoring                                         carry(factor 1): rate=  1.1% med.epoch=  25.5  | restart(alpha/2^k+1): rate=  0.5% med.epoch=  29.5
+  NULL p=1e-4  random censor 30% (non-informative)                  carry(factor 1): rate=  0.9% med.epoch= 136.0  | restart(alpha/2^k+1): rate=  0.2% med.epoch=  15.0
+  NULL p=1e-4  censor 50% of CLEAN epochs (informative)             carry(factor 1): rate= 58.6% med.epoch= 743.0  | restart(alpha/2^k+1): rate=  0.2% med.epoch=   3.0
+  NULL p=1e-4  censor 50% of LOSSY epochs (informative, conservative) carry(factor 1): rate=  0.1% med.epoch=  13.0  | restart(alpha/2^k+1): rate=  0.1% med.epoch= 195.0
+  ALT p=1e-3   no censoring                                         carry(factor 1): rate=100.0% med.epoch=  15.0  | restart(alpha/2^k+1): rate=100.0% med.epoch=  18.0
+  ALT p=1e-3   random censor 30% (non-informative)                  carry(factor 1): rate=100.0% med.epoch=  21.0  | restart(alpha/2^k+1): rate= 25.6% med.epoch=   9.0
+  ALT p=1e-3   censor 50% of CLEAN epochs (informative)             carry(factor 1): rate=100.0% med.epoch=  12.0  | restart(alpha/2^k+1): rate= 34.1% med.epoch=   7.0
+  ALT p=1e-3   censor 50% of LOSSY epochs (informative, conservative) carry(factor 1): rate=100.0% med.epoch=  43.0  | restart(alpha/2^k+1): rate= 41.3% med.epoch=  27.0
+
+==============================================================================
+SECTION 6: restoration on probes. p_target=1e-3, alpha=0.05, budget 20000 probes, 2000 runs
+  repo rule: N = ceil(log(alpha)/log(1-p_t)) = 2995 consecutive clean probes
+  p_true=0       consecutive-clean: certify=100.0% med.probes=   2,995 | two-sided e-process: certify=  0.0% (med     nan probes) re-quarantine=  0.0% (med     nan) inconclusive=100.0%
+  p_true=0.0001  consecutive-clean: certify=100.0% med.probes=   2,995 | two-sided e-process: certify=  0.0% (med     nan probes) re-quarantine=  0.0% (med     nan) inconclusive=100.0%
+  p_true=0.0005  consecutive-clean: certify= 97.4% med.probes=   5,302 | two-sided e-process: certify=  0.0% (med     nan probes) re-quarantine=  0.1% (med     500) inconclusive=100.0%
+  p_true=0.001   consecutive-clean: certify= 64.8% med.probes=   8,917 | two-sided e-process: certify=  0.0% (med     nan probes) re-quarantine=  1.4% (med   1,000) inconclusive=98.6%
+  p_true=0.003   consecutive-clean: certify=  0.6% med.probes=  13,501 | two-sided e-process: certify=  0.0% (med     nan probes) re-quarantine=100.0% (med   3,000) inconclusive= 0.1%
+  p_true=0.01    consecutive-clean: certify=  0.0% med.probes=     nan | two-sided e-process: certify=  0.0% (med     nan probes) re-quarantine=100.0% (med     300) inconclusive= 0.0%

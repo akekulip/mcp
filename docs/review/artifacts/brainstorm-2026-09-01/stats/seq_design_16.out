@@ -1,0 +1,38 @@
+  inc_c = np.where(L[:, :, None] > 0, L[:, :, None] * lc[None, None, :], 0.0) + S[:, :, None] * np.log((1 - cert_alts) / (1 - pt))[None, None, :]
+==============================================================================
+SECTION 1: absolute one-sided binomial e-processes, null loss <= p0
+
+p_true=0.001  p0=1e-05  epoch=100  horizon=30000 packets
+  Wald info floor ln(1/a)/KL = 829 packets;  1/p = 1,000;  drops needed d*=ceil(ln(1/a)/ln(p/p0)) = 1  -> quantised floor d*/p = 1,000
+  oracle-SPRT              alarm=100.0%  mean packets=     1,275  median=       700
+  log-uniform mixture      alarm=100.0%  mean packets=     1,665  median=     1,300
+  Beta(.5,500) plug-in     alarm=100.0%  mean packets=     1,441  median=       700
+  repo six-alt vs 0.99     alarm=  0.0%  mean packets=       nan  median=       nan
+
+p_true=0.0001  p0=1e-05  epoch=500  horizon=300000 packets
+  Wald info floor ln(1/a)/KL = 21,358 packets;  1/p = 10,000;  drops needed d*=ceil(ln(1/a)/ln(p/p0)) = 2  -> quantised floor d*/p = 20,000
+  oracle-SPRT              alarm=100.0%  mean packets=    27,138  median=    16,500
+  log-uniform mixture      alarm=100.0%  mean packets=    36,748  median=    30,000
+  Beta(.5,500) plug-in     alarm=100.0%  mean packets=    36,902  median=    29,000
+  repo six-alt vs 0.99     alarm=  0.0%  mean packets=       nan  median=       nan
+
+p_true=3e-05  p0=1e-05  epoch=2000  horizon=5000000 packets
+  Wald info floor ln(1/a)/KL = 231,178 packets;  1/p = 33,333;  drops needed d*=ceil(ln(1/a)/ln(p/p0)) = 3  -> quantised floor d*/p = 100,000
+  oracle-SPRT              alarm=100.0%  mean packets=   258,453  median=   190,000
+  log-uniform mixture      alarm=100.0%  mean packets=   410,318  median=   352,000
+  Beta(.5,500) plug-in     alarm=100.0%  mean packets=   536,846  median=   493,000
+  repo six-alt vs 0.99     alarm=  0.0%  mean packets=       nan  median=       nan
+
+NULL p_true=1e-05, horizon 2e6 packets:  oracle-SPRT: FA=0.00%, log-uniform mixture: FA=1.10%, Beta(.5,500) plug-in: FA=0.50%
+
+NULL p_true=5e-06, horizon 2e6 packets:  oracle-SPRT: FA=0.00%, log-uniform mixture: FA=0.10%, Beta(.5,500) plug-in: FA=0.10%
+
+==============================================================================
+SECTION 6: restoration on probes. p_target=1e-3, alpha=0.05, budget 20000 probes, 2000 runs
+  repo rule: N = ceil(log(alpha)/log(1-p_t)) = 2995 consecutive clean probes
+  p_true=0       consecutive-clean: certify=100.0% med.probes=   2,995 | two-sided e-process: certify=100.0% (med   3,600 probes) re-quarantine=  0.0% (med     nan) inconclusive= 0.0%
+  p_true=0.0001  consecutive-clean: certify=100.0% med.probes=   2,995 | two-sided e-process: certify=100.0% (med   3,600 probes) re-quarantine=  0.0% (med     nan) inconclusive= 0.0%
+  p_true=0.0005  consecutive-clean: certify= 97.5% med.probes=   5,370 | two-sided e-process: certify= 53.0% (med   8,600 probes) re-quarantine=  0.1% (med     200) inconclusive=46.9%
+  p_true=0.001   consecutive-clean: certify= 68.0% med.probes=   8,417 | two-sided e-process: certify=  3.8% (med   3,600 probes) re-quarantine=  1.9% (med     800) inconclusive=94.3%
+  p_true=0.003   consecutive-clean: certify=  0.4% med.probes=  10,134 | two-sided e-process: certify=  0.0% (med     nan probes) re-quarantine=100.0% (med   3,100) inconclusive= 0.0%
+  p_true=0.01    consecutive-clean: certify=  0.0% med.probes=     nan | two-sided e-process: certify=  0.0% (med     nan probes) re-quarantine=100.0% (med     300) inconclusive= 0.0%
