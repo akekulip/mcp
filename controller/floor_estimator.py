@@ -41,14 +41,21 @@ class _EpochSample:
 class _SublinkWindow:
     def __init__(self) -> None:
         self.samples: Deque[_EpochSample] = deque()
+        # healthy-only totals -- feed the leave-one-out floor pool
         self.running_tx = 0
         self.running_lost = 0
+        # unfiltered totals -- this sublink's own recent behaviour regardless
+        # of its healthy/unhealthy tag, used to estimate ITS OWN suspect rate
+        self.raw_tx = 0
+        self.raw_lost = 0
 
     def append(self, sample: _EpochSample) -> None:
         self.samples.append(sample)
         if sample.healthy:
             self.running_tx += sample.tx
             self.running_lost += sample.lost
+        self.raw_tx += sample.tx
+        self.raw_lost += sample.lost
 
     def prune(self, cutoff_epoch: int) -> None:
         while self.samples and self.samples[0].epoch <= cutoff_epoch:
@@ -56,6 +63,8 @@ class _SublinkWindow:
             if evicted.healthy:
                 self.running_tx -= evicted.tx
                 self.running_lost -= evicted.lost
+            self.raw_tx -= evicted.tx
+            self.raw_lost -= evicted.lost
 
 
 class FleetFloorEstimator:
@@ -112,3 +121,23 @@ class FleetFloorEstimator:
             return None
         estimate = pool_lost / pool_tx
         return max(self.min_floor, min(estimate, 1.0 - self.min_floor))
+
+    def own_rate_estimate(self, sublink: int, min_tx: int = 1) -> Optional[float]:
+        """This sublink's own recent loss rate over the trailing window,
+        regardless of its healthy/unhealthy tag -- unlike `floor_for`, which
+        deliberately excludes unhealthy epochs from the leave-one-out pool,
+        this answers "how has this specific sublink actually been behaving
+        lately", which is what estimating ITS OWN suspect rate needs
+        (`docs/review/artifacts/STATS-LAYER-REVIEW-2026-09-02.md`, HIGH D: a
+        lifetime average dilutes toward the historical floor the longer a
+        link was healthy before degrading; a trailing window does not).
+        Returns `None` when there is too little recent data to trust.
+        """
+        window = self._windows.get(sublink)
+        if window is None:
+            return None
+        if self._latest_epoch is not None:
+            window.prune(self._latest_epoch - self.window_epochs)
+        if window.raw_tx < min_tx:
+            return None
+        return window.raw_lost / window.raw_tx

@@ -12,46 +12,68 @@ schedule. Nothing here performs a synchronous, targeted RPC call; the
 existing per-gap-event resolver (`resolve_ledger_gap_event`) keeps serving its
 own immediate-diagnostics purpose on a separate path and is untouched.
 
-An adversarial review (`docs/review/artifacts/STATS-LAYER-REVIEW-2026-09-02.md`)
-found and this revision fixes three critical defects in an earlier version of
-this wiring:
+Two rounds of adversarial review
+(`docs/review/artifacts/STATS-LAYER-REVIEW-2026-09-02.md`) found and this
+revision fixes:
 
 - **Previsibility (CRITICAL 2).** Floors for every sublink are computed from
   the estimator's state as of the end of the *previous* tick, before any
-  sublink's current-epoch counts are recorded. Recording used to happen
-  before computing floors, which let a sibling's own current-epoch outcome
-  leak into the null it was judged against under a shared shock (e.g. a hot
-  spine port) -- measured false-rejection rate up to 0.500 on a fully healthy
-  fleet. The fix is strict ordering: read every floor, THEN record every
-  sublink's epoch.
+  sublink's current-epoch counts are recorded. Verified fixed by the second
+  review.
 - **Anti-conservative floor fallback (CRITICAL 1) / unreachable censoring
   (HIGH 1).** `FleetFloorEstimator.floor_for` returns `None` when its pool is
-  too thin to trust (cold start, one sublink, or every sibling under
-  mitigation). This used to be silently replaced by `min_floor`, the most
-  anti-conservative null available -- measured 200/200 false alarms on a
-  healthy single-sublink fleet. `None` is now treated as a censored epoch:
-  the primary process is fed `censored=True` (factor of one, no reset,
-  brainstorm C2 verbatim), never a numeric substitute.
-- **Restoration arming (CRITICAL 3).** Arming used to trigger on `wealth >
-  1.0` (roughly a coin flip under the null) using the arming epoch's own
-  empirical rate as the null it then immediately tested (circular). Arming
-  now requires the mitigation weight to have dropped to `arm_weight_threshold`
-  or below (a real, sustained signal), and estimates the suspect rate from
-  the sublink's cumulative (tx, lost) totals accumulated strictly *before*
-  the arming epoch -- never the epoch it is about to test.
+  too thin to trust; `None` is treated as a censored epoch (factor of one, no
+  reset), never a numeric substitute. Verified fixed by the second review.
+- **Restoration arming crash (CRITICAL A, found in round 2).** A sublink
+  blackholed for its entire recorded history produces a raw suspect-rate
+  ratio of exactly 1.0, which used to raise uncaught from
+  `RestorationEProcess.arm` and permanently wedge `tick()`.
+  `_SublinkState.suspect_rate_estimate` and `RestorationEProcess.arm` both
+  now clamp below 1.0.
+- **Restoration grid coupling (CRITICAL B, round 2: CRITICAL 3's first fix
+  was necessary but not sufficient).** A restoration grid fixed once at
+  construction can sit below a fleet floor that has since drifted, or below
+  the true background rate a spuriously-armed, actually-healthy sublink is
+  really producing -- both make restoration practically unreachable even
+  though `arm()`'s "suspect_rate exceeds every alternative" guard was
+  satisfied. The healthy-alternatives grid is now built fresh at every arm
+  attempt from the CURRENT floor for that sublink (`floors[sublink]` from
+  this same tick's pass 1), not a fixed construction-time grid.
+- **Suspect-rate dilution (HIGH D, round 2).** Estimating the suspect rate
+  from a sublink's *lifetime* cumulative totals dilutes toward its historical
+  (healthy) average the longer it was healthy before degrading, making later
+  armings close to indistinguishable from the background. The estimate now
+  comes from `FleetFloorEstimator.own_rate_estimate`, a trailing window of
+  that sublink's own recent behaviour, matching the floor's own window.
 
-Deliberately NOT wired this pass, and left dead rather than pretending
-otherwise: `relative_eprocess.py`'s congestion-vs-gray discriminator (needs a
-queue-depth/context stratification key this snapshot shape does not carry
-yet) and context (4-bit) stratification of the primary detector itself. Both
-are the brainstorm's C2 stratification requirement and remain open work,
-tracked in WORKING_NOTES.md rather than silently absent.
+**Not resolved this pass, and explicitly NOT safe to treat as resolved
+(CRITICAL C, round 2):** under a shared shock across siblings (e.g. a hot
+spine port raising loss on every sibling roughly equally), the previsibility
+fix removes the CRITICAL 2 leak but the pooled floor still lags a
+fleet-wide change, and the second review measured the false-rejection rate
+under a strong common shock rising to 1.00 (worse than the original leaky
+code's 0.15 in that same adversarial configuration, though better in the
+narrower scenario CRITICAL 2's own regression test targets). This is exactly
+the failure mode `relative_eprocess.py`'s congestion-vs-gray discriminator
+was kept in the design for (brainstorm C2, secondary mechanism) -- it
+requires a queue-depth/context stratification key this snapshot shape does
+not carry, which is a real design task, not a small wiring fix. **Until that
+discriminator is wired, this layer's fleet-wide false-alarm control is not
+preregistration-safe under non-stationary or common-mode load, and must not
+be used for a paper claim about FDR control without that precondition stated
+or the discriminator in place.** Tracked in WORKING_NOTES.md; flagged for
+Philip's explicit decision on scope and on whether PREREG.md needs an
+amendment before this is relied upon.
 """
 
 from dataclasses import dataclass
 from typing import Dict, Optional, Sequence, Tuple
 
-from controller.absolute_eprocess import FleetAbsoluteEProcess, FleetEpochRecord
+from controller.absolute_eprocess import (
+    FleetAbsoluteEProcess,
+    FleetEpochRecord,
+    log_spaced_alternatives,
+)
 from controller.fleet_control import e_bh_reject
 from controller.floor_estimator import FleetFloorEstimator
 from controller.mitigation_weight import RestorationEProcess, weight_from_wealth
@@ -68,41 +90,35 @@ class SublinkDecision:
 
 
 class _SublinkState:
-    def __init__(self, alternatives: Sequence[float],
-                 restoration_alternatives: Sequence[float], alpha: float):
+    def __init__(self, alternatives: Sequence[float], alpha: float):
         self.process = FleetAbsoluteEProcess(alpha=alpha, alternatives=alternatives)
-        self.restoration = RestorationEProcess(
-            alpha=alpha, healthy_alternatives=restoration_alternatives)
+        self.restoration = RestorationEProcess(alpha=alpha)
         self.repair_generation = 0
         self.last_weight = 1.0
-        self.cumulative_tx = 0
-        self.cumulative_lost = 0
-
-    def suspect_rate_estimate(self) -> Optional[float]:
-        """The empirical rate from evidence strictly before the current epoch."""
-        if self.cumulative_tx == 0:
-            return None
-        return self.cumulative_lost / self.cumulative_tx
 
 
 class FleetDecisionLoop:
     def __init__(self, alpha: float, alternatives: Sequence[float],
-                 restoration_alternatives: Sequence[float],
+                 restoration_grid_low: float, restoration_grid_count: int,
                  floor_window_epochs: int, w_min: float, floor_min: float = 1e-6,
-                 arm_weight_threshold: float = 0.8):
+                 arm_weight_threshold: float = 0.8, suspect_min_tx: int = 1):
         self.alpha = float(alpha)
         self.alternatives = tuple(float(v) for v in alternatives)
         if not self.alternatives:
             raise ValueError("at least one alternative is required")
-        self.restoration_alternatives = tuple(float(v) for v in restoration_alternatives)
-        if not self.restoration_alternatives:
-            raise ValueError("at least one restoration alternative is required")
+        if not 0.0 < restoration_grid_low < 1.0:
+            raise ValueError("restoration_grid_low must lie in (0, 1)")
+        if restoration_grid_count < 1:
+            raise ValueError("restoration_grid_count must be positive")
         if not 0.0 < w_min < 1.0:
             raise ValueError("w_min must lie in (0, 1)")
         if not 0.0 < arm_weight_threshold <= 1.0:
             raise ValueError("arm_weight_threshold must lie in (0, 1]")
+        self.restoration_grid_low = float(restoration_grid_low)
+        self.restoration_grid_count = int(restoration_grid_count)
         self.w_min = float(w_min)
         self.arm_weight_threshold = float(arm_weight_threshold)
+        self.suspect_min_tx = int(suspect_min_tx)
         self.floor = FleetFloorEstimator(window_epochs=floor_window_epochs,
                                           min_floor=floor_min)
         self._states: Dict[int, _SublinkState] = {}
@@ -110,10 +126,20 @@ class FleetDecisionLoop:
     def _state_for(self, sublink: int) -> _SublinkState:
         state = self._states.get(sublink)
         if state is None:
-            state = _SublinkState(self.alternatives, self.restoration_alternatives,
-                                   self.alpha)
+            state = _SublinkState(self.alternatives, self.alpha)
             self._states[sublink] = state
         return state
+
+    def _restoration_grid(self, current_floor: float) -> Optional[Sequence[float]]:
+        """A fresh healthy-alternatives grid spanning up to the CURRENT
+        floor, so genuine post-repair traffic at today's background rate
+        falls inside the grid's coverage (CRITICAL B) rather than below a
+        stale, more-optimistic grid fixed at construction time."""
+        high = min(current_floor, 1.0 - 1e-6)
+        if high <= self.restoration_grid_low:
+            return None
+        return log_spaced_alternatives(self.restoration_grid_low, high,
+                                       self.restoration_grid_count)
 
     def tick(self, epoch: int,
              snapshots: Dict[int, Tuple[int, int]]) -> Dict[int, SublinkDecision]:
@@ -121,11 +147,16 @@ class FleetDecisionLoop:
 
         `snapshots` maps sublink -> (tx, rx) for the epoch that just closed.
         """
-        # Pass 1: read every floor from state as of the END of the PRIOR
-        # tick, before this epoch's counts are recorded anywhere. This is
-        # what makes the null previsible with respect to every sublink's
-        # current-epoch outcome, not just the sublink it is judged for.
+        # Pass 1: read every floor -- and every sublink's own recent-rate
+        # estimate, used only for restoration arming -- from state as of the
+        # END of the PRIOR tick, before this epoch's counts are recorded
+        # anywhere. This is what makes the null previsible with respect to
+        # every sublink's current-epoch outcome, not just the sublink it is
+        # judged for, and keeps arming from using the very epoch it then
+        # immediately tests.
         floors = {sublink: self.floor.floor_for(sublink) for sublink in snapshots}
+        suspect_rates = {sublink: self.floor.own_rate_estimate(sublink, self.suspect_min_tx)
+                         for sublink in snapshots}
 
         # Pass 2: now record this epoch's counts (affects only FUTURE floors).
         for sublink, (tx, rx) in snapshots.items():
@@ -151,14 +182,18 @@ class FleetDecisionLoop:
         for sublink, (tx, rx) in snapshots.items():
             state = self._state_for(sublink)
             weight = weight_from_wealth(wealths[sublink], self.w_min)
+            floor = floors[sublink]
 
-            if (weight <= self.arm_weight_threshold and not state.restoration.armed):
-                suspect_rate = state.suspect_rate_estimate()
-                if (suspect_rate is not None and
-                        suspect_rate > max(self.restoration_alternatives)):
-                    state.restoration.arm(suspect_rate)
-                # otherwise: not enough prior evidence yet (or it isn't
-                # clearly elevated) to arm safely -- wait for a later tick.
+            if (weight <= self.arm_weight_threshold and not state.restoration.armed
+                    and floor is not None):
+                suspect_rate = suspect_rates[sublink]
+                if suspect_rate is not None:
+                    suspect_rate = min(suspect_rate, 1.0 - 1e-9)
+                    grid = self._restoration_grid(floor)
+                    if grid is not None and suspect_rate > max(grid):
+                        state.restoration.arm(suspect_rate, healthy_alternatives=grid)
+                # otherwise: not enough evidence, or no valid floor/grid yet
+                # to arm safely -- wait for a later tick.
 
             restoring = state.restoration.armed
             if restoring:
@@ -167,16 +202,8 @@ class FleetDecisionLoop:
                 if state.restoration.recovered:
                     state.restoration.disarm()
                     state.repair_generation += 1
-                    state.cumulative_tx = 0
-                    state.cumulative_lost = 0
                     weight = 1.0
                     restoring = False
-
-            # Cumulative totals feed only the NEXT tick's arming decision, so
-            # the epoch just processed is never used to arm and then test
-            # itself in the same tick.
-            state.cumulative_tx += tx
-            state.cumulative_lost += tx - rx
 
             state.last_weight = weight
             decisions[sublink] = SublinkDecision(

@@ -37,36 +37,51 @@ def weight_from_wealth(wealth: float, w_min: float) -> float:
 
 
 class RestorationEProcess:
-    """One independent restoration sequence, armed once mitigation begins."""
+    """One independent restoration sequence, armed once mitigation begins.
 
-    def __init__(self, alpha: float, healthy_alternatives: Sequence[float]):
+    The healthy-alternatives grid is supplied fresh at `arm()` time, not
+    fixed at construction: a grid fixed once could sit below a fleet floor
+    that has since drifted up, making restoration structurally unreachable
+    even though `arm()`'s own guard was satisfied at the time
+    (`docs/review/artifacts/STATS-LAYER-REVIEW-2026-09-02.md`, CRITICAL B --
+    the first fix, a static grid plus a guard on `suspect_rate` alone, was
+    necessary but not sufficient). The caller is expected to build the grid
+    from the CURRENT fleet floor for this sublink on every arming attempt.
+    """
+
+    def __init__(self, alpha: float):
         if not 0.0 < alpha < 1.0:
             raise ValueError("alpha must lie in (0, 1)")
-        healthy_alternatives = tuple(float(v) for v in healthy_alternatives)
-        if not healthy_alternatives:
-            raise ValueError("at least one healthy alternative is required")
         self._alpha = alpha
-        self._healthy_alternatives = healthy_alternatives
         self._inner: Optional[FleetAbsoluteEProcess] = None
         self._suspect_rate: Optional[float] = None
         self._recovered = False
 
-    def arm(self, suspect_rate: float) -> None:
+    def arm(self, suspect_rate: float, healthy_alternatives: Sequence[float]) -> None:
         """Start a fresh restoration sequence testing against `suspect_rate`.
 
-        `suspect_rate` must exceed every healthy alternative -- otherwise
-        every mixture component bets in the wrong direction and wealth
-        decays monotonically forever, permanently preventing restoration
-        (`docs/review/artifacts/STATS-LAYER-REVIEW-2026-09-02.md`, CRITICAL 3).
+        `suspect_rate` is clamped below 1.0 -- a fully blackholed sublink
+        (rx=0 for its entire recorded history) produces a raw ratio of
+        exactly 1.0, which previously raised uncaught from the guard below
+        and permanently wedged the caller's loop (STATS-LAYER-REVIEW-
+        2026-09-02.md, CRITICAL A). `suspect_rate` must still exceed every
+        healthy alternative in the supplied grid -- otherwise every mixture
+        component bets in the wrong direction and wealth decays
+        monotonically forever, permanently preventing restoration
+        (same file, CRITICAL 3 / CRITICAL B).
         """
-        if not 0.0 < suspect_rate < 1.0:
-            raise ValueError("suspect_rate must lie in (0, 1)")
-        if suspect_rate <= max(self._healthy_alternatives):
+        if not 0.0 < suspect_rate <= 1.0:
+            raise ValueError("suspect_rate must lie in (0, 1]")
+        suspect_rate = min(suspect_rate, 1.0 - 1e-9)
+        healthy_alternatives = tuple(float(v) for v in healthy_alternatives)
+        if not healthy_alternatives:
+            raise ValueError("at least one healthy alternative is required")
+        if suspect_rate <= max(healthy_alternatives):
             raise ValueError(
                 "suspect_rate must exceed every healthy alternative; "
                 "otherwise restoration can never be reached")
         self._inner = FleetAbsoluteEProcess(alpha=self._alpha,
-                                            alternatives=self._healthy_alternatives)
+                                            alternatives=healthy_alternatives)
         self._suspect_rate = suspect_rate
         self._recovered = False
 

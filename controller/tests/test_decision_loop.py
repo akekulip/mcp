@@ -9,7 +9,8 @@ def make_loop(**overrides):
     config = {
         "alpha": 0.05,
         "alternatives": log_spaced_alternatives(1e-3, 0.5, count=12),
-        "restoration_alternatives": log_spaced_alternatives(1e-5, 1e-3, count=8),
+        "restoration_grid_low": 1e-8,
+        "restoration_grid_count": 8,
         "floor_window_epochs": 20,
         "w_min": 0.05,
     }
@@ -220,7 +221,8 @@ class FleetDecisionLoopTest(unittest.TestCase):
         # Two sublinks, a single fixed alternative (0.5) for a hand-checkable
         # mixture, no randomness.
         loop = make_loop(alpha=0.05, alternatives=(0.5,),
-                        restoration_alternatives=(1e-4,), floor_window_epochs=20)
+                        restoration_grid_low=1e-6, restoration_grid_count=1,
+                        floor_window_epochs=20)
         # epoch 0: both sublinks report identically; both pools are empty
         # (leave-one-out excludes the only other sublink's not-yet-recorded
         # data) so both must be censored.
@@ -242,10 +244,16 @@ class FleetDecisionLoopTest(unittest.TestCase):
         self.assertNotAlmostEqual(math.log(decisions[2].wealth), leaked_log_lr, places=2)
 
     def test_restoration_never_arms_unrestorable(self):
-        # CRITICAL 3: arm() now rejects a suspect_rate at or below every
-        # healthy alternative, and decision_loop only calls arm() with a
-        # cumulative, pre-epoch estimate -- so arming must never raise and
-        # must never permanently stall wealth at ~0.
+        # arm() now rejects a suspect_rate at or below every healthy
+        # alternative, decision_loop only calls arm() with a previsible,
+        # windowed rate estimate, and the grid tracks the current floor -- so
+        # 500 epochs of a persistently bad link (it never actually recovers
+        # here, so its restoration wealth correctly decaying toward zero is
+        # the RIGHT behaviour, not a bug) must still arm without raising, and
+        # a genuinely recovering link (separately covered by
+        # test_a_recovered_link_is_restored_to_full_weight) must be able to
+        # actually cross back to full weight -- not "no exception" alone,
+        # which a permanently-stuck sequence would also satisfy.
         loop = make_loop()
         rng = random.Random(14)
         for epoch in range(500):
@@ -258,6 +266,22 @@ class FleetDecisionLoopTest(unittest.TestCase):
             rx = sum(1 for _ in range(tx) if rng.random() >= 0.05)
             snapshots[2] = (tx, rx)
             loop.tick(epoch, snapshots)  # must not raise
+        state = loop._states[2]
+        self.assertTrue(state.restoration.armed)
+
+    def test_a_permanently_blackholed_sublink_does_not_crash_the_loop(self):
+        # CRITICAL A: a sublink with rx=0 for its entire recorded history
+        # produces a raw suspect-rate ratio of exactly 1.0 once it becomes
+        # eligible to arm restoration -- this used to raise uncaught and
+        # permanently wedge tick().
+        loop = make_loop()
+        for epoch in range(10):
+            snapshots = {
+                6: (1000, 998), 10: (1000, 997), 14: (1000, 999),
+                2: (1000, 0),  # fully blackholed from epoch 0
+            }
+            decisions = loop.tick(epoch, snapshots)  # must not raise
+        self.assertIn(2, decisions)
 
 
 if __name__ == "__main__":

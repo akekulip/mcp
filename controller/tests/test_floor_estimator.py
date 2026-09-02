@@ -77,6 +77,40 @@ class FleetFloorEstimatorTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             FleetFloorEstimator(window_epochs=5, min_floor=1.0)
 
+    def test_own_rate_estimate_is_none_before_any_data(self):
+        estimator = FleetFloorEstimator(window_epochs=10)
+        self.assertIsNone(estimator.own_rate_estimate(2))
+
+    def test_own_rate_estimate_reflects_the_sublinks_own_recent_behaviour(self):
+        # unlike floor_for, this is NOT leave-one-out and is NOT filtered by
+        # the healthy flag -- it answers "how has this sublink itself been
+        # behaving lately", which is what estimating its own suspect rate
+        # needs (a lifetime average dilutes toward history; this does not).
+        estimator = FleetFloorEstimator(window_epochs=10)
+        estimator.record_epoch(2, epoch=0, tx=1000, rx=500, healthy=False)  # 50% loss
+        self.assertAlmostEqual(estimator.own_rate_estimate(2), 0.5, places=6)
+
+    def test_own_rate_estimate_only_uses_this_sublinks_own_window(self):
+        estimator = FleetFloorEstimator(window_epochs=10)
+        estimator.record_epoch(2, epoch=0, tx=1000, rx=999, healthy=True)   # sublink 2: clean
+        estimator.record_epoch(6, epoch=0, tx=1000, rx=500, healthy=False)  # sublink 6: bad
+        self.assertAlmostEqual(estimator.own_rate_estimate(2), 0.001, places=6)
+        self.assertAlmostEqual(estimator.own_rate_estimate(6), 0.5, places=6)
+
+    def test_own_rate_estimate_ages_out_with_the_window(self):
+        estimator = FleetFloorEstimator(window_epochs=2)
+        estimator.record_epoch(2, epoch=0, tx=1000, rx=0, healthy=False)   # 100% loss, old
+        estimator.record_epoch(2, epoch=1, tx=1000, rx=999, healthy=True)
+        estimator.record_epoch(2, epoch=2, tx=1000, rx=999, healthy=True)
+        # epoch 0 has aged out of the 2-epoch window
+        self.assertAlmostEqual(estimator.own_rate_estimate(2), 2.0 / 2000.0, places=6)
+
+    def test_own_rate_estimate_respects_min_tx(self):
+        estimator = FleetFloorEstimator(window_epochs=10)
+        estimator.record_epoch(2, epoch=0, tx=5, rx=5, healthy=True)
+        self.assertIsNone(estimator.own_rate_estimate(2, min_tx=10))
+        self.assertIsNotNone(estimator.own_rate_estimate(2, min_tx=1))
+
 
 if __name__ == "__main__":
     unittest.main()
