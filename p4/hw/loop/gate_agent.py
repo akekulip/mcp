@@ -13,7 +13,14 @@ Protocol, one line per request, so the wire cost is a single small TCP segment:
     T <path_id> <attn> <clean>\n                           -> set attention state, reply "OK <us>\n"
     P\n                                                    -> ping,              reply "OK 0\n"
     V\n                                                    -> report sealed program/build/runtime identity
+    V2\n                                                   -> report sealed switch/setup identity too
     R [sublink ...]\n                                      -> dump selected/all witness state
+                                                            using census rows tagged "S"
+    A <sublink> <ndrop>\n                                  -> contiguous burst injector ranges
+    S <sublink> <packet_count> <drop_count> <phase>\n      -> exact dispersed injector ranges
+                                                            (command, not R-response row)
+    K <sublink> [low high]\n                               -> full or bounded blackhole range
+    M [dev_port ...]\n                                      -> read MAC port RX/TX counters
 
 Reads go through this agent too, and that is not incidental: SDE 9.13.2 lets only ONE client bind
 the pipeline config ("Client ID N trying to bind but Client ID M already owns this P4"), and an
@@ -23,23 +30,30 @@ correct shape, and it is what a real deployment runs.
 The reply carries the agent's own bfrt write time in microseconds, so the host-side and
 switch-side components of the path can be separated afterwards.
 """
-import os, socket, sys, time
+import os, pathlib, socket, sys, time
 from gate_agent_core import (
     add_batch_strict,
     clear_entries_strict,
+    compute_switch_id,
     format_arm_reply,
     format_blackhole_reply,
+    format_port_stats_reply,
+    format_spread_reply,
     is_not_found,
     parse_bank_command,
     parse_blackhole_command,
     parse_epoch_command,
+    parse_port_stats_command,
+    parse_spread_command,
+    read_port_stats_rows,
     peer_allowed,
     rewrite_act_enter_field,
     sync_counters_strict,
     verify_loaded_build,
+    verify_loaded_setup,
     verify_sha256_manifest,
 )
-from injector_ranges import modular_drop_ranges
+from injector_ranges import modular_drop_ranges, modular_spread_drop_ranges
 
 PROG = os.environ.get("MCP_PROG")
 if not PROG:
@@ -49,7 +63,12 @@ RUNTIME_FILES = ("gate_agent.py", "gate_agent_core.py", "injector_ranges.py")
 RUNTIME_ID = verify_sha256_manifest(
     RUNTIME_ROOT, PROG + ".runtime-manifest.sha256", expected_files=RUNTIME_FILES)
 BUILD_ID = verify_sha256_manifest(RUNTIME_ROOT, PROG + ".build-manifest.sha256")
+SETUP_ID = verify_sha256_manifest(RUNTIME_ROOT, PROG + ".setup-manifest.sha256")
 SWITCHD_PID = verify_loaded_build(RUNTIME_ROOT, PROG, BUILD_ID)
+SWITCH_ID = compute_switch_id(
+    pathlib.Path("/etc/machine-id").read_text(), socket.gethostname(), 0,
+)
+verify_loaded_setup(RUNTIME_ROOT, PROG, SWITCH_ID, SETUP_ID, SWITCHD_PID)
 
 sys.path.append("/home/decps/Downloads/bf-sde-9.13.2/install/lib/python3.8/site-packages/tofino")
 sys.path.append("/home/decps/Downloads/bf-sde-9.13.2/install/lib/python3.8/site-packages")
@@ -67,20 +86,6 @@ info = cli.bfrt_info_get(PROG)
 tgt = gc.Target(device_id=0, pipe_id=0xFFFF)
 gate = info.table_get("pipe.Ingress.tbl_health_gate")
 attn_reg = info.table_get("pipe.Ingress.reg_attn")
-try:
-    rx_frontier_table = info.table_get("pipe.Ingress.reg_rx_frontier")
-except Exception as e:
-    # e.g. mcp_fabric_ledger: the receiver ledger (advance-only reg_wit_expect +
-    # never-reset reg_wit_observed) replaces the CLF frontier scheme entirely, so this
-    # program never had this table.  F/X/Z below refuse to run rather than either raise
-    # an opaque table_get error or, worse, silently apply the old bank/sublink index
-    # decode (idx >> 8 / idx & 0xFF) to a register that no longer has a bank dimension.
-    # "bfrt raises KeyError; wrappers vary" (verify_program's own comment in
-    # hw_adapter.py) -- print what was actually swallowed so a transient gRPC error or
-    # bind race is never silently misdiagnosed as "this program has no CLF frontier".
-    rx_frontier_table = None
-    print("F/X/Z disabled: reg_rx_frontier not resolved for program %s (%s: %s)" %
-          (PROG, type(e).__name__, e), flush=True)
 
 def key_for(src, dst, spray, ctx):
     return gate.make_key([gc.KeyTuple("md.src_leaf", src), gc.KeyTuple("md.dst_leaf", dst),
@@ -199,6 +204,29 @@ while True:
                     conn.sendall(format_arm_reply(sub, ranges).encode())
                     print("A %d %d -> armed seq %s" % (sub, ndrop, ranges), flush=True)
                     continue
+                elif f[0] == "S":
+                    sub, packet_count, drop_count, phase = parse_spread_command(f)
+                    seqt = info.table_get("pipe.Egress.reg_wit_seq")
+                    cur = 0
+                    for d, k in seqt.entry_get(
+                            tgt, [seqt.make_key([gc.KeyTuple("$REGISTER_INDEX", sub)])],
+                            {"from_hw": True}):
+                        v = d.to_dict()["Egress.reg_wit_seq.f1"]
+                        cur = max(v) if isinstance(v, list) else v
+                    ranges = modular_spread_drop_ranges(
+                        cur, packet_count, drop_count, phase)
+                    ft = info.table_get("pipe.Egress.tbl_eg_fail")
+                    keys = [ft.make_key([gc.KeyTuple("md.sublink", sub),
+                                         gc.KeyTuple("hdr.witness.seq", low=lo, high=hi),
+                                         gc.KeyTuple("$MATCH_PRIORITY", 1)])
+                            for lo, hi in ranges]
+                    data = [ft.make_data([], "Egress.eg_fail_drop") for _ in keys]
+                    add_batch_strict(ft, tgt, keys, data)
+                    conn.sendall(format_spread_reply(
+                        sub, packet_count, drop_count, phase, ranges).encode())
+                    print("S %d %d %d %d -> armed seq %s" %
+                          (sub, packet_count, drop_count, phase, ranges), flush=True)
+                    continue
                 elif f[0] == "U":
                     # U <udp_dst> <udp_src> <spray>  -- declare ONE audit/probation flow and
                     # pin the sublink it must take.  tbl_audit_steer opens a deliberate
@@ -267,11 +295,6 @@ while True:
                     # complete and no longer being written. Zeroing the active bank instead
                     # clears TX while packets are in flight, so they arrive and set RX with
                     # no matching TX -- the TX=0/RX=1 state, seen in 50 of 50 trials.
-                    #
-                    # On the receiver ledger (mcp_fabric_ledger.p4) this command still runs
-                    # -- act_enter{epoch, bank} is unchanged on the wire -- but nothing reads
-                    # clf_bank any more, so it is a no-op for measurement: newly entering
-                    # packets get stamped with the new parity and nothing downstream cares.
                     bank = parse_bank_command(f)   # hdr.fabric.clf_bank, a dedicated byte
                     t = info.table_get("pipe.Ingress.tbl_final")
                     n = rewrite_act_enter_field(t, tgt, gc.DataTuple, "bank", bank)
@@ -286,6 +309,12 @@ while True:
                     conn.sendall(("OK %d\n" % n).encode())
                     print("E %d -> %d act_enter rows now stamp epoch %d" %
                           (epoch, n, epoch), flush=True)
+                    continue
+                elif f[0] == "M":
+                    ports = parse_port_stats_command(f)
+                    stat = info.table_get("$PORT_STAT")
+                    rows = read_port_stats_rows(stat, tgt, ports, gc.KeyTuple)
+                    conn.sendall(format_port_stats_reply(rows).encode())
                     continue
                 elif f[0] == "I":
                     # I -- injector ground truth: how many packets did tbl_eg_fail actually
@@ -312,12 +341,6 @@ while True:
                     print("C -> cleared %d injector entries" % len(keys), flush=True)
                     continue
                 elif f[0] == "F":
-                    if rx_frontier_table is None:
-                        # Actionable remediation first: replies and the log line are
-                        # truncated to 80 chars (see the generic except below), so a
-                        # long "why" pushes "use R" out of what the caller ever sees.
-                        raise RuntimeError(
-                            "use R, not F: reg_rx_frontier absent from program %s" % PROG)
                     # Read both CLF frontiers and pack the per-link 16-bit masks.
                     # The data plane stores a byte per sublink (a per-link mask would need a
                     # one-hot 1 << ctx and the compiler cannot shift a runtime value); packing
@@ -352,9 +375,6 @@ while True:
                     conn.sendall(("".join(l + "\n" for l in lines)).encode())
                     conn.sendall(b"OK 0\n"); continue
                 elif f[0] == "X":
-                    if rx_frontier_table is None:
-                        raise RuntimeError(
-                            "use R, not X: reg_rx_frontier absent from program %s" % PROG)
                     # X -- per-sublink frontier COUNTS: "X <bank> <vlink> <ctx> <tx> <rx>".
                     # F packs presence bits and therefore cannot distinguish "one stray
                     # packet arrived" from "the link is carrying full load", which is the
@@ -380,17 +400,6 @@ while True:
                     conn.sendall(("".join(r + "\n" for r in rows)).encode())
                     conn.sendall(b"OK 0\n"); continue
                 elif f[0] == "Z":
-                    if rx_frontier_table is None:
-                        # Also protects reg_tx_frontier: without this guard the loop below
-                        # would zero it (a real, executed side effect) before failing on
-                        # reg_rx_frontier's absence. reg_tx_frontier is not itself the
-                        # ledger's (hi, lo) pair -- that is reg_wit_expect/reg_wit_observed
-                        # -- but on the receiver ledger it too is a deliberately
-                        # never-reset lifetime counter (the widened CLF TX side), so
-                        # zeroing it mid-interval is a real regression, not a no-op.
-                        raise RuntimeError(
-                            "no Z, ledger never resets: reg_rx_frontier absent from %s"
-                            % PROG)
                     # Zero both frontiers (per-epoch or per-trial reset).
                     for reg, fld in (("pipe.Egress.reg_tx_frontier", "Egress.reg_tx_frontier.f1"),
                                      ("pipe.Ingress.reg_rx_frontier", "Ingress.reg_rx_frontier.f1")):
@@ -398,12 +407,6 @@ while True:
                         tt.entry_del(tgt, None)
                     conn.sendall(b"OK 0\n"); continue
                 elif f[0] == "R":
-                    # `obs` (reg_wit_observed) means different things on different programs.
-                    # On the base/CLF programs it is a since-last-gap count. On the receiver
-                    # ledger (mcp_fabric_ledger.p4) its reset was removed, so it is instead a
-                    # never-reset lifetime arrivals count ("lo" in Delta(hi)-Delta(lo)); a
-                    # caller reading this program's census must diff two R reads for the
-                    # same sublink to recover a delta, not read one line in isolation.
                     requested = [int(x) for x in f[1:]]
                     if any(not 0 <= sublink < 1024 for sublink in requested):
                         raise ValueError("census sublink outside 0..1023")
@@ -433,6 +436,13 @@ while True:
                         raise ValueError("V takes no arguments")
                     conn.sendall(("IDENTITY %s %s %s %d\n" %
                                   (PROG, BUILD_ID, RUNTIME_ID, SWITCHD_PID)).encode())
+                    continue
+                elif f[0] == "V2":
+                    if len(f) != 1:
+                        raise ValueError("V2 takes no arguments")
+                    conn.sendall(("SEALED_IDENTITY %s %s %s %s %s %d\n" %
+                                  (PROG, SWITCH_ID, BUILD_ID, SETUP_ID,
+                                   RUNTIME_ID, SWITCHD_PID)).encode())
                     continue
                 elif f[0] != "P":
                     conn.sendall(b"ERR unknown\n"); continue

@@ -5,6 +5,10 @@ import pathlib
 
 
 ACT_ENTER = "Ingress.act_enter"
+DEFAULT_MCP_PORTS = (9, 10, 164, 165, 166, 167, 172, 173, 174, 175)
+PORT_STAT_DEV_PORT = "$DEV_PORT"
+PORT_STAT_RX = "$FramesReceivedOK"
+PORT_STAT_TX = "$FramesTransmittedOK"
 
 
 def format_arm_reply(sublink, ranges):
@@ -17,6 +21,12 @@ def format_arm_reply(sublink, ranges):
 def format_blackhole_reply(sublink, low, high):
     """Return full-range injector detail plus the standard OK terminator."""
     return "BLACKHOLED %d [%d..%d]\nOK 1\n" % (sublink, low, high)
+
+
+def format_spread_reply(sublink, packet_count, drop_count, phase, ranges):
+    """Return exact spread injector detail plus the standard OK terminator."""
+    return "SPREAD %d %d %d %d\nOK %d\n" % (
+        sublink, packet_count, drop_count, phase, len(tuple(ranges)))
 
 
 def _sha256(path):
@@ -96,6 +106,31 @@ def verify_loaded_build(root, program, build_identity, proc_root="/proc"):
     return pid
 
 
+def compute_switch_id(machine_id, hostname, device_id):
+    normalized = "%s\n%s\n%d\n" % (machine_id.strip(), hostname.strip(), device_id)
+    if not machine_id.strip() or not hostname.strip() or device_id < 0:
+        raise RuntimeError("stable switch identity inputs are unavailable")
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+
+
+def verify_loaded_setup(root, program, switch_identity, setup_identity, switchd_pid):
+    """Prove the sealed setup identity was applied to the live switch owner."""
+    receipt = pathlib.Path(root).resolve() / (program + ".loaded-setup.sha256")
+    try:
+        fields = receipt.read_text().split()
+    except OSError as error:
+        raise RuntimeError("missing loaded-setup receipt") from error
+    if len(fields) != 3 or not fields[0].isdigit():
+        raise RuntimeError("malformed loaded-setup receipt")
+    receipt_pid, receipt_switch, receipt_identity = int(fields[0]), fields[1], fields[2]
+    if receipt_pid != switchd_pid:
+        raise RuntimeError("loaded setup does not name the live build owner")
+    if receipt_switch != switch_identity:
+        raise RuntimeError("loaded setup names another switch")
+    if receipt_identity != setup_identity:
+        raise RuntimeError("loaded setup identity does not match sealed setup")
+
+
 def peer_allowed(peer_ip, allowed_peers):
     return peer_ip in allowed_peers
 
@@ -148,6 +183,27 @@ def parse_epoch_command(fields):
     return parse_uint(fields, "E", 0, 0xFFFF)
 
 
+def parse_port_stats_command(fields):
+    """Parse ``M [dev_port ...]`` as sorted unique decimal dev ports."""
+    if not fields or fields[0] != "M":
+        raise ValueError("M requires zero or more decimal dev ports")
+    if len(fields) == 1:
+        return DEFAULT_MCP_PORTS
+    ports = []
+    seen = set()
+    for raw in fields[1:]:
+        if not raw or any(char not in "0123456789" for char in raw):
+            raise ValueError("M dev ports must be decimal integers")
+        port = int(raw, 10)
+        if not 0 <= port <= 511:
+            raise ValueError("M dev port outside 0..511")
+        if port in seen:
+            raise ValueError("duplicate M dev port %d" % port)
+        seen.add(port)
+        ports.append(port)
+    return tuple(sorted(ports))
+
+
 def parse_blackhole_command(fields):
     """Parse either ``K sublink`` or ``K sublink low high`` exactly."""
     if len(fields) == 2:
@@ -163,6 +219,25 @@ def parse_blackhole_command(fields):
     if not 0 <= low <= high <= 0xFFFF:
         raise ValueError("sequence range outside 0..65535")
     return sublink, low, high
+
+
+def parse_spread_command(fields):
+    """Parse ``S sublink packet_count drop_count phase`` exactly."""
+    if len(fields) != 5 or fields[0] != "S":
+        raise ValueError("S requires sublink, packet_count, drop_count, and phase")
+    try:
+        sublink, packet_count, drop_count, phase = (int(value, 0) for value in fields[1:])
+    except ValueError as error:
+        raise ValueError("S arguments must be integers") from error
+    if not 0 <= sublink < 1024:
+        raise ValueError("S sublink outside 0..1023")
+    if not 1 <= packet_count <= 254:
+        raise ValueError("S packet_count outside 1..254")
+    if not 1 <= drop_count <= packet_count:
+        raise ValueError("S drop_count outside 1..packet_count")
+    if phase < 0:
+        raise ValueError("S phase must be non-negative")
+    return sublink, packet_count, drop_count, phase % packet_count
 
 
 def _action_name(row):
@@ -196,6 +271,53 @@ def _read_act_enter_rows(table, target):
         if _is_act_enter(row):
             rows.append((key, row))
     return rows
+
+
+def _port_from_key(key):
+    row = key.to_dict()
+    value = row.get(PORT_STAT_DEV_PORT)
+    if not isinstance(value, dict) or "value" not in value:
+        raise RuntimeError("malformed port stat key")
+    port = value["value"]
+    if isinstance(port, bool) or not isinstance(port, int):
+        raise RuntimeError("malformed port stat key")
+    return port
+
+
+def _port_counter(row, name):
+    if name not in row:
+        raise RuntimeError("missing port counter %s" % name)
+    value = row[name]
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise RuntimeError("malformed port counter %s" % name)
+    return value
+
+
+def read_port_stats_rows(table, target, dev_ports, key_tuple):
+    """Read selected $PORT_STAT rows and return ``(port, rx_ok, tx_ok)`` tuples."""
+    requested = tuple(sorted(dev_ports))
+    keys = [table.make_key([key_tuple(PORT_STAT_DEV_PORT, dev_port)])
+            for dev_port in requested]
+    rows = {}
+    for data, key in table.entry_get(target, keys, {"from_hw": True}):
+        port = _port_from_key(key)
+        if port not in requested:
+            raise RuntimeError("unexpected port stat row %d" % port)
+        values = data.to_dict()
+        rows[port] = (
+            _port_counter(values, PORT_STAT_RX),
+            _port_counter(values, PORT_STAT_TX),
+        )
+    missing = [port for port in requested if port not in rows]
+    if missing:
+        raise RuntimeError("missing port stats rows: %s" % missing[:8])
+    return tuple((port, rows[port][0], rows[port][1]) for port in requested)
+
+
+def format_port_stats_reply(rows):
+    ordered = tuple(sorted(rows))
+    payload = "".join("M %d %d %d\n" % row for row in ordered)
+    return payload + "OK %d\n" % len(ordered)
 
 
 def rewrite_act_enter_field(table, target, data_tuple, field_name, value, expected_count=None):
