@@ -1594,3 +1594,35 @@ and monitored; no further unrequested expansion of scope.
 - Verdict for the paper: 1344 consecutive clean cycles (~6,720 injected drops recovered exactly,
   ~215k clean probe packets with seq == obs on every sublink); the single stop was the reader,
   and the fixed reader distinguishes the two cases from now on.
+
+### mcp-51 check-in 08:26 UTC
+- MAIN2 201/1200, 0 bad, driver alive, switch up, no new switchd errors.
+
+### mcp-51 08:33 UTC / 04:33 EDT — MAIN2 stopped at cycle 224: the 16-bit sequence register WRAPPED (first time on silicon); not a drop
+- Record: cycle 224 `clean_mismatches` = sublink 2 delta_seq **-65516** (= 20 - 65536), delta_obs 20;
+  persisted through the 2 s recheck (so the new race guard correctly did NOT excuse it). Injected
+  loss still 5/5. Fresh census: sublink 2 seq=36 obs=57347 (seq wrapped, obs not yet); sublinks
+  6/10/14 at seq 65520-65527 = obs, i.e. one cycle from wrapping themselves.
+- Why: `hdr.witness.seq` and `reg_wit_seq` are `bit<16>` (`p4/witness/mcp_fabric_w2.p4:1025`,
+  `..._w4_egdrop.p4:1046`); the sequence is cumulative since bring-up and sublink 2 crossed 65536
+  stamped packets at 1344+50+27+40(+validation) + 224 cycles x 40. The soak driver's delta
+  arithmetic was plain subtraction. Nothing on the switch changed; switchd ERROR count still 11.
+- Fix (driver only): `deltas_since` reduces every delta mod 2^16 (exact for a 16-bit register,
+  no-op for a wider one, since a cycle moves a sublink by 40 << 65536). Offline self-test replays
+  the exact cycle-224 numbers plus an obs wrap and a wrapped inject phase. Relaunched as MAIN3
+  (1000 cycles, `P3-OVERNIGHT-LEDGER-SOAK-MAIN3-2026-09-02.jsonl`, ~4.3 h -> ~12:50 UTC / 08:50 EDT).
+  MAIN3's first cycles will cross the wrap on sublinks 6/10/14, so they are the live test of the fix.
+- FOR THE MORNING (design, not tonight): the 16-bit seq is the header field the injector ranges
+  match on, so its width is a wire-format decision, but any consumer of `reg_wit_seq` /
+  `reg_wit_observed` (the controller's ledger reader, the e-process input) must difference mod
+  2^16 and must be read more often than 65536 packets per sublink — at 25G line rate that is
+  ~tens of ms. This is the same family as the assessment's "8-bit counters/rate" blocking defect
+  and should be folded into that item. `reg_wit_observed` width still to be read from the
+  ledger source (grep of the checked-in witness programs only shows the seq register).
+- Tally so far tonight: MAIN 1344 clean cycles, MAIN2 223 clean cycles; both stops were the
+  reader (a read-order race, then a wrap), both now handled and logged, neither a silicon fault.
+- Widths confirmed from `p4/witness/mcp_fabric_ledger.p4` (the loaded program): `reg_wit_observed`
+  is `Register<bit<32>, bit<16>>(1024, 0)` (line 921), `reg_wit_seq` is `Register<bit<16>,
+  bit<16>>(1024, 0)` (line 1424). So only seq wraps; obs is 32-bit. MAIN3 cycle 1 carried sublinks
+  6/10/14 across their own 65536 boundary (they were at 65520-65527, +40 per cycle) and reported
+  them clean: the mod-2^16 differencing is verified live, not just in the offline self-test.

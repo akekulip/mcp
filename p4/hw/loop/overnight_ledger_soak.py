@@ -104,14 +104,24 @@ def clear_injector() -> str:
     return gate_command("C")
 
 
+# hdr.witness.seq and reg_wit_seq are bit<16> (p4/witness/*.p4: `bit<16> seq;`,
+# `Register<bit<16>, bit<16>>(64, 0) reg_wit_seq`), so the per-sublink sequence
+# wraps every 65536 stamped packets. First seen on silicon at MAIN2 cycle 224
+# (2026-09-02 08:31 UTC): sublink 2 read delta_seq = 20 - 65536 = -65516 with
+# delta_obs = 20. A cycle moves each sublink by 40 packets, far below the
+# modulus, so reducing every delta mod 2^16 is exact for a 16-bit register and
+# a no-op for a wider one.
+COUNTER_WRAP = 1 << 16
+
+
 def deltas_since(baseline: Dict[int, Dict[str, int]],
                   current: Dict[int, Dict[str, int]]) -> Dict[int, Dict[str, int]]:
     result = {}
     for sublink, row in current.items():
         base = baseline.get(sublink, {"seq": row["seq"], "obs": row["obs"]})
         result[sublink] = {
-            "delta_seq": row["seq"] - base["seq"],
-            "delta_obs": row["obs"] - base["obs"],
+            "delta_seq": (row["seq"] - base["seq"]) % COUNTER_WRAP,
+            "delta_obs": (row["obs"] - base["obs"]) % COUNTER_WRAP,
         }
     return result
 
