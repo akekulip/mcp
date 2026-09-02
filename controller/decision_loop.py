@@ -46,24 +46,62 @@ revision fixes:
   comes from `FleetFloorEstimator.own_rate_estimate`, a trailing window of
   that sublink's own recent behaviour, matching the floor's own window.
 
-**Not resolved this pass, and explicitly NOT safe to treat as resolved
-(CRITICAL C, round 2):** under a shared shock across siblings (e.g. a hot
-spine port raising loss on every sibling roughly equally), the previsibility
-fix removes the CRITICAL 2 leak but the pooled floor still lags a
-fleet-wide change, and the second review measured the false-rejection rate
-under a strong common shock rising to 1.00 (worse than the original leaky
-code's 0.15 in that same adversarial configuration, though better in the
-narrower scenario CRITICAL 2's own regression test targets). This is exactly
-the failure mode `relative_eprocess.py`'s congestion-vs-gray discriminator
-was kept in the design for (brainstorm C2, secondary mechanism) -- it
-requires a queue-depth/context stratification key this snapshot shape does
-not carry, which is a real design task, not a small wiring fix. **Until that
-discriminator is wired, this layer's fleet-wide false-alarm control is not
-preregistration-safe under non-stationary or common-mode load, and must not
-be used for a paper claim about FDR control without that precondition stated
-or the discriminator in place.** Tracked in WORKING_NOTES.md; flagged for
-Philip's explicit decision on scope and on whether PREREG.md needs an
-amendment before this is relied upon.
+**NOT PRODUCTION READY as of 2026-09-02 -- three review rounds, each finding a
+deeper structural problem than the last (`docs/review/artifacts/
+STATS-LAYER-REVIEW-2026-09-02.md` has the full record). This module has no
+production caller anywhere in the repo (grep confirms it -- only its own test
+suite exercises it), so nothing live is at risk, but it must not be wired
+into `p4/hw/loop/controller_loop.py` or used for any paper claim until the
+open items below are resolved with human design judgment, not another
+autonomous patch cycle:**
+
+- **CRITICAL C (round 2, unresolved).** Under a shared shock across siblings
+  (e.g. a hot spine port), the pooled floor lags a fleet-wide change and the
+  false-rejection rate was measured up to 1.00 in an adversarial
+  configuration. Needs `relative_eprocess.py`'s congestion-vs-gray
+  discriminator wired with queue-depth/context stratification -- a real
+  design task, not a small fix.
+- **CRITICAL 1, round 3 -- a single degraded link can drive the ENTIRE fleet
+  into a permanent, unrecoverable absorbing deadlock.** The `healthy` tag fed
+  to the floor estimator is previsible (correctly so) but therefore stale by
+  exactly one epoch, so a newly-degraded link's first bad epoch still counts
+  as healthy evidence and pollutes its siblings' floors upward. Because the
+  primary alternatives grid is FIXED at construction while the floor can
+  rise, clean traffic against an inflated floor can itself alarm (measured:
+  wealth 1.2e+74 from clean 1e-3 traffic once the floor rose to 0.1). This
+  cascades: mitigated sublinks compound the floor contamination for the rest
+  of the fleet, until every sublink is mitigated, every leave-one-out pool is
+  empty, every epoch censors, and wealth freezes forever -- measured: still
+  100% mitigated 4800 epochs after the single triggering fault was repaired.
+  Fix direction (measured to work): couple the PRIMARY alternatives grid to
+  the current floor the same way `_restoration_grid` already couples the
+  restoration grid, and give the loop an escape hatch from an all-censored
+  state.
+- **CRITICAL 2, round 3 -- HIGH D is not actually fixed; restoration action
+  rate measured at 0/8 against the design's required >=0.9.** The trailing
+  window in `own_rate_estimate` removes lifetime dilution but arming still
+  fires on the SAME tick the primary detector first reacts, when the window
+  contains zero degraded epochs yet -- measured suspect_rate understated by
+  9x to 194x versus the true degraded rate, arming a restoration sequence
+  against a null that is barely distinguishable from the healthy floor.
+  Window size does not fix this; the estimate needs to be anchored to the
+  evidence that triggered arming (e.g. epochs since the primary process's
+  wealth started climbing, or the primary mixture's own argmax alternative),
+  not a fixed-length trailing window measured from the arming tick.
+- **HIGH -- `restoration_grid_low` is an unvalidated config trap.**
+  Unchecked against `floor_min` or any achievable floor; when there is no
+  headroom, arming silently no-ops with no error or log line, and every
+  mitigated sublink stays pinned at `w_min` forever with no visible cause.
+- Round 3 also found two of this round's own regression tests do not
+  actually kill the mutants they were written for (a full revert of the
+  restoration-grid coupling and a full revert of both `suspect_rate` clamps
+  both leave the 206-test suite green) -- the test suite currently
+  overstates how protected these fixes are.
+
+Flagged for Philip's explicit decision: this needs a design pass on how the
+primary detector's null tracks a moving floor without becoming self-alarming,
+and on how suspect-rate estimation should anchor to "evidence since arming"
+rather than any fixed window -- not a fourth autonomous fix-and-review cycle.
 """
 
 from dataclasses import dataclass
