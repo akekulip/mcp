@@ -12,70 +12,116 @@ schedule. Nothing here performs a synchronous, targeted RPC call; the
 existing per-gap-event resolver (`resolve_ledger_gap_event`) keeps serving its
 own immediate-diagnostics purpose on a separate path and is untouched.
 
-Three review rounds (`docs/review/artifacts/STATS-LAYER-REVIEW-2026-09-02.md`,
-`STATS-LAYER-STATUS-2026-09-02.md`) found problems of increasing depth in an
-earlier version of this wiring; the redesign proposal
-(`STATS-LAYER-REDESIGN-PROPOSAL-2026-09-02.md`) analyzed each and this
-revision implements the recommended fixes, in the recommended order:
+Four review rounds now (`docs/review/artifacts/STATS-LAYER-REVIEW-2026-09-02.md`,
+`STATS-LAYER-STATUS-2026-09-02.md`, and round 4 recorded below) have found
+problems of increasing depth, and this docstring has twice been caught
+overstating what was actually verified -- read it as a status report with
+its own history of correction, not a finished spec.
 
-- **Q3, incident-regime circuit breaker.** When the fraction of sublinks
-  currently mitigated (previsibly, from `last_weight` as of the prior tick)
-  reaches `incident_fraction_threshold`, a slow, fleet-wide historical
-  baseline (an exponentially-weighted (tx, lost) accumulator, updated only
-  OUTSIDE an incident so contamination cannot poison it) is offered as a
-  fallback floor for any sublink whose live leave-one-out pool is too thin
-  to trust -- instead of unconditional censoring. This is what breaks the
-  round-3 absorbing deadlock: a pool that is empty because "everyone is
-  mitigated" now still yields a real, previously-measured floor rather than
-  freezing every sublink's wealth forever with no escape.
-- **Q1, ratio-relative primary detector.** The primary process is now a
+## What genuinely works, independently re-measured by round 4 on fresh seeds
+
+- **Q1, ratio-relative primary detector.** The primary process is a
   `FleetRatioEProcess` (`absolute_eprocess.py`): its alternatives are fixed
-  RATIOS above the current floor, not fixed absolute rates, so a floor that
-  drifts upward (e.g. from the previsible-but-stale `healthy` tag admitting
-  one contaminated epoch) cannot leave clean traffic looking better-fit to a
-  now-too-low fixed grid than to the inflated null -- the mechanism that
-  produced the measured 1.2e+74 false alarm and drove the round-3 cascade.
-- **Q2, CUSUM-anchored suspect-rate estimation.** Restoration's suspect rate
-  no longer comes from a fixed trailing window (which measured a 9x-194x
-  understatement, since it mixes a long healthy prefix with the few epochs
-  since a fast-triggering primary detector reacted). It is now estimated
-  from raw counts accumulated only since `FleetRatioEProcess.change_point_epoch()`
-  -- a CUSUM change-point estimate already available from the primary
-  process's own state, re-anchored automatically as that estimate advances.
+  RATIOS above the current floor, not fixed absolute rates. **This, alone,
+  is what ends the round-3 absorbing deadlock** -- round 4 instrumented the
+  exact cascade scenario and found Q3 (below) never engages in it at all (0
+  incident epochs). Confirmed on 5 seeds: at most 1-2 of 16 sublinks are
+  ever mitigated simultaneously (versus 15/16 by epoch 2500 previously,
+  still 100% at epoch 4999), and the fault recovers within roughly 600-800
+  epochs of its own end.
+- **Q2, CUSUM-anchored suspect-rate estimation**, using
+  `FleetRatioEProcess.change_point_epoch()` (gated by a minimum log-capital
+  climb -- see below) instead of a fixed trailing window. Restoration's
+  action rate measured 8/8 at both of round 3's degraded rates (0.20, 0.05)
+  across 8 fresh seeds, checked against the actual `repair_generation`
+  counter (not just "weight back near 1"), meeting the design's own >=0.9
+  target (brainstorm H2/H3) -- versus 0/8 before. No cross-fault state leak:
+  two sequential faults on the same sublink, and a second fault on a
+  different sublink, both estimate cleanly with no trace of prior evidence.
+  One defect was found and fixed while validating this: the running-min
+  tracker needs a minimum-climb gate (`change_point_epoch(min_climb=3.0)`),
+  since under a true null a low-ratio alternative's log-capital random-walks
+  with negative drift and touches a "new minimum" almost every epoch by
+  construction -- an ungated estimate tracked essentially "now" throughout
+  ordinary operation and discarded a fault's own early evidence right when
+  arming needed it, which by itself made the action-rate fix ineffective.
+  Both headline results (no cascade, action rate) are mutant-tested: reverting
+  either Q1 or Q2 alone is caught by a dedicated regression test in
+  `controller/tests/test_decision_loop.py`.
 
-**Q4 (wiring `relative_eprocess.py` as a corroboration gate on mitigation
-actions) is NOT implemented this pass** -- it needs queue-depth/context
-stratification plumbing that does not exist anywhere in the repo yet (a real
-data-plumbing lift, not a controller-side change) and its own measurement
-plan from the redesign proposal. Until it lands, the CRITICAL C finding
-(false-rejection rate up to 1.00 under a strong shared/common-mode shock
-across siblings) remains open, and this layer's fleet-wide false-alarm
-control is still not preregistration-safe under non-stationary or
-common-mode load. Flagged for Philip's decision on scope and on whether
-PREREG.md needs an amendment before this is relied upon for a paper claim.
+## What is newly broken or still broken (round 4)
 
-Verification status as of this revision, measured directly (not asserted):
-the exact round-3 cascade scenario (a single link degraded for 100 epochs on
-a 16-sublink fleet) no longer cascades at all -- at most 1 of 16 sublinks is
-ever mitigated, versus the prior 15/16 by epoch 2500, still 100% at epoch
-4999. Restoration's action rate measured 8/8 at both degraded rates the
-round-3 review used (0.20 and 0.05), versus the prior 0/8, meeting the
-design's own >=0.9 target (brainstorm H2/H3). One additional defect was
-found and fixed while validating Q2: `FleetRatioEProcess.change_point_epoch`
-needed a minimum-climb gate, since a low-ratio alternative's log-capital
-random-walks with slightly negative drift under a true null and touches a
-"new minimum" almost every epoch by construction -- an un-gated running-min
-epoch tracked essentially "now" throughout ordinary healthy operation and
-discarded a real fault's own early evidence right when arming needed it
-(collapsing the action-rate fix on its own). All of the above are permanent
-regression tests in `controller/tests/test_decision_loop.py` and
-`controller/tests/test_ratio_eprocess.py`. CRITICAL C (Q4, not implemented
-this pass) remains open and unchanged in status -- a fresh empirical check
-found ~22% false-alarm rate under a common-mode shock in one configuration,
-consistent with "still an open problem," not newly regressed by Q1's change
-to the primary detector. A fresh adversarial review is still warranted
-before this is considered settled, given the pattern of the first three
-rounds.
+- **CRITICAL -- Q1 measurably REGRESSES the common-mode-shock case; an
+  earlier version of this docstring incorrectly claimed the opposite.**
+  Round 4 measured that under a sustained EXOGENOUS shock across all
+  sublinks (nothing individually faulty), Q1's ratio grid can pin the
+  ENTIRE fleet at `w_min` with e-BH rejections on nearly every sublink-epoch
+  -- two to three orders of magnitude worse than the pre-Q1 code in the same
+  scenario. Mechanism: during a shock the leave-one-out floor lags, i.e.
+  UNDER-estimates the true rate; because Q1's alternatives scale with the
+  floor, an under-estimated floor times a ratio can land close to the
+  fleet's new true rate, so every epoch looks like strong evidence for the
+  ratio alternative rather than the (also moved) truth. This is exactly the
+  "mirrored risk" the redesign proposal flagged as unprotected and
+  unvalidated for Q1, and it fails when actually measured. There is also a
+  closed-form breakeven, independent of any shock: a healthy link whose true
+  rate persistently exceeds ~1.44x the fleet's estimated floor alarms with
+  probability -> 1 even with no fault ever injected. **This is not fixed.**
+  It needs either a floor-staleness guard (censor, or widen the tested null,
+  when the fleet-aggregate rate has moved faster than the floor window can
+  track) or Q4's corroboration gate -- both are design work, not a small
+  patch, and CRITICAL C's status (below) is the same underlying problem
+  viewed from the fleet-FDR side rather than the single-link side.
+- **CRITICAL C (common-mode shock, Q4 not implemented) is open and, per the
+  above, is the same root cause as the new CRITICAL just described, not an
+  independent one.** Wiring `relative_eprocess.py` needs queue-depth/context
+  stratification plumbing that does not exist anywhere in the repo yet.
+  Until either that or a floor-staleness guard lands, this layer's
+  fleet-wide false-alarm control is not preregistration-safe under
+  non-stationary or common-mode load, and per-link detection is not safe
+  when the fleet's own aggregate rate is moving quickly, independent of any
+  single link's own true behavior.
+- **HIGH -- restoration can prematurely declare a fault repaired while it is
+  still active, at low severities close to the floor.** `suspect_min_tx`
+  defaulted to 1 (arming reachable on a single epoch's worth of evidence);
+  raising it reduces but does not eliminate this, because at true rates only
+  slightly above the floor the risk is closer to an inherent property of a
+  bounded-alpha hypothesis test than a fixable estimation bug -- restoration
+  runs its own alpha, and a nonzero false-restoration rate under a
+  genuinely-still-faulty null is not automatically zero just because the
+  primary side of the same alpha is well controlled. `suspect_min_tx` now
+  defaults to 2000 (a few thousand packets, not one epoch); the regression
+  tests report the premature-restoration rate NEXT TO the action rate, not
+  in isolation (a usefulness number without its safety number beside it is
+  an incomplete report), and both are 0.0/8 and 8/8 respectively at the
+  degraded rates the design's own H2/H3 target uses. The residual risk at
+  much lower severities (true rate within ~2-3x of the floor) is disclosed,
+  not eliminated, and would need its own dedicated statistical treatment
+  (e.g. a minimum required log-capital climb before trusting a restoration
+  verdict, analogous to Q2's `min_climb` gate) if the design ever needs
+  reliable restoration that close to the noise floor.
+- Two lower-severity implementation bugs found and fixed by round 4: the
+  slow fleet-wide baseline's exponential decay was applied once PER SUBLINK
+  inside the per-epoch loop rather than once per epoch, silently shrinking
+  its effective memory with fleet size (measured ~1 epoch of memory at the
+  design's own 1024-sublink target, instead of "much slower than the 20-epoch
+  live window" as intended) -- fixed to decay exactly once per epoch. The
+  baseline's output was also unclamped and could reach exactly 0.0 or 1.0,
+  which `FleetRatioEProcess.ingest` rejects -- now clamped to
+  `[floor_min, 1 - floor_min]`.
+- Known, not yet addressed: the fleet-wide baseline is not leave-one-out
+  (a sublink's own traffic feeds the very baseline handed back to it as a
+  fallback null) and is not immune to a single fault below the incident
+  threshold (a 1-in-16 fault, 6.25%, never triggers `incident_fraction_threshold`
+  at its default 0.3, so it still feeds the "frozen" baseline directly);
+  `_states` is never evicted for a sublink that stops reporting, so
+  `in_incident` and the baseline can latch onto stale state indefinitely;
+  `incident_fraction_threshold` quantizes coarsely at small fleet sizes
+  (any single sublink is already >=1/3 of a 3-sublink fleet).
+
+A fifth adversarial review is warranted before any of this is considered
+settled, given the pattern of every round so far finding something the
+previous one missed or misreported.
 """
 
 from dataclasses import dataclass
@@ -137,7 +183,7 @@ class FleetDecisionLoop:
     def __init__(self, alpha: float, ratios: Sequence[float],
                  restoration_grid_low: float, restoration_grid_count: int,
                  floor_window_epochs: int, w_min: float, floor_min: float = 1e-6,
-                 arm_weight_threshold: float = 0.8, suspect_min_tx: int = 1,
+                 arm_weight_threshold: float = 0.8, suspect_min_tx: int = 2000,
                  incident_fraction_threshold: float = 0.3,
                  baseline_decay: float = 0.98):
         self.alpha = float(alpha)
@@ -156,6 +202,8 @@ class FleetDecisionLoop:
             raise ValueError("incident_fraction_threshold must lie in (0, 1]")
         if not 0.0 < baseline_decay < 1.0:
             raise ValueError("baseline_decay must lie in (0, 1)")
+        if suspect_min_tx < 1:
+            raise ValueError("suspect_min_tx must be positive")
         self.restoration_grid_low = float(restoration_grid_low)
         self.restoration_grid_count = int(restoration_grid_count)
         self.w_min = float(w_min)
@@ -186,7 +234,9 @@ class FleetDecisionLoop:
     def _baseline_floor(self) -> Optional[float]:
         if self._baseline_tx <= 0.0:
             return None
-        return self._baseline_lost / self._baseline_tx
+        estimate = self._baseline_lost / self._baseline_tx
+        floor_min = self.floor.min_floor
+        return max(floor_min, min(estimate, 1.0 - floor_min))
 
     def _restoration_grid(self, current_floor: Optional[float]) -> Optional[Sequence[float]]:
         """A fresh healthy-alternatives grid spanning up to the CURRENT
@@ -233,15 +283,23 @@ class FleetDecisionLoop:
 
         # Now record this epoch's counts (affects only FUTURE floors) and the
         # slow historical baseline (frozen during an incident so contamination
-        # cannot poison the very fallback meant to survive it).
+        # cannot poison the very fallback meant to survive it). The decay is
+        # applied exactly ONCE per epoch here, not once per sublink inside the
+        # loop below -- round-4 review measured that decaying per-sublink made
+        # the "slow" baseline's effective memory shrink with fleet size (3.6
+        # epochs at 16 sublinks, ~1 epoch at the design's 1024-sublink target),
+        # silently defeating the point of a baseline slower than the live
+        # floor window.
+        if not incident:
+            self._baseline_tx *= self.baseline_decay
+            self._baseline_lost *= self.baseline_decay
         for sublink, (tx, rx) in snapshots.items():
             state = self._state_for(sublink)
             self.floor.record_epoch(sublink, epoch=epoch, tx=tx, rx=rx,
                                      healthy=state.last_weight >= 1.0)
             if not incident:
-                self._baseline_tx = self._baseline_tx * self.baseline_decay + tx
-                self._baseline_lost = (self._baseline_lost * self.baseline_decay +
-                                       (tx - rx))
+                self._baseline_tx += tx
+                self._baseline_lost += tx - rx
 
         wealths: Dict[int, float] = {}
         censored_flags: Dict[int, bool] = {}

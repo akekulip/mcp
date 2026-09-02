@@ -218,6 +218,37 @@ class FleetDecisionLoopTest(unittest.TestCase):
                 healthy_false_alarms += 1
         self.assertEqual(healthy_false_alarms, 0)
 
+    def test_baseline_decay_does_not_shrink_with_fleet_size(self):
+        # round-4 HIGH 2: the baseline's decay used to be applied once PER
+        # SUBLINK inside the per-epoch loop, so its effective memory shrank
+        # with fleet size instead of staying "much slower than the live
+        # floor window" regardless of scale. A 4-sublink and a 16-sublink
+        # fleet fed the SAME per-sublink clean traffic for the same number
+        # of epochs must reach the same baseline estimate.
+        def final_baseline(num_sublinks, epochs=50):
+            loop = make_loop(baseline_decay=0.9)
+            for epoch in range(epochs):
+                snapshots = {s: (100, 99) for s in range(num_sublinks)}
+                loop.tick(epoch, snapshots)
+            return loop._baseline_floor()
+
+        small = final_baseline(4)
+        large = final_baseline(16)
+        self.assertIsNotNone(small)
+        self.assertIsNotNone(large)
+        self.assertAlmostEqual(small, large, places=6)
+
+    def test_baseline_floor_is_clamped_never_exactly_zero_or_one(self):
+        # round-4 finding: an unclamped baseline of exactly 0.0 or 1.0
+        # crashes FleetRatioEProcess.ingest ("floor must lie in (0, 1)").
+        loop = make_loop()
+        for epoch in range(30):  # zero loss every epoch -> raw estimate is 0.0
+            loop.tick(epoch, {2: (100, 100), 6: (100, 100)})
+        baseline = loop._baseline_floor()
+        self.assertIsNotNone(baseline)
+        self.assertGreater(baseline, 0.0)
+        self.assertLess(baseline, 1.0)
+
     def test_floor_is_previsible_not_leaked_from_a_siblings_same_epoch_shock(self):
         # CRITICAL 2, deterministic: a sibling's shock THIS epoch must not
         # enter the floor used to judge another sublink THIS SAME epoch.
@@ -292,50 +323,78 @@ class FleetDecisionLoopTest(unittest.TestCase):
     # implemented after the round-3 review found a permanent, fleet-wide
     # absorbing deadlock and a restoration action rate of 0/8. ---
 
-    def _run_single_fault_fleet(self, seed, degraded_rate, horizon, num_sublinks=16):
+    def _run_single_fault_fleet(self, seed, degraded_rate, horizon, num_sublinks=16,
+                                fault_end=200):
+        # round-4 review: a "weight >= 0.999 and not restoring" check alone
+        # cannot distinguish a genuine restoration from "arming never
+        # happened at all" or a premature restore -- it only measures what
+        # its name says when checked alongside repair_generation, and only
+        # after the fault window has actually closed.
         loop = make_loop(ratios=(2.0, 5.0, 10.0, 50.0, 200.0))
         rng = random.Random(seed)
         sublinks = list(range(num_sublinks))
         bad = 0
         max_mitigated = 0
         recovered_at = None
+        premature_repair_epoch = None
         last_decisions = None
         for epoch in range(horizon):
             snapshots = {}
             for sublink in sublinks:
                 tx = 200
-                rate = degraded_rate if (sublink == bad and 100 <= epoch < 200) else 1e-3
+                rate = degraded_rate if (sublink == bad and 100 <= epoch < fault_end) else 1e-3
                 rx = sum(1 for _ in range(tx) if rng.random() >= rate)
                 snapshots[sublink] = (tx, rx)
             decisions = loop.tick(epoch, snapshots)
             last_decisions = decisions
+            state = loop._states[bad]
             max_mitigated = max(max_mitigated,
                                 sum(1 for d in decisions.values() if d.weight < 1.0))
-            if (recovered_at is None and epoch > 200 and
-                    decisions[bad].weight >= 0.999 and not decisions[bad].restoring):
+            if (premature_repair_epoch is None and 100 <= epoch < fault_end and
+                    state.repair_generation > 0):
+                premature_repair_epoch = epoch
+            if (recovered_at is None and epoch >= fault_end and
+                    state.repair_generation > 0 and decisions[bad].weight >= 0.999 and
+                    not decisions[bad].restoring):
                 recovered_at = epoch
-        return max_mitigated, recovered_at, last_decisions
+        return max_mitigated, recovered_at, premature_repair_epoch, last_decisions
 
     def test_a_single_fault_does_not_cascade_into_a_fleet_wide_deadlock(self):
         # The round-3 CRITICAL 1 scenario exactly: one link degraded for 100
         # epochs on a 16-sublink fleet. Previously this measured 15/16
         # sublinks mitigated by epoch 2500 and still 100% mitigated at epoch
         # 4999 (4800 epochs after the fault's own 100-epoch window closed).
-        max_mitigated, recovered_at, decisions = self._run_single_fault_fleet(
+        # "max_mitigated" here is the peak SIMULTANEOUS count in any one
+        # epoch, not a claim that no other sublink is EVER individually
+        # mitigated across the whole run at a different time.
+        max_mitigated, recovered_at, premature, decisions = self._run_single_fault_fleet(
             seed=42, degraded_rate=0.20, horizon=5000)
-        self.assertEqual(max_mitigated, 1)  # only the genuinely bad link, ever
+        self.assertEqual(max_mitigated, 1)  # only the genuinely bad link, ever, at once
         self.assertIsNotNone(recovered_at)
+        self.assertIsNone(premature)
         self.assertEqual(sum(1 for d in decisions.values() if d.weight < 1.0), 0)
 
     def test_restoration_action_rate_meets_the_design_target(self):
         # brainstorm H2/H3: action rate >= 0.9 per repaired fault. Previously
-        # measured 0/8 at both of these exact degraded rates.
+        # measured 0/8 at both of these exact degraded rates. Reported next
+        # to the premature-restoration (safety) rate over the SAME trials,
+        # not in isolation -- a usefulness number without its safety number
+        # beside it is not a complete report (repo CLAUDE.md cross-check
+        # rule 4; round-4 review's own HIGH 1 finding).
         for rate in (0.20, 0.05):
-            outcomes = [self._run_single_fault_fleet(seed, rate, horizon=3000)[1] is not None
-                       for seed in range(8)]
-            action_rate = sum(outcomes) / len(outcomes)
-            self.assertGreaterEqual(action_rate, 0.9,
-                                    f"rate={rate}: only {sum(outcomes)}/8 recovered")
+            results = [self._run_single_fault_fleet(seed, rate, horizon=3000)
+                      for seed in range(8)]
+            action_rate = sum(1 for _, recovered, _, _ in results if recovered is not None) / 8
+            premature_rate = sum(1 for _, _, premature, _ in results
+                                 if premature is not None) / 8
+            self.assertGreaterEqual(
+                action_rate, 0.9,
+                f"rate={rate}: action_rate={action_rate:.2f}, "
+                f"premature_restoration_rate={premature_rate:.2f}")
+            self.assertEqual(
+                premature_rate, 0.0,
+                f"rate={rate}: action_rate={action_rate:.2f}, "
+                f"premature_restoration_rate={premature_rate:.2f}")
 
 
 if __name__ == "__main__":
