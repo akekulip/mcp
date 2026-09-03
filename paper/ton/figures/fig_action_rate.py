@@ -7,7 +7,8 @@ import numpy as np
 from _common import *  # noqa
 
 setup()
-raw = load("BASELINE-COMPARISON-SWEEP-2026-09-02.json")
+raw = load("BASELINE-COMPARISON-SWEEP-2026-09-03.json")
+RATES = (0.015, 0.01, 0.005, 1e-3, 1e-4, 5e-5, 2e-5, 1e-5)
 fig, ax = utils_mpl.get_fig(size=(3.5, 2.25))
 x = np.arange(len(RATES))
 for i, arm in enumerate(ARMS):
@@ -18,7 +19,7 @@ for i, arm in enumerate(ARMS):
     ax.errorbar(x + off, y, yerr=[y - lo, hi - y], color=COLORS[arm], marker=MARKERS[arm],
                 markersize=4.5, linewidth=1.3, capsize=2, elinewidth=0.8, label=LABELS[arm], zorder=3)
 ax.set_xticks(x)
-ax.set_xticklabels([fmt_p(p) for p in RATES])
+ax.set_xticklabels([fmt_p(p) if p >= 0.005 or p in (1e-3, 1e-4, 1e-5) else f"${p*1e5:g}\\times10^{{-5}}$" for p in RATES], rotation=30, ha="right", fontsize=7)
 ax.set_xlabel(r"Link loss rate $p$ (rarer faults $\rightarrow$)")
 ax.set_ylabel("Action rate (50 seeds)")
 utils_mpl.set_y_axis(ax, bnd=[-0.03, 1.08])

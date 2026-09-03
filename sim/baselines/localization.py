@@ -178,6 +178,45 @@ class MCPLocalizer:
                          if d.fleet_rejected)
 
 
+class CounterPairLocalizer:
+    """CounterPair-0B: the same per-directed-link (tx, rx) information as the
+    ledger, but with the transmit register on the SENDING switch and the
+    receive register on the RECEIVING switch, read at two instants. The tx
+    observation is perturbed by the read-skew model of
+    `comparison.counterpair_tx` (skew as a fraction of the epoch; 0 is the
+    idealized bound with identical information to the ledger). Same frozen
+    decision rule."""
+
+    def __init__(self, skew_frac: float, seed: int):
+        import numpy as np
+        from sim.baselines.comparison import counterpair_tx
+        self._cp_tx = counterpair_tx
+        self.skew = skew_frac
+        self.loop: FleetDecisionLoop = make_mcp_loop()
+        self._ids: Dict[Link, int] = {}
+        self._prev: Dict[Link, float] = {}
+        self._rng = np.random.default_rng(seed + 2_000_003)
+
+    def _id(self, link: Link) -> int:
+        if link not in self._ids:
+            self._ids[link] = len(self._ids)
+        return self._ids[link]
+
+    def tick(self, epoch: int, counters: Dict[Link, Tuple[int, int]]) -> FrozenSet[Link]:
+        id_to_link = {}
+        snapshot = {}
+        for link, (tx, rx) in counters.items():
+            tx_obs, off = self._cp_tx(tx, rx, float(tx), self.skew,
+                                      self._prev.get(link, 0.0), self._rng)
+            self._prev[link] = off
+            lid = self._id(link)
+            id_to_link[lid] = link
+            snapshot[lid] = (tx_obs, rx)
+        decisions = self.loop.tick(epoch, snapshot)
+        return frozenset(id_to_link[lid] for lid, d in decisions.items()
+                         if d.fleet_rejected)
+
+
 # ---------------------------------------------------------------------------
 # SprayCheck-Z view: per-flow per-spine RX + §3.6 cross-leaf intersection.
 # ---------------------------------------------------------------------------

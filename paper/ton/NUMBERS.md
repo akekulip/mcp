@@ -86,3 +86,36 @@ Soak: 57/57 recovery cycles; two unarmed sublinks one "stamp with no arrival" ea
   The draft reports both, labelled.
 - SI Result 1 "zero false positives on 40,000+ clean packets" vs the two clean cells summing to
   42,050; the draft says "more than 42,000".
+
+## 2026-09-03 revision (referee response) — new and superseding numbers
+Sources: BC3 = `BASELINE-COMPARISON-SWEEP-2026-09-03.json` (post-onset origin; supersedes the
+2026-09-02 file, which included 20 M of warm-up); FL = `FLOOR-SWEEP-2026-09-03.json`; LC3 =
+`LOCALIZATION-COMPARISON-SWEEP-2026-09-03.json`; CF3 = `CORRELATED-FAULT-STRESS-SWEEP-2026-09-03b.json`;
+RL = `READ-LOOP-BENCH-2026-09-03.md`; AI = `APP-IMPACT-HTSIM-MAKEBREAK-2026-09-03.md`.
+
+| item | value | source |
+|---|---|---|
+| Ledger post-onset median packets, 1.5 %…1e-4 | 2 M (IQR 2–2; 2–4 at 1e-4), epoch 10 = first post-onset | BC3 |
+| Ledger at 5e-5 / 2e-5 / 1e-5 | 6 M (IQR 4–8, epoch 12) / 36 M (26–44, epoch 27) / no detection | BC3 |
+| SprayCheck-Z post-onset | 4 / 6 (6–8) / 12 (11.5–16) / 94 M (62–128, action 0.78) / none at ≤1e-4 | BC3 |
+| FlowPulse-θ post-onset | 2 / 2 (2–4) / 68 M (26–112, action 0.38) / none at ≤1e-3 | BC3 |
+| Separation at 1e-3 | 94 M / 2 M = 47× | BC3 |
+| CounterPair-0B σ=0 | identical to ledger, every cell | BC3 |
+| CounterPair-0B σ=1e-4 FP | 0.28 (≥0.5 %), 0.94 (1e-3), 1.00 (≤1e-4); action 1.00; at p=f action 0.62 (noise) | BC3 |
+| CounterPair-0B σ≥1e-3 (incl. 2.6e-2) FP | 1.00 at every p | BC3 |
+| Phantom-loss std | ≈ λσ/√6: ≈10 pkts at σ=1e-4, ≈2 700 at 2.6e-2 (λ=250 k) | model, BC3 |
+| Read loop | 2.6 ms per sublink; 347.5 ms median (304–358) per 1024-sublink census | RL |
+| Wrap bound | 2.17 Mpps/port at 1438 B wire; 30 ms per wrap; ≤187 kpps per sublink at 350 ms | RL |
+| Floor sweep, action at p=f / 2f / 5f | 0.00 / (0.18, 1.00, 1.00) / 1.00 at f=1e-6, 1e-5, 1e-4 | FL |
+| Floor sweep, median epochs after onset at 2f / 5f / 10f / 50f | f=1e-6: –, 14, 5, 1; f=1e-5: 18, 3, 1, 1; f=1e-4: 8.5, 2, 1, – | FL (median_epoch − 9) |
+| SprayCheck at p=5e-4 over f=1e-5 / 1e-4 | action 0.16 / 0.06 | FL |
+| Localization CounterPair σ=0 | exact 1.00 every cell | LC3 |
+| Localization CounterPair σ=0.026 | exact 0.00 [0,0.07], wrong 1.00, set size 2.88–3.00 | LC3 |
+| R4 incast 0.5 % / 0.1 %, ledger | FP 1.00/1.00, mean false 8.0 (final) | CF3 |
+| R4 incast, SprayCheck | FP union 0.26 / 0.32, final 0.02; mean false 0.60/0.72 union, 0.04 final | CF3 |
+| R4 culprit outside (u13 1 %) | ledger recall 1.00 exact-all 0.00 false 8.0; SC 1.00 / 0.96 / FP 0.04→0.00; FP-θ recall 0 | CF3 |
+| R4 culprit inside (d00 1 %) | ledger 1.00 / 0.00 / false 7.0; SC 1.00 / 0.92 / FP 0.08→0.00; FP-θ 1.00 / 0.00 / false 3.0 union, 0.88 final, FP 1.00→0.32 | CF3 |
+| App impact | CCT 3.58752 s → 3.63638 s = +1.362 % at 1e-3, τ=40 ms, 255 drops / 307 609 pkts; ~99.5 % absorbed; no actuator in htsim | AI |
+| Added load by packet size (2 B / wire bytes incl. 20 B preamble+IFG) | 64 B: 2.4 %; 256 B: 0.7 %; 1400 B payload: 0.14 %; 9000 B: 0.02 % | computed |
+| Anomaly | 2/57 (two-byte) vs 0/100 (four-byte, matched); MAC 9 224/9 224; idle trigger 3 of 14 after walk-back | SA §7 |
+| Decision rule | α=0.05; ratios {2,5,10,50,200}; floor window 20 epochs; w_min 0.05 | `comparison.py:make_mcp_loop` |

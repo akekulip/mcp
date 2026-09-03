@@ -27,7 +27,7 @@ from sim.baselines.localization import (
     Link, MCPLocalizer, SprayCheckLocalizer, mcp_link_counters,
 )
 
-OUTPUT_PATH = "docs/review/artifacts/CORRELATED-FAULT-STRESS-SWEEP-2026-09-03.json"
+OUTPUT_PATH = "docs/review/artifacts/CORRELATED-FAULT-STRESS-SWEEP-2026-09-03b.json"
 
 N_LEAVES = 4
 K = 8
@@ -48,6 +48,8 @@ class Regime:
     faulty_rate: float
     base_rate: float
     note: str
+    elevated_links: FrozenSet[Link] = frozenset()
+    elevated_rate: float = 0.0
 
 
 def regimes() -> List[Regime]:
@@ -70,6 +72,21 @@ def regimes() -> List[Regime]:
                       "culprit 1% over a 0.1% common-mode shock"))
     out.append(Regime("R3_shock5e-3_culprit5e-2", frozenset({d00}), 5e-2, 5e-3,
                       "culprit 5% over a 0.5% common-mode shock"))
+    # R4 partial correlation: persistent congestion loss on the SUBSET of links
+    # that feed one leaf (every downlink into L0, the shape of incast at a
+    # collective's reduction point), healthy elsewhere. Not a fault: the
+    # correct answer names none of the congested links.
+    incast = frozenset(("down", i, 0) for i in range(K))
+    for shock in (0.005, 1e-3):
+        out.append(Regime(f"R4_incast@{shock:g}", frozenset(), 0.0, HEALTHY_RATE,
+                          "incast: every downlink into L0 elevated, no fault",
+                          elevated_links=incast, elevated_rate=shock))
+    out.append(Regime("R4_incast1e-3_culprit_outside", frozenset({u13}), 1e-2,
+                      HEALTHY_RATE, "culprit 1% on an uplink outside a 0.1% incast",
+                      elevated_links=incast, elevated_rate=1e-3))
+    out.append(Regime("R4_incast1e-3_culprit_inside", frozenset({d00}), 1e-2,
+                      HEALTHY_RATE, "culprit 1% on a downlink inside a 0.1% incast",
+                      elevated_links=incast, elevated_rate=1e-3))
     return out
 
 
@@ -86,6 +103,7 @@ class TrialResult:
     arms: Dict[str, ArmTrace]
     realized_faulty_loss: float
     realized_background_loss: float
+    realized_elevated_loss: float = float("nan")
 
 
 def run_one_trial(reg: Regime, seed: int, spraycheck_s: float) -> TrialResult:
@@ -109,17 +127,21 @@ def run_one_trial(reg: Regime, seed: int, spraycheck_s: float) -> TrialResult:
 
     traces = {a: {"union": set(), "final": frozenset(),
                   "first": None, "maxfalse": 0} for a in ARMS}
-    f_tx = f_lost = b_tx = b_lost = 0
+    f_tx = f_lost = b_tx = b_lost = e_tx = e_lost = 0
     true = reg.faulty_links
 
     for _ in range(POST_ONSET_EPOCHS):
         draw = simulate_epoch_correlated(N_LEAVES, K, reg.faulty_links,
                                          reg.faulty_rate, reg.base_rate,
-                                         PACKETS_PER_PAIR, rng)
+                                         PACKETS_PER_PAIR, rng,
+                                         elevated_links=reg.elevated_links,
+                                         elevated_rate=reg.elevated_rate)
         counters = mcp_link_counters(draw, N_LEAVES, K)
         for link, (tx, rx) in counters.items():
             if link in true:
                 f_tx += tx; f_lost += tx - rx
+            elif link in reg.elevated_links:
+                e_tx += tx; e_lost += tx - rx
             else:
                 b_tx += tx; b_lost += tx - rx
 
@@ -144,6 +166,7 @@ def run_one_trial(reg: Regime, seed: int, spraycheck_s: float) -> TrialResult:
         arms=arms,
         realized_faulty_loss=(f_lost / f_tx) if f_tx else float("nan"),
         realized_background_loss=(b_lost / b_tx) if b_tx else float("nan"),
+        realized_elevated_loss=(e_lost / e_tx) if e_tx else float("nan"),
     )
 
 
@@ -188,6 +211,11 @@ def summarize(trials: List[TrialResult], reg: Regime) -> dict:
             if reg.faulty_links else None),
         "realized_background_loss_mean":
             statistics.mean(t.realized_background_loss for t in trials),
+        "elevated_links": sorted(str(l) for l in reg.elevated_links),
+        "elevated_rate": reg.elevated_rate,
+        "realized_elevated_loss_mean": (
+            statistics.mean(t.realized_elevated_loss for t in trials)
+            if reg.elevated_links else None),
     }
     for a in ARMS:
         union_scores = [score_multi(t.arms[a].union, reg.faulty_links) for t in trials]

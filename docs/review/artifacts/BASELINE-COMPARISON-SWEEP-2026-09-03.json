@@ -1,0 +1,2250 @@
+{
+  "0.015": {
+    "mcp": {
+      "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 10.0,
+      "iqr": [
+        10.0,
+        10.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "spraycheck": {
+      "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 11.0,
+      "iqr": [
+        11.0,
+        11.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "flowpulse": {
+      "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 10.0,
+      "iqr": [
+        10.0,
+        10.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "mcp_packets": {
+      "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 2000000.0,
+      "iqr": [
+        2000000.0,
+        2000000.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "spraycheck_packets": {
+      "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 4000000.0,
+      "iqr": [
+        4000000.0,
+        4000000.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "flowpulse_packets": {
+      "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 2000000.0,
+      "iqr": [
+        2000000.0,
+        2000000.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "counterpair": {
+      "0.0": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            10.0
+          ],
+          "n": 50,
+          "false_positive_rate": 0.0,
+          "skew_frac": 0.0
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            2000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 0.0,
+          "skew_frac": 0.0
+        }
+      },
+      "0.0001": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            10.0
+          ],
+          "n": 50,
+          "false_positive_rate": 0.28,
+          "skew_frac": 0.0001
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            2000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 0.28,
+          "skew_frac": 0.0001
+        }
+      },
+      "0.001": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            10.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.001
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            2000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.001
+        }
+      },
+      "0.01": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            10.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.01
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            2000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.01
+        }
+      },
+      "0.026": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            10.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.026
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            2000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.026
+        }
+      },
+      "0.1": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.1
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.1
+        }
+      }
+    },
+    "packets_origin": "post_onset"
+  },
+  "0.01": {
+    "mcp": {
+      "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 10.0,
+      "iqr": [
+        10.0,
+        10.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "spraycheck": {
+      "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 12.0,
+      "iqr": [
+        12.0,
+        13.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "flowpulse": {
+      "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 10.0,
+      "iqr": [
+        10.0,
+        11.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "mcp_packets": {
+      "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 2000000.0,
+      "iqr": [
+        2000000.0,
+        2000000.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "spraycheck_packets": {
+      "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 6000000.0,
+      "iqr": [
+        6000000.0,
+        8000000.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "flowpulse_packets": {
+      "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 2000000.0,
+      "iqr": [
+        2000000.0,
+        4000000.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "counterpair": {
+      "0.0": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            10.0
+          ],
+          "n": 50,
+          "false_positive_rate": 0.0,
+          "skew_frac": 0.0
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            2000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 0.0,
+          "skew_frac": 0.0
+        }
+      },
+      "0.0001": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            10.0
+          ],
+          "n": 50,
+          "false_positive_rate": 0.28,
+          "skew_frac": 0.0001
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            2000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 0.28,
+          "skew_frac": 0.0001
+        }
+      },
+      "0.001": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            10.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.001
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            2000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.001
+        }
+      },
+      "0.01": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            10.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.01
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            2000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.01
+        }
+      },
+      "0.026": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            10.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.026
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            2000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.026
+        }
+      },
+      "0.1": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.1
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.1
+        }
+      }
+    },
+    "packets_origin": "post_onset"
+  },
+  "0.005": {
+    "mcp": {
+      "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 10.0,
+      "iqr": [
+        10.0,
+        10.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "spraycheck": {
+      "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 15.0,
+      "iqr": [
+        14.75,
+        17.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "flowpulse": {
+      "action_rate": 0.38,
+      "action_rate_ci95": [
+        0.2586259584257722,
+        0.5184980497760643
+      ],
+      "median": 43,
+      "iqr": [
+        22.0,
+        65.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "mcp_packets": {
+      "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 2000000.0,
+      "iqr": [
+        2000000.0,
+        2000000.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "spraycheck_packets": {
+      "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 12000000.0,
+      "iqr": [
+        11500000.0,
+        16000000.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "flowpulse_packets": {
+      "action_rate": 0.38,
+      "action_rate_ci95": [
+        0.2586259584257722,
+        0.5184980497760643
+      ],
+      "median": 68000000,
+      "iqr": [
+        26000000.0,
+        112000000.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "counterpair": {
+      "0.0": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            10.0
+          ],
+          "n": 50,
+          "false_positive_rate": 0.0,
+          "skew_frac": 0.0
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            2000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 0.0,
+          "skew_frac": 0.0
+        }
+      },
+      "0.0001": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            10.0
+          ],
+          "n": 50,
+          "false_positive_rate": 0.28,
+          "skew_frac": 0.0001
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            2000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 0.28,
+          "skew_frac": 0.0001
+        }
+      },
+      "0.001": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            10.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.001
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            2000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.001
+        }
+      },
+      "0.01": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            10.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.01
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            2000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.01
+        }
+      },
+      "0.026": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.026
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.026
+        }
+      },
+      "0.1": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.1
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.1
+        }
+      }
+    },
+    "packets_origin": "post_onset"
+  },
+  "0.001": {
+    "mcp": {
+      "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 10.0,
+      "iqr": [
+        10.0,
+        10.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "spraycheck": {
+      "action_rate": 0.78,
+      "action_rate_ci95": [
+        0.6475818431054045,
+        0.8724621377569771
+      ],
+      "median": 56,
+      "iqr": [
+        40.0,
+        73.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "flowpulse": {
+      "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
+      "median": null,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "mcp_packets": {
+      "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 2000000.0,
+      "iqr": [
+        2000000.0,
+        2000000.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "spraycheck_packets": {
+      "action_rate": 0.78,
+      "action_rate_ci95": [
+        0.6475818431054045,
+        0.8724621377569771
+      ],
+      "median": 94000000,
+      "iqr": [
+        62000000.0,
+        128000000.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "flowpulse_packets": {
+      "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
+      "median": null,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "counterpair": {
+      "0.0": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            10.0
+          ],
+          "n": 50,
+          "false_positive_rate": 0.0,
+          "skew_frac": 0.0
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            2000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 0.0,
+          "skew_frac": 0.0
+        }
+      },
+      "0.0001": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            10.0
+          ],
+          "n": 50,
+          "false_positive_rate": 0.94,
+          "skew_frac": 0.0001
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            2000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 0.94,
+          "skew_frac": 0.0001
+        }
+      },
+      "0.001": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            10.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.001
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            2000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.001
+        }
+      },
+      "0.01": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.5,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.01
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 3000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.01
+        }
+      },
+      "0.026": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.026
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.026
+        }
+      },
+      "0.1": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.1
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.1
+        }
+      }
+    },
+    "packets_origin": "post_onset"
+  },
+  "0.0001": {
+    "mcp": {
+      "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 10.0,
+      "iqr": [
+        10.0,
+        11.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "spraycheck": {
+      "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
+      "median": null,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "flowpulse": {
+      "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
+      "median": null,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "mcp_packets": {
+      "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 2000000.0,
+      "iqr": [
+        2000000.0,
+        4000000.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "spraycheck_packets": {
+      "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
+      "median": null,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "flowpulse_packets": {
+      "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
+      "median": null,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "counterpair": {
+      "0.0": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 0.0,
+          "skew_frac": 0.0
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 0.0,
+          "skew_frac": 0.0
+        }
+      },
+      "0.0001": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.0001
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.0001
+        }
+      },
+      "0.001": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.001
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.001
+        }
+      },
+      "0.01": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 11.0,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.01
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 4000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.01
+        }
+      },
+      "0.026": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.5,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.026
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 3000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.026
+        }
+      },
+      "0.1": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.1
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.1
+        }
+      }
+    },
+    "packets_origin": "post_onset"
+  },
+  "5e-05": {
+    "mcp": {
+      "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 12.0,
+      "iqr": [
+        11.0,
+        13.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "spraycheck": {
+      "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
+      "median": null,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "flowpulse": {
+      "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
+      "median": null,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "mcp_packets": {
+      "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 6000000.0,
+      "iqr": [
+        4000000.0,
+        8000000.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "spraycheck_packets": {
+      "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
+      "median": null,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "flowpulse_packets": {
+      "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
+      "median": null,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "counterpair": {
+      "0.0": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 12.0,
+          "iqr": [
+            11.0,
+            13.0
+          ],
+          "n": 50,
+          "false_positive_rate": 0.0,
+          "skew_frac": 0.0
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 6000000.0,
+          "iqr": [
+            4000000.0,
+            8000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 0.0,
+          "skew_frac": 0.0
+        }
+      },
+      "0.0001": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 11.5,
+          "iqr": [
+            11.0,
+            12.25
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.0001
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 5000000.0,
+          "iqr": [
+            4000000.0,
+            6500000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.0001
+        }
+      },
+      "0.001": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.001
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.001
+        }
+      },
+      "0.01": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 11.0,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.01
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 4000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.01
+        }
+      },
+      "0.026": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.5,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.026
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 3000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.026
+        }
+      },
+      "0.1": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.1
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.1
+        }
+      }
+    },
+    "packets_origin": "post_onset"
+  },
+  "2e-05": {
+    "mcp": {
+      "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 27.0,
+      "iqr": [
+        22.0,
+        31.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "spraycheck": {
+      "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
+      "median": null,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "flowpulse": {
+      "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
+      "median": null,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "mcp_packets": {
+      "action_rate": 1.0,
+      "action_rate_ci95": [
+        0.9286499658256813,
+        1.0
+      ],
+      "median": 36000000.0,
+      "iqr": [
+        26000000.0,
+        44000000.0
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "spraycheck_packets": {
+      "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
+      "median": null,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "flowpulse_packets": {
+      "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
+      "median": null,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "counterpair": {
+      "0.0": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 27.0,
+          "iqr": [
+            22.0,
+            31.0
+          ],
+          "n": 50,
+          "false_positive_rate": 0.0,
+          "skew_frac": 0.0
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 36000000.0,
+          "iqr": [
+            26000000.0,
+            44000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 0.0,
+          "skew_frac": 0.0
+        }
+      },
+      "0.0001": {
+        "epoch": {
+          "action_rate": 0.96,
+          "action_rate_ci95": [
+            0.8653966212204534,
+            0.9889613473391734
+          ],
+          "median": 14.0,
+          "iqr": [
+            13.0,
+            17.75
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.0001
+        },
+        "packets": {
+          "action_rate": 0.96,
+          "action_rate_ci95": [
+            0.8653966212204534,
+            0.9889613473391734
+          ],
+          "median": 10000000.0,
+          "iqr": [
+            8000000.0,
+            17500000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.0001
+        }
+      },
+      "0.001": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.001
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.001
+        }
+      },
+      "0.01": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 11.0,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.01
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 4000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.01
+        }
+      },
+      "0.026": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.5,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.026
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 3000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.026
+        }
+      },
+      "0.1": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.1
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.1
+        }
+      }
+    },
+    "packets_origin": "post_onset"
+  },
+  "1e-05": {
+    "mcp": {
+      "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
+      "median": null,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "spraycheck": {
+      "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
+      "median": null,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "flowpulse": {
+      "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
+      "median": null,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "mcp_packets": {
+      "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
+      "median": null,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "spraycheck_packets": {
+      "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
+      "median": null,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "flowpulse_packets": {
+      "action_rate": 0.0,
+      "action_rate_ci95": [
+        0.0,
+        0.07135003417431873
+      ],
+      "median": null,
+      "iqr": [
+        null,
+        null
+      ],
+      "n": 50,
+      "false_positive_rate": 0.0
+    },
+    "counterpair": {
+      "0.0": {
+        "epoch": {
+          "action_rate": 0.0,
+          "action_rate_ci95": [
+            0.0,
+            0.07135003417431873
+          ],
+          "median": null,
+          "iqr": [
+            null,
+            null
+          ],
+          "n": 50,
+          "false_positive_rate": 0.0,
+          "skew_frac": 0.0
+        },
+        "packets": {
+          "action_rate": 0.0,
+          "action_rate_ci95": [
+            0.0,
+            0.07135003417431873
+          ],
+          "median": null,
+          "iqr": [
+            null,
+            null
+          ],
+          "n": 50,
+          "false_positive_rate": 0.0,
+          "skew_frac": 0.0
+        }
+      },
+      "0.0001": {
+        "epoch": {
+          "action_rate": 0.62,
+          "action_rate_ci95": [
+            0.4815019502239357,
+            0.7413740415742278
+          ],
+          "median": 15,
+          "iqr": [
+            13.0,
+            17.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.0001
+        },
+        "packets": {
+          "action_rate": 0.62,
+          "action_rate_ci95": [
+            0.4815019502239357,
+            0.7413740415742278
+          ],
+          "median": 12000000,
+          "iqr": [
+            8000000.0,
+            16000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.0001
+        }
+      },
+      "0.001": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.5,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.001
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 3000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.001
+        }
+      },
+      "0.01": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 11.0,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.01
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 4000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.01
+        }
+      },
+      "0.026": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.5,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.026
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 3000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.026
+        }
+      },
+      "0.1": {
+        "epoch": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 10.0,
+          "iqr": [
+            10.0,
+            11.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.1
+        },
+        "packets": {
+          "action_rate": 1.0,
+          "action_rate_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "median": 2000000.0,
+          "iqr": [
+            2000000.0,
+            4000000.0
+          ],
+          "n": 50,
+          "false_positive_rate": 1.0,
+          "skew_frac": 0.1
+        }
+      }
+    },
+    "packets_origin": "post_onset"
+  }
+}

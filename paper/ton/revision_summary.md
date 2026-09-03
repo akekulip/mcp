@@ -90,3 +90,14 @@ one marker/hatch per arm for grayscale printing):
 - Acknowledgment and biography blocks are placeholders.
 - Figure 2 was produced with matplotlib (the diagram-design agent could not be kept alive); it is
   IEEE-column-sized and Times-set but may deserve an Inkscape pass before submission.
+
+## 2026-09-03 referee revision — checker state after the rewrite
+Whole-paper `voice_check` after the referee revision: mean 24.2 words/sentence (band 19.6–25.7),
+short/medium/long/very long 18.0 / 48.5 / 24.3 / 7.1 % (bands 6–21 / 50–70 / 13–34 / 1.4–6.8),
+"we" 16.0/100 (band 15–41), boosters 0.0, hedges 5.4/1000 (band 7.7–20.9). Two bands sit just
+outside: medium sentences 1.5 points low and very-long sentences 0.3 points high, both from the
+new results prose (Sections V, VIII, X) whose sentences carry several numbers each; hedges are
+below band because findings with a number are unhedged by rule and the new sections are mostly
+findings. No booster, no em dash, one first-ness claim. Manuscript: 16 pages (ToN ceiling 16; 10
+free), abstract 250 words with no abbreviations. Removed to fit: the action-rate figure and the
+localization and boundary tables, all duplicated by Figures 1, 4 and 6 and preserved in the artifact.

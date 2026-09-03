@@ -46,24 +46,38 @@ from sim.baselines.localization import (
 def simulate_epoch_correlated(n_leaves: int, k: int,
                               faulty_links: FrozenSet[Link], faulty_rate: float,
                               base_rate: float, packets_per_pair: int,
-                              rng) -> EpochDraw:
+                              rng, elevated_links: FrozenSet[Link] = frozenset(),
+                              elevated_rate: float = 0.0) -> EpochDraw:
     """Shared 2-hop draw with a SET of faulty directed links over a `base_rate`
     background. Each ordered pair (a!=b) sprays `packets_per_pair` i.i.d.-uniform
     over k spines; each hop drops independently at its link's true rate
     (`faulty_rate` if that directed link is in `faulty_links`, else `base_rate`).
     `faulty_links=frozenset()` with `base_rate=shock` is the pure common-mode
     shock; with `base_rate=healthy` and a non-empty set it is multi-independent.
+
+    R4 (partial correlation, e.g. incast at a collective's reduction point):
+    `elevated_links` carry `elevated_rate` -- persistent congestion loss on a
+    SUBSET of links that is NOT a fault and must not be named -- while the
+    rest of the fabric sits at `base_rate`. A link in `faulty_links` is always
+    a fault, whether or not it is also in the elevated subset.
     """
     import numpy as np
     tx = np.zeros((n_leaves, n_leaves, k), dtype=np.int64)
     su = np.zeros_like(tx)
     arr = np.zeros_like(tx)
 
+    def rate_of(link: Link) -> float:
+        if link in faulty_links:
+            return faulty_rate
+        if link in elevated_links:
+            return elevated_rate
+        return base_rate
+
     def up_rate(a: int, i: int) -> float:
-        return faulty_rate if ('up', a, i) in faulty_links else base_rate
+        return rate_of(('up', a, i))
 
     def down_rate(i: int, b: int) -> float:
-        return faulty_rate if ('down', i, b) in faulty_links else base_rate
+        return rate_of(('down', i, b))
 
     for a in range(n_leaves):
         for b in range(n_leaves):

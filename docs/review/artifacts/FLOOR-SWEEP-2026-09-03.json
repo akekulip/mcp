@@ -1,0 +1,713 @@
+{
+  "1e-06": {
+    "1.0": {
+      "p": 1e-06,
+      "floor": 1e-06,
+      "multiple": 1.0,
+      "mcp": {
+        "action_rate": 0.0,
+        "action_rate_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median": null,
+        "iqr": [
+          null,
+          null
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "mcp_packets": {
+        "action_rate": 0.0,
+        "action_rate_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median": null,
+        "iqr": [
+          null,
+          null
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "spraycheck": {
+        "action_rate": 0.0,
+        "action_rate_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median": null,
+        "iqr": [
+          null,
+          null
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      }
+    },
+    "2.0": {
+      "p": 2e-06,
+      "floor": 1e-06,
+      "multiple": 2.0,
+      "mcp": {
+        "action_rate": 0.18,
+        "action_rate_ci95": [
+          0.0977008273245379,
+          0.3079631945470261
+        ],
+        "median": 61,
+        "iqr": [
+          44.0,
+          82.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "mcp_packets": {
+        "action_rate": 0.18,
+        "action_rate_ci95": [
+          0.0977008273245379,
+          0.3079631945470261
+        ],
+        "median": 104000000,
+        "iqr": [
+          70000000.0,
+          146000000.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "spraycheck": {
+        "action_rate": 0.0,
+        "action_rate_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median": null,
+        "iqr": [
+          null,
+          null
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      }
+    },
+    "5.0": {
+      "p": 4.9999999999999996e-06,
+      "floor": 1e-06,
+      "multiple": 5.0,
+      "mcp": {
+        "action_rate": 1.0,
+        "action_rate_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median": 23.0,
+        "iqr": [
+          20.0,
+          27.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "mcp_packets": {
+        "action_rate": 1.0,
+        "action_rate_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median": 28000000.0,
+        "iqr": [
+          22000000.0,
+          36000000.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "spraycheck": {
+        "action_rate": 0.0,
+        "action_rate_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median": null,
+        "iqr": [
+          null,
+          null
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      }
+    },
+    "10.0": {
+      "p": 9.999999999999999e-06,
+      "floor": 1e-06,
+      "multiple": 10.0,
+      "mcp": {
+        "action_rate": 1.0,
+        "action_rate_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median": 14.0,
+        "iqr": [
+          13.0,
+          16.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "mcp_packets": {
+        "action_rate": 1.0,
+        "action_rate_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median": 10000000.0,
+        "iqr": [
+          8000000.0,
+          14000000.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "spraycheck": {
+        "action_rate": 0.0,
+        "action_rate_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median": null,
+        "iqr": [
+          null,
+          null
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      }
+    },
+    "50.0": {
+      "p": 4.9999999999999996e-05,
+      "floor": 1e-06,
+      "multiple": 50.0,
+      "mcp": {
+        "action_rate": 1.0,
+        "action_rate_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median": 10.0,
+        "iqr": [
+          10.0,
+          10.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "mcp_packets": {
+        "action_rate": 1.0,
+        "action_rate_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median": 2000000.0,
+        "iqr": [
+          2000000.0,
+          2000000.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "spraycheck": {
+        "action_rate": 0.0,
+        "action_rate_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median": null,
+        "iqr": [
+          null,
+          null
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      }
+    }
+  },
+  "1e-05": {
+    "1.0": {
+      "p": 1e-05,
+      "floor": 1e-05,
+      "multiple": 1.0,
+      "mcp": {
+        "action_rate": 0.0,
+        "action_rate_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median": null,
+        "iqr": [
+          null,
+          null
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "mcp_packets": {
+        "action_rate": 0.0,
+        "action_rate_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median": null,
+        "iqr": [
+          null,
+          null
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "spraycheck": {
+        "action_rate": 0.0,
+        "action_rate_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median": null,
+        "iqr": [
+          null,
+          null
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      }
+    },
+    "2.0": {
+      "p": 2e-05,
+      "floor": 1e-05,
+      "multiple": 2.0,
+      "mcp": {
+        "action_rate": 1.0,
+        "action_rate_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median": 27.0,
+        "iqr": [
+          22.0,
+          31.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "mcp_packets": {
+        "action_rate": 1.0,
+        "action_rate_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median": 36000000.0,
+        "iqr": [
+          26000000.0,
+          44000000.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "spraycheck": {
+        "action_rate": 0.0,
+        "action_rate_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median": null,
+        "iqr": [
+          null,
+          null
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      }
+    },
+    "5.0": {
+      "p": 5e-05,
+      "floor": 1e-05,
+      "multiple": 5.0,
+      "mcp": {
+        "action_rate": 1.0,
+        "action_rate_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median": 12.0,
+        "iqr": [
+          11.0,
+          13.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "mcp_packets": {
+        "action_rate": 1.0,
+        "action_rate_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median": 6000000.0,
+        "iqr": [
+          4000000.0,
+          8000000.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "spraycheck": {
+        "action_rate": 0.0,
+        "action_rate_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median": null,
+        "iqr": [
+          null,
+          null
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      }
+    },
+    "10.0": {
+      "p": 0.0001,
+      "floor": 1e-05,
+      "multiple": 10.0,
+      "mcp": {
+        "action_rate": 1.0,
+        "action_rate_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median": 10.0,
+        "iqr": [
+          10.0,
+          11.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "mcp_packets": {
+        "action_rate": 1.0,
+        "action_rate_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median": 2000000.0,
+        "iqr": [
+          2000000.0,
+          4000000.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "spraycheck": {
+        "action_rate": 0.0,
+        "action_rate_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median": null,
+        "iqr": [
+          null,
+          null
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      }
+    },
+    "50.0": {
+      "p": 0.0005,
+      "floor": 1e-05,
+      "multiple": 50.0,
+      "mcp": {
+        "action_rate": 1.0,
+        "action_rate_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median": 10.0,
+        "iqr": [
+          10.0,
+          10.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "mcp_packets": {
+        "action_rate": 1.0,
+        "action_rate_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median": 2000000.0,
+        "iqr": [
+          2000000.0,
+          2000000.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "spraycheck": {
+        "action_rate": 0.16,
+        "action_rate_ci95": [
+          0.08337321362087696,
+          0.2851448096176598
+        ],
+        "median": 67.0,
+        "iqr": [
+          46.25,
+          83.5
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      }
+    }
+  },
+  "0.0001": {
+    "1.0": {
+      "p": 0.0001,
+      "floor": 0.0001,
+      "multiple": 1.0,
+      "mcp": {
+        "action_rate": 0.0,
+        "action_rate_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median": null,
+        "iqr": [
+          null,
+          null
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "mcp_packets": {
+        "action_rate": 0.0,
+        "action_rate_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median": null,
+        "iqr": [
+          null,
+          null
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "spraycheck": {
+        "action_rate": 0.0,
+        "action_rate_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median": null,
+        "iqr": [
+          null,
+          null
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      }
+    },
+    "2.0": {
+      "p": 0.0002,
+      "floor": 0.0001,
+      "multiple": 2.0,
+      "mcp": {
+        "action_rate": 1.0,
+        "action_rate_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median": 17.5,
+        "iqr": [
+          16.0,
+          19.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "mcp_packets": {
+        "action_rate": 1.0,
+        "action_rate_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median": 17000000.0,
+        "iqr": [
+          14000000.0,
+          20000000.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "spraycheck": {
+        "action_rate": 0.0,
+        "action_rate_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median": null,
+        "iqr": [
+          null,
+          null
+        ],
+        "n": 50,
+        "false_positive_rate": 0.02
+      }
+    },
+    "5.0": {
+      "p": 0.0005,
+      "floor": 0.0001,
+      "multiple": 5.0,
+      "mcp": {
+        "action_rate": 1.0,
+        "action_rate_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median": 11.0,
+        "iqr": [
+          11.0,
+          11.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "mcp_packets": {
+        "action_rate": 1.0,
+        "action_rate_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median": 4000000.0,
+        "iqr": [
+          4000000.0,
+          4000000.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "spraycheck": {
+        "action_rate": 0.06,
+        "action_rate_ci95": [
+          0.020614596364630478,
+          0.16217343370877002
+        ],
+        "median": 85,
+        "iqr": [
+          null,
+          null
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      }
+    },
+    "10.0": {
+      "p": 0.001,
+      "floor": 0.0001,
+      "multiple": 10.0,
+      "mcp": {
+        "action_rate": 1.0,
+        "action_rate_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median": 10.0,
+        "iqr": [
+          10.0,
+          10.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "mcp_packets": {
+        "action_rate": 1.0,
+        "action_rate_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median": 2000000.0,
+        "iqr": [
+          2000000.0,
+          2000000.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "spraycheck": {
+        "action_rate": 0.56,
+        "action_rate_ci95": [
+          0.4230578680014353,
+          0.6883801278976466
+        ],
+        "median": 54.5,
+        "iqr": [
+          46.5,
+          70.25
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      }
+    },
+    "50.0": {
+      "p": 0.005,
+      "floor": 0.0001,
+      "multiple": 50.0,
+      "mcp": {
+        "action_rate": 1.0,
+        "action_rate_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median": 10.0,
+        "iqr": [
+          10.0,
+          10.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "mcp_packets": {
+        "action_rate": 1.0,
+        "action_rate_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median": 2000000.0,
+        "iqr": [
+          2000000.0,
+          2000000.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      },
+      "spraycheck": {
+        "action_rate": 1.0,
+        "action_rate_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median": 15.0,
+        "iqr": [
+          15.0,
+          17.0
+        ],
+        "n": 50,
+        "false_positive_rate": 0.0
+      }
+    }
+  }
+}

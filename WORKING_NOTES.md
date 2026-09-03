@@ -2377,3 +2377,9 @@ before submission.
 - 2026-09-03 figure pass (Philip: "where are the figures that prove the contributions?"): one data figure
   per objective added from the sweep JSONs/silicon cells via ieee-paper-figures + ToN caption rules
   (`paper/ton/figures/fig_{action_rate,localization,silicon,correlated}.py`); build 13 pages; commit 23fd8ea.
+- 2026-09-03 referee revision: two referee reports landed (`review_two_byte_witness.md`,
+  `artifact_audit_and_revised_verdict.md`). Verified at line level; acted on 14 items (post-onset
+  packets origin fixed → 47× separation; CounterPair-0B arm with measured read skew 2.6 ms/350 ms;
+  Proposition 1 + floor sweep; R4 incast regime; e-process subsection with α; app-impact NULL and
+  anomaly/aliasing disclosed; wrap bound). Declined the "wrap 2×" item with Table III evidence.
+  See `paper/ton/RESPONSE-TO-REFEREE-2026-09-03.md`.

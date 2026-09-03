@@ -15,12 +15,16 @@ from typing import Dict, List, Optional, Tuple
 
 from sim.baselines.comparison import SprayCheckDetectorCalibration, wilson_ci
 from sim.baselines.localization import (
-    ArmLocalization, FlowPulseLocalizer, Link, MCPLocalizer, SprayCheckLocalizer,
-    mcp_link_counters, score_localization, simulate_epoch,
+    ArmLocalization, CounterPairLocalizer, FlowPulseLocalizer, Link, MCPLocalizer,
+    SprayCheckLocalizer, mcp_link_counters, score_localization, simulate_epoch,
 )
 
-OUTPUT_PATH = "docs/review/artifacts/LOCALIZATION-COMPARISON-SWEEP-2026-09-02.json"
+OUTPUT_PATH = "docs/review/artifacts/LOCALIZATION-COMPARISON-SWEEP-2026-09-03.json"
 ARMS = ("mcp", "spraycheck", "flowpulse")
+# CounterPair-0B read skew (fraction of the epoch): idealized 0 and the
+# best case measured on the Tofino (2.6 ms pairwise read vs a 100 ms epoch,
+# READ-LOOP-BENCH-2026-09-03.md).
+COUNTERPAIR_SKEWS = (0.0, 2.6e-2)
 
 
 @dataclass
@@ -28,6 +32,7 @@ class TrialResult:
     mcp: ArmLocalization
     spraycheck: ArmLocalization
     flowpulse: ArmLocalization
+    counterpair: Dict[float, ArmLocalization] = None  # skew -> outcome
 
 
 def _faulty_link(family: str) -> Link:
@@ -47,6 +52,7 @@ def run_one_trial(family: str, faulty_rate: float, healthy_rate: float,
     faulty = _faulty_link(family)
 
     mcp = MCPLocalizer()
+    cps = {sk: CounterPairLocalizer(sk, seed) for sk in COUNTERPAIR_SKEWS}
     senders = [a for a in range(n_leaves) if a != 0]
     fp = FlowPulseLocalizer(spine=0, dst=0, senders=senders)
     sc = SprayCheckLocalizer(n_leaves, k, spraycheck_s)
@@ -57,21 +63,30 @@ def run_one_trial(family: str, faulty_rate: float, healthy_rate: float,
     for _ in range(bootstrap_epochs):
         draw = simulate_epoch(n_leaves, k, None, faulty_rate, healthy_rate,
                               packets_per_pair, rng)
-        mcp.tick(epoch, mcp_link_counters(draw, n_leaves, k))
+        counters = mcp_link_counters(draw, n_leaves, k)
+        mcp.tick(epoch, counters)
+        for cp in cps.values():
+            cp.tick(epoch, counters)
         fp.observe(draw)
         epoch += 1
 
     mcp_res: Optional[ArmLocalization] = None
     sc_res: Optional[ArmLocalization] = None
     fp_res: Optional[ArmLocalization] = None
+    cp_res: Dict[float, Optional[ArmLocalization]] = {sk: None for sk in COUNTERPAIR_SKEWS}
 
     for _ in range(max_post_onset_epochs):
         draw = simulate_epoch(n_leaves, k, faulty, faulty_rate, healthy_rate,
                               packets_per_pair, rng)
 
-        rejected = mcp.tick(epoch, mcp_link_counters(draw, n_leaves, k))
+        counters = mcp_link_counters(draw, n_leaves, k)
+        rejected = mcp.tick(epoch, counters)
         if mcp_res is None and rejected:
             mcp_res = score_localization(rejected, faulty, True)
+        for sk, cp in cps.items():
+            cp_rej = cp.tick(epoch, counters)
+            if cp_res[sk] is None and cp_rej:
+                cp_res[sk] = score_localization(cp_rej, faulty, True)
 
         detected, localized = sc.observe_and_localize(draw)
         if sc_res is None and detected:
@@ -83,12 +98,14 @@ def run_one_trial(family: str, faulty_rate: float, healthy_rate: float,
                 fp_res = score_localization(localized, faulty, True)
 
         epoch += 1
-        if mcp_res is not None and sc_res is not None and fp_res is not None:
+        if (mcp_res is not None and sc_res is not None and fp_res is not None
+                and all(v is not None for v in cp_res.values())):
             break
 
     miss = ArmLocalization(detected=False, exact=False, wrong=False, cardinality=None)
     return TrialResult(mcp=mcp_res or miss, spraycheck=sc_res or miss,
-                       flowpulse=fp_res or miss)
+                       flowpulse=fp_res or miss,
+                       counterpair={sk: (cp_res[sk] or miss) for sk in COUNTERPAIR_SKEWS})
 
 
 def sweep(families, loss_rates, n_leaves: int = 4, k: int = 8,
@@ -113,8 +130,14 @@ def sweep(families, loss_rates, n_leaves: int = 4, k: int = 8,
 # Aggregation + paired statistics (all arms share each seed's stream).
 # ---------------------------------------------------------------------------
 
+def _outcome(t: TrialResult, arm: str) -> ArmLocalization:
+    if arm.startswith("counterpair@"):
+        return t.counterpair[float(arm.split("@", 1)[1])]
+    return getattr(t, arm)
+
+
 def summarize_arm(trials: List[TrialResult], arm: str) -> dict:
-    outcomes = [getattr(t, arm) for t in trials]
+    outcomes = [_outcome(t, arm) for t in trials]
     n = len(outcomes)
     n_exact = sum(1 for o in outcomes if o.exact)
     n_wrong = sum(1 for o in outcomes if o.wrong)
@@ -162,8 +185,8 @@ def mcnemar_exact(trials: List[TrialResult], arm_a: str, arm_b: str) -> dict:
     the paired difference in exact-rate with its sign."""
     b = c = 0  # b: a exact & b not; c: b exact & a not
     for t in trials:
-        ea = getattr(t, arm_a).exact
-        eb = getattr(t, arm_b).exact
+        ea = _outcome(t, arm_a).exact
+        eb = _outcome(t, arm_b).exact
         if ea and not eb:
             b += 1
         elif eb and not ea:
@@ -178,8 +201,8 @@ def mcnemar_exact(trials: List[TrialResult], arm_a: str, arm_b: str) -> dict:
     n = len(trials)
     return {"b_%s_only" % arm_a: b, "c_%s_only" % arm_b: c,
             "discordant": nd, "p_value": p,
-            "exact_rate_diff": (sum(getattr(t, arm_a).exact for t in trials)
-                                - sum(getattr(t, arm_b).exact for t in trials)) / n}
+            "exact_rate_diff": (sum(_outcome(t, arm_a).exact for t in trials)
+                                - sum(_outcome(t, arm_b).exact for t in trials)) / n}
 
 
 def main() -> None:
@@ -190,11 +213,14 @@ def main() -> None:
     report: Dict[str, dict] = {}
     for (family, p), trials in results.items():
         key = f"{family}@{p}"
-        report[key] = {arm: summarize_arm(trials, arm) for arm in ARMS}
+        cp_arms = tuple(f"counterpair@{sk}" for sk in COUNTERPAIR_SKEWS)
+        report[key] = {arm: summarize_arm(trials, arm) for arm in ARMS + cp_arms}
         report[key]["paired_mcp_vs_spraycheck"] = mcnemar_exact(trials, "mcp", "spraycheck")
         report[key]["paired_mcp_vs_flowpulse"] = mcnemar_exact(trials, "mcp", "flowpulse")
+        for a in cp_arms:
+            report[key][f"paired_mcp_vs_{a}"] = mcnemar_exact(trials, "mcp", a)
         print(f"[{key}]", flush=True)
-        for arm in ARMS:
+        for arm in ARMS + cp_arms:
             r = report[key][arm]
             print(f"  {arm}: exact={r['exact_rate']:.2f}{tuple(round(x,2) for x in r['exact_ci95'])} "
                   f"wrong={r['wrong_rate']:.2f} miss={r['miss_rate']:.2f} "

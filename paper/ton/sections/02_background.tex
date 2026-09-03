@@ -14,7 +14,22 @@ A \emph{grayhole} is a directed link that forwards most of its packets and silen
 
 A passive detector counts packets the switch already forwards and adds nothing to them. Under spraying it faces two limits, and both become worse as $p$ falls.
 
-\textbf{The cost limit.} A grayhole of rate $p$ on one of $k$ spines removes a fraction $p$ of the packets that spine should have received. To notice the deficit, a detector compares that spine's count $\lambda$ against the others. The comparison is only meaningful when the expected deficit $\lambda p$ exceeds the sampling noise of spraying, which is of order $\sqrt{\lambda}$ for independent spray decisions. Because a test with $s$ standard deviations of margin needs $\lambda p > s\sqrt{\lambda}$, i.e., $\lambda > s^2/p^2$, the packets a count-based test needs grow at least as $1/p$, and for a Z-test as $1/p^2$. A witness that observes each directed link's own transmit count does not compare against noise at all. It counts the missing packets directly, so its cost should not depend on $p$. Section~\ref{sec:detection} measures both.
+\textbf{The cost limit.} A grayhole of rate $p$ on one of $k$ spines removes a fraction $p$ of the packets that spine should have received. To notice the deficit, a passive detector compares that spine's arrival count against the others, and the comparison is only meaningful when the expected deficit exceeds the sampling noise of spraying. A witness that observes each directed link's own transmit count compares the link's loss count against the background loss floor $f$ instead. Both comparisons are Poisson separations, and both scale the same way in $p$; what differs is the constant. We state this as a proposition, because it governs every detection number in the paper.
+
+\begin{proposition}[Detection cost of a count test and of a witness]
+\label{prop:cost}
+Let a directed link carry $\lambda$ packets per epoch, let spray decisions and per-packet drops be independent, and let a test require $s$ standard deviations of separation. A passive test on arrival counts separates a loss fraction $p$ from spray noise, which has standard deviation $\sqrt{\lambda}$, when $\lambda p > s\sqrt{\lambda}$, i.e., when
+\begin{equation}
+\lambda_{\mathrm{passive}} > s^2 / p^2 .
+\label{eq:passive}
+\end{equation}
+A witness that counts the link's own drops separates them from a background floor $f<p$, whose drops have standard deviation $\sqrt{\lambda f}$, when $\lambda p > s\sqrt{\lambda f}$, i.e., when
+\begin{equation}
+\lambda_{\mathrm{witness}} > s^2 f / p^2 .
+\label{eq:witness}
+\end{equation}
+\end{proposition}
+\noindent The two bounds have the same $1/p^2$ form; the witness divides the constant by $f$, which is $10^5$ on a fabric whose floor is $10^{-5}$. The Gaussian form of~\eqref{eq:witness} holds when the floor produces many drops per epoch; when $\lambda f$ is below about one, the separation is a sparse Poisson test and the required $\lambda$ grows as $1/(p\log(p/f))$ instead, which is milder in $p$ but diverges as $p$ approaches $f$. Two consequences follow, and Section~\ref{sec:detection} measures both. First, over any range of $p$ for which one epoch's $\lambda$ already exceeds $s^2 f/p^2$, the witness detects on the first epoch and its cost looks flat; that is a statement about the epoch volume relative to the floor, not about the absence of a wall. Second, the witness has a wall of its own, at $p$ of a few times $f$, and the wall moves with $f$.
 
 \textbf{The aliasing limit.} An arrival counter at $L_b$ for packets that came through spine $S_i$ sees the product of the survival rates of $L_a\!\rightarrow\!S_i$ and $S_i\!\rightarrow\!L_b$. Consequently, one counter cannot tell which of the two directed links dropped the packets. SprayCheck resolves the pair by intersecting failure reports from several leaves that share the spine~\cite{spraycheck}. FlowPulse resolves it by asking whether every sender on the port is affected or only one~\cite{flowpulse}. Both rules need corroborating traffic, and that traffic can become scarce at low loss. A per-directed-link witness holds each link's own count and needs no corroboration. Section~\ref{sec:localization} measures both.
 

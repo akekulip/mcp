@@ -9,8 +9,9 @@ import numpy as np
 from _common import *  # noqa
 
 setup()
-raw = load("CORRELATED-FAULT-STRESS-SWEEP-2026-09-03.json")
-fig, axes = plt.subplots(1, 3, figsize=(7.16, 2.3), gridspec_kw={"width_ratios": [1.3, 1, 1]})
+raw = load("CORRELATED-FAULT-STRESS-SWEEP-2026-09-03b.json")
+fig, axes2 = plt.subplots(2, 2, figsize=(7.16, 4.3))
+axes = axes2.ravel()
 w = 0.26
 
 
@@ -31,7 +32,7 @@ def bars(ax, cells, ticklabels, field, err=None, arms=ARMS, ylabel="", title="")
             if v > 0:
                 ax.text(xi, v + (0.02 if field != "final" else 0.6), f"{v:.2f}" if v < 10 else f"{v:.0f}",
                         ha="center", va="bottom", fontsize=6, color="0.2")
-    ax.set_xticks(x); ax.set_xticklabels(ticklabels, fontsize=7.5)
+    ax.set_xticks(x); ax.set_xticklabels(ticklabels, fontsize=7)
     ax.set_ylabel(ylabel); ax.set_title(title, fontsize=8.5, loc="left")
 
 
@@ -52,13 +53,21 @@ bars(axes[1], r2, ["shift 0.5%", "shift 0.1%"], "final", ylabel="Healthy links n
      title="(b) fleet-wide shift, no culprit")
 utils_mpl.set_y_axis(axes[1], bnd=[0, 74])
 axes[1].axhline(64, color="0.45", linewidth=0.8, linestyle=":")
-axes[1].text(1.38, 65, "all 64 links", fontsize=6.5, color="0.35", ha="right", va="bottom")
+axes[1].text(1.4, 65.5, "all 64 links", fontsize=6.5, color="0.35", ha="right", va="bottom")
 
 # (c) R3 exact-all with CI
 r3 = ["R3_shock1e-3_culprit1e-2", "R3_shock5e-3_culprit5e-2"]
 bars(axes[2], r3, ["shift 0.1%\nculprit 1%", "shift 0.5%\nculprit 5%"], "exact", err="exact_all_ci95",
      ylabel="Exact-all rate", title="(c) one culprit inside a shift")
 utils_mpl.set_y_axis(axes[2], bnd=[0, 1.15])
+
+# (d) R4 incast: healthy links named at the final epoch (8 = every congested downlink)
+r4 = ["R4_incast@0.005", "R4_incast@0.001", "R4_incast1e-3_culprit_outside", "R4_incast1e-3_culprit_inside"]
+bars(axes[3], r4, ["incast\n0.5%", "incast\n0.1%", "+culprit\noutside", "+culprit\ninside"], "final",
+     ylabel="Healthy links named, final epoch", title="(d) incast on one leaf's downlinks")
+utils_mpl.set_y_axis(axes[3], bnd=[0, 10.2])
+axes[3].axhline(8, color="0.45", linewidth=0.8, linestyle=":")
+axes[3].text(3.4, 8.9, "all 8 congested links", fontsize=6.5, color="0.35", ha="right", va="bottom")
 for a in axes:
     utils_mpl.set_grid(fig, a)
 fig.savefig("fig_correlated.pdf", transparent=False)

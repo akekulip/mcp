@@ -1,80 +1,31 @@
 \section{The Boundary: Correlated Faults (O4)}
 \label{sec:robustness}
 
-Every result so far injects one independent fault. This section asks whether the advantage survives several faults at once and whether it survives a correlated, fleet-wide shift in loss. It is a gate rather than a pass: if the advantage collapses under correlation, that bounds the headline claims to the independent regime, which is the pre-registered scope, and we would rather know. The harness of Section~\ref{sec:method} drives three regimes over the 64 directed links of the two-hop fabric, 50 seeds per cell and 40 post-onset epochs, with the ledger's controller unmodified. Two anchors accompany every cell: a do-nothing arm that never acts, and an oracle that returns the true set. The injected loss was verified in the data of every cell, not in the configuration. Figure~\ref{fig:correlated} summarizes the three regimes; Tables~\ref{tab:multi} and~\ref{tab:shock} give the full numbers.
+Every result so far injects one independent fault. This section asks whether the advantage survives several faults at once, whether it survives a correlated, fleet-wide shift in loss, and whether it survives persistent congestion loss on a subset of links. The last is the shape of incast at a collective's reduction point, and it is more likely in a training fabric than a uniform shift. It is a gate rather than a pass: where the advantage collapses, that bounds the headline claims, and the first two regimes were pre-registered as that boundary. The harness of Section~\ref{sec:method} drives four regimes over the 64 directed links of the two-hop fabric, 50 seeds per cell and 40 post-onset epochs, with the ledger's controller unmodified. Two anchors accompany every cell: a do-nothing arm that never acts, and an oracle that returns the true set. The injected loss was verified in the data of every cell, not in the configuration. Figure~\ref{fig:correlated} summarizes the four regimes; the full per-cell tables, with intervals and both the window and final-epoch scores, are in the artifact.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{fig_correlated.pdf}
-\caption{The correlated-fault gate, 50 seeds per cell over 40 post-onset epochs on 64 directed links. (a) Exact-all rate, with 95 percent intervals, for two and three simultaneous independent faults. (b) Healthy links falsely named at the final epoch under a fleet-wide shift with no culprit, where the correct answer is zero and 64 is every link. (c) Exact-all rate for one culprit embedded in a shift. The ledger holds in (a) and fails in (b) and (c), where SprayCheck-Z holds.}
+\caption{The correlated-fault gate, 50 seeds per cell over 40 post-onset epochs on 64 directed links. (a) Exact-all rate, with 95 percent intervals, for two and three simultaneous independent faults. (b) Healthy links falsely named at the final epoch under a fleet-wide shift with no culprit, where the correct answer is zero and 64 is every link. (c) Exact-all rate for one culprit embedded in a shift. (d) Healthy links falsely named at the final epoch when the eight downlinks into one leaf carry persistent congestion loss, alone and with a culprit outside or inside the congested set. The ledger holds in (a) and fails in (b), (c), and (d), where SprayCheck-Z holds.}
 \label{fig:correlated}
 \end{figure*}
 
-\begin{table}[t]
-\caption{Two or three simultaneous independent faults (R1), 50 seeds per cell. Recall: fraction of true faulty links named. Exact-all: fraction of seeds that named the true set and nothing else. FP: fraction of seeds that named a healthy link, over the whole 40-epoch window / at the final epoch. False: mean healthy links named over the window. FlowPulse-$\theta$ named nothing in these cells (recall 0.00) and is omitted.}
-\label{tab:multi}
-\centering
-\scriptsize
-\begin{tabular}{@{}llcccc@{}}
-\toprule
-Cell & Arm & Recall & Exact-all & FP (win./fin.) & False \\
-\midrule
-$M\!=\!2$, 0.5\%     & Ledger & 1.00 & 1.00 & 0.00 / 0.00 & 0.00 \\
-                     & SprayCheck-Z & 1.00 & 0.28 & 0.72 / 0.00 & 1.20 \\
-$M\!=\!3$, 0.5\%     & Ledger & 1.00 & 1.00 & 0.00 / 0.00 & 0.00 \\
-                     & SprayCheck-Z & 1.00 & 0.18 & 0.82 / 0.02 & 1.44 \\
-$M\!=\!2$, $10^{-3}$ & Ledger & 1.00 & 1.00 & 0.00 / 0.00 & 0.00 \\
-                     & SprayCheck-Z & 0.75 & 0.00 & 0.98 / 0.52 & 2.54 \\
-$M\!=\!3$, $10^{-3}$ & Ledger & 1.00 & 1.00 & 0.00 / 0.00 & 0.00 \\
-                     & SprayCheck-Z & 0.63 & 0.00 & 0.96 / 0.54 & 2.58 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
 \subsection{Several Independent Faults}
 
-Table~\ref{tab:multi} presents the first regime, in which $M\in\{2,3\}$ distinct directed links are faulty at the same rate against a healthy background. The ledger named every one of the faulty links on the first epoch after onset, with no false link, at both 0.5 percent and $10^{-3}$. The reason is that it judges each directed link on that link's own evidence, so a second fault elsewhere in the fabric changes nothing about the first. SprayCheck-Z became worse as faults multiplied. Because several simultaneous failure reports create spurious cross-leaf intersections, it recalled the true faults at 0.5 percent but added 1.2 to 1.4 healthy links per seed. Consequently, it named exactly the true set in only 18 to 28 percent of seeds. At $10^{-3}$ its recall itself fell to 0.63 to 0.75, and a healthy link was still named at the final epoch in about half the seeds. FlowPulse-$\theta$ missed at these rates, as in the single-fault sweep. The independent-fault advantage is therefore stronger with several faults than with one, and the spurious-intersection behaviour is a limitation of the passive localizer that we have not found reported elsewhere.
-
-\begin{table}[t]
-\caption{A fleet-wide shift in loss with no single culprit (R2, ground truth is the empty set) and one culprit embedded in the shift (R3). For R2 the columns are the false-positive rate over the window / at the final epoch and the mean number of healthy links named over the window / at the final epoch. For R3 they are recall of the culprit, exact-all, false-positive rate over the window / at the final epoch, and mean healthy links named over the window. 50 seeds per cell; do-nothing scores 0.00 on every R2 column.}
-\label{tab:shock}
-\centering
-\scriptsize
-\begin{tabular}{@{}llcc@{}}
-\toprule
-R2 cell & Arm & FP (win./fin.) & False (win./fin.) \\
-\midrule
-shift 0.5\% & Ledger & 1.00 / 1.00 & 64.0 / 64.0 \\
-            & SprayCheck-Z & 0.20 / 0.02 & 0.48 / 0.04 \\
-            & FlowPulse-$\theta$ & 1.00 / 1.00 & 64.0 / 33.3 \\
-shift 0.1\% & Ledger & 1.00 / 1.00 & 64.0 / 64.0 \\
-            & SprayCheck-Z & 0.28 / 0.02 & 0.68 / 0.04 \\
-            & FlowPulse-$\theta$ & 0.00 / 0.00 & 0.00 / 0.00 \\
-\bottomrule
-\end{tabular}
-\par\medskip
-\begin{tabular}{@{}llcccc@{}}
-\toprule
-R3 shift / culprit & Arm & Recall & Exact-all & FP (win./fin.) & False \\
-\midrule
-0.1\% / 1\% & Ledger & 1.00 & 0.00 & 1.00 / 1.00 & 63.0 \\
-            & SprayCheck-Z & 1.00 & 0.86 & 0.14 / 0.00 & 0.22 \\
-            & FlowPulse-$\theta$ & 1.00 & 0.00 & 1.00 / 0.50 & 3.0 \\
-0.5\% / 5\% & Ledger & 1.00 & 0.00 & 1.00 / 1.00 & 63.0 \\
-            & SprayCheck-Z & 1.00 & 0.98 & 0.02 / 0.00 & 0.02 \\
-            & FlowPulse-$\theta$ & 1.00 & 0.00 & 1.00 / 1.00 & 33.9 \\
-\bottomrule
-\end{tabular}
-\end{table}
+Figure~\ref{fig:correlated}(a) presents the first regime, in which $M\in\{2,3\}$ distinct directed links are faulty at the same rate against a healthy background. The ledger named every one of the faulty links on the first epoch after onset, with no false link, at both 0.5 percent and $10^{-3}$. The reason is that it judges each directed link on that link's own evidence, so a second fault elsewhere in the fabric changes nothing about the first. SprayCheck-Z became worse as faults multiplied. Because several simultaneous failure reports create spurious cross-leaf intersections, it recalled the true faults at 0.5 percent but added 1.2 to 1.4 healthy links per seed. Consequently, it named exactly the true set in only 18 to 28 percent of seeds. At $10^{-3}$ its recall itself fell to 0.63 to 0.75, and a healthy link was still named at the final epoch in about half the seeds. FlowPulse-$\theta$ missed at these rates, as in the single-fault sweep. The independent-fault advantage therefore appears stronger with several faults than with one, and the spurious-intersection behaviour is a limitation of the passive localizer that we have not found reported elsewhere.
 
 \subsection{A Fleet-Wide Shift With No Culprit}
 
-The upper part of Table~\ref{tab:shock} presents the second regime, in which every directed link's loss rises to the same level and no link is individually at fault, so the correct answer is to name nothing. The ledger failed this gate. It named all 64 directed links in every seed, on every epoch through the end of the window, which is worse than doing nothing. The reason is that its fleet floor is a leave-one-out estimate that lags a shift shared by every link. Each link's ratio then reads the shifted but healthy rate as strong evidence, and e-BH rejects nearly every link. The rejected links leave the pool from which the floor is estimated, and the fleet latches. We had predicted this failure from our own analysis of the decision rule before the gate was run, and the gate reproduced it on fresh seeds. SprayCheck-Z was the arm that held here, with a false-positive rate of 0.02 at the final epoch. Its Z-test normalizes each flow by that flow's own observed count, which falls with the shift, so a uniform shift can cancel. FlowPulse-$\theta$ flagged nearly every port when the shift's two-hop deficit crossed its one-percent threshold and flagged nothing when it did not; below the threshold it is blind rather than resistant.
+Figure~\ref{fig:correlated}(b) presents the second regime, in which every directed link's loss rises to the same level and no link is individually at fault, so the correct answer is to name nothing. The ledger failed this gate. It named all 64 directed links in every seed, on every epoch through the end of the window, which is worse than doing nothing. The reason is that its fleet floor is a leave-one-out estimate that lags a shift shared by every link. Each link's ratio then reads the shifted but healthy rate as strong evidence, and e-BH rejects nearly every link. The rejected links leave the pool from which the floor is estimated, and the fleet latches. We had predicted this failure from our own analysis of the decision rule before the gate was run, and the gate reproduced it on fresh seeds. SprayCheck-Z was the arm that held here, with a false-positive rate of 0.02 at the final epoch. Its Z-test normalizes each flow by that flow's own observed count, which falls with the shift, so a uniform shift can cancel. FlowPulse-$\theta$ flagged nearly every port when the shift's two-hop deficit crossed its one-percent threshold and flagged nothing when it did not; below the threshold it is blind rather than resistant.
 
 \subsection{A Culprit Inside the Shift}
 
-The lower part of Table~\ref{tab:shock} presents the third regime, a shift plus one link worse than the shifted background. The ledger did find the culprit, in every seed and on the first epoch, but it drowned the culprit among the other 63 links, so its exact-all rate was 0.00 and its answer was not actionable. SprayCheck-Z isolated the culprit cleanly against the shifted background, with exact-all rates of 0.86 and 0.98 and no healthy link named at the final epoch, for the same reason that let it hold in the second regime. In this regime, then, the exact directed-link localization that is the ledger's advantage under independent faults becomes SprayCheck's advantage.
+Figure~\ref{fig:correlated}(c) presents the third regime, a shift plus one link worse than the shifted background. The ledger did find the culprit, in every seed and on the first epoch, but it drowned the culprit among the other 63 links, so its exact-all rate was 0.00 and its answer was not actionable. SprayCheck-Z isolated the culprit cleanly against the shifted background, with exact-all rates of 0.86 and 0.98 and no healthy link named at the final epoch, for the same reason that let it hold in the second regime. In this regime, then, the exact directed-link localization that is the ledger's advantage under independent faults becomes SprayCheck's advantage.
+
+\subsection{Congestion Loss on a Subset of Links}
+
+Figure~\ref{fig:correlated}(d) presents the fourth regime. The eight downlinks into one leaf carry a persistent elevated loss of 0.5 or 0.1 percent while the other 56 links stay at the floor, first with no fault anywhere and then with a 1 percent culprit on an uplink outside the congested set or on a downlink inside it. This is congestion loss, not a fault, and the correct answer names none of the eight congested links. The ledger named all eight, in every seed, at every epoch, and with a culprit present it found the culprit in every seed but could not separate it from the seven or eight congested links beside it, so its exact-all rate was 0.00. The reason is not the floor this time, which the 56 healthy links keep well estimated; it is that the ledger is a loss counter, and congestion loss is loss. Equation~\eqref{eq:loss} counts the packets a queue dropped exactly as it counts the packets a damaged optic dropped, and nothing in the decision rule asks why. SprayCheck-Z held again, naming a congested link at the final epoch in 2 percent of seeds and isolating the culprit in 92 to 96 percent, because its per-flow normalization cancels a loss that every flow through the congested leaf shares. FlowPulse-$\theta$ was blind to the congestion at both levels, as its per-port deficit stayed below its threshold, and named three links when the culprit sat inside the congested set. We had expected this result from the analysis of Section~\ref{sec:ledger}, and we report it because an operator is likely to meet incast far more often than a uniform fleet-wide shift. Section~\ref{sec:discussion} states what a fix needs: a signal that separates queue loss from link loss, which the testbed's queue-depth metadata can supply and which this paper does not evaluate.
 
 \subsection{What the Gate Decides}
 
-The advantage holds, and widens, for several simultaneous independent faults, and it fails under a common-mode shift. Consequently, the claims of Sections~\ref{sec:detection} to~\ref{sec:silicon} are stated for one or several independent per-directed-link faults on a stationary fabric, and we state the converse as plainly: under a correlated shift the ledger's absolute-floor test does not hold, and a relative passive test is the better tool. The uniform shift is the cleanest stress and the one the decision rule was predicted to fail; a partial correlated shift over a subset of links is untested and would sit between the first and second regimes. Section~\ref{sec:discussion} discusses what a fix would need.
+The advantage holds, and widens, for several simultaneous independent faults; it fails under a common-mode shift, and it fails under persistent congestion loss on a subset of links. Consequently, the claims of Sections~\ref{sec:detection} to~\ref{sec:silicon} are stated for one or several independent per-directed-link faults on a fabric whose remaining links lose packets only at the background floor. We state the converse as plainly. Where loss is shared, whether by every link or by the links behind one congested queue, the ledger's absolute test names the shared loss as faults, and a relative passive test is the better tool. Section~\ref{sec:discussion} discusses what a fix would need.

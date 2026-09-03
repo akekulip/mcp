@@ -30,8 +30,8 @@ from __future__ import annotations
 
 import math
 import statistics
-from dataclasses import dataclass
-from typing import Dict, Optional, Tuple
+from dataclasses import dataclass, field
+from typing import Dict, Optional, Sequence, Tuple
 
 from controller.decision_loop import FleetDecisionLoop
 from sim.baselines.flowpulse_theta import FlowPulseDetector, LearnedLoadModel
@@ -88,13 +88,49 @@ class RunResult:
     mcp_false_positive: bool
     spraycheck_false_positive: bool
     flowpulse_false_positive: bool
+    # CounterPair-0B arm (see `counterpair_tx`), one entry per read-skew level
+    # swept in the same trial on the same shared stream: skew_frac -> value.
+    cp_epoch: Dict[float, Optional[int]] = field(default_factory=dict)
+    cp_packets: Dict[float, Optional[int]] = field(default_factory=dict)
+    cp_false_positive: Dict[float, bool] = field(default_factory=dict)
+
+
+def counterpair_tx(tx_true: int, rx: int, per_link_rate_per_epoch: float,
+                   skew_frac: float, prev_offset: float, rng) -> Tuple[int, float]:
+    """The zero-byte counter-pair arm's TX observation for one link-epoch.
+
+    A counter pair keeps a per-directed-link transmit register on the SENDING
+    switch and a receive register on the RECEIVING switch, with no stamp on
+    the wire (RFC 6374 style; the "Theta(1) but skew-limited" row of the
+    related-work comparison). The controller reads the two registers on two
+    devices at two instants. Let the TX read of epoch e land at t_e + d_e^tx
+    and the RX read at t_e + d_e^rx, each offset drawn independently and
+    uniformly from [0, skew) where `skew` is the span of the controller's read
+    loop, expressed here as a fraction of the epoch (`skew_frac`). The epoch's
+    TX delta then counts the packets sent in a window shifted by
+    o_e = d_e^tx - d_e^rx relative to the RX window, so the observed TX is the
+    true TX plus rate * (o_e - o_{e-1}): a zero-mean disturbance with standard
+    deviation about rate * skew / sqrt(6), which the arm cannot distinguish
+    from loss. Packets in flight on the link (microseconds) are negligible
+    beside the read skew (milliseconds) and are not modelled. If the
+    disturbance would make TX fall below RX, the arm clamps to zero loss, as a
+    real controller would. `skew_frac = 0` is the idealized bound: the same
+    information as the in-band witness, read at one instant.
+    Returns (observed_tx, this_epoch_offset)."""
+    if skew_frac <= 0.0:
+        return tx_true, 0.0
+    offset = float(rng.uniform(0.0, skew_frac) - rng.uniform(0.0, skew_frac))
+    phantom = int(round(per_link_rate_per_epoch * (offset - prev_offset)))
+    tx_obs = max(tx_true + phantom, rx)
+    return tx_obs, offset
 
 
 def run_one_trial(k: int, faulty_rate: float, healthy_rate: float,
                    packets_per_epoch: int, bootstrap_epochs: int,
                    max_post_onset_epochs: int, seed: int,
                    spraycheck_s: float,
-                   flowpulse_bootstrap_iters: int = 5) -> RunResult:
+                   flowpulse_bootstrap_iters: int = 5,
+                   counterpair_skews: Sequence[float] = ()) -> RunResult:
     import numpy as np
     rng = np.random.default_rng(seed)
     faulty_spine = 0
@@ -102,6 +138,16 @@ def run_one_trial(k: int, faulty_rate: float, healthy_rate: float,
     mcp_loop = make_mcp_loop()
     fp_load_model = LearnedLoadModel(bootstrap_iters=flowpulse_bootstrap_iters)
     fp_detector = FlowPulseDetector()
+    # CounterPair-0B: one independent copy of the SAME decision rule per skew
+    # level, fed (skewed tx, rx). Its own rng stream keeps the shared
+    # spray/survival draw identical across arms and skew levels.
+    cp_loops = {s: make_mcp_loop() for s in counterpair_skews}
+    cp_rng = np.random.default_rng(seed + 1_000_003)
+    cp_prev = {s: [0.0] * k for s in counterpair_skews}
+    cp_epoch: Dict[float, Optional[int]] = {s: None for s in counterpair_skews}
+    cp_packets: Dict[float, Optional[int]] = {s: None for s in counterpair_skews}
+    cp_fp: Dict[float, bool] = {s: False for s in counterpair_skews}
+    per_link_rate = packets_per_epoch / k
 
     # SprayCheck-Z's threshold depends on the total flow size N tested against
     # (lam = N/k); we re-test at every growing cumulative N, using the SAME
@@ -114,7 +160,6 @@ def run_one_trial(k: int, faulty_rate: float, healthy_rate: float,
     fp_epoch = fp_packets = None
     mcp_fp = sc_fp = fp_fp = False
 
-    cumulative_packets = 0
     epoch = 0
 
     # Bootstrap phase: fully healthy traffic, no fault yet.
@@ -122,11 +167,22 @@ def run_one_trial(k: int, faulty_rate: float, healthy_rate: float,
         snapshot = simulate_epoch(k, None, faulty_rate, healthy_rate,
                                   packets_per_epoch, rng)
         mcp_loop.tick(epoch, snapshot)
+        for s in counterpair_skews:
+            cp_loops[s].tick(epoch, snapshot)   # warm the floor on clean data
         for spine, (tx, rx) in snapshot.items():
             fp_load_model.observe(str(spine), float(rx))
             sc_cumulative[spine] += rx
-        cumulative_packets += packets_per_epoch
         epoch += 1
+
+    # Packets-to-detect is counted from the fault's ONSET, as the module
+    # docstring and the paper's metric definition state. An earlier version of
+    # this loop started the counter at epoch 0 and so folded the
+    # `bootstrap_epochs * packets_per_epoch` of clean warm-up traffic into
+    # every reported cost (a constant 20 M at the sweep's settings), which put
+    # the costs and the post-onset budget on different origins; found by a
+    # referee's arithmetic on the reported medians and fixed here, with the
+    # sweep regenerated. The origin is now the onset epoch.
+    cumulative_packets = 0
 
     # Onset: spine 0 degrades and stays degraded for the rest of the run.
     for _ in range(max_post_onset_epochs):
@@ -143,6 +199,24 @@ def run_one_trial(k: int, faulty_rate: float, healthy_rate: float,
                         mcp_epoch, mcp_packets = epoch, cumulative_packets
                     else:
                         mcp_fp = True
+
+        # --- CounterPair-0B: same (tx, rx) information, read on two devices
+        # at two instants; TX perturbed by the read-skew model. ---
+        for s in counterpair_skews:
+            skewed = {}
+            for spine, (tx, rx) in snapshot.items():
+                tx_obs, off = counterpair_tx(tx, rx, per_link_rate, s,
+                                             cp_prev[s][spine], cp_rng)
+                cp_prev[s][spine] = off
+                skewed[spine] = (tx_obs, rx)
+            cp_dec = cp_loops[s].tick(epoch, skewed)
+            for spine, decision in cp_dec.items():
+                if decision.fleet_rejected:
+                    if spine == faulty_spine:
+                        if cp_epoch[s] is None:
+                            cp_epoch[s], cp_packets[s] = epoch, cumulative_packets
+                    else:
+                        cp_fp[s] = True
 
         # --- SprayCheck-Z: cumulative RX-only counts, re-tested each epoch ---
         for spine, (_, rx) in snapshot.items():
@@ -180,24 +254,44 @@ def run_one_trial(k: int, faulty_rate: float, healthy_rate: float,
         epoch += 1
 
     return RunResult(mcp_epoch, mcp_packets, sc_epoch, sc_packets,
-                     fp_epoch, fp_packets, mcp_fp, sc_fp, fp_fp)
+                     fp_epoch, fp_packets, mcp_fp, sc_fp, fp_fp,
+                     cp_epoch, cp_packets, cp_fp)
 
 
 def sweep(loss_rates, k: int = 8, healthy_rate: float = 1e-5,
           packets_per_epoch: int = 200, bootstrap_epochs: int = 30,
           max_post_onset_epochs: int = 2000, trials: int = 20,
-          spraycheck_calibration_lam: float = 2_500_000):
+          spraycheck_calibration_lam: float = 2_500_000,
+          counterpair_skews: Sequence[float] = ()):
     spraycheck_s = SprayCheckDetectorCalibration.get(spraycheck_calibration_lam)
     results = {}
     for p in loss_rates:
         trial_results = [
             run_one_trial(k, p, healthy_rate, packets_per_epoch,
                           bootstrap_epochs, max_post_onset_epochs, seed,
-                          spraycheck_s)
+                          spraycheck_s, counterpair_skews=counterpair_skews)
             for seed in range(trials)
         ]
         results[p] = trial_results
     return results
+
+
+def summarize_counterpair(trial_results, skew: float, what: str):
+    """`summarize` for the CounterPair-0B arm at one skew level; `what` is
+    "epoch" or "packets"."""
+    values = [getattr(r, f"cp_{what}").get(skew) for r in trial_results]
+    detected = [v for v in values if v is not None]
+    n = len(values)
+    median = statistics.median(detected) if detected else None
+    q1 = q3 = None
+    if len(detected) >= 4:
+        quantiles = statistics.quantiles(detected, n=4)
+        q1, q3 = quantiles[0], quantiles[2]
+    fp_rate = sum(1 for r in trial_results if r.cp_false_positive.get(skew)) / n
+    return {"action_rate": len(detected) / n,
+            "action_rate_ci95": wilson_ci(len(detected), n),
+            "median": median, "iqr": (q1, q3), "n": n,
+            "false_positive_rate": fp_rate, "skew_frac": skew}
 
 
 class SprayCheckDetectorCalibration:

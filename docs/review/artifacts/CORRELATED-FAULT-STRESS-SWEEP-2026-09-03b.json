@@ -1,0 +1,1942 @@
+{
+  "_config": {
+    "n_leaves": 4,
+    "k": 8,
+    "healthy_rate": 1e-05,
+    "packets_per_pair": 2000000,
+    "bootstrap_epochs": 10,
+    "post_onset_epochs": 40,
+    "trials": 50,
+    "spraycheck_s": 3.241228070175439
+  },
+  "R1_multi2@0.005": {
+    "note": "two independent directed-link faults",
+    "faulty_links": [
+      "('down', 0, 0)",
+      "('up', 1, 3)"
+    ],
+    "faulty_rate": 0.005,
+    "base_rate": 1e-05,
+    "realized_faulty_loss_mean": 0.004999982469168289,
+    "realized_background_loss_mean": 1.0001099757809479e-05,
+    "elevated_links": [],
+    "elevated_rate": 0.0,
+    "realized_elevated_loss_mean": null,
+    "mcp": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 2,
+        "max_false_simultaneous_over_seeds": 0,
+        "recall_mean": 1.0,
+        "exact_all_rate": 1.0,
+        "exact_all_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 2
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 2,
+        "max_false_simultaneous_over_seeds": 0,
+        "recall_mean": 1.0,
+        "exact_all_rate": 1.0,
+        "exact_all_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 2
+      }
+    },
+    "spraycheck": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 0.72,
+        "fp_ci95": [
+          0.5833461285401034,
+          0.8252598564231963
+        ],
+        "mean_false_links": 1.2,
+        "mean_localized_size": 3.2,
+        "max_false_simultaneous_over_seeds": 3,
+        "recall_mean": 1.0,
+        "exact_all_rate": 0.28,
+        "exact_all_ci95": [
+          0.17474014357680362,
+          0.4166538714598967
+        ],
+        "median_first_detect_epoch": 1.0,
+        "n_true": 2
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 2,
+        "max_false_simultaneous_over_seeds": 3,
+        "recall_mean": 1.0,
+        "exact_all_rate": 1.0,
+        "exact_all_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median_first_detect_epoch": 1.0,
+        "n_true": 2
+      }
+    },
+    "flowpulse": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 0.0,
+        "detect_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 0,
+        "max_false_simultaneous_over_seeds": 0,
+        "recall_mean": 0.0,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": null,
+        "n_true": 2
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 0.0,
+        "detect_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 0,
+        "max_false_simultaneous_over_seeds": 0,
+        "recall_mean": 0.0,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": null,
+        "n_true": 2
+      }
+    },
+    "_anchors": {
+      "do_nothing": {
+        "fp_rate": 0.0,
+        "recall": 0.0
+      },
+      "oracle": {
+        "fp_rate": 0.0,
+        "recall": 1.0,
+        "note": "returns exactly the injected set; recall<1 here would mean the injector is broken (cross-check #1)"
+      }
+    }
+  },
+  "R1_multi3@0.005": {
+    "note": "three independent directed-link faults",
+    "faulty_links": [
+      "('down', 0, 0)",
+      "('down', 5, 2)",
+      "('up', 1, 3)"
+    ],
+    "faulty_rate": 0.005,
+    "base_rate": 1e-05,
+    "realized_faulty_loss_mean": 0.004999587378421254,
+    "realized_background_loss_mean": 9.99356679508348e-06,
+    "elevated_links": [],
+    "elevated_rate": 0.0,
+    "realized_elevated_loss_mean": null,
+    "mcp": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 3,
+        "max_false_simultaneous_over_seeds": 0,
+        "recall_mean": 1.0,
+        "exact_all_rate": 1.0,
+        "exact_all_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 3
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 3,
+        "max_false_simultaneous_over_seeds": 0,
+        "recall_mean": 1.0,
+        "exact_all_rate": 1.0,
+        "exact_all_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 3
+      }
+    },
+    "spraycheck": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 0.82,
+        "fp_ci95": [
+          0.6920368054529739,
+          0.902299172675462
+        ],
+        "mean_false_links": 1.44,
+        "mean_localized_size": 4.44,
+        "max_false_simultaneous_over_seeds": 3,
+        "recall_mean": 1.0,
+        "exact_all_rate": 0.18,
+        "exact_all_ci95": [
+          0.0977008273245379,
+          0.3079631945470261
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 3
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 0.02,
+        "fp_ci95": [
+          0.0035391680889764604,
+          0.10495686471836953
+        ],
+        "mean_false_links": 0.02,
+        "mean_localized_size": 3.02,
+        "max_false_simultaneous_over_seeds": 3,
+        "recall_mean": 1.0,
+        "exact_all_rate": 0.98,
+        "exact_all_ci95": [
+          0.8950431352816304,
+          0.9964608319110235
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 3
+      }
+    },
+    "flowpulse": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 0.02,
+        "detect_ci95": [
+          0.0035391680889764604,
+          0.10495686471836953
+        ],
+        "fp_rate": 0.02,
+        "fp_ci95": [
+          0.0035391680889764604,
+          0.10495686471836953
+        ],
+        "mean_false_links": 0.02,
+        "mean_localized_size": 0.02,
+        "max_false_simultaneous_over_seeds": 1,
+        "recall_mean": 0.0,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": null,
+        "n_true": 3
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 0.0,
+        "detect_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 0,
+        "max_false_simultaneous_over_seeds": 1,
+        "recall_mean": 0.0,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": null,
+        "n_true": 3
+      }
+    },
+    "_anchors": {
+      "do_nothing": {
+        "fp_rate": 0.0,
+        "recall": 0.0
+      },
+      "oracle": {
+        "fp_rate": 0.0,
+        "recall": 1.0,
+        "note": "returns exactly the injected set; recall<1 here would mean the injector is broken (cross-check #1)"
+      }
+    }
+  },
+  "R1_multi2@0.001": {
+    "note": "two independent directed-link faults",
+    "faulty_links": [
+      "('down', 0, 0)",
+      "('up', 1, 3)"
+    ],
+    "faulty_rate": 0.001,
+    "base_rate": 1e-05,
+    "realized_faulty_loss_mean": 0.000999664565316733,
+    "realized_background_loss_mean": 1.0000616092060193e-05,
+    "elevated_links": [],
+    "elevated_rate": 0.0,
+    "realized_elevated_loss_mean": null,
+    "mcp": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 2,
+        "max_false_simultaneous_over_seeds": 0,
+        "recall_mean": 1.0,
+        "exact_all_rate": 1.0,
+        "exact_all_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 2
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 2,
+        "max_false_simultaneous_over_seeds": 0,
+        "recall_mean": 1.0,
+        "exact_all_rate": 1.0,
+        "exact_all_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 2
+      }
+    },
+    "spraycheck": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 0.98,
+        "detect_ci95": [
+          0.8950431352816304,
+          0.9964608319110235
+        ],
+        "fp_rate": 0.98,
+        "fp_ci95": [
+          0.8950431352816304,
+          0.9964608319110235
+        ],
+        "mean_false_links": 2.54,
+        "mean_localized_size": 4.04,
+        "max_false_simultaneous_over_seeds": 4,
+        "recall_mean": 0.75,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": 18,
+        "n_true": 2
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 0.88,
+        "detect_ci95": [
+          0.7619492111337642,
+          0.9438247628937535
+        ],
+        "fp_rate": 0.52,
+        "fp_ci95": [
+          0.3851151225880844,
+          0.6520308760449429
+        ],
+        "mean_false_links": 0.68,
+        "mean_localized_size": 1.72,
+        "max_false_simultaneous_over_seeds": 4,
+        "recall_mean": 0.52,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": 18,
+        "n_true": 2
+      }
+    },
+    "flowpulse": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 0.0,
+        "detect_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 0,
+        "max_false_simultaneous_over_seeds": 0,
+        "recall_mean": 0.0,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": null,
+        "n_true": 2
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 0.0,
+        "detect_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 0,
+        "max_false_simultaneous_over_seeds": 0,
+        "recall_mean": 0.0,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": null,
+        "n_true": 2
+      }
+    },
+    "_anchors": {
+      "do_nothing": {
+        "fp_rate": 0.0,
+        "recall": 0.0
+      },
+      "oracle": {
+        "fp_rate": 0.0,
+        "recall": 1.0,
+        "note": "returns exactly the injected set; recall<1 here would mean the injector is broken (cross-check #1)"
+      }
+    }
+  },
+  "R1_multi3@0.001": {
+    "note": "three independent directed-link faults",
+    "faulty_links": [
+      "('down', 0, 0)",
+      "('down', 5, 2)",
+      "('up', 1, 3)"
+    ],
+    "faulty_rate": 0.001,
+    "base_rate": 1e-05,
+    "realized_faulty_loss_mean": 0.000999847841649936,
+    "realized_background_loss_mean": 9.98623574087091e-06,
+    "elevated_links": [],
+    "elevated_rate": 0.0,
+    "realized_elevated_loss_mean": null,
+    "mcp": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 3,
+        "max_false_simultaneous_over_seeds": 0,
+        "recall_mean": 1.0,
+        "exact_all_rate": 1.0,
+        "exact_all_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 3
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 3,
+        "max_false_simultaneous_over_seeds": 0,
+        "recall_mean": 1.0,
+        "exact_all_rate": 1.0,
+        "exact_all_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 3
+      }
+    },
+    "spraycheck": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 0.96,
+        "detect_ci95": [
+          0.8653966212204534,
+          0.9889613473391734
+        ],
+        "fp_rate": 0.96,
+        "fp_ci95": [
+          0.8653966212204534,
+          0.9889613473391734
+        ],
+        "mean_false_links": 2.58,
+        "mean_localized_size": 4.48,
+        "max_false_simultaneous_over_seeds": 4,
+        "recall_mean": 0.6333333333333333,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": 15.0,
+        "n_true": 3
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 0.96,
+        "detect_ci95": [
+          0.8653966212204534,
+          0.9889613473391734
+        ],
+        "fp_rate": 0.54,
+        "fp_ci95": [
+          0.40398634328388083,
+          0.6703056539821737
+        ],
+        "mean_false_links": 0.9,
+        "mean_localized_size": 2.26,
+        "max_false_simultaneous_over_seeds": 4,
+        "recall_mean": 0.4533333333333333,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": 15.0,
+        "n_true": 3
+      }
+    },
+    "flowpulse": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 0.0,
+        "detect_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 0,
+        "max_false_simultaneous_over_seeds": 0,
+        "recall_mean": 0.0,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": null,
+        "n_true": 3
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 0.0,
+        "detect_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 0,
+        "max_false_simultaneous_over_seeds": 0,
+        "recall_mean": 0.0,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": null,
+        "n_true": 3
+      }
+    },
+    "_anchors": {
+      "do_nothing": {
+        "fp_rate": 0.0,
+        "recall": 0.0
+      },
+      "oracle": {
+        "fp_rate": 0.0,
+        "recall": 1.0,
+        "note": "returns exactly the injected set; recall<1 here would mean the injector is broken (cross-check #1)"
+      }
+    }
+  },
+  "R2_shock@0.005": {
+    "note": "fleet-wide shock, no localizable single-link fault",
+    "faulty_links": [],
+    "faulty_rate": 0.0,
+    "base_rate": 0.005,
+    "realized_faulty_loss_mean": null,
+    "realized_background_loss_mean": 0.005000062853778021,
+    "elevated_links": [],
+    "elevated_rate": 0.0,
+    "realized_elevated_loss_mean": null,
+    "mcp": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 1.0,
+        "fp_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "mean_false_links": 64,
+        "mean_localized_size": 64,
+        "max_false_simultaneous_over_seeds": 64
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 1.0,
+        "fp_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "mean_false_links": 64,
+        "mean_localized_size": 64,
+        "max_false_simultaneous_over_seeds": 64
+      }
+    },
+    "spraycheck": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 0.2,
+        "detect_ci95": [
+          0.11243629945973886,
+          0.3303737210448524
+        ],
+        "fp_rate": 0.2,
+        "fp_ci95": [
+          0.11243629945973886,
+          0.3303737210448524
+        ],
+        "mean_false_links": 0.48,
+        "mean_localized_size": 0.48,
+        "max_false_simultaneous_over_seeds": 2
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 0.02,
+        "detect_ci95": [
+          0.0035391680889764604,
+          0.10495686471836953
+        ],
+        "fp_rate": 0.02,
+        "fp_ci95": [
+          0.0035391680889764604,
+          0.10495686471836953
+        ],
+        "mean_false_links": 0.04,
+        "mean_localized_size": 0.04,
+        "max_false_simultaneous_over_seeds": 2
+      }
+    },
+    "flowpulse": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 1.0,
+        "fp_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "mean_false_links": 63.98,
+        "mean_localized_size": 63.98,
+        "max_false_simultaneous_over_seeds": 48
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 1.0,
+        "fp_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "mean_false_links": 33.3,
+        "mean_localized_size": 33.3,
+        "max_false_simultaneous_over_seeds": 48
+      }
+    },
+    "_anchors": {
+      "do_nothing": {
+        "fp_rate": 0.0,
+        "recall": null
+      },
+      "oracle": {
+        "fp_rate": 0.0,
+        "recall": null,
+        "note": "returns exactly the injected set; recall<1 here would mean the injector is broken (cross-check #1)"
+      }
+    }
+  },
+  "R2_shock@0.001": {
+    "note": "fleet-wide shock, no localizable single-link fault",
+    "faulty_links": [],
+    "faulty_rate": 0.0,
+    "base_rate": 0.001,
+    "realized_faulty_loss_mean": null,
+    "realized_background_loss_mean": 0.0010000214451962087,
+    "elevated_links": [],
+    "elevated_rate": 0.0,
+    "realized_elevated_loss_mean": null,
+    "mcp": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 1.0,
+        "fp_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "mean_false_links": 64,
+        "mean_localized_size": 64,
+        "max_false_simultaneous_over_seeds": 64
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 1.0,
+        "fp_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "mean_false_links": 64,
+        "mean_localized_size": 64,
+        "max_false_simultaneous_over_seeds": 64
+      }
+    },
+    "spraycheck": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 0.28,
+        "detect_ci95": [
+          0.17474014357680362,
+          0.4166538714598967
+        ],
+        "fp_rate": 0.28,
+        "fp_ci95": [
+          0.17474014357680362,
+          0.4166538714598967
+        ],
+        "mean_false_links": 0.68,
+        "mean_localized_size": 0.68,
+        "max_false_simultaneous_over_seeds": 2
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 0.02,
+        "detect_ci95": [
+          0.0035391680889764604,
+          0.10495686471836953
+        ],
+        "fp_rate": 0.02,
+        "fp_ci95": [
+          0.0035391680889764604,
+          0.10495686471836953
+        ],
+        "mean_false_links": 0.04,
+        "mean_localized_size": 0.04,
+        "max_false_simultaneous_over_seeds": 2
+      }
+    },
+    "flowpulse": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 0.0,
+        "detect_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 0,
+        "max_false_simultaneous_over_seeds": 0
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 0.0,
+        "detect_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 0,
+        "max_false_simultaneous_over_seeds": 0
+      }
+    },
+    "_anchors": {
+      "do_nothing": {
+        "fp_rate": 0.0,
+        "recall": null
+      },
+      "oracle": {
+        "fp_rate": 0.0,
+        "recall": null,
+        "note": "returns exactly the injected set; recall<1 here would mean the injector is broken (cross-check #1)"
+      }
+    }
+  },
+  "R3_shock1e-3_culprit1e-2": {
+    "note": "culprit 1% over a 0.1% common-mode shock",
+    "faulty_links": [
+      "('down', 0, 0)"
+    ],
+    "faulty_rate": 0.01,
+    "base_rate": 0.001,
+    "realized_faulty_loss_mean": 0.010001811775646987,
+    "realized_background_loss_mean": 0.001000022793096187,
+    "elevated_links": [],
+    "elevated_rate": 0.0,
+    "realized_elevated_loss_mean": null,
+    "mcp": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 1.0,
+        "fp_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "mean_false_links": 63,
+        "mean_localized_size": 64,
+        "max_false_simultaneous_over_seeds": 63,
+        "recall_mean": 1.0,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 1
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 1.0,
+        "fp_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "mean_false_links": 63,
+        "mean_localized_size": 64,
+        "max_false_simultaneous_over_seeds": 63,
+        "recall_mean": 1.0,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 1
+      }
+    },
+    "spraycheck": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 0.14,
+        "fp_ci95": [
+          0.06950745262022862,
+          0.2618645719852809
+        ],
+        "mean_false_links": 0.22,
+        "mean_localized_size": 1.22,
+        "max_false_simultaneous_over_seeds": 3,
+        "recall_mean": 1.0,
+        "exact_all_rate": 0.86,
+        "exact_all_ci95": [
+          0.738135428014719,
+          0.9304925473797714
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 1
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 1,
+        "max_false_simultaneous_over_seeds": 3,
+        "recall_mean": 1.0,
+        "exact_all_rate": 1.0,
+        "exact_all_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 1
+      }
+    },
+    "flowpulse": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 1.0,
+        "fp_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "mean_false_links": 3,
+        "mean_localized_size": 4,
+        "max_false_simultaneous_over_seeds": 3,
+        "recall_mean": 1.0,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 1
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 0.8,
+        "detect_ci95": [
+          0.6696262789551477,
+          0.8875637005402612
+        ],
+        "fp_rate": 0.5,
+        "fp_ci95": [
+          0.36644286412332855,
+          0.6335571358766714
+        ],
+        "mean_false_links": 1.34,
+        "mean_localized_size": 2.06,
+        "max_false_simultaneous_over_seeds": 3,
+        "recall_mean": 0.72,
+        "exact_all_rate": 0.3,
+        "exact_all_ci95": [
+          0.1910338908960936,
+          0.4375061227736339
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 1
+      }
+    },
+    "_anchors": {
+      "do_nothing": {
+        "fp_rate": 0.0,
+        "recall": 0.0
+      },
+      "oracle": {
+        "fp_rate": 0.0,
+        "recall": 1.0,
+        "note": "returns exactly the injected set; recall<1 here would mean the injector is broken (cross-check #1)"
+      }
+    }
+  },
+  "R3_shock5e-3_culprit5e-2": {
+    "note": "culprit 5% over a 0.5% common-mode shock",
+    "faulty_links": [
+      "('down', 0, 0)"
+    ],
+    "faulty_rate": 0.05,
+    "base_rate": 0.005,
+    "realized_faulty_loss_mean": 0.04999432055612575,
+    "realized_background_loss_mean": 0.005000102969237741,
+    "elevated_links": [],
+    "elevated_rate": 0.0,
+    "realized_elevated_loss_mean": null,
+    "mcp": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 1.0,
+        "fp_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "mean_false_links": 63,
+        "mean_localized_size": 64,
+        "max_false_simultaneous_over_seeds": 63,
+        "recall_mean": 1.0,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 1
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 1.0,
+        "fp_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "mean_false_links": 63,
+        "mean_localized_size": 64,
+        "max_false_simultaneous_over_seeds": 63,
+        "recall_mean": 1.0,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 1
+      }
+    },
+    "spraycheck": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 0.02,
+        "fp_ci95": [
+          0.0035391680889764604,
+          0.10495686471836953
+        ],
+        "mean_false_links": 0.02,
+        "mean_localized_size": 1.02,
+        "max_false_simultaneous_over_seeds": 1,
+        "recall_mean": 1.0,
+        "exact_all_rate": 0.98,
+        "exact_all_ci95": [
+          0.8950431352816304,
+          0.9964608319110235
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 1
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 1,
+        "max_false_simultaneous_over_seeds": 1,
+        "recall_mean": 1.0,
+        "exact_all_rate": 1.0,
+        "exact_all_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 1
+      }
+    },
+    "flowpulse": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 1.0,
+        "fp_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "mean_false_links": 62.98,
+        "mean_localized_size": 63.98,
+        "max_false_simultaneous_over_seeds": 48,
+        "recall_mean": 1.0,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 1
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 1.0,
+        "fp_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "mean_false_links": 33.92,
+        "mean_localized_size": 34.92,
+        "max_false_simultaneous_over_seeds": 48,
+        "recall_mean": 1.0,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 1
+      }
+    },
+    "_anchors": {
+      "do_nothing": {
+        "fp_rate": 0.0,
+        "recall": 0.0
+      },
+      "oracle": {
+        "fp_rate": 0.0,
+        "recall": 1.0,
+        "note": "returns exactly the injected set; recall<1 here would mean the injector is broken (cross-check #1)"
+      }
+    }
+  },
+  "R4_incast@0.005": {
+    "note": "incast: every downlink into L0 elevated, no fault",
+    "faulty_links": [],
+    "faulty_rate": 0.0,
+    "base_rate": 1e-05,
+    "realized_faulty_loss_mean": null,
+    "realized_background_loss_mean": 1.0003233397124051e-05,
+    "elevated_links": [
+      "('down', 0, 0)",
+      "('down', 1, 0)",
+      "('down', 2, 0)",
+      "('down', 3, 0)",
+      "('down', 4, 0)",
+      "('down', 5, 0)",
+      "('down', 6, 0)",
+      "('down', 7, 0)"
+    ],
+    "elevated_rate": 0.005,
+    "realized_elevated_loss_mean": 0.005000801894236162,
+    "mcp": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 1.0,
+        "fp_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "mean_false_links": 8,
+        "mean_localized_size": 8,
+        "max_false_simultaneous_over_seeds": 8
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 1.0,
+        "fp_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "mean_false_links": 8,
+        "mean_localized_size": 8,
+        "max_false_simultaneous_over_seeds": 8
+      }
+    },
+    "spraycheck": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 0.26,
+        "detect_ci95": [
+          0.15871379651367384,
+          0.3955342198899992
+        ],
+        "fp_rate": 0.26,
+        "fp_ci95": [
+          0.15871379651367384,
+          0.3955342198899992
+        ],
+        "mean_false_links": 0.6,
+        "mean_localized_size": 0.6,
+        "max_false_simultaneous_over_seeds": 2
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 0.02,
+        "detect_ci95": [
+          0.0035391680889764604,
+          0.10495686471836953
+        ],
+        "fp_rate": 0.02,
+        "fp_ci95": [
+          0.0035391680889764604,
+          0.10495686471836953
+        ],
+        "mean_false_links": 0.04,
+        "mean_localized_size": 0.04,
+        "max_false_simultaneous_over_seeds": 2
+      }
+    },
+    "flowpulse": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 0.0,
+        "detect_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 0,
+        "max_false_simultaneous_over_seeds": 0
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 0.0,
+        "detect_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 0,
+        "max_false_simultaneous_over_seeds": 0
+      }
+    },
+    "_anchors": {
+      "do_nothing": {
+        "fp_rate": 0.0,
+        "recall": null
+      },
+      "oracle": {
+        "fp_rate": 0.0,
+        "recall": null,
+        "note": "returns exactly the injected set; recall<1 here would mean the injector is broken (cross-check #1)"
+      }
+    }
+  },
+  "R4_incast@0.001": {
+    "note": "incast: every downlink into L0 elevated, no fault",
+    "faulty_links": [],
+    "faulty_rate": 0.0,
+    "base_rate": 1e-05,
+    "realized_faulty_loss_mean": null,
+    "realized_background_loss_mean": 9.99605474633979e-06,
+    "elevated_links": [
+      "('down', 0, 0)",
+      "('down', 1, 0)",
+      "('down', 2, 0)",
+      "('down', 3, 0)",
+      "('down', 4, 0)",
+      "('down', 5, 0)",
+      "('down', 6, 0)",
+      "('down', 7, 0)"
+    ],
+    "elevated_rate": 0.001,
+    "realized_elevated_loss_mean": 0.0010001615773475871,
+    "mcp": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 1.0,
+        "fp_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "mean_false_links": 8,
+        "mean_localized_size": 8,
+        "max_false_simultaneous_over_seeds": 8
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 1.0,
+        "fp_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "mean_false_links": 8,
+        "mean_localized_size": 8,
+        "max_false_simultaneous_over_seeds": 8
+      }
+    },
+    "spraycheck": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 0.32,
+        "detect_ci95": [
+          0.20758044093999403,
+          0.45810557136276076
+        ],
+        "fp_rate": 0.32,
+        "fp_ci95": [
+          0.20758044093999403,
+          0.45810557136276076
+        ],
+        "mean_false_links": 0.72,
+        "mean_localized_size": 0.72,
+        "max_false_simultaneous_over_seeds": 4
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 0.02,
+        "detect_ci95": [
+          0.0035391680889764604,
+          0.10495686471836953
+        ],
+        "fp_rate": 0.02,
+        "fp_ci95": [
+          0.0035391680889764604,
+          0.10495686471836953
+        ],
+        "mean_false_links": 0.04,
+        "mean_localized_size": 0.04,
+        "max_false_simultaneous_over_seeds": 4
+      }
+    },
+    "flowpulse": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 0.0,
+        "detect_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 0,
+        "max_false_simultaneous_over_seeds": 0
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 0.0,
+        "detect_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 0,
+        "max_false_simultaneous_over_seeds": 0
+      }
+    },
+    "_anchors": {
+      "do_nothing": {
+        "fp_rate": 0.0,
+        "recall": null
+      },
+      "oracle": {
+        "fp_rate": 0.0,
+        "recall": null,
+        "note": "returns exactly the injected set; recall<1 here would mean the injector is broken (cross-check #1)"
+      }
+    }
+  },
+  "R4_incast1e-3_culprit_outside": {
+    "note": "culprit 1% on an uplink outside a 0.1% incast",
+    "faulty_links": [
+      "('up', 1, 3)"
+    ],
+    "faulty_rate": 0.01,
+    "base_rate": 1e-05,
+    "realized_faulty_loss_mean": 0.009998176393834487,
+    "realized_background_loss_mean": 9.985446085438257e-06,
+    "elevated_links": [
+      "('down', 0, 0)",
+      "('down', 1, 0)",
+      "('down', 2, 0)",
+      "('down', 3, 0)",
+      "('down', 4, 0)",
+      "('down', 5, 0)",
+      "('down', 6, 0)",
+      "('down', 7, 0)"
+    ],
+    "elevated_rate": 0.001,
+    "realized_elevated_loss_mean": 0.0010000615923411844,
+    "mcp": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 1.0,
+        "fp_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "mean_false_links": 8,
+        "mean_localized_size": 9,
+        "max_false_simultaneous_over_seeds": 8,
+        "recall_mean": 1.0,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 1
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 1.0,
+        "fp_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "mean_false_links": 8,
+        "mean_localized_size": 9,
+        "max_false_simultaneous_over_seeds": 8,
+        "recall_mean": 1.0,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 1
+      }
+    },
+    "spraycheck": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 0.04,
+        "fp_ci95": [
+          0.011038652660826577,
+          0.13460337877954667
+        ],
+        "mean_false_links": 0.04,
+        "mean_localized_size": 1.04,
+        "max_false_simultaneous_over_seeds": 1,
+        "recall_mean": 1.0,
+        "exact_all_rate": 0.96,
+        "exact_all_ci95": [
+          0.8653966212204534,
+          0.9889613473391734
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 1
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 1,
+        "max_false_simultaneous_over_seeds": 1,
+        "recall_mean": 1.0,
+        "exact_all_rate": 1.0,
+        "exact_all_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 1
+      }
+    },
+    "flowpulse": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 0.0,
+        "detect_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 0,
+        "max_false_simultaneous_over_seeds": 0,
+        "recall_mean": 0.0,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": null,
+        "n_true": 1
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 0.0,
+        "detect_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 0,
+        "max_false_simultaneous_over_seeds": 0,
+        "recall_mean": 0.0,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": null,
+        "n_true": 1
+      }
+    },
+    "_anchors": {
+      "do_nothing": {
+        "fp_rate": 0.0,
+        "recall": 0.0
+      },
+      "oracle": {
+        "fp_rate": 0.0,
+        "recall": 1.0,
+        "note": "returns exactly the injected set; recall<1 here would mean the injector is broken (cross-check #1)"
+      }
+    }
+  },
+  "R4_incast1e-3_culprit_inside": {
+    "note": "culprit 1% on a downlink inside a 0.1% incast",
+    "faulty_links": [
+      "('down', 0, 0)"
+    ],
+    "faulty_rate": 0.01,
+    "base_rate": 1e-05,
+    "realized_faulty_loss_mean": 0.010000869285202198,
+    "realized_background_loss_mean": 1.000284056367318e-05,
+    "elevated_links": [
+      "('down', 0, 0)",
+      "('down', 1, 0)",
+      "('down', 2, 0)",
+      "('down', 3, 0)",
+      "('down', 4, 0)",
+      "('down', 5, 0)",
+      "('down', 6, 0)",
+      "('down', 7, 0)"
+    ],
+    "elevated_rate": 0.001,
+    "realized_elevated_loss_mean": 0.0010001380299499941,
+    "mcp": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 1.0,
+        "fp_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "mean_false_links": 7,
+        "mean_localized_size": 8,
+        "max_false_simultaneous_over_seeds": 7,
+        "recall_mean": 1.0,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 1
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 1.0,
+        "fp_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "mean_false_links": 7,
+        "mean_localized_size": 8,
+        "max_false_simultaneous_over_seeds": 7,
+        "recall_mean": 1.0,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 1
+      }
+    },
+    "spraycheck": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 0.08,
+        "fp_ci95": [
+          0.031549003255790686,
+          0.18838502545063704
+        ],
+        "mean_false_links": 0.08,
+        "mean_localized_size": 1.08,
+        "max_false_simultaneous_over_seeds": 1,
+        "recall_mean": 1.0,
+        "exact_all_rate": 0.92,
+        "exact_all_ci95": [
+          0.8116149745493629,
+          0.9684509967442093
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 1
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 0.0,
+        "fp_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "mean_false_links": 0,
+        "mean_localized_size": 1,
+        "max_false_simultaneous_over_seeds": 1,
+        "recall_mean": 1.0,
+        "exact_all_rate": 1.0,
+        "exact_all_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "median_first_detect_epoch": 0.0,
+        "n_true": 1
+      }
+    },
+    "flowpulse": {
+      "union_over_window": {
+        "n": 50,
+        "detect_rate": 1.0,
+        "detect_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "fp_rate": 1.0,
+        "fp_ci95": [
+          0.9286499658256813,
+          1.0
+        ],
+        "mean_false_links": 3,
+        "mean_localized_size": 4,
+        "max_false_simultaneous_over_seeds": 3,
+        "recall_mean": 1.0,
+        "exact_all_rate": 0.0,
+        "exact_all_ci95": [
+          0.0,
+          0.07135003417431873
+        ],
+        "median_first_detect_epoch": 1.0,
+        "n_true": 1
+      },
+      "final_epoch": {
+        "n": 50,
+        "detect_rate": 0.46,
+        "detect_ci95": [
+          0.3296943460178263,
+          0.5960136567161192
+        ],
+        "fp_rate": 0.32,
+        "fp_ci95": [
+          0.20758044093999403,
+          0.45810557136276076
+        ],
+        "mean_false_links": 0.88,
+        "mean_localized_size": 1.3,
+        "max_false_simultaneous_over_seeds": 3,
+        "recall_mean": 0.42,
+        "exact_all_rate": 0.14,
+        "exact_all_ci95": [
+          0.06950745262022862,
+          0.2618645719852809
+        ],
+        "median_first_detect_epoch": 1.0,
+        "n_true": 1
+      }
+    },
+    "_anchors": {
+      "do_nothing": {
+        "fp_rate": 0.0,
+        "recall": 0.0
+      },
+      "oracle": {
+        "fp_rate": 0.0,
+        "recall": 1.0,
+        "note": "returns exactly the injected set; recall<1 here would mean the injector is broken (cross-check #1)"
+      }
+    }
+  }
+}
