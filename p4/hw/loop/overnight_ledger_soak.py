@@ -33,6 +33,12 @@ PROBE_SCRIPT = "~/mcp_multicontext_probe.py"
 IFACE = "enp59s0f0np0"
 CONTEXTS = (2, 6, 10, 14)
 
+# The uplink (Vision's source leaf -> spine) and downlink (spine -> dest leaf) passes for
+# this topology, per HW-LEDGER-SMOKE-TEST.md's own labeling: sublink = (vlink << 4) | ctx.
+VLINK_UP, VLINK_DN = 0, 10
+CENSUS_SUBLINKS = tuple(sorted(
+    {(vlink << 4) | ctx for vlink in (VLINK_UP, VLINK_DN) for ctx in CONTEXTS}))
+
 # gate_agent.py only accepts connections from 127.0.0.1 or Vision
 # (ALLOWED_PEERS in gate_agent.py) -- every command is proxied over SSH to
 # the switch itself and connects to localhost from there, exactly like every
@@ -62,8 +68,19 @@ def gate_command(command: str, timeout: float = 10.0) -> str:
     return result.stdout
 
 
-def read_census() -> Dict[int, Dict[str, int]]:
-    reply = gate_command("R")
+def read_census(extra_sublinks=()) -> Dict[int, Dict[str, int]]:
+    """Explicit sublinks, not bare `R`: bare R silently drops any sublink whose seq/obs
+    isn't yet nonzero on BOTH sides from its per-side dicts, so a single half-populated
+    sublink ANYWHERE on the chip (bring-up's own port-check traffic reliably leaves one
+    or two -- e.g. vlink 8, unrelated to this soak's own leaf/context traffic) makes bare
+    R fail outright with "missing census rows" before this soak ever sends a packet.
+    Requesting exactly the sublinks this soak actually touches sidesteps that: gate_agent
+    includes a requested index regardless of its current value (0 included), so pre-existing
+    zero/asymmetric noise on OTHER, un-requested sublinks can never block a read again.
+    `extra_sublinks` covers a CLI-configurable --inject-sublink outside CENSUS_SUBLINKS'
+    fixed context set (the default, 2, is already in it)."""
+    wanted = sorted(set(CENSUS_SUBLINKS) | set(extra_sublinks))
+    reply = gate_command("R " + " ".join(str(s) for s in wanted))
     rows = {}
     for line in reply.splitlines():
         parts = line.split()
@@ -126,7 +143,7 @@ def deltas_since(baseline: Dict[int, Dict[str, int]],
     return result
 
 
-def census_after_settle(settle_s: float) -> Dict[int, Dict[str, int]]:
+def census_after_settle(settle_s: float, extra_sublinks=()) -> Dict[int, Dict[str, int]]:
     """Read the census only after in-flight probe packets have landed.
 
     gate_agent.py's R command bulk-reads reg_wit_seq first and
@@ -135,7 +152,7 @@ def census_after_settle(settle_s: float) -> Dict[int, Dict[str, int]]:
     sublinks 14 and 142, both equal again on the very next read). Settling
     before the read closes the window; the recheck below catches the rest."""
     time.sleep(settle_s)
-    return read_census()
+    return read_census(extra_sublinks)
 
 
 def mismatches_vs(baseline: Dict[int, Dict[str, int]],
@@ -148,26 +165,26 @@ def run_cycle(cycle: int, log_path: Path, baseline: Dict[int, Dict[str, int]],
               count_per_context: int, pps: int, inject_sublink: int,
               inject_ndrop: int, settle_s: float, recheck_s: float) -> dict:
     send_clean_traffic(count_per_context, pps)
-    after_clean = census_after_settle(settle_s)
+    after_clean = census_after_settle(settle_s, (inject_sublink,))
     clean_first = mismatches_vs(baseline, after_clean)
     clean_recheck = None
     if clean_first:
         # A disagreement on the first read is re-read once before it counts:
         # a read-order race resolves, a real drop or phantom does not.
         time.sleep(recheck_s)
-        after_clean = read_census()
+        after_clean = read_census((inject_sublink,))
         clean_recheck = mismatches_vs(baseline, after_clean)
     baseline = after_clean
 
     arm_reply = arm_injector(inject_sublink, inject_ndrop)
     send_clean_traffic(count_per_context, pps)
-    after_inject = census_after_settle(settle_s)
+    after_inject = census_after_settle(settle_s, (inject_sublink,))
     clear_reply = clear_injector()
     other_first = mismatches_vs(baseline, after_inject, skip=inject_sublink)
     other_recheck = None
     if other_first:
         time.sleep(recheck_s)
-        after_inject = read_census()
+        after_inject = read_census((inject_sublink,))
         other_recheck = mismatches_vs(baseline, after_inject, skip=inject_sublink)
     inject_deltas = deltas_since(baseline, after_inject)
     baseline = after_inject
@@ -209,7 +226,7 @@ def main() -> int:
     log_path = Path(args.log)
     log_path.parent.mkdir(parents=True, exist_ok=True)
 
-    baseline = read_census()
+    baseline = read_census((args.inject_sublink,))
     for cycle in range(1, args.cycles + 1):
         record, baseline = run_cycle(cycle, log_path, baseline, args.count_per_context,
                                      args.pps, args.inject_sublink, args.inject_ndrop,

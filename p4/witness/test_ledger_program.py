@@ -516,9 +516,20 @@ class TestClfSchemeIsGone(unittest.TestCase):
 
         The model collapses both into one Sublink, so the pairing has to be pinned
         against the source or the model assumes away the thing that matters.
+
+        Overhead-reduction pass 2026-09-02 stopped carrying link_id on the wire: the
+        receiver now reconstructs md.wit_link from its own ingress port/spray plus a
+        freshly re-derived ctx nibble (tbl_wit_link_recon + tbl_wit_ctx_index), rather
+        than reading it straight off the wire. What still has to be pinned is that
+        this reconstruction lands on the SAME sublink identity the sender used --
+        i.e. that md.wit_link's composition mirrors md.sublink's own two-step
+        composition (vlink upper bits, then ctx low nibble) exactly.
         """
-        self.assertIn("hdr.witness.link_id = md.sublink;", self.src)   # egress stamp
-        self.assertIn("md.wit_link = hdr.witness.link_id;", self.src)  # ingress lift
+        self.assertIn("action set_wit_link(bit<16> wit_vlink_base) {", self.src)
+        self.assertIn("md.wit_link = wit_vlink_base;", self.src)          # vlink upper bits
+        self.assertIn("action wit_ctx_index() { md.wit_link[3:0] = md.ctx[3:0]; }", self.src)
+        self.assertIn("md.sublink = vlink_base;", self.src)               # sender's own vlink upper bits
+        self.assertIn("action ctx_index() { md.sublink[3:0] = md.ctx[3:0]; }", self.src)
         self.assertIn("wit_check.execute(md.wit_link)", self.src)      # hi index
         self.assertIn("wit_count.execute(md.wit_link)", self.src)      # lo index
         self.assertIn("tx_seen.execute(md.clf_tx_idx)", self.src)      # TX index

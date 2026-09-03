@@ -257,6 +257,63 @@ def verify_eg_vlink_snapshot(rows, contextual=False):
     return f"tbl_eg_vlink verified: {len(expected)} exact rows"
 
 
+# Overhead-reduction pass 2026-09-02 (docs/review/artifacts/LEDGER-WIRE-REDUCTION-2026-09-02.md):
+# programs whose ingress reconstructs md.wit_link from (ingress_port, hdr.fabric.spray) instead
+# of reading hdr.witness.link_id off the wire. Only mcp_fabric_ledger has this table today --
+# tbl_wit_link_recon simply does not exist in the schema of any other program this script can
+# target, so this must be checked before install_wit_link_recon() is ever called for --program.
+WIT_LINK_RECON_PROGRAMS = {"mcp_fabric_ledger"}
+
+
+def has_wit_link_recon(program):
+    return program in WIT_LINK_RECON_PROGRAMS
+
+
+def plan_wit_link_recon():
+    """Ingress-side mirror of plan_eg_vlink(): the receiving hop reconstructs md.wit_link's
+    vlink component from its OWN ingress port plus the wire-carried hdr.fabric.spray, rather
+    than reading link_id off the wire (which no longer exists on it).
+
+    The receiving ingress port is the SENDING egress port's loopback peer -- LOOP_UP_DP[leaf]
+    and LOOP_DN_DP[leaf] are exactly that peer pair for each leaf (the same cage 5 <-> cage 6
+    DAC loopback plan_eg_vlink() itself relies on) -- so this iterates the SAME (leaf, spine)
+    space with port and vlink swapped to the arrival side. hdr.fabric.spray needs no
+    eg_qid()-style port-group transform: it is a plain wire-carried integer chosen once at the
+    source leaf, not a TM queue id.
+    """
+    rows = []
+    for leaf in range(4):
+        for s in range(N_SPINE):
+            # sent egress LOOP_UP_DP[leaf]/qid s -> vlink_up(leaf, s); arrives on its loopback
+            # peer, LOOP_DN_DP[leaf].
+            rows.append((LOOP_DN_DP[leaf], s, vlink_up(leaf, s)))
+            # sent egress LOOP_DN_DP[leaf]/qid s -> vlink_dn(s, leaf); arrives on its loopback
+            # peer, LOOP_UP_DP[leaf].
+            rows.append((LOOP_UP_DP[leaf], s, vlink_dn(s, leaf)))
+    return rows
+
+
+def install_wit_link_recon(gc, bfrt, tgt):
+    t = bfrt.table_get("pipe.Ingress.tbl_wit_link_recon")
+    rows = plan_wit_link_recon()
+    want = set((port, spray) for port, spray, _ in rows)
+    for port, spray, vlink in rows:
+        _upsert(gc, t, tgt,
+                [t.make_key([gc.KeyTuple("ig_intr_md.ingress_port", port),
+                            gc.KeyTuple("hdr.fabric.spray", spray, 0xFFFF),
+                            gc.KeyTuple("$MATCH_PRIORITY", 1)])],
+                [t.make_data([gc.DataTuple("wit_vlink_base", vlink << 4)],
+                            "Ingress.set_wit_link")])
+    stale = 0
+    for _d, k in list(t.entry_get(tgt, flags={"from_hw": False})):
+        kd = k.to_dict()
+        cur = (_row_field(kd, "ig_intr_md.ingress_port"), _row_field(kd, "hdr.fabric.spray"))
+        if cur not in want:
+            t.entry_del(tgt, [k])
+            stale += 1
+    print(f"tbl_wit_link_recon: {len(rows)} rows installed, {stale} stale rows removed")
+
+
 def plan_gate():
     """Row L (1..255): attn[15:8] == L and rnd_attn in [0, (L<<8)-1] -> measure."""
     return [(L, 0, (L << 8) - 1) for L in range(1, 256)]
@@ -465,6 +522,8 @@ def main():
             seed_attn(gc, bfrt, tgt, a.a0)
             install_gate(gc, bfrt, tgt)
             install_eg_vlink(gc, bfrt, tgt, contextual=is_contextual_program(a.program, bfrt))
+            if has_wit_link_recon(a.program):
+                install_wit_link_recon(gc, bfrt, tgt)
             # NOT `a.program == "mcp_fabric_cw4"`.  Every capsule-era program composes
             # md.sublink = (vlink << 4) | ctx, and the compiler cannot shift a runtime
             # action parameter, so the control plane must supply the shift.  Hardcoding

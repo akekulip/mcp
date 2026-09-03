@@ -1836,3 +1836,380 @@ faster, failing completely at 0.5% and below. Committed as `328cd89`, with the h
 script, the raw JSON, and a results doc that explicitly states what this sweep does NOT show
 (baseline-currency overhead, localization accuracy, healing comparison, common-mode robustness) --
 only 8 seeds per point, enough for a real large effect, not yet a publication-grade CI.
+
+## Status (2026-09-02, later still) — wire-overhead reduction implemented and compile-verified
+
+Implemented the overhead-reduction idea from the comparison doc's honest cost table: dropped
+`hdr.witness.link_id` from `mcp_fabric_ledger.p4`'s wire format (`wit_h` 4B -> 2B, seq only). The
+receiving ingress now reconstructs `md.wit_link` from its own ingress port + `hdr.fabric.spray`
+(`tbl_wit_link_recon`, new) plus a freshly re-derived ctx nibble (`tbl_wit_ctx_index`, new),
+mirroring the egress side's existing `tbl_eg_vlink`+`tbl_ctx_index` split. Caught a real
+correctness bug before it went anywhere near a compile: my first draft baked a *constant* ctx
+nibble into the reconstruction table's action data, but ctx is `tbl_context`'s fresh per-packet
+classification (size bin x DSCP), not a function of (port, spray) -- a link can carry many
+contexts, so a constant would have silently mislabeled every packet whose real class differed.
+Fixed by composing ctx as a second, independent step, exactly like the egress side already does.
+
+Local compile gate (9.13.1 laptop SDE, before/after pair from git): 0 errors, no new warnings on
+either side. Honest cost, not just the win: wire drops 4B->2B (-50%, ~0.28%->~0.14% added load
+at 1400B payload), but ingress costs **+1 MAU stage (11->12, now at Tofino 1's 12-stage ceiling,
+zero ingress headroom left)** plus +2 SRAM blocks / +1 TCAM block. Egress and every other axis
+unchanged. Full writeup: `docs/review/artifacts/LEDGER-WIRE-REDUCTION-2026-09-02.md`.
+
+Ran the ledger's own PTF/model suite against the compiled program (`tofino-model` on the laptop,
+`p4/ptf/model/run_ledger.sh`) -- required updating `p4/ptf/test_ledger.py`'s fixtures, not just
+the P4: the old suite hand-picked an arbitrary wire `link_id` to steer each test onto its target
+sublink, using ONE physical test port for both the sender and receiver pass. That affordance is
+gone by design, and the test's minimal topology (collapsing two real hops onto one port) doesn't
+survive port-based reconstruction unmodified. Fixed by routing the receiver pass through the
+model's second loop port (mirroring how two different front-panel ports would really disambiguate
+the two hops) and steering each test onto its sublink via `spray`/`diffserv` instead of a
+hand-picked wire value. All 9 asserted PTF tests pass with values identical to the pre-change run.
+Also fixed one stale source-pinning assertion in `p4/witness/test_ledger_program.py` (grepped for
+the now-removed `wit_link()` action) and refreshed the checked-in `mcp_fabric_ledger.bfrt.json`
+artifact it reads as schema ground truth. Full regression after all fixes: 257/257 (222 controller
++ 35 P4-source-pinning tests) plus the 9 PTF/model tests, all passing.
+
+**Not done, deliberately deferred, per the compile-gate doc's own §5**: `controller/hw_adapter.py`'s
+`witness.link_id == mirror.vlink` cross-check still references the removed field and needs a
+bring-up-time validation test in its place; `setup_attention.py` needs a real, topology-driven
+`tbl_wit_link_recon` population function (the PTF test's 3-row version is model-only); Option 2
+(moving `seq` into the dead `vsw_id` field to eliminate `wit_h` entirely) remains unimplemented,
+specified only. No hardware contact of any kind -- next step before deployment is a 9.13.2
+compile-gate on the switch itself.
+
+## Status (2026-09-02, later still) — wire-reduction ledger validated on real hardware
+
+Closed the two prerequisites the compile-gate report had flagged as blocking hardware, then took
+the change all the way to real silicon:
+
+1. `p4/control/setup_attention.py` gained `plan_wit_link_recon()`/`install_wit_link_recon()`, a
+   real topology-driven population for the new `tbl_wit_link_recon` table, mirroring
+   `plan_eg_vlink()`'s exact 16-row structure via the loopback peer port. Verified
+   programmatically against `plan_eg_vlink()`'s own output and pinned by a new test class.
+2. `controller/hw_adapter.py`'s stale `witness.link_id == mirror.vlink` cross-check is gone (not
+   silently deleted): `_WITNESS` shrank to match the new 2-byte wire format, and two LATENT test
+   gaps this surfaced were fixed rather than papered over -- one test's "missing witness" check
+   was actually passing via the now-removed mismatch check firing on unrelated filler bytes, not
+   real truncation detection; another had a stale pinned byte-count. Full regression after both
+   fixes plus the setup_attention change: 295/295.
+3. 9.13.2 compile gate run ON THE SWITCH ITSELF (compile-only): numbers byte-for-byte identical to
+   the 9.13.1 laptop gate -- 0 errors, same 5 warnings, 11->12 ingress stages, 89->91 SRAM,
+   15->16 TCAM. No SDE-version drift.
+4. **Loaded onto real hardware and validated with real traffic**, replicating
+   `HW-LEDGER-SMOKE-TEST.md`'s exact methodology (`takeover.sh` -> `deploy.sh` -> `bringup.sh`,
+   traffic from Vision via `multicontext_probe.py`, readout via the gate agent's `R` command):
+   zero loss across 80 packets in 4 real DSCP contexts on two hop directions, and exact recovery
+   of a known 5-packet injected loss (Δseq-Δobs = 5 on the nose), matching the pre-change binary's
+   own real-silicon numbers exactly. `tbl_wit_link_recon: 16 rows installed` confirmed the new
+   production control-plane function ran automatically as part of standard bring-up, no manual
+   step. Full writeup: `docs/review/artifacts/HW-LEDGER-WIRE-REDUCTION-SMOKE-TEST.md`.
+
+**A real, general infrastructure bug was found and fixed along the way, not worked around**:
+`gate_agent.py` refused to start against the freshly-loaded build (`RuntimeError: loaded setup
+does not name the live build owner`) because nothing writes the `<PROG>.loaded-setup.sha256`
+receipt a guard added directly on the switch (git commit `b1a5ec1`) requires -- `bringup.sh`
+predates that guard and never got the matching writer. Added step 5c to `p4/hw/bringup.sh` to
+write it automatically right after `setup_attention.py up` succeeds; verified by extracting the
+exact logic and confirming it reproduces, byte-for-byte, the receipt this session first wrote by
+hand to unblock itself. Closes the gap for every future bring-up of any program, not just this one.
+
+The chip was confirmed idle (no active gate_agent/controller process) before `takeover.sh` ran,
+and the user explicitly authorized displacing whatever was loaded ("the switch is yours").
+Snapshot of the displaced program: `p4/hw/snapshots/20260902T182651Z-takeover.txt`.
+
+## Status (2026-09-02, later still) — soak found a real, open anomaly; PI decision made and recorded
+
+Fixed `overnight_ledger_soak.py`'s `read_census()` (bare `R` fails outright on any stray
+half-populated sublink anywhere on the chip; bring-up's own port-check traffic reliably leaves
+one) to request explicit sublinks -- a real, general fix. Ran 57 soak cycles against the
+wire-reduction binary.
+
+**Primary result: clean.** The actual mechanism under test -- recovering an injected 5-packet loss
+via the new reconstruction -- passed 57/57, zero exceptions.
+
+**Secondary finding: a real, open anomaly.** Twice (cycle 1, cycle 56), an *unmeasured, unarmed*
+sublink showed one extra stamp with no matching arrival, persisting past recheck -- a signature the
+pre-change binary's ~3,200 historical soak cycles never showed once (theirs was always the opposite
+direction, a documented self-resolving race). Investigated with two cheap, decisive checks: MAC-level
+port counters (9224 TX = 9224 RX, rules out physical-layer loss) and a 30-second fully-idle window
+(byte-for-byte identical before/after across 36 sublinks, rules out spontaneous ambient noise). No
+confirmed root cause beyond that.
+
+**PI decision** (made directly, not deferred): do not revert the hardware to the prior binary (the
+claim actually under test held at 57/57); do not declare the finding resolved (it's real, logged,
+and inconsistent with history); stop further live-hardware cycling on this specific question for
+now (the cheap decisive checks are exhausted; more cycling without new instrumentation has a worse
+risk/effort trade on shared hardware than stopping to plan a properly-instrumented follow-up).
+Switch left clean and idle, wire-reduction binary still loaded, injector cleared. Also corrected an
+overclaim in the earlier smoke-test doc's conclusion (originally said the new binary "reproduces
+the pre-change binary's real-silicon behavior exactly" -- narrowed to "on the sublink under active
+detection," since that's what's actually established).
+
+Full writeups: `docs/review/artifacts/HW-LEDGER-WIRE-REDUCTION-SOAK-ANOMALY-2026-09-02.md` (the
+finding + PI reasoning), `LEDGER-WIRE-REDUCTION-2026-09-02.md` §7 (pointer),
+`HW-LEDGER-WIRE-REDUCTION-SMOKE-TEST.md` (corrected conclusion).
+
+**Next step, not yet started:** a matched-conditions short soak against the pre-wire-reduction
+binary (same script, same timing) for a fresh comparison baseline, since the existing historical
+soak logs are a different session with possibly different testbed background conditions. A
+mirror-copy packet trace of the exact discrepancy, if it recurs, would be the properly-instrumented
+follow-up mentioned in the PI decision -- not attempted here, deliberately, to avoid improvising it
+ad hoc on shared hardware.
+
+## Status (2026-09-02, later still) — matched-conditions comparison + injector hypothesis ruled out
+
+Continued the PI-directed investigation of the soak anomaly with two more decisive experiments:
+
+**1. Matched-conditions comparison.** Deployed a byte-identical copy of the pre-wire-reduction
+source under its own program name (`mcp_fabric_ledger_prewire`, confirmed SHA-256 match against
+git HEAD), took it live via the same takeover/bringup pipeline (bringup.sh's new receipt-writing
+step worked cleanly, no manual fix needed this time), and ran the identical soak script for 100
+cycles immediately after the wire-reduction binary's 57-cycle run. Result: **0/100 anomalies on
+the unmodified binary vs 2/57 on the wire-reduction binary**, same script, same timing, same
+testbed. This is real evidence against "ambient testbed noise" and upgrades the finding to "likely
+specific to the wire-reduction reconstruction." Restored the wire-reduction binary as live
+afterward (confirmed via gate agent identity check and a functional 10/10-exact traffic test);
+removed the temporary `mcp_fabric_ledger_prewire.p4` file now that its data is captured in the doc.
+
+Also found and explained a *second*, separate, benign pattern while verifying the restore: contexts
+0 and 3 (outside the probe's own context set — `ctx=(dscp_class<<2)|size_bin`, probe's fixed
+payload always produces {2,6,10,14}) consistently show phantom arrivals with no matching stamps,
+reproduced identically across two bring-ups. Leading explanation: bring-up's own port-verification
+traffic likely defaults `spray=0`, which the new reconstruction always maps to vlink 0 regardless
+of which leaf's check it was — a real structural difference from the old wire-read design, but one
+that never touches a sublink this project's own traffic measures.
+
+**2. Injector-write hypothesis ruled out.** Both confirmed cross-context anomalies happened right
+next to a live `arm_injector`/`clear_injector` table write, the leading suspect. Built
+`p4/hw/loop/clean_traffic_only_probe.py` (new script, reuses `overnight_ledger_soak.py`'s helpers,
+zero injector calls anywhere) to test this directly. It reproduced the anomaly on cycle 1 (sublink
+6, identical `Δseq=21,Δobs=20` signature) with no table writes anywhere nearby -- **ruling the
+injector-write hypothesis out**. Noticed instead: all three confirmed occurrences so far were the
+first traffic burst after a gap (fresh bring-up, or several idle minutes) except cycle 56, which
+remains unexplained by this pattern. New leading hypothesis: an idle-then-first-burst effect,
+specifically testable next session (burst, deliberate idle gap, burst again, compare).
+
+Verification for this round: new script syntax-checked and import-verified; full existing suite
+re-run clean (295/295, no regressions from any of today's changes).
+
+**Switch left clean and idle**, wire-reduction binary live, gate agent healthy, no injector armed.
+Full record, including the ruled-out hypotheses and the sharpened next-session plan:
+`docs/review/artifacts/HW-LEDGER-WIRE-REDUCTION-SOAK-ANOMALY-2026-09-02.md`.
+
+## Status (2026-09-02, later still) — idle-then-burst hypothesis confirmed, probabilistically
+
+Built one more small, bounded probe (`p4/hw/loop/idle_gap_probe.py`, 3 trials: a control burst
+with no preceding idle, then a deliberate 90s idle gap, then a test burst) to directly test the
+leading hypothesis from the injector-write discriminator. Result: **0/3 mismatches on control
+bursts, 1/3 on test bursts** (trial 3 reproduced the identical `Δseq=21,Δobs=20` signature, this
+time on sublink 14). Counting every genuinely-first-after-a-gap burst across the whole day's
+investigation: 3 of 5 reproduced the anomaly, against 0 of many dozens of steady-state bursts.
+**This is now a confirmed, real, though probabilistic (not deterministic) signal** -- idleness
+measurably elevates the anomaly's likelihood on the next burst. Mechanism still unknown (queue/TM
+effect after a quiet port? stale pipeline state on a cold path? something else) and cycle 56 of the
+original soak remains an unexplained exception to the "always first-after-gap" pattern.
+
+Verification: both new scripts (`clean_traffic_only_probe.py`, `idle_gap_probe.py`) syntax/import
+checked; full existing suite re-run clean after each (295/295, no regressions). Switch confirmed
+clean and idle afterward, wire-reduction binary live, gate agent healthy.
+
+**Where this leaves the investigation**: four ruled-out/confirmed findings now stand --
+not physical loss, not ambient noise, not injector writes, and IS correlated with post-idle
+bursts. The mechanism itself remains open. The next concrete step (not attempted today,
+deliberately, to avoid open-ended improvisation on shared hardware) is the packet-level mirror
+trace, now armed with a much better trigger condition (deliberately idle, then one burst) than
+"run hundreds of cycles and hope." Full record, all four checks, in
+`docs/review/artifacts/HW-LEDGER-WIRE-REDUCTION-SOAK-ANOMALY-2026-09-02.md`.
+
+## Status (2026-09-02, later still) — mirror trace built; found it can't fire at all (second, separate defect)
+
+Per "wire up the mirror trace for the next session" and "diagnose the system in full, not in
+part," built the follow-up instrumentation THIS session instead of deferring it, and ran it to a
+real, if unexpected, conclusion.
+
+Built: `install_mirrors(gc, bfrt, tgt, collector_dp=9)` run against the live switch (confirmed via
+direct `$mirror.cfg` readback that session 2 -- the one gap events use -- is configured
+identically to session 1, which works); `controller/hw_adapter.py` copied to Vision (pure stdlib,
+runs standalone, no offline round-trip needed); new `p4/hw/loop/mirror_trace_listener.py`, a raw
+`AF_PACKET` listener on Vision parsing every mirror copy live.
+
+**The pipeline works** -- confirmed via an independent `tcpdump` capture (real 0x88f1 frames
+arrive with the exact expected MAC addresses) and the listener itself correctly capturing 3
+genuine sampled copies during ordinary traffic.
+
+**It could not catch the soak anomaly, because gap-event mirrors do not appear to fire at all**:
+three independent, deterministic, substantial injected drops (5, 5, 15 packets, two different
+sublinks) each correctly registered on the ledger's own register math (proving
+`md.wit_result.gap` WAS computed nonzero for the closing packet) -- yet zero produced a
+`gap_event` mirror copy, despite `set_gap_event()`'s trigger condition reading exactly that same
+value on exactly that same packet, and its mirror session being proven identically configured to
+the one that works. This is a **second, separate, real defect**, not caused by today's
+wire-reduction pass (the code is unmodified) -- likely never exercised on real hardware since the
+receiver-ledger redesign moved to controller-side register polling as the primary signal and the
+mirror path was left behind, untested. Root cause not established within this session's budget;
+named as its own dedicated follow-up.
+
+**Consequence**: the mirror-trace plan is blocked on this being fixed first. Everything needed to
+resume the moment it is fixed is left in place and documented: the listener, `hw_adapter.py` on
+Vision, mirror sessions configured, and the idle-gap trigger condition from the prior check ready
+to arm on.
+
+Verification: new listener script syntax-checked; full existing suite re-run clean (295/295).
+Switch confirmed healthy afterward (identity check, `bf_switchd` pid unchanged), gate agent
+restored after the two brief stop/restart cycles needed to bind for the mirror-config and
+verdict-table reads (setup_attention.py and raw bfrt reads both require the exclusive bind
+gate_agent otherwise holds).
+
+Full record of all five checks run today (physical loss ruled out, ambient noise ruled out,
+injector writes ruled out, idle-then-burst confirmed probabilistically, and now the mirror-path
+defect): `docs/review/artifacts/HW-LEDGER-WIRE-REDUCTION-SOAK-ANOMALY-2026-09-02.md`.
+
+## Status (2026-09-02, later still) — gap-event mirror defect: root-caused as pre-existing, not ours
+
+Static check first (no hardware): read the `phv.json` allocation data from both compiled binaries.
+`md.wit_result.gap` is written once (stage 5, `wit_measure()`) and read correctly downstream
+(stage 6 verdict, stage 11 `set_gap_event()`) with no conflicting write in between -- ruled out a
+PHV-corruption explanation.
+
+Two decisive checks then settled it:
+
+1. **Attention side-effect proves gap detection works internally.** `G 4` (read live attention)
+   returned `ATTN 4 11264 760` -- `11264 - 4096 = 7168 = 7*1024 (k_up)`, i.e. seven whole
+   exceedance increments already banked. `md.exceed` only gets set via `tbl_wit_arm`, gated on
+   `md.wit_result.gap != 0`. This proves gap DETECTION has been firing correctly, repeatedly,
+   all day -- the defect is narrowly in the mirror COPY of that event, not the detection itself.
+2. **Direct A/B settled causation.** `set_gap_event()` reads the gap value at the single highest
+   MAU stage in BOTH binaries (stage 10/11 pre-change, stage 11/12 post-change) -- same relative
+   position, ruling out "pushed past a threshold by the new stage" as the mechanism. Confirmed by
+   re-testing directly: took the pre-wire-reduction binary live again (still sealed on the switch),
+   installed its own mirror sessions, hit it with the identical deterministic 5-packet drop.
+   **Same result** -- ledger registers showed the exact gap (20 seq/15 obs), zero mirror copies
+   arrived. Identical failure on the UNMODIFIED binary.
+
+**Conclusive: this defect pre-dates the wire-reduction pass and is fully independent of it.**
+Standing defect in the receiver ledger's inherited mirror-notification path, apparently never
+exercised on real hardware since the redesign moved the primary signal to register polling.
+Not this session's bug to fix; today's wire-reduction work is exonerated. Wire-reduction binary
+restored as live afterward and re-verified functionally (fresh burst counted exactly right on
+every sublink). Full record: `docs/review/artifacts/HW-LEDGER-WIRE-REDUCTION-SOAK-ANOMALY-2026-09-02.md`.
+
+**Philip's observation, acted on**: this is exactly the "assumed it holds, never re-verified after
+a later change" pattern -- the receiver-ledger redesign kept the old mirror code because "it didn't
+change," without re-testing it under the new design. Dispatched a fork to audit the project's other
+status/verification documents for the same pattern. Findings, confirmed independently where cheap
+to check (`docs/review/artifacts/ASSUMPTION-AUDIT-2026-09-02.md`):
+
+1. **Root cause traced to its origin** (closed): the 2026-09-01 receiver-ledger redesign plan
+   explicitly deferred deleting the ingress attention/gate loop as a "separate, smaller follow-up,"
+   and the compile gate verified it only for stage cost, never function. Disclosed on paper two
+   days ago; nobody tested the disclosed gap until it became a live defect today.
+2. **Open, high concern**: `set_audit_receipt()`/`set_audit_gap_event()` use the identical broken
+   mirror mechanism. `VERIFICATION-2026-08-29.md`'s PASS for the audit path only tested unauthorized
+   traffic in the MODEL, never an authorized receipt on real hardware. If this is also broken, the
+   whole planned counterfactual-observability/evidence-lease design has a hidden blocker. NOT yet
+   tested -- needs a new `tbl_audit_steer` control-plane entry plus crafted audit-flagged traffic,
+   which is new setup beyond today's already-authorized work. Flagged for a decision, not run
+   unilaterally given how much hardware time this session has already used.
+3. **Confirmed, moderate**: `CAMPAIGN-PLAN.md`'s B1/B4/B5 blocker closures cite "current compile
+   11/4" -- that's `mcp_fabric_gate_event.p4`'s stage count, not the ledger's actual 11/5, and were
+   never re-verified against the ledger's real schema. B1's underlying mechanism (`tbl_eg_fail`) is
+   independently confirmed working via today's own extensive use of it, so this is stale citation,
+   not necessarily a functional gap for B1 specifically -- B4/B5 remain genuinely unchecked.
+4. **Already tracked**: PREREG.md v1.9 self-discloses that §1/§3/§7.4 describe the retired design;
+   no new action beyond what WORKING_NOTES already tracked.
+
+**Closed, same session, on "Go on and treat 3 as well. Close all these and resume":**
+
+- **Item 2 closed -- audit-receipt mirror confirmed broken, second call site of the one defect.**
+  No bind cycle needed: `gate_agent.py`'s `U <udp_dst> <udp_src> <spray>` installs the
+  `tbl_audit_steer` entry. Wrote `p4/hw/loop/audit_probe.py` (multicontext_probe recipe, UDP
+  4792/<token>, 64 B payload per the PTF `host_packet`). Discriminator was register-observable,
+  not the mirror: the same 5-tuple hashes to spray 1 (sublink 16, +10/+10 twice) but with the
+  audit entry declared lands on spray 0 (sublink 0, +10/+10) -- only `set_audit_spray()` does that,
+  and it sets `md.is_audit=1` in the same statement. All 10 counted exactly; zero
+  `FLAG_AUDIT_RECEIPT` copies. Caveat stated in the doc: hop!=0 re-derivation of is_audit is
+  inferred from identical matching, not directly observed. A quarantine leg was a no-op (hash
+  already on spray 1) and is reported as proving nothing. Entry and quarantine cleared after.
+- **Item 3 closed -- B4 re-verified against the deployed program; it did NOT hold.** Re-ran
+  `p4/hw/setup_audit.py` (offline, like the original closure) on the ledger schema: exit 1, two
+  "required and unplanned" tables -- `tbl_eg_bern` (added by the ledger redesign, never exempted)
+  and `tbl_wit_link_recon` (today's table, no planner registered). Fixed both in
+  `setup_audit.py` (evidence-cited exemption; planner mapped to `plan_wit_link_recon()`). Ledger
+  now PASS 12 planned/0 unplanned; gate_event schema unchanged (no regression). `CAMPAIGN-PLAN.md`
+  B1/B4 rows corrected in place with dated notes. `--live` not run (needs the bind gate_agent holds).
+- Item 4 unchanged (already tracked). Full write-up: `docs/review/artifacts/ASSUMPTION-AUDIT-2026-09-02.md`.
+
+**CORRECTION (same day, on "Go on"): the "mirror-emission defect" does not exist — it was my
+instrument.** Root-causing it statically (PHV/assembler showed `set_gap_event` writing
+`mirror_type`/`mirror_sid` correctly at the last stage, same relative placement as the working
+program) pushed me to check the CAPTURE side, and `HW-CLOSED-LOOP.md` names the exact trap: defect
+#1 (a bare `AF_PACKET` socket doesn't join promiscuous mode, so Vision's NIC hardware-drops mirror
+copies addressed to `a5:a5:a5:a5:a5:a5`) and #4 (`ETH_P_ALL` buries them behind production). My
+`mirror_trace_listener.py` had BOTH bugs; `controller_loop.open_mirror_socket()` already fixes them
+and says so in a comment I didn't copy. The one time the old listener saw copies, a `tcpdump`
+(promisc-enabling) was running alongside it. After fixing the listener (join `PACKET_MR_PROMISC`,
+bind on `MIRROR_ETYPE`): the gap-event mirror fired immediately (`vlink=2 flags=0x9
+path_id=0xFFFB`) and the audit-receipt mirror fired (10 copies, `flags=0x10/0x11`, declared
+sublink, seq 21..30). **Both mirror paths are healthy; there is no P4 defect.**
+
+This was a real error on my part: I concluded a hardware defect from an unvalidated instrument and
+carried it across multiple docs before the "0 copies, always, clean" all-or-nothing pattern (the
+exact CLAUDE.md cross-check #5 signature) got checked. Corrected in the open across
+`HW-LEDGER-WIRE-REDUCTION-SOAK-ANOMALY-2026-09-02.md` and `ASSUMPTION-AUDIT-2026-09-02.md`.
+
+**What survives the correction (all register-observable, never mirror-dependent)**: the original
+soak anomaly (stray 1-packet miscounts on unmeasured sublinks); the idle-then-burst correlation;
+the 0/100-vs-2/57 comparison; wire-reduction injected-loss recovery 157/157; the is_audit spray-pin
+proof; item 3's `setup_audit.py` fixes. **What it opens**: the mirror trace now WORKS, so the
+original soak anomaly is diagnosable after all — idle-then-burst trigger + the fixed listener is
+the concrete, no-longer-blocked next step.
+
+**Standing state**: switch idle and clean (wire-reduction binary live, nothing armed, audit
+declaration cleared, quarantine deleted); `mirror_trace_listener.py` fixed and in the repo.
+
+## Status (2026-09-02, later still) — traced idle-gap run: anomaly didn't fire; mirror-sampling confound resolved
+
+Used the now-working mirror trace to go after the original soak anomaly: idle-gap probe (3 trials,
+90s idle) with attention raised to ~100% on both spray paths (originals 26624/70 + 4096/20 saved
+and restored). Outcome, honestly: **the register-observable anomaly did not reproduce this run**
+(0/6 legs; it's ~50%/idle-burst, so 0/3 is unlucky ~12% but unremarkable). The mirror trace itself
+worked (956 copies, 1 explained gap event on sublink 14's known bring-up-noise baseline).
+
+**Confound found and resolved rather than over-read** (having just been burned once): at ~100%
+sampling the mirrored-arrival counts showed occasional single shortfalls (39/40, 19/20), but the
+ground-truth registers for those exact sublinks (10, 170) read 125/125 perfectly balanced -- the
+shortfalls were dropped MIRROR COPIES (HW-CLOSED-LOOP.md #2/#8), not data loss. Lesson: a ~100%
+mirror firehose can't do exact per-packet accounting; registers are ground truth, mirror is a lossy
+sampler. Corrected next-session instrument design recorded in the soak-anomaly doc §6: register
+check as the TRIGGER, and only on a real Δseq/Δobs flag inspect a LOW-VOLUME BPF-filtered mirror
+capture scoped to that sublink (à la controller_loop's attach_mirror_filter) -- not a broad
+high-sampling capture. Switch left clean, attention restored, regression 295/295.
+
+## Status (2026-09-02, later still) — register-triggered hunt (6 trials): did NOT reproduce; trigger reading walked back
+
+Ran the §6 design correctly: normal attention (no capture-loss confound), fixed listener, register
+check as trigger, 6 idle-gap trials (~98% to catch it IF the rate were ~50%/idle-burst). Result:
+**0/6 legs flagged, 0 gap-event copies.** Combined with the previous traced run that is **0 hits in
+9 idle-bursts**.
+
+**Honest walk-back (integrity):** my earlier "idle-then-burst confirmed ~50% (3/5)" was a
+small-sample read; with the new data it's **3/14**, and two clean runs at 0/9 mean the "any 90s
+idle then burst" trigger does NOT reliably fire it in the current heavily-warmed fabric. What still
+stands: the anomaly IS real (original soak 2/57 + matched 0/100-vs-2/57, never in doubt). Refined
+hypothesis, better-supported by the data: the three earliest hits shared "early in session / near a
+fresh program load" more tightly than "90s idle" -- so the likely trigger is **genuinely-cold
+fabric (first burst after a fresh load)**, which the warmed state no longer provides. Soak-anomaly
+doc §7 has the full reasoning.
+
+**PI call: stopped the live chase.** 0/9 means more idle-gap trials are low information-per-cost;
+won't keep cycling shared hardware on a just-weakened trigger. Honest next experiment (not run this
+session, needs its own bring-up budget): a fresh-bringup-first-burst protocol -- cold-load, send
+one burst immediately, repeat -- register check as trigger, low-volume/BPF-filtered mirror ready.
+Switch clean, attention at normal (26624/70, 4096/20), nothing armed, regression 295/295.
+
+<!-- AUTO-HANDOFF (PreCompact/auto) 2026-09-02T17:13:07Z -->
+### Compaction handoff — 2026-09-02T17:13:07Z
+- Git: branch `master`, 26 uncommitted file(s): README.md docs/review/BEHAVIORAL-SUBLINK-PLAN.md docs/review/CAMPAIGN-PLAN.md docs/review/HEALTH-GATE-RESULT.md docs/review/P2-P3-INDEPENDENT-AUDIT.md docs/review/P3-DYNAMIC-RESULT.md docs/review/P3-FEEDBACK-RESULT.md docs/review/artifacts/HW-CLF-FRONTIER-PLACEMENT.md docs/review/artifacts/HW-CLF-STARVED-SWEEP.md docs/review/artifacts/HW-CLF-VS-CW4.md docs/review/artifacts/HW-SELECTIVE-DETECTION.md docs/review/artifacts/P3-EVENT-AUDIT-9.13.1.md 
+- Last verification run recorded: 2026-09-02T16:55:16Z	cd /home/philip/Projects/mcp python3 -c " # Wall-clock time-to-detect, stated assumption explicitly: a 25G link (this # 
+- RESUME: re-read the Task/Status/Next-action sections above; trust this file over recollection.

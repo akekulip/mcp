@@ -145,16 +145,16 @@ header csig_h {
     bit<16> epoch;          // idem (tbl_final action data): egress only touches worst_*
 }
 
-/* ---- M2 order witness (variant W4: 4 bytes, explicit link id + sequence) ----
- * As W2, but the upstream egress also stamps the directed vlink id, so the
- * downstream does not have to infer link identity from its ingress port.
- *
- * link_id and seq are adjacent 16-bit fields and therefore share one 32-bit PHV
- * container.  Their egress sources differ (tbl_eg_vlink action data vs the SALU
- * return), which is exactly bf-p4c Class 13.  Mitigation is the csig_replace_a/b
- * precedent: two actions in two tables, each supplying one source. */
+/* ---- M2 order witness (2 bytes: sequence only, overhead-reduction pass
+ * 2026-09-02) ----
+ * W4 used to also carry an explicit directed-link id (link_id) so the
+ * downstream would not have to infer link identity from its ingress port.
+ * That id is redundant: the receiving hop's ingress port plus the
+ * already-carried hdr.fabric.spray name exactly one directed vlink, the same
+ * pair tbl_eg_vlink used to pick link_id in the first place (see
+ * tbl_wit_link_recon below). Dropping it halves the wire cost of this header
+ * with no loss of information. */
 header wit_h {
-    bit<16> link_id;
     bit<16> seq;
 }
 
@@ -417,13 +417,12 @@ parser IgParser(packet_in pkt, out headers_t hdr, out ig_md_t md,
 
     /* The witness rides with the CSIG tag: act_enter sets nxt = NXT_CSIG and
      * validates both, so one parser state covers every fabric pass.  md.wit_link
-     * is a same-width 16->16 copy (the silicon byte-aliasing of an 8->16 parser
-     * cast is why every carried field in this program is 16 bits), and it is
-     * assigned ONLY here — a Tofino parser field may be written in one state per
-     * path, which is why the start state does not zero it. */
+     * is no longer read off the wire (overhead-reduction pass 2026-09-02) -- it
+     * is reconstructed at ingress by tbl_wit_link_recon, keyed on this packet's
+     * own ingress port and hdr.fabric.spray, which is already parsed by the time
+     * that table applies. */
     state parse_witness {
         pkt.extract(hdr.witness);
-        md.wit_link = hdr.witness.link_id;
         transition parse_ipv4;
     }
 
@@ -482,6 +481,51 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
         actions = { set_role; }
         size    = 64;
         const default_action = set_role(ROLE_OTHER, 0, 0);
+    }
+
+    /* ---- overhead-reduction pass 2026-09-02: reconstruct the arriving directed
+     * link locally instead of reading it off the wire (formerly hdr.witness.
+     * link_id, C-W4). The sending hop's egress picked link_id from ITS OWN
+     * (egress_port, egress_qid) via tbl_eg_vlink; the receiving hop's ingress
+     * port is that same egress port's loopback peer, so (ingress_port, the
+     * already-carried hdr.fabric.spray) names exactly the same directed vlink.
+     * Loop ports match spray EXACTLY -- each (port, spray) pair is exactly one
+     * vlink; host/NIC ports don't care (spray is meaningless before a packet has
+     * entered the fabric) and fall through to the default 0, which is never read
+     * (md.wit_link is only consumed under hdr.witness.isValid()).
+     *
+     * This table supplies ONLY the vlink upper bits (wit_vlink_base = vlink << 4,
+     * low nibble 0) -- mirroring set_eg_vlink's vlink_base exactly. The ctx low
+     * nibble is NOT baked in here: ctx is tbl_context's fresh, per-packet
+     * classification of THIS packet's own IP header (size bin x DSCP class), not
+     * a function of (port, spray) -- a link can carry many contexts, so a
+     * constant per-entry ctx would mislabel every packet whose real class
+     * differs. tbl_wit_ctx_index composes it in a second step, once md.ctx is
+     * live, exactly as tbl_eg_vlink + tbl_ctx_index do on the sending side. */
+    action set_wit_link(bit<16> wit_vlink_base) {
+        md.wit_link = wit_vlink_base;
+    }
+
+    table tbl_wit_link_recon {
+        key     = { ig_intr_md.ingress_port : exact; hdr.fabric.spray : ternary; }
+        actions = { set_wit_link; }
+        size    = 32;
+        const default_action = set_wit_link(0);
+    }
+
+    /* Composes the ctx low nibble into md.wit_link, mirroring ctx_index() on the
+     * egress side. Must run AFTER tbl_context.apply() (md.ctx is fresh only from
+     * there) and after tbl_wit_link_recon.apply() (this only overwrites the low
+     * nibble). Class 11: a keyless table cannot default to a computed action, so
+     * this uses the same NXT_CSIG const-entry pattern as tbl_ctx_index. */
+    action wit_ctx_index() { md.wit_link[3:0] = md.ctx[3:0]; }
+
+    table tbl_wit_ctx_index {
+        key     = { hdr.fabric.nxt : exact; }
+        actions = { wit_ctx_index; @defaultonly NoAction; }
+        size    = 4;
+        const default_action = NoAction();
+        const entries = { NXT_CSIG : wit_ctx_index(); }
     }
 
     /* ---- H35: provenance for the audit path (campaign blocker B5) ---------------
@@ -1139,7 +1183,6 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
          * halves from one constant source in ONE ingress action is legal; the
          * same pair written from two different sources in egress is not. */
         hdr.witness.setValid();
-        hdr.witness.link_id   = 0;
         hdr.witness.seq       = 0;
     }
 
@@ -1215,6 +1258,7 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
 
     apply {
         tbl_port_role.apply();
+        tbl_wit_link_recon.apply();
 
         /* §3 carriage detail 2.  The fabric ethertype is internal-only, so a frame
          * carrying it that arrives on a HOST port is injected, not looped: drop it.
@@ -1225,6 +1269,7 @@ control Ingress(inout headers_t hdr, inout ig_md_t md,
         } else {
             tbl_dst_leaf.apply();
             tbl_context.apply();
+            tbl_wit_ctx_index.apply();
 
             /* Drawn on EVERY fabric pass (each pass crosses one virtual link), and
              * drawn here rather than next to tbl_fail so it co-places with the other
@@ -1429,16 +1474,15 @@ control Egress(inout eg_headers_t hdr, inout eg_md_t md,
         }
     };
 
-    action wit_stamp() { hdr.witness.seq     = wit_next.execute(md.sublink); }
-    action wit_link()  { hdr.witness.link_id = md.sublink; }
+    action wit_stamp() { hdr.witness.seq = wit_next.execute(md.sublink); }
 
     /* Class 11 again: a keyless table cannot make a computed-index stateful action
      * its default.  hdr.fabric.nxt has a two-value compile-time domain, so const
      * entries cost nothing and express the intent (stamp the tag stack only).
      *
-     * Class 13: link_id and seq share a 32-bit container and their sources differ
-     * (tbl_eg_vlink action data vs the SALU return), so they are written by two
-     * actions in two tables — the csig_replace_a / csig_replace_b precedent. */
+     * wit_h carries only seq now (overhead-reduction pass 2026-09-02 dropped
+     * link_id), so the Class-13 two-table split this comment used to describe no
+     * longer applies to this header -- kept as a single table, single action. */
     /* ===================== TX FRONTIER (the sender's departure count) =============
      * A free-running count of packets this switch actually PUT ON a directed sublink.
      * Its old partner, the CLF RX frontier, is gone; its partner now is the receiver
@@ -1522,14 +1566,6 @@ control Egress(inout eg_headers_t hdr, inout eg_md_t md,
         const entries = { NXT_CSIG : wit_stamp(); }
     }
 
-    table tbl_wit_link {
-        key     = { hdr.fabric.nxt : exact; }
-        actions = { wit_link; @defaultonly NoAction; }
-        size    = 4;
-        const default_action = NoAction();
-        const entries = { NXT_CSIG : wit_link(); }
-    }
-
     /* ---- H39a: POST-STAMP fault injection (campaign blocker B1) -----------------
      * The ingress injector tbl_fail cannot produce a witness gap.  It runs AFTER
      * tbl_wit_check, so a packet is counted by the downstream witness and only then
@@ -1538,7 +1574,7 @@ control Egress(inout eg_headers_t hdr, inout eg_md_t md,
      * requires loss strictly BETWEEN the upstream egress deparser and the downstream
      * ingress check, and until now no table occupied that window.
      *
-     * This table does.  It runs immediately after tbl_wit_stamp / tbl_wit_link, so
+     * This table does.  It runs immediately after tbl_wit_stamp, so
      * the packet has already consumed a sequence number from reg_wit_seq and already
      * carries it in hdr.witness.seq; eg_dprsr_md.drop_ctl then discards the frame in
      * the egress deparser.  The counter advances, the packet never arrives, and the
@@ -1595,8 +1631,8 @@ control Egress(inout eg_headers_t hdr, inout eg_md_t md,
      * p = (range width) / 65536 and the silicon campaign can be run at the same rates
      * the simulator uses.
      *
-     * It sits in the same post-stamp window as tbl_eg_fail -- after tbl_wit_stamp /
-     * tbl_wit_link, so the sequence number has already been consumed and the loss is
+     * It sits in the same post-stamp window as tbl_eg_fail -- after tbl_wit_stamp,
+     * so the sequence number has already been consumed and the loss is
      * visible to the downstream ledger as a hole.  Being placed before the CSIG compare
      * is incidental, NOT a saving: eg_dprsr_md.drop_ctl is honoured at the egress
      * DEPARSER, so tbl_csig_diff and the replace tables still execute on a doomed
@@ -1698,7 +1734,6 @@ control Egress(inout eg_headers_t hdr, inout eg_md_t md,
             md.clf_tx_idx = md.sublink;
             tbl_tx_frontier.apply();
             tbl_wit_stamp.apply();
-            tbl_wit_link.apply();
             tbl_eg_fail.apply();     /* H39a: drop AFTER the sequence is consumed */
             md.eg_rnd = rng_eg_bern.get();
             tbl_eg_bern.apply();     /* the stochastic arm, same window */

@@ -156,11 +156,12 @@ class TestScopeOfThePerStageFigures(unittest.TestCase):
         self.assertEqual(set(iso["S1_parse_copy"]), {"median_us", "p95_us", "p99_us", "n"})
         self.assertEqual(iso["S1_parse_copy"]["n"], SMALL)
         self.assertGreater(iso["S1_parse_copy"]["median_us"], 0.0)
-        self.assertEqual(iso["frame_bytes"], 106,
+        self.assertEqual(iso["frame_bytes"], 104,
                          "a C-W4 gap-event copy: mirror_h 30 + eth 14 + fabric_h 12 + csig_h 14 "
-                         "+ witness 4 + payload 32; a plain data copy is 76 B and parses shallower")
+                         "+ witness 2 (overhead-reduction pass 2026-09-02 dropped link_id) "
+                         "+ payload 32; a plain data copy is 76 B and parses shallower")
         self.assertIn("isolated reference", self.report)
-        self.assertIn("frame parsed: 106 B", self.report)
+        self.assertIn("frame parsed: 104 B", self.report)
 
     def test_report_says_which_figures_may_be_cited(self):
         self.assertIn("TOTAL and S3 are the figures this project cites", self.report)

@@ -1,0 +1,3 @@
+{"trial": 1, "timestamp": 1788379307.710449, "control_mismatches": [], "test_mismatches": []}
+{"trial": 2, "timestamp": 1788379409.6562967, "control_mismatches": [], "test_mismatches": []}
+{"trial": 3, "timestamp": 1788379514.6760633, "control_mismatches": [], "test_mismatches": [{"sublink": 14, "delta_seq": 21, "delta_obs": 20}]}

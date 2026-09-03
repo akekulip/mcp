@@ -7,6 +7,38 @@ import setup_attention
 import setup_skeleton
 
 
+class WitLinkReconControlPlaneTest(unittest.TestCase):
+    """plan_wit_link_recon() must be the exact topological mirror of plan_eg_vlink():
+    same (leaf, spine) space, ingress port swapped to the sending egress port's
+    loopback peer, same vlink number. This is what LEDGER-WIRE-REDUCTION-2026-09-02.md
+    argues by hand; pin it so a future edit to either planning function can't drift
+    the two apart silently."""
+
+    def test_only_the_ledger_program_has_wit_link_recon(self):
+        self.assertTrue(setup_attention.has_wit_link_recon("mcp_fabric_ledger"))
+        self.assertFalse(setup_attention.has_wit_link_recon("mcp_fabric_cw4"))
+        self.assertFalse(setup_attention.has_wit_link_recon("mcp_fabric"))
+
+    def test_recon_rows_mirror_eg_vlink_rows_via_the_loopback_peer(self):
+        recon_rows = setup_attention.plan_wit_link_recon()
+        self.assertEqual(len(recon_rows), 16)
+        self.assertEqual(len(set((p, s) for p, s, _ in recon_rows)), 16,
+                         "every (ingress_port, spray) key must be unique")
+
+        eg_rows = setup_attention.plan_eg_vlink()
+        for leaf in range(4):
+            up_port = setup_attention.LOOP_UP_DP[leaf]
+            dn_port = setup_attention.LOOP_DN_DP[leaf]
+            up_vlinks = {v for p, _q, v in eg_rows if p == up_port}
+            dn_vlinks = {v for p, _q, v in eg_rows if p == dn_port}
+            recon_at_dn = {v for p, _s, v in recon_rows if p == dn_port}
+            recon_at_up = {v for p, _s, v in recon_rows if p == up_port}
+            self.assertEqual(recon_at_dn, up_vlinks,
+                             "packets egressing %d arrive on its peer %d" % (up_port, dn_port))
+            self.assertEqual(recon_at_up, dn_vlinks,
+                             "packets egressing %d arrive on its peer %d" % (dn_port, up_port))
+
+
 class Cw4ControlPlaneTest(unittest.TestCase):
     def test_baseline_egress_vlink_action_keeps_original_shape(self):
         self.assertEqual(setup_attention.eg_vlink_action_fields(9, contextual=False),

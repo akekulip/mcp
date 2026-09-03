@@ -161,7 +161,7 @@ def build_gap_copy(vlink: int, context: int, epoch: int, gap: int, attn: int) ->
         attn=attn, next_hop=2, inner_etype=FABRIC_ETYPE,
         csig={"worst_hop": 1, "worst_vlink": sublink, "worst_qdepth": 0, "worst_tdelta": 0,
               "path_id": gap, "epoch": epoch},
-        witness={"link_id": sublink, "seq": gap})
+        witness={"seq": gap})
 
 
 def build_event_stream(seed: int, n: int, arm: str) -> List[bytes]:

@@ -360,6 +360,42 @@ else
     fi
 fi
 
+# ============================================== 5c. loaded-setup receipt
+# gate_agent_core.verify_loaded_setup() (added on the switch, pulled back in commit
+# b1a5ec1) refuses to start unless <PROG>.loaded-setup.sha256 exists and names the
+# CURRENT bf_switchd pid, this machine's stable switch identity, and the sealed
+# setup-manifest hash. Nothing wrote this receipt until 2026-09-02's wire-reduction
+# hardware pass hit it as a hard failure -- deploy.sh/bringup.sh predate the guard.
+# Writing it here, right after setup succeeds, closes that gap for every future
+# bring-up instead of requiring the same manual receipt each time.
+hw_step "5c. write the loaded-setup receipt gate_agent.py requires to start"
+SETUP_RECEIPT="${REMOTE_DIR}/${PROG}.loaded-setup.sha256"
+SETUP_SEAL=$(hw_ssh_script "write loaded-setup receipt" <<EOF
+set -eu
+cd '${REMOTE_DIR}'
+pid=\$(pgrep -x bf_switchd) || { echo "no bf_switchd running"; exit 9; }
+[ "\$(printf '%s\n' "\$pid" | wc -l)" -eq 1 ] || { echo "expected exactly one bf_switchd, found: \$pid"; exit 9; }
+switch_identity=\$(python3 -c "
+import pathlib, socket, hashlib
+machine_id = pathlib.Path('/etc/machine-id').read_text()
+hostname = socket.gethostname()
+normalized = '%s\n%s\n%d\n' % (machine_id.strip(), hostname.strip(), 0)
+print(hashlib.sha256(normalized.encode('utf-8')).hexdigest())
+")
+setup_identity=\$(sha256sum '${SETUP_MANIFEST}' | awk '{print \$1}')
+tmp='${SETUP_RECEIPT}.tmp.'\$\$
+printf '%s %s %s\n' "\$pid" "\$switch_identity" "\$setup_identity" > "\$tmp"
+mv "\$tmp" '${SETUP_RECEIPT}'
+cat '${SETUP_RECEIPT}'
+EOF
+) || { printf '%s\n' "$SETUP_SEAL" | sed 's/^/   /'; hw_die "could not write the loaded-setup receipt"; }
+if is_dry; then
+    hw_say "[dry-run] would write ${SETUP_RECEIPT} as '<bf_switchd pid> <switch identity> <setup-manifest sha256>'."
+else
+    printf '%s\n' "$SETUP_SEAL" | sed 's/^/   /'
+    hw_pass "loaded-setup receipt written: ${SETUP_RECEIPT}"
+fi
+
 # ================================================================ 6. port check
 hw_step "6. wait up to ${PORT_TIMEOUT}s for all loop pairs and host ports"
 hw_info "loop pairs (5/k <-> 6/k): ${LOOP_PAIRS[*]}   host ports: ${HOST_DPS[*]}"

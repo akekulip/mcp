@@ -81,6 +81,10 @@ EXEMPT: Dict[str, str] = {
                 "and hw_adapter.py:496 reads its counters as ground truth",
     "tbl_eg_fail": "post-stamp fault injector; empty is the healthy state and hardware "
                    "campaigns arm exact sublink/sequence ranges only for controlled trials",
+    "tbl_eg_bern": "Bernoulli post-stamp fault injector (receiver-ledger redesign, 2026-09-01); "
+                   "empty is the healthy state (const default eg_bern_none forwards). Armed per "
+                   "trial by p4/ptf/test_ledger.py arm_bernoulli() and cleared in its setUp; the "
+                   "runtime two-entry range tiling is LEDGER-COMPILE-GATE.md section 5",
     "tbl_health_gate": "quarantine state written at run time by "
                        "controller/sublink_feedback.py:257; empty = nothing quarantined",
     "tbl_audit_steer": "armed per audit round by controller/sublink_feedback.py:287, "
@@ -144,6 +148,8 @@ def _planners() -> Dict[str, Tuple[int, str]]:
     else:
         out["tbl_gate"] = (len(at.plan_gate()), "setup_attention.plan_gate()")
         out["tbl_eg_vlink"] = (len(at.plan_eg_vlink()), "setup_attention.plan_eg_vlink()")
+        out["tbl_wit_link_recon"] = (len(at.plan_wit_link_recon()),
+                                     "setup_attention.plan_wit_link_recon()")
         out["tbl_exceed_evid"] = (2, "setup_attention.set_thresh_evid() writes 2 rows")
         out["tbl_exceed_csig"] = (1, "setup_attention.set_thresh_csig() writes 1 row")
         out["tbl_evid_fwd"] = (1, "setup_attention.install_evid_fwd() writes 1 row")

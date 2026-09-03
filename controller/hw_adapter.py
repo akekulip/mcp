@@ -72,7 +72,12 @@ FLAG_GAP_EVENT, FLAG_AUDIT_RECEIPT = 0x8, 0x10
 _MIRROR_META = struct.Struct("!HHHHH")     # next_hop vlink path_id attn flags (tstamp48 apart)
 _FABRIC = struct.Struct("!HHHHBBBB")
 _CSIG = struct.Struct("!HHHIHH")
-_WITNESS = struct.Struct("!HH")
+# Overhead-reduction pass 2026-09-02 (docs/review/artifacts/LEDGER-WIRE-REDUCTION-2026-09-02.md):
+# wit_h dropped link_id from the wire (seq only now). The receiver reconstructs md.wit_link from
+# its own ingress port + hdr.fabric.spray instead of reading it, so there is no wire-carried
+# link_id left to copy into a mirror and no independent second source to cross-check mirror_h.vlink
+# against -- that check (below) is gone by necessity, not by oversight.
+_WITNESS = struct.Struct("!H")
 
 
 # ----------------------------------------------------------------------------- encoding
@@ -153,8 +158,8 @@ def parse_copy(buf: bytes) -> Dict[str, Any]:
             if out["gap_event"] or out["audit_receipt"]:
                 if len(inner) < off + _WITNESS.size:
                     raise ValueError("event copy is missing the copied C-W4 witness")
-                link_id, seq = _WITNESS.unpack_from(inner, off)
-                out["witness"] = {"link_id": link_id, "seq": seq}
+                seq, = _WITNESS.unpack_from(inner, off)
+                out["witness"] = {"seq": seq}
                 off += _WITNESS.size
                 if out["audit_receipt"] and len(inner) >= off + 20:
                     version_ihl = inner[off]
@@ -167,8 +172,13 @@ def parse_copy(buf: bytes) -> Dict[str, Any]:
     if out["gap_event"] or out["audit_receipt"]:
         if out["csig"] is None or out["witness"] is None:
             raise ValueError("event copy requires copied CSIG epoch and C-W4 witness")
-        if out["witness"]["link_id"] != out["vlink"]:
-            raise ValueError("event sublink mismatch between witness and mirror metadata")
+        # No mirror-vs-witness cross-check here anymore: mirror_h.vlink IS md.wit_link, and
+        # since the overhead-reduction pass md.wit_link is reconstructed at ingress (port +
+        # spray + ctx) rather than copied from a wire-carried link_id, there is no longer an
+        # independent second value in this same copy to check it against. The equivalent
+        # validation now happens once, at bring-up, against the installed
+        # tbl_wit_link_recon/tbl_context entries (setup_attention.py + the hardware compile
+        # gate) rather than per-packet here.
     if out["gap_event"]:
         if out["path_id"] == 0:
             raise ValueError("gap event carries a zero discontinuity")
@@ -201,7 +211,7 @@ def build_copy(vlink: int, pid: int, flags: int, tstamp_ns: int, attn: int = 409
                                 csig.get("worst_qdepth", 0), csig.get("worst_tdelta", 0),
                                 csig.get("path_id", pid), csig.get("epoch", 0))
             if witness:
-                inner += _WITNESS.pack(witness.get("link_id", 0), witness.get("seq", 0))
+                inner += _WITNESS.pack(witness.get("seq", 0))
     if udp_src_port is not None or udp_dst_port is not None:
         if udp_src_port is None or udp_dst_port is None:
             raise ValueError("both UDP ports are required")
