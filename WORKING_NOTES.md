@@ -2320,3 +2320,22 @@ clean positive eval the paper needs. Switch left clean, injectors cleared, gate 
 The paper (ToN/IMC per the framing memo) now has its silicon anchor: MCP's side of the head-to-head
 is MEASURED, not modelled -- exact per-link loss recovery to 1e-4 with FP=0 and exact localization,
 in the regime where the passive baselines fail.
+
+## Status (2026-09-03) — evidence base COMPLETE; paper spine written; ready for writeup
+
+All measurement-paper experiments the framing memo asked for are done and committed (Philip-alone):
+- Silicon detection/localization fidelity incl. Bernoulli + downlink (114ffc8, 35837cb) -- MCP's
+  side measured on real Tofino, exact recovery to 1e-4, FP=0, exact localization both directions.
+- Packets-to-detect scaling curve, the headline figure (a64bf08) -- flat Theta(1) vs ~Theta(1/p).
+- Correlated-fault stress gate (6de6b33) -- HONEST SPLIT: holds+widens for independent multiplicity;
+  FAILS under common-mode (SprayCheck better there), bounding the paper to the independent/stationary
+  regime (PREREG v1.9). Reported openly, credibility-raising.
+- Comprehensive prior-work comparison, 15 systems, 2 tables + 4-family positioning (37f53f7) --
+  primitive conceded to NetSeer/LinkGuardian/LossRadar/UEC; measured-characterization slot claimed.
+- Paper spine (this commit): contribution statement, section plan, evidence mapping, non-claims,
+  reviewer-attack pre-empts. `paper/PAPER-SPINE-2026-09-03.md`.
+
+Top-venue is closed (4 gates); the deliverable is a ToN/IMC measurement paper. NEXT STEP is the
+writeup: systems-paper-writing (structure) -> paper-voice -> academic-humanizer -> checks ->
+remove-ai-marks, section by section per the spine. Nothing on hardware; switch clean; ~21 clean
+Philip-authored commits this session.
