@@ -2359,3 +2359,18 @@ mid-run: corpus papers must be peer-reviewed/accepted, not bare arXiv preprints.
 NEXT: aggregate cards -> `journal_style_card.md` + `dynamic_writing_skill.md` (conflict table vs
 paper-voice contract + cs_engineering base); then draft section by section into paper/ton/sections/
 via systems-paper-writing -> paper-voice (voice_check) -> academic-humanizer -> remove-ai-marks.
+
+## Status (2026-09-03, evening) — journal-adapt Phase 2 applied: full ToN draft built
+
+- Phase 1 closed with 7/10 cards (ton_006-008 lost to repeated API 529/rate-limit kills; every retry and
+  in-place resume died). `journal_style_card.md` + `paper/ton/dynamic_writing_skill.md` committed (aaad63b).
+- Phase 2 applied at drafting time (no prior manuscript): all 12 sections drafted in the main thread from
+  the committed artifacts, `paper/ton/NUMBERS.md` transcribes every number with provenance (3 cross-doc
+  inconsistencies flagged, not resolved). Fig 2 built with matplotlib (`figures/fig_system.py`) after the
+  diagram agent died three times. Whole-paper voice_check: all sentence-rhythm bands in range, boosters 0,
+  no regression after academic-humanizer; citations/readability deviations justified in
+  `paper/ton/revision_summary.md`. IEEEtran journal build: 12 pages, abstract 250 words, no abbreviations.
+- Order fixed to the ToN profile: ... IX Cost -> X Discussion and Limitations -> XI Related Work -> XII.
+NEXT: final build -> remove-ai-marks Layer A on sections/*.tex, main.tex, main.pdf, figures -> commit.
+Author to fill: acknowledgment, biography; optional Inkscape pass on Fig 2; ieee-journal-reviewer pass
+before submission.

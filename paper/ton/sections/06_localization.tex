@@ -1,1 +1,48 @@
-% 06_localization -- drafted after journal-adapt Phase 1 (dynamic_writing_skill.md)
+\section{Localization (O2)}
+\label{sec:localization}
+
+Detection answers whether something is wrong; localization answers which directed link, which is the question a repair needs. We expect the ledger to name exactly one directed link at every rate, because it holds each link's own count, and we expect the passive arms to degrade to the uplink and downlink pair once corroborating traffic runs short (Section~\ref{sec:limits}). Table~\ref{tab:localization} presents the outcome for a downlink fault and for an uplink fault, over 50 seeds per cell on the two-hop fabric of Section~\ref{sec:method}.
+
+\begin{table}[t]
+\caption{Localization of a single directed-link grayhole on a 4-leaf, 8-spine fabric, 50 seeds per cell, generous budget of 60 post-onset epochs. Exact: named the true directed link and only it (95 percent Wilson interval). Amb.: named a set containing a healthy link. Miss: named nothing. Size: mean set size over detections. The ledger scored exact 1.00 [0.93, 1.00] with size 1.00 in every cell of both families and is omitted from the rows.}
+\label{tab:localization}
+\centering
+\small
+\begin{tabular}{@{}llcccc@{}}
+\toprule
+$p$ & Arm & Exact & Amb. & Miss & Size \\
+\midrule
+\multicolumn{6}{@{}l}{\textit{Downlink fault} ($S_0\!\rightarrow\!L_0$)} \\
+1.5\%     & SprayCheck-Z & 1.00 [0.93, 1.00] & 0.00 & 0.00 & 1.00 \\
+          & FlowPulse-$\theta$ & 0.94 [0.84, 0.98] & 0.06 & 0.00 & 1.18 \\
+1.0\%     & SprayCheck-Z & 0.96 [0.87, 0.99] & 0.04 & 0.00 & 1.04 \\
+          & FlowPulse-$\theta$ & 0.22 [0.13, 0.35] & 0.78 & 0.00 & 2.74 \\
+0.5\%     & SprayCheck-Z & 0.34 [0.22, 0.48] & 0.66 & 0.00 & 1.70 \\
+          & FlowPulse-$\theta$ & 0.00 [0.00, 0.07] & 0.00 & 1.00 & -- \\
+$10^{-3}$ & SprayCheck-Z & 0.00 [0.00, 0.07] & 1.00 & 0.00 & 2.00 \\
+          & FlowPulse-$\theta$ & 0.00 [0.00, 0.07] & 0.00 & 1.00 & -- \\
+$10^{-4}$ & SprayCheck-Z & 0.00 [0.00, 0.07] & 0.26 & 0.74 & 2.00 \\
+          & FlowPulse-$\theta$ & 0.00 [0.00, 0.07] & 0.00 & 1.00 & -- \\
+\midrule
+\multicolumn{6}{@{}l}{\textit{Uplink fault} ($L_1\!\rightarrow\!S_0$)} \\
+1.5\%     & SprayCheck-Z & 1.00 [0.93, 1.00] & 0.00 & 0.00 & 1.00 \\
+          & FlowPulse-$\theta$ & 0.00 [0.00, 0.07] & 0.00 & 1.00 & -- \\
+1.0\%     & SprayCheck-Z & 1.00 [0.93, 1.00] & 0.00 & 0.00 & 1.00 \\
+          & FlowPulse-$\theta$ & 0.00 [0.00, 0.07] & 0.00 & 1.00 & -- \\
+0.5\%     & SprayCheck-Z & 0.26 [0.16, 0.40] & 0.74 & 0.00 & 1.78 \\
+          & FlowPulse-$\theta$ & 0.00 [0.00, 0.07] & 0.00 & 1.00 & -- \\
+$10^{-3}$ & SprayCheck-Z & 0.02 [0.00, 0.10] & 0.92 & 0.06 & 1.98 \\
+          & FlowPulse-$\theta$ & 0.00 [0.00, 0.07] & 0.00 & 1.00 & -- \\
+$10^{-4}$ & SprayCheck-Z & 0.00 [0.00, 0.07] & 0.26 & 0.74 & 2.00 \\
+          & FlowPulse-$\theta$ & 0.00 [0.00, 0.07] & 0.00 & 1.00 & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{The ledger names exactly one directed link.} In every cell of both families the ledger's exact rate was 1.00 [0.93, 1.00], its mean set size was exactly 1.00, and it named a healthy link in no seed. This follows from two facts already on record: it detects in every seed with a false-positive rate of 0.00 (Section~\ref{sec:detection}), and the sublink it rejects is a directed link, so only the link that lost packets has an anomalous ratio. We state plainly that this score is close to definitional. The ledger is the only arm that sees each directed link's own transmit count, and the arms do not have equal information by design. The measured result is that the witness removes the aliasing the passive arms cannot, not that a better inference beat them on equal evidence.
+
+\textbf{SprayCheck-Z ties at high loss and degrades to the pair at low loss.} At 1.5 percent in both families and at 1.0 percent for the uplink, SprayCheck's cross-leaf intersection resolved the fault to one directed link as well as the ledger did; the paired difference was 0.00 with $p = 1.0$ on the McNemar test, and we report it as a null result. At 0.5 percent its exact rate fell to 0.34 for the downlink and 0.26 for the uplink. At $10^{-3}$ it fell to 0.00 and 0.02 with a mean set size of 2.00, i.e., the uplink and downlink pair its paper says an uncorroborated report is left with. The reason is that at those rates its Z-test flags the faulty spine on too few distinct leaves to complete the intersection, so it can name the spine but not the directed link. Every such pair contains one healthy link, which is why the ambiguous column reaches 1.00 there: a repair that acted on the set would touch the wrong hop half the time. At $10^{-4}$ it missed in 74 percent of seeds even under the generous budget.
+
+\textbf{FlowPulse-$\theta$ cannot localize an uplink fault at any rate.} For a downlink fault it was exact in 94 percent of seeds at 1.5 percent, fell to 22 percent at 1.0 percent with a mean set size of 2.74, because its all-or-one rule landed in neither branch and returned the port's whole candidate set, and missed at 0.5 percent and below. For an uplink fault it missed in every seed at every rate, including 1.5 percent. The reason is that a single sender's loss moves the aggregate load of the ingress port by only about $1/\!\text{(number of senders)}$ of the drop rate, here about 0.5 percent for a 1.5 percent uplink loss shared by three senders, which never clears the paper's fixed one-percent threshold. This is faithful to FlowPulse's own design: in its native setting one sender occupies each port and an uplink fault is the whole port's load. Under multi-sender spraying the same fault is diluted below its threshold. The gap is a property of the sprayed fabric, reproduced, not a handicap imposed on the baseline.
+
+\textbf{Boundary.} These results hold for one independent fault on a fabric of four leaves and eight spines with uniform spray. FlowPulse's dilution grows with the number of senders per port, so it is worse at larger radix; SprayCheck's intersection improves with more leaves but needs a longer corroborating round. We expect the ordering of the arms to survive both changes, while the exact crossover rates are properties of this fabric, not universal constants.

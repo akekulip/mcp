@@ -1,1 +1,34 @@
-% 02_background -- drafted after journal-adapt Phase 1 (dynamic_writing_skill.md)
+\section{Background, Fault Model, and Objectives}
+\label{sec:background}
+
+In this section, we first describe the sprayed leaf--spine fabric and the grayhole we study. Then we state the two limits of a passive vantage that the rest of the paper measures, and we define the fault model, the objectives, and the scope.
+
+\subsection{Sprayed Leaf--Spine Fabrics}
+
+A two-tier Clos fabric connects $n$ leaf switches to $k$ spine switches, and every leaf has one link to every spine. A packet from leaf $L_a$ to leaf $L_b$ crosses exactly two directed links: the uplink $L_a\!\rightarrow\!S_i$ and the downlink $S_i\!\rightarrow\!L_b$ for some spine $S_i$. We call each such one-way hop a \emph{directed link}. A fabric with $n$ leaves and $k$ spines has $2nk$ of them. Under per-packet spraying the leaf chooses the spine for each packet independently, in the simplest case uniformly at random~\cite{spraying}. Consequently, a flow of $N$ packets places about $N/k$ packets on each of its $k$ uplinks and on each of its $k$ downlinks. The Ultra Ethernet specification adopts spraying as its default and adds a link-layer retry that can retransmit a lost frame across one link~\cite{uec}. REPS extends spraying with a load balancer that steers away from paths that show loss~\cite{reps}. Throughout the paper we use $n=4$ and $k=8$ in the replay harness, which is the topology SprayCheck evaluates~\cite{spraycheck}, and a 4-leaf, 2-spine virtual fabric on silicon.
+
+A \emph{grayhole} is a directed link that forwards most of its packets and silently drops a fraction $p$ of them. We study $p$ from 1.5 percent down to $10^{-4}$, and we call $10^{-3}$ to $10^{-4}$ the low-loss regime. A grayhole differs from a blackhole, which drops everything and is caught by any liveness check. It also differs from congestion loss, which is transient and is shared by every link behind the congested queue. Time is divided into \emph{epochs}, i.e., the period at which a controller reads counters and decides. In the replay harness one epoch carries two million packets across the fleet, and the detectors act at epoch boundaries.
+
+\subsection{Two Limits of a Passive Vantage}
+\label{sec:limits}
+
+A passive detector counts packets the switch already forwards and adds nothing to them. Under spraying it faces two limits, and both become worse as $p$ falls.
+
+\textbf{The cost limit.} A grayhole of rate $p$ on one of $k$ spines removes a fraction $p$ of the packets that spine should have received. To notice the deficit, a detector compares that spine's count $\lambda$ against the others. The comparison is only meaningful when the expected deficit $\lambda p$ exceeds the sampling noise of spraying, which is of order $\sqrt{\lambda}$ for independent spray decisions. Because a test with $s$ standard deviations of margin needs $\lambda p > s\sqrt{\lambda}$, i.e., $\lambda > s^2/p^2$, the packets a count-based test needs grow at least as $1/p$, and for a Z-test as $1/p^2$. A witness that observes each directed link's own transmit count does not compare against noise at all. It counts the missing packets directly, so its cost should not depend on $p$. Section~\ref{sec:detection} measures both.
+
+\textbf{The aliasing limit.} An arrival counter at $L_b$ for packets that came through spine $S_i$ sees the product of the survival rates of $L_a\!\rightarrow\!S_i$ and $S_i\!\rightarrow\!L_b$. Consequently, one counter cannot tell which of the two directed links dropped the packets. SprayCheck resolves the pair by intersecting failure reports from several leaves that share the spine~\cite{spraycheck}. FlowPulse resolves it by asking whether every sender on the port is affected or only one~\cite{flowpulse}. Both rules need corroborating traffic, and that traffic can become scarce at low loss. A per-directed-link witness holds each link's own count and needs no corroboration. Section~\ref{sec:localization} measures both.
+
+\subsection{Fault Model, Objectives, and Scope}
+\label{sec:scope}
+
+We assume that the loss rate of a faulty directed link is stationary over the observation window and that faults on different directed links are independent. We argue that this is a reasonable assumption for the physical-layer causes that dominate gray failures in production, i.e., damaged optics, marginal cables, and misconfigured forward error correction. Each of these is local to one link and persists until repaired~\cite{corropt}. We assume that a healthy directed link has a small background loss rate, set to $10^{-5}$ in the harness, and we assume that one or several directed links can be faulty at once. We do not assume that the faulty link is known to carry any particular flow, and we do not assume that the controller can inject probes.
+
+The paper evaluates four objectives, and we refer to them by label in the rest of the paper.
+\begin{itemize}
+\item \textbf{O1, detection cost.} The number of packets, and the fraction of trials, a detector needs to flag the faulty spine or link within a fixed budget, as a function of $p$, with the false-positive rate reported next to it.
+\item \textbf{O2, localization.} Whether the detector names exactly the faulty directed link, an ambiguous set that contains it, or nothing.
+\item \textbf{O3, silicon fidelity.} Whether the ledger, on a real switch, recovers the injected loss exactly at each $p$ and attributes it to the injected directed link alone.
+\item \textbf{O4, the boundary.} Whether O1 and O2 survive several simultaneous faults, and whether they survive a fleet-wide, correlated shift in loss.
+\end{itemize}
+
+\textbf{Scope.} Two regimes are out of scope for the headline claims. Under a common-mode shift, in which every link's loss rises together, the ledger's decision rule fails, as Section~\ref{sec:robustness} shows and Section~\ref{sec:discussion} discusses. The claims of Sections~\ref{sec:detection} to~\ref{sec:silicon} are therefore stated for independent faults on a stationary fabric. Repairing or re-admitting a faulty link is not addressed; Section~\ref{sec:related} cites the systems that do. Blackholes are used only to validate the testbed and are not part of the evaluation.

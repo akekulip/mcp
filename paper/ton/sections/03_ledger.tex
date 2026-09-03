@@ -1,1 +1,24 @@
-% 03_ledger -- drafted after journal-adapt Phase 1 (dynamic_writing_skill.md)
+\section{The Receiver Ledger}
+\label{sec:ledger}
+
+The receiver ledger is the measured arm of this paper. It is our implementation of the per-link sequence witness that NetSeer~\cite{netseer} and LinkGuardian~\cite{linkguardian} place in the data plane, at reduced width, and we describe it here only far enough that the cost and the measurements of the later sections can be read. We claim no design contribution for it. In Figure~\ref{fig:system}, we show the data path from a sending leaf to a receiving leaf and the two places the ledger touches it.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig_system.pdf}
+\caption{The receiver ledger on a sprayed leaf--spine fabric. The sending leaf stamps each packet at egress with a two-byte per-directed-link sequence number. The receiving switch reconstructs the directed link from its own ingress port and the spray field, and keeps two registers per directed link: the last sequence number seen and the number of packets seen. Once per epoch the controller reads both registers, takes the difference of their deltas as the loss on that directed link, compares it with the fleet floor, and applies e-BH to name the faulty links.}
+\label{fig:system}
+\end{figure}
+
+\textbf{Witness stamp.} At the egress of the sending hop, the switch inserts a two-byte header carrying a 16-bit sequence number that it increments per directed sublink, i.e., per directed link and traffic class. The header carries nothing else. An earlier version of the ledger also carried a 16-bit link identifier, which doubled the wire cost. Because the receiving hop already knows its own ingress port, and because the spray field is already on the wire for load balancing, the identifier is redundant, and we removed it. Section~\ref{sec:cost} reports what that removal cost in pipeline stages. The stamp is an in-fabric cost only: it is stripped before the packet reaches a host.
+
+\textbf{Link reconstruction.} At the ingress of the receiving hop, a match table keyed on the ingress port and the spray field names the directed link, and a second table appends the traffic class, which the switch classifies fresh for every packet from the packet's size and its differentiated-services code point. Two tables are needed rather than one because the traffic class is a per-packet property, not a per-link one; a single table that baked a fixed class into each link entry would mislabel every packet whose class differed from the entry.
+
+\textbf{Ledger registers.} For each of the $2nk$ directed links, and for each traffic class, the receiving switch keeps two registers: $\mathit{seq}$, the 16-bit sequence number of the last stamped packet seen on that sublink, and $\mathit{obs}$, a 32-bit lifetime count of the stamped packets seen. Both can be updated in the data plane at line rate, and both were on our switch. Over an epoch in which the two registers advance by $\Delta\mathit{seq}$, taken modulo $2^{16}$, and $\Delta\mathit{obs}$, the loss on the sublink is
+\begin{equation}
+\ell = \Delta\mathit{seq} - \Delta\mathit{obs},
+\label{eq:loss}
+\end{equation}
+because the sender advanced the sequence once per packet it sent and the receiver counted once per packet that arrived. Equation~\eqref{eq:loss} is exact for in-order and for reordered arrivals. Because the sequence register keeps a frontier rather than a running sum, a late packet manufactures no phantom loss. A duplicated packet drives the estimate to $-1$, which the controller can read as a duplicate. A packet lost after the last survivor of an epoch is counted in the next epoch, when the next survivor advances the frontier. We verified all three properties against the compiled program on the vendor's software model before any hardware measurement (Section~\ref{sec:method}).
+
+\textbf{Decision.} Once per epoch the controller reads every sublink's registers, forms the loss ratio $\ell/\Delta\mathit{seq}$, and compares it with the fleet floor, a leave-one-out estimate of the background loss rate that excludes the sublink under test. Because a healthy sublink's ratio sits at the floor while a faulty one sits far above it, the controller can test each sublink on its own evidence. It never compares a sublink against the sampling noise of the other spines. The per-sublink evidence is accumulated as an e-process. The set of sublinks whose evidence exceeds the e-BH threshold at a chosen false discovery rate~\cite{ebh} is the set the controller names as faulty. That set is both the detection and the localization, because a rejected sublink is a directed link and only the link that lost packets can have an anomalous ratio. We note that this decision rule is the part of the ledger that fails under a fleet-wide shift in loss, because the floor then moves with the fault (Section~\ref{sec:robustness}).

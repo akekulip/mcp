@@ -1,1 +1,39 @@
-% 05_detection -- drafted after journal-adapt Phase 1 (dynamic_writing_skill.md)
+\section{Detection Cost (O1)}
+\label{sec:detection}
+
+We expect the ledger's cost to be flat in $p$ and the passive detectors' cost to grow as $1/p$ (Section~\ref{sec:limits}). In Figure~\ref{fig:scaling} and Table~\ref{tab:detection}, we show the packets each arm needed to flag the faulty spine and the fraction of seeds in which it did so, for five loss rates from 1.5 percent to $10^{-4}$.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{scaling_curve.pdf}
+\caption{Median packets to detect a single-spine grayhole against loss rate $p$, over 50 seeds, $k=8$ spines, and a budget of 160 million packets (dotted ceiling). Filled markers are cells with an action rate of 1.00; hollow markers are annotated with the fraction of seeds that detected, and their median is over those seeds only; a cross on the ceiling marks a cell in which no seed detected. The ledger's cost is flat, the passive detectors' cost grows toward the ceiling and then crosses it.}
+\label{fig:scaling}
+\end{figure}
+
+\begin{table}[t]
+\caption{Detection of a single-spine grayhole within a 160-million-packet budget, 50 seeds per cell: action rate (Act.) and, over the seeds that detected, the median fleet packets to the first correct flag (Pkts). The 95 percent Wilson interval is [0.93, 1.00] for every 1.00, [0.65, 0.87] for 0.78, [0.26, 0.52] for 0.38, and [0.00, 0.07] for every 0.00. False positives were 0.00 for every arm at every rate.}
+\label{tab:detection}
+\centering
+\footnotesize
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+ & \multicolumn{2}{c}{Ledger} & \multicolumn{2}{c}{SprayCheck-Z} & \multicolumn{2}{c@{}}{FlowPulse-$\theta$} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(l){6-7}
+$p$ & Act. & Pkts & Act. & Pkts & Act. & Pkts \\
+\midrule
+1.5\%     & 1.00 & 22.0\,M & 1.00 & 24.0\,M & 1.00 & 22.0\,M \\
+1.0\%     & 1.00 & 22.0\,M & 1.00 & 26.0\,M & 1.00 & 22.0\,M \\
+0.5\%     & 1.00 & 22.0\,M & 1.00 & 32.0\,M & 0.38 & 88.0\,M \\
+$10^{-3}$ & 1.00 & 22.0\,M & 0.78 & 114.0\,M & 0.00 & -- \\
+$10^{-4}$ & 1.00 & 22.0\,M & 0.00 & -- & 0.00 & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{The ledger's cost is flat.} The ledger flagged the faulty spine in every seed at every rate, with a median of 22.0 million fleet packets and an interquartile range of 22 to 24 million, and it did so on the first epoch after onset in every case. The reason is that the quantity it tests is a loss ratio relative to the fleet floor, and a fault at any $p$ that is far above the floor of $10^{-5}$ clears the test on one epoch's worth of that link's traffic. Its cost is set by the epoch volume, not by $p$. Its false-positive rate was 0.00.
+
+\textbf{The passive cost grows and the action rate collapses.} SprayCheck-Z matched the ledger at 1.5 percent and needed 24, 26, and 32 million packets at 1.5, 1.0, and 0.5 percent. At $10^{-3}$ its median rose to 114 million packets, five times the ledger's, and that median is over the 78 percent of seeds that detected at all; the interquartile range widened from 24 to 24 million at 1.5 percent to 82 to 148 million at $10^{-3}$. At $10^{-4}$ no seed detected within the budget. FlowPulse-$\theta$ failed one order of magnitude earlier: it matched the ledger at 1.5 and 1.0 percent, detected in 38 percent of seeds at 0.5 percent with a median of 88 million packets, and detected nothing at $10^{-3}$ and below. Both passive arms also had a false-positive rate of 0.00, so the collapse is a loss of sensitivity, not a trade against false alarms.
+
+\textbf{This is a scaling law, not a budget artifact.} Because a Z-test on a spine's arrival count $\lambda$ separates a deficit of fraction $p$ from spray noise only when $\lambda > s^2/p^2$ (Section~\ref{sec:limits}), its packets to detect grow at least as $1/p$. The separation is visible inside the budget: at $10^{-3}$ SprayCheck already needed five times the ledger's packets for the seeds it caught, and the 22 percent it missed at $10^{-3}$ and the whole column at $10^{-4}$ are the same wall pushed past 160 million packets. A larger budget would move the passive action-rate floor to a rarer $p$, but it cannot flatten the curve, and the ledger's flat line should not depend on the budget at all, because it detects on the first epoch. We note that this is a statement about cost, not capability: a passive detector with an unbounded budget can eventually detect at $10^{-4}$, and nothing here says otherwise. Within any fixed operational budget, however, the passive action rate collapses as faults become rarer, and the witness's does not.
+
+\textbf{Two disclosures.} SprayCheck's sensitivity is calibrated under its paper's Poisson model; its real join-the-shortest-queue spraying has less noise, and a sensitivity tuned to it would lower its curve by a constant factor without changing the slope. The conditional medians of the hollow points in Figure~\ref{fig:scaling} are survivorship-biased, which is why the figure annotates each with its action rate and why we read the action-rate collapse, not the slope of a censored median, as the load-bearing signal.

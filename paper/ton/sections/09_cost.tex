@@ -1,1 +1,29 @@
-% 09_cost -- drafted after journal-adapt Phase 1 (dynamic_writing_skill.md)
+\section{Cost}
+\label{sec:cost}
+
+The passive detectors pay nothing on the wire, and the ledger does. This section reports the ledger's cost in the currency each baseline paper uses for its own, from the compiler's resource report on the switch's own software development kit, not from an estimate. Table~\ref{tab:cost} presents it beside the numbers the two baseline papers report for themselves.
+
+\begin{table}[t]
+\caption{Cost of the ledger beside the self-reported cost of the passive detectors. Ledger numbers are from the hardware compile on SDE 9.13.2, which matched the 9.13.1 compile exactly; the 4-byte column is the earlier version that also carried a link identifier. SprayCheck's state is under 2 KB in total but covers one flow at a time, rotating about once a minute; FlowPulse's paper states no memory figure. We have not reimplemented either in P4, so no stage count exists for them.}
+\label{tab:cost}
+\centering
+\footnotesize
+\begin{tabular}{@{}lccc@{}}
+\toprule
+ & Ledger, 2 B & Ledger, 4 B & Passive \\
+\midrule
+Wire bytes per packet & 2 & 4 & 0 \\
+Added load (1400 B) & 0.14\% & 0.28\% & 0 \\
+State per directed sublink & 6 B & 6 B & see caption \\
+Sublinks covered at once & 1024 & 1024 & one flow / port \\
+Ingress / egress stages & 12 / 5 & 11 / 5 & -- \\
+SRAM / TCAM blocks & 91 / 16 & 89 / 15 & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Wire.} The witness is two bytes per packet, i.e., about 0.14 percent of a 1400-byte payload, computed as $2/1404$. The earlier four-byte version, which also carried a link identifier, cost 0.28 percent, the same order as the $\pm$0.25 percent flow-priority distortion SprayCheck reports for its own prioritized flows~\cite{spraycheck}. The stamp is stripped before host delivery, so the cost is bandwidth on every fabric hop and nothing at the endpoints.
+
+\textbf{State.} Each directed sublink holds a 16-bit sequence register and a 32-bit observed-count register, six bytes, and the program tracks all 1024 sublinks continuously. SprayCheck's own state is under two kilobytes, but it instruments one flow at a time and takes about a minute to rotate to the next~\cite{spraycheck}; FlowPulse's paper does not state a memory figure~\cite{flowpulse}. The trade is continuous per-link coverage of the whole fabric for a fixed per-packet tag, against zero tag for a rotating sample.
+
+\textbf{Pipeline.} Halving the wire cost was not free. Reconstructing the directed link at ingress from the port and the spray field added two narrow tables, and the compiler placed them in a new stage. The program went from 11 to 12 ingress stages, which is the hardware ceiling of the Tofino~1, with 5 egress stages unchanged. It also went from 89 to 91 SRAM blocks and from 15 to 16 TCAM blocks. The compile was byte-for-byte identical on the laptop SDE 9.13.1 and the switch's 9.13.2, with zero errors and the same five warnings on both. The stage cost follows from a choice we made before compiling. To avoid destabilizing logic that other parts of the program rely on, we added narrow tables rather than widen the key of an existing multi-purpose port-role table. Consequently, the program now has no ingress stage headroom, and any future ingress addition must either remove a stage elsewhere or revisit that choice by folding the reconstruction key into the port-role table. We report this as the real cost of the two-byte witness rather than as a footnote, because a reviewer who weights pipeline stages over wire bytes can reasonably prefer the four-byte version.
