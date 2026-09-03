@@ -2269,3 +2269,29 @@ not simple detect→reroute mitigation, which may still help training.
 Decision pending with Philip: commit to the application-impact campaign (real path to a top-venue
 contribution) vs ship the ToN/IMC measurement paper now. Nothing touching hardware; switch idle;
 frozen localizer untouched. 10 clean Philip-authored commits this session.
+
+## Status (2026-09-03) — application-impact htsim make-or-break: NULL; top-venue search exhausted
+
+Drove the top-venue application-impact campaign to its decisive gate (as PI, autonomously). Result:
+**NULL.** Real htsim MoE collective, busiest healthy uplink (US41->CS1, controlled placement,
+~4400 drops at 1e-3), tau=40ms (RTO-dominated, the only regime the gate said could work):
+CLEAN 3.58752s vs DO-NOTHING 3.63638s = **+1.362%** -- the ceiling on recoverable slowdown, below
+the >=5% bar. The 210 prior runs at tau=0.3ms were flat; 130x more RTO moved it only to 1.36%.
+Ring-AllReduce pipelining absorbs the losses; the closed-form model was ~40x optimistic (it assumed
+critical-path placement). Doc: `docs/review/artifacts/APP-IMPACT-HTSIM-MAKEBREAK-2026-09-03.md`,
+commit 2a42768. (Also found: htsim schedulers incl. oracle never actuate mitigation -> prior
+210-run gate comparisons were CCT-identical by construction; a fault-clear actuator is a one-clause
+change but moot at a 1.36% ceiling.)
+
+**All four top-venue avenues are now exhausted, each settled cheaply in simulation:**
+1. Novel detector mechanism -> prior art.
+2. Healing lifecycle -> structural FAIL (ties round-robin).
+3. Identifiability reframe -> refuted by SprayCheck.
+4. Application impact -> NULL (pipeline-hidden, 1.36%).
+
+**Honest terminus: the defensible outcome is the ToN/IMC measurement paper** (framing in
+CONTRIBUTION-FRAMING-2026-09-02.md). "Better than others" holds at the telemetry level (detection
+cost-scaling + exact localization where baselines miss/alias at low loss); it does NOT translate to
+a top-venue application-level result, and now we can say that from evidence, not assertion. The
+top-venue push is complete and negative. Awaiting Philip's call to proceed with the ToN/IMC writeup.
+Nothing on hardware; switch idle; 13 clean Philip-authored commits this session.
