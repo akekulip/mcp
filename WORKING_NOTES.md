@@ -2242,3 +2242,30 @@ non-stationary stress (the biggest gap, not in hand — caps the venue even for 
 The gates did their job: killed an unpublishable P4 lifecycle build and a wasted SIGCOMM cycle
 CHEAPLY, in simulation, before any hardware. Awaiting Philip's call on venue/scope. Nothing touching
 hardware; switch idle; frozen localizer untouched (1cc6349a).
+
+## Status (2026-09-02, later still) — novel-angle hunt exhausted; the real top-venue path is application impact
+
+Per Philip's "hunt a different novel angle first," tested the strongest reframe — the
+identifiability-limit angle (`NOVELTY-GATE-IDENTIFIABILITY-2026-09-02.md`, commit ee4b731):
+**FAIL**, and against the project's own comparator. SprayCheck §3.6 already names+resolves the
+{uplink,downlink} ambiguity passively (and our LOCALIZATION-COMPARISON measured it tying MCP at
+1.0-1.5%); the rank-7-vs-16 figure is a spine-BLIND artifact, not a spraying limit; every pillar is
+prior art; the repo already lost this argument (NOVELTY-GATE Gate 1b).
+
+**Reframe-hunting for novelty is now exhausted** — three convergent FAILs this session: healing
+lifecycle (structural tie to round-robin), identifiability limit (refuted by SprayCheck), and the
+framing check (measurement alone = ToN/IMC). There is no cheap novelty hiding in the existing
+results; the mechanism is prior art and the measured wins are information-structure consequences.
+
+**The ONE legitimate remaining top-venue path is not a reframe — it is a new RESULT: application
+impact.** Show that MCP's detection/localization advantage translates to measurably faster ML
+training recovery (collective-completion-time / job slowdown) vs SprayCheck/FlowPulse under
+grayhole faults. That is the C-series campaign in CAMPAIGN-PLAN.md + the collective-completion-time
+eval that VERIFICATION-2026-08-29 lists as NOT proven. It is a substantial but BOUNDED experimental
+program (definite shape, definite end), and it is what would earn "better than others" at the level
+operators actually care about. NOTE the healing FAIL only kills the restoration-scheduling story,
+not simple detect→reroute mitigation, which may still help training.
+
+Decision pending with Philip: commit to the application-impact campaign (real path to a top-venue
+contribution) vs ship the ToN/IMC measurement paper now. Nothing touching hardware; switch idle;
+frozen localizer untouched. 10 clean Philip-authored commits this session.
