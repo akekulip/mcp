@@ -2374,3 +2374,6 @@ via systems-paper-writing -> paper-voice (voice_check) -> academic-humanizer -> 
 NEXT: final build -> remove-ai-marks Layer A on sections/*.tex, main.tex, main.pdf, figures -> commit.
 Author to fill: acknowledgment, biography; optional Inkscape pass on Fig 2; ieee-journal-reviewer pass
 before submission.
+- 2026-09-03 figure pass (Philip: "where are the figures that prove the contributions?"): one data figure
+  per objective added from the sweep JSONs/silicon cells via ieee-paper-figures + ToN caption rules
+  (`paper/ton/figures/fig_{action_rate,localization,silicon,correlated}.py`); build 13 pages; commit 23fd8ea.
