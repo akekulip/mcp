@@ -2,8 +2,13 @@
 
 Synthesised from four independent expert reviews (project lead, silicon engineer, evaluation
 scientist, networks specialist), each of which found something the others did not. Every blocker
-below was found by planning against the SOURCE, not against intent. Nothing here is executed until
-its stated gate passes.
+below was found by planning against the SOURCE, not against intent.
+
+**Status update, 2026-08-30:** B1-B5, C1, and C4 are closed for partial loss. Hardware forwarding,
+behavioral identity, selective detection, event delivery, automated batch mitigation, repeated
+event-to-first-rerouted latency, and modular injector wrap have run. C3's automatic restoration
+lifecycle and total-blackhole liveness remain open. The authoritative boundary is
+`VERIFICATION-2026-08-29.md`.
 
 ## 0. The claim, corrected — this is the biggest change
 
@@ -51,11 +56,11 @@ evaluation strength.
 
 | # | blocker | gate |
 |---|---|---|
-| B1 | **No post-stamp fault injector** (H39a). The sequence is stamped in egress; the only injector `tbl_fail` runs in ingress AFTER `tbl_wit_check`, so a packet is counted and only then discarded and NO GAP IS EVER PRODUCED. C1 and C3 cannot run. | an egress injector after `tbl_wit_stamp`, keyed `md.sublink : exact` + `hdr.witness.seq : range`, with a DirectCounter. Compile locally on 9.13.1 first — free. Class 2 caps it at ONE range field. |
-| B2 | **Control plane binds the wrong program** (H39b). `hw_adapter.py:39` hardcodes `PROG = "mcp_fabric"`; against `mcp_fabric_gate_event` this fails as wrong action arity or a silently empty table, not cleanly. Neither the BFRT adapter nor `epoch_loop`'s BFRT path has ever run against the switch. | parameterise the program name; `controller/tests` green |
-| B3 | **No deploy automation.** Zero scripts in the repo SSH to the switch. A hand-typed campaign violates the monitor-long-runs rule by construction. | `p4/hw/{deploy,takeover,bringup,canary}.sh`, each with a `--dry-run` proving zero real ssh calls |
-| B4 | **Setup covers 6 of 14 runtime tables.** | a script printing planned vs installed rows for all 14 |
-| B5 | **H35 audit-path authorization.** `tbl_audit_steer` admits a health-gate bypass on a guessable 16-bit token with no provenance check. | add `md.role` (or the controller's ingress dev_port) to the key — stays one entry — then recompile and re-verify placement |
+| B1 | Post-stamp fault injector | **DONE:** `tbl_eg_fail`, exact sublink + sequence range, DirectCounter, after witness stamp; current compile 11/4 (`mcp_fabric_gate_event`). **2026-09-02 correction:** the receiver ledger (`mcp_fabric_ledger`) is 11/5, and 12/5 after the wire-reduction pass — `tbl_eg_fail` re-verified working on it directly, repeatedly, that day (`HW-LEDGER-WIRE-REDUCTION-SOAK-ANOMALY-2026-09-02.md`) |
+| B2 | Program/schema-safe BFRT control | **DONE:** program is parameterized; controller tests cover current gate and three-key audit schema |
+| B3 | Deploy automation | **DONE:** deploy/takeover/bringup/canary dry-run surfaces exist; deploy and bring-up now use a SHA-256 build manifest and exact one-process ownership |
+| B4 | Runtime setup coverage | **DONE:** schema-derived audit covers 50 BFRT objects and reports zero required/unplanned match-action tables (`mcp_fabric_gate_event`). **2026-09-02 re-run against `mcp_fabric_ledger`'s schema found 2 gaps the original closure never covered:** `tbl_eg_bern` (added by the ledger redesign, never exempted) and `tbl_wit_link_recon` (added by the wire-reduction pass, no planner registered). Both closed in `p4/hw/setup_audit.py`; ledger schema now audits 0 unplanned (offline mode — `--live` not run, it needs the bfrt bind `gate_agent.py` holds). See `ASSUMPTION-AUDIT-2026-09-02.md` §3 |
+| B5 | Audit-path authorization | **DONE:** `md.audit_src` is part of the key; unauthorized audit-shaped model traffic follows quarantine |
 
 ## 2. Campaign order — revised
 
@@ -114,8 +119,9 @@ Holm across those four; everything else descriptive.
 **Grid cut, 92,160 -> ~8,600 runs.** `h` is a tuning knob, not a factor — select it on a separate
 tuning split and freeze it, or every headline number is a maximum over four thresholds, which is
 grid-shaped p-hacking. `k` is dead once evidence-sized probation lands. `tau` gains depth where the
-cliff is (add 10/20/40/60/80 ms — there is currently nothing between 2.2 and 106.6 ms) and loses
-breadth elsewhere. Reorder becomes its own factor. And per H38 the p=1e-2 reorder cell is 47x beyond
+cliff is (add 10/20/40/60/80 ms — the measured partial-loss path is 4.998 ms, while 2.2 ms remains
+only a component reference) and loses breadth elsewhere. Reorder becomes its own factor. And per
+H38 the p=1e-2 reorder cell is 47x beyond
 controller capacity — it is past the cliff, not on it, so cutting it is honest.
 
 ## 4. Threats, and the one experiment that converts the weakest
@@ -149,11 +155,13 @@ buys credibility for the simulated results.
 
 ## 6. Order of execution
 
-1. Clear B1-B5 off-chip (one day). No hardware measurement before B1 and B2.
+1. Clear B1-B5 off-chip — **DONE 2026-08-29**.
 2. C4 compile on 9.13.2 — **DONE 2026-08-29**, both programs 11/4, exit 0.
-3. Take the chip, bring up, run the `egress_qid` sentinel sweep and the hairpin proof.
-4. C2 with its four-instrument ledger and negative control.
-5. C1, 30 reps, switch-clock exact, with the disarmed negative control.
+3. Take the chip, bring up, run the `egress_qid` sentinel sweep and the hairpin proof — **PARTIAL:
+   forwarding and 17-sublink identity proved; retain the full four-instrument ledger requirement**.
+4. C2 with its four-instrument ledger and negative control — **PARTIAL: manual selective
+   mitigation proved once; repetition and complete ledger remain**.
+5. C1, 30 reps, switch-clock exact, with the disarmed negative control — **OPEN**.
 6. C3, the seven-step lifecycle figure.
 7. In parallel off-chip: build arms A7/A8, the miss-rate-vs-conditionality and alignment curves, and
    the cut confirmatory grid.

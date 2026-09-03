@@ -1,5 +1,11 @@
 # Independent P2/P3 audit — 2026-08-28
 
+> **Superseded status notice, updated 2026-08-30:** this audit is retained as a dated checkpoint. Its
+> 9/3 Capsule, 10/3 gate, “no event producer/transport,” and “no dynamic operating point” statements
+> are no longer current. See `VERIFICATION-2026-08-29.md`, `P3-DYNAMIC-RESULT.md`, and the
+> `artifacts/HW-*.md` records. The partial-loss controller loop is now measured; P3 remains partial
+> because total-blackhole liveness and the restoration lifecycle remain open.
+
 ## Verdict
 
 - **P2 behavioral health gate: PASS as a mechanism.** The exact P4 sources compile on both available

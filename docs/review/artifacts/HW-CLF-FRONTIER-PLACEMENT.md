@@ -3,6 +3,12 @@
 **Date:** 2026-08-30. **Program:** `p4/witness/mcp_fabric_clf_eg.p4`.
 Follows `HW-CLF-FRONTIER-HOP.md`, which records the four defects individually.
 
+> **Later correction (same session):** the coverage conclusion in “Two consequences” below was
+> an intermediate result taken while `tbl_eg_vlink` was empty. After D7 installed and exactly
+> verified that table, the two hops resolved to distinct vlinks and silicon localized faults on
+> both directed links. The original observation is retained here as history; the current result is
+> `HW-CLF-RESTORATION-LIFECYCLE.md#two-link-coverage-restored-and-per-link-localization-measured`.
+
 ## The common cause
 
 Every one of the four was silent, and they were silent for the same reason:
@@ -80,11 +86,12 @@ decides.
 * **In ingress `md.hop` names the hop the packet is AT**, so entries `{1, 2}` are simply correct.
   The original author's numbering was right for the intended placement; the table had ended up in
   the wrong control.
-* **Coverage does NOT double — this was claimed and then measured false.** Listing entry 2 on
+* **Superseded intermediate conclusion: “coverage does not double.”** Listing entry 2 on
   both frontiers was tried on the assumption that the destination leaf would record the second
   link's arrival. With exactly 10 probe packets the frontier read **TX=20 RX=20**: every count
-  doubled, because `md.vlink` resolves to 0 at the spine's egress too, so the second link has no
-  distinct sublink identity and its marks land in the FIRST link's slot.
+  doubled. At this point that was attributed to the second link having no distinct identity. D7
+  later proved the actual cause: `tbl_eg_vlink` had never been installed, so its default action
+  aliased every hop to vlink 0.
 
   That aliasing is worse than missing coverage. With the second link dark, TX would be 20 (both
   hops commit) and RX 10 (only the first link delivers) — a ratio of 0.5, reported HEALTHY. The
@@ -92,9 +99,8 @@ decides.
   **TX=20 RX=20**, 30 read **30/30**, 50 read **50/50**, and 30 with the context blackholed read
   **TX=31 RX=0**. One mark per packet per frontier, exact and proportional.
 
-  **CLF covers the FIRST directed link only**, as it did before this change. Extending it
-  requires giving each hop's outgoing sublink a distinct identity at the spine, which is separate
-  work and is not done.
+  This one-link restriction is historical, not the shipped result. With `tbl_eg_vlink` installed,
+  entries `{1,2}` localize both directed links; the later artifact cited above supersedes it.
 
 ### Cost
 

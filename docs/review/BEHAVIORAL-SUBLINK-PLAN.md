@@ -1,7 +1,8 @@
 # Behavioral Sublinks plan — primary research direction
 
-**Status:** active, 2026-08-28. This supersedes the audit-lease/lifecycle direction in `PLAN.md`;
-W4 and witness-stop remain infrastructure and baselines.
+**Status:** active and re-verified, 2026-08-30. This supersedes the audit-lease/lifecycle direction
+in `PLAN.md`; W4 and witness-stop remain infrastructure and baselines. The evidence/claim ledger
+is `VERIFICATION-2026-08-29.md`.
 
 ## Thesis and claim boundary
 
@@ -36,22 +37,30 @@ probes are attributed infrastructure, not novelty claims.
 
 - Generated `mcp_fabric_cw4.p4` uses the existing 16-bit witness id as `vlink[15:4] | stratum[3:0]`;
   no added wire bytes and 1024 cells per sequence register.
-- Exact-source compiles on bf-p4c 9.13.1 and the switch's 9.13.2 agree: armed W4 is 9/3 stages,
-  C-W4 is 9/4, Context Capsule is 9/3, and Capsule + health gate is 10/3. The gate therefore costs
-  one ingress stage over the capsule and leaves 2 ingress stages.
+- Exact-source compiles place armed W4 at 9/3 stages, C-W4 at 9/4, Context Capsule at 9/4,
+  Capsule + health gate at 10/4, and the current event/audit/fault-injection program at 11/4.
+  The old 9/3 Capsule and 10/3 gate rows are retracted: they contained an invalid packed-width
+  parser copy. The full prototype leaves one ingress and eight egress stages.
 - Four software-model tests pass, including an end-to-end upstream classifier/wire-stamp test.
 - P2's hostile model suite passes 5/5: exact-context reroute, same-link healthy-context retention,
   accurate post-reroute accounting, restoration by entry deletion, and no-entry no-op.
 - The controller can bind the C-W4 program, supplies the pre-shifted vlink base, maps one attributed
   directed sublink to every exact P2 gate key, and performs tested BFRT add/modify/delete operations.
+- The current data plane emits an attributed gap event, authorizes audit steering by source role,
+  emits downstream receipts, and includes a post-stamp exact-sublink fault injector. The current
+  source passes its software-model suite and compiles at 11/4.
+- Silicon demonstrations prove forwarding, 17/17 behavioral identities, selective discontinuity,
+  attributed event delivery, automated frozen inference, a four-row gate batch, and selective
+  mitigation. In 20/20 valid hardened trials, event-to-first-rerouted-packet latency was 4.998 ms
+  median (3.998–5.499 ms); a separate mixed-context check moved only context 2 to the backup.
 - The frozen post-localization value gate passes for aligned direction x size faults: median +25
   percentage points safe delivered demand over directed W4, 100% oracle-gap closure, zero unsafe
   primary bytes. It exposes 25-point gaps for a within-bin boundary and a class-only fault.
 
-Not yet built or proven: a real downstream-to-source C-W4 event source/transport, probation/audit
-traffic for restoration, end-to-end feedback latency, dynamic specificity, trace-driven
-performance, or P2/P3 packet semantics on silicon. The controller code is a decision core and BFRT
-boundary, not an end-to-end feedback mechanism.
+Not yet built or proven: a full audit/probation/removal lifecycle on silicon; total-blackhole
+liveness; dynamic specificity with confidence intervals; or trace-driven application performance.
+The measured closed loop begins at a partial-loss gap event, not at fault onset, and its elevated
+backup observation probability is instrumentation rather than a production-overhead result.
 
 One structural limit is now explicit: C-W4 needs a later survivor in the same context to expose a
 sequence gap. It cannot by itself detect a context that becomes a complete black hole. P4 may not
@@ -102,18 +111,22 @@ the counted table because that would make the ground-truth counter name the wron
 link, no loops/black holes, accurate post-reroute counters, and no action on a healthy/no-entry
 packet. Compile and resource report required.
 
-### P3 — Topology-realistic feedback and state — PARTIAL, BLOCKS P4
+### P3 — Topology-realistic feedback and state — PARTIAL-LOSS LOOP SILICON-GREEN, LIFECYCLE OPEN
 
 Carry a downstream C-W4 event to the source selector using an attributed notification mechanism;
 do not claim notification novelty. The controller first installs this mapping; a later data-plane
 fast path is allowed only if it materially improves unsafe exposure. Include event coalescing,
 sequence epoch/reset, stale feedback, and flapping.
 
-The decision core, exact-key expansion, BFRT writer, epoch rejection, coalescing, and restoration
-guard exist and have unit coverage. There is no producer/transport that constructs a `GapEvent`
-from the switch, and restoration has no probation/audit traffic source. The old 97.4 us fast-path
-comparison is retracted because it measured same-switch congestion attention, not C-W4 feedback;
-`P3-FEEDBACK-RESULT.md` now records only a controller-latency sensitivity.
+The data plane produces an attributed gap event and carries it to the collector on silicon. The
+running controller consumes a demand-targeted pooled census, parses `GapEvent`, applies the frozen
+inference layer, and writes every affected gate row as one batch. Twenty repeated trials measured
+4.998 ms median from the downstream switch event to the first exact probe on the backup. Targeted
+census reduced one agent read from about 250 ms to 7.7 ms median; otherwise the write could queue
+behind telemetry. What remains open is the second half of the lifecycle: no running controller has
+yet injected sufficient probation traffic, consumed all declared receipts, and removed the gate on
+silicon. The old 97.4 us comparison remains retracted because it measured same-switch congestion
+attention, not this path.
 
 Add a mandatory liveness sub-gate: demonstrate partial conditional loss, a selective total
 blackhole, and an all-context blackhole. For the latter two, either price an explicit liveness/audit
@@ -123,15 +136,16 @@ mechanism or narrow the detector claim. A gap-only C-W4 result cannot pass this 
 alarm operating points, conditional mitigation must keep unsafe packets within the preregistered
 bound and must not quarantine a healthy context at an unacceptable rate.
 
-### P4 — Trace-driven value and application experiment — BLOCKED ON P3 OBSERVABILITY
+### P4 — Trace-driven value and application experiment — BLOCKED ON P3 LIVENESS/RESTORATION
 
 Replay Ring-AllReduce and MoE AlltoAll demand through htsim/ATLAHS. Required faults: CorrOpt-style
 direction asymmetry, Aegis-style `>1 KB`, direction x size, class-selective, persistent/repaired/
 flapping, and the two negative-control boundary cases.
 
-Do not implement an instantaneous-detector shortcut. P4 begins only after the event source,
-restoration evidence, feedback latency distribution, and total-blackhole treatment are fixed. An
-earlier post-localization analytical value gate remains useful but is not an application result.
+Do not implement an instantaneous-detector shortcut. The partial-loss event-to-gate latency
+distribution is now measured; P4 begins only after restoration evidence, the reorder contract, and
+total-blackhole treatment are fixed. An earlier post-localization analytical value gate remains
+useful but is not an application result.
 
 Baselines: physical-link disable, directed W4, topology-realistic witness-stop, size-only C-W4,
 Context-Capsule C-W4, exact oracle, and varied synthetic probes for detection coverage. Match on
@@ -146,12 +160,13 @@ least 5 percentage points or median CCT by at least 5% over directed W4, with a 
 while meeting the identical unsafe-packet bound. Otherwise narrow the paper to the mechanism and
 negative characterization.
 
-### P5 — Silicon and robustness
+### P5 — Silicon and robustness — PARTIAL
 
-Recompile on the switch's SDE 9.13.2, then run the functional 4-leaf x 2-spine virtual fabric with
-both hosts. Validate two live queues on one port, post-stamp faults, conditional reroute, reset,
-wrap, reordering, background loss, and control-plane restart. No hardware mutation occurs without
-an explicit test window.
+The switch's SDE 9.13.2 compiled and loaded the event program, and the functional virtual fabric
+proved forwarding, behavioral identity, post-stamp selective detection, automated conditional
+reroute, targeted census, batch actuation, repeated reset, and modular injector wrap. Still validate
+reordering on the adopted witness, background-loss specificity, restoration, flapping, and
+control-plane restart.
 
 **Gate:** model/silicon agreement on packet semantics and resource fit; all divergences reported.
 

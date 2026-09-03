@@ -1,7 +1,8 @@
 # What CLF sees that C-W4 structurally cannot — measured
 
 **Date:** 2026-08-30. Program `mcp_fabric_clf_eg.p4`, source sha256 prefix `540d03a7a7c295f2`.
-Sublink 2 (vlink 0, context 2) on the first directed link. PREREG rule 1 requires CLF to detect
+This comparison used sublink 2 (vlink 0, context 2) on the first directed link. The later D7 fix
+restored two-link coverage; this arm remains a valid first-link comparison. PREREG rule 1 requires CLF to detect
 where ordinary C-W4 detects 0%; this is the first hardware measurement of that comparison.
 
 ## How C-W4's state is read
@@ -59,15 +60,15 @@ comes back cannot drive mitigation while the link is dark.
 
 ## Scope and what this does not establish
 
-* One directed link (source leaf -> spine); see `HW-CLF-FRONTIER-PLACEMENT.md` for why coverage
-  does not currently extend to the second.
+* This A/B arm exercised one directed link (source leaf -> spine). CLF now covers both directed
+  links after exact `tbl_eg_vlink` installation; see `HW-CLF-RESTORATION-LIFECYCLE.md`.
 * `n = 5` for the A/B comparison; `n = 1` for the retroactive sequence, which is deterministic
   and mechanistically explained by the register definition above.
 * This reads C-W4's **observed counter**, the register the gap signal is computed from. The
   mirror/gap-event transport path was not separately instrumented in this run, so the claim is
   about the witness state, not about end-to-end event delivery.
-* `all_context_blackhole` is still unmeasured, and it carries its own kill criterion: a fully
-  dark link is what ordinary link management already detects.
+* At this point in the sequence `all_context_blackhole` was unmeasured. Result 3 below closes it
+  and tests its link-management kill criterion.
 
 ---
 

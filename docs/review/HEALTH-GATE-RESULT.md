@@ -1,9 +1,9 @@
-# P2 — Behavioural health gate: built, compiles at 10/3, hostile suite 5/5
+# P2 — Behavioural health gate: built, compiles at 10/4, hostile suite 5/5
 
 **Independent verification, 2026-08-28:** the four exact source files were compiled on local SDE
-9.13.1 and remote SDE 9.13.2 without loading a pipeline. Both compilers placed armed W4 at 9/3,
-C-W4 at 9/4, Context Capsule at 9/3, and Capsule + health gate at 10/3. The earlier 8/3 W4 row was
-a stale count and is corrected below.
+9.13.1 and remote SDE 9.13.2 without loading a pipeline. The corrected sources place armed W4 at
+9/3, C-W4 at 9/4, Context Capsule at 9/4, and Capsule + health gate at 10/4. The earlier 8/3 W4,
+9/3 Capsule, and 10/3 gate rows are stale or invalid and are corrected below.
 
 The piece that makes behavioural sublinks *do* something rather than merely observe: when a
 (source, destination, spray path, context) sublink is quarantined, the packet's **spray choice** is
@@ -32,11 +32,11 @@ invariant (vlink resolution, counting, witness stamping) is unchanged by constru
 |---|---|
 | armed W4 witness | 9 / 3 |
 | C-W4 (egress-classified sublinks) | 9 / 4 |
-| Context Capsule (source-classified) | 9 / **3** |
-| **Capsule + health gate** | **10 / 3** |
+| Context Capsule (source-classified) | 9 / **4** |
+| **Capsule + health gate** | **10 / 4** |
 
 From the authoritative `pipe/logs/table_summary.log` of `--verbose 2` builds. The gate costs one
-ingress stage relative to Context Capsule. Tofino 1 has 12 per gress, so **2 ingress and 9 egress
+ingress stage relative to Context Capsule. Tofino 1 has 12 per gress, so **2 ingress and 8 egress
 remain** — ingress is the binding constraint for anything added later.
 
 ## Hostile suite — 5/5 (`p4/ptf/test_health_gate.py`)
@@ -62,9 +62,10 @@ the same physical link are still carrying traffic on it.
 
 ## What is still required
 
-P3 remains partial: a downstream C-W4 event still needs a real source-to-selector transport, and a
-quarantined primary needs explicit probation/audit traffic before restoration. The current
-controller decision core programs the exact P2 keys and rejects restoration by silence, but this is
-not an end-to-end feedback path. P4 (trace-driven Ring-AllReduce and MoE AlltoAll value) remains
-blocked on that observability gate, then silicon. The capacity numbers in `CAPSULE-RESULT.md` assume
-an instantaneous post-localization decision.
+P3 remains partial, but the partial-loss detection-to-quarantine loop is now connected: 20/20
+silicon trials measured 4.998 ms median from the attributed gap event to the first exact packet on
+the backup. A separate mixed-context check moved only the bad context and retained all three healthy
+contexts on the primary. Probation/audit traffic has still not restored a primary on hardware, and
+passive C-W4 still cannot detect a total context blackhole. P4 (trace-driven Ring-AllReduce and MoE
+AlltoAll value) remains blocked on those lifecycle gates. The capacity numbers in
+`CAPSULE-RESULT.md` still assume an instantaneous post-localization decision.

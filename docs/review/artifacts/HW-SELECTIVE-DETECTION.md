@@ -1,5 +1,9 @@
 # Selective detection of a conditional fault, on silicon — 2026-08-29
 
+> Historical component record. The end-to-end latency limitation stated below was closed for
+> partial loss on 2026-08-30; see `HW-CLOSED-LOOP.md`. The five-packet detection result here is
+> otherwise retained unchanged.
+
 A fault injected into ONE behavioural sublink is detected on that sublink and on no other. This is
 the detection half of the thesis, on a Tofino 1.
 

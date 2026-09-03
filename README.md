@@ -1,21 +1,23 @@
 # MCP — Measurement Control Plane
 
-> **Research direction updated 2026-08-28.** The original generic attention/bandit thesis and the
-> post-TM sequence witness are not treated as novel contributions. The active plan keeps W4 as
-> costed infrastructure and tests a new, still-gated question: after mitigation removes traffic
-> from a suspect link, can a switch-capped audit safely produce the evidence needed to restore or
-> keep quarantining that link?
+> **Research direction verified 2026-08-30.** The original generic attention/bandit thesis, the
+> post-TM sequence witness, and a generic quarantine/audit lifecycle are not treated as novel
+> contributions. The active direction is **Behavioral Sublinks**: observe and selectively mitigate
+> a directed physical link by source-declared packet context, so a failing context can be rerouted
+> while proven-safe contexts keep using the link. The mechanism fits Tofino; its partial-loss
+> detection-to-quarantine loop now measures 4.998 ms median over 20/20 valid silicon trials. Safe
+> restoration, total-blackhole liveness, and the matched-safety application result remain open.
 
 The project now has two coordinated tracks:
 
-1. finish semantic and silicon validation of the known W4 directed-link witness; and
-2. only after a new primary-source novelty gate passes, build and evaluate the
-   `detect -> quarantine -> audit -> probation -> restore` lifecycle.
+1. harden the C-W4/context-capsule evidence path, including reorder and black-hole boundaries; and
+2. close and evaluate the
+   `detect -> attributed event -> selective quarantine -> audit -> probation -> restore` loop.
 
-The canonical direction is `docs/review/PLAN.md`; the exact failed novelty verdict is
-`docs/review/NOVELTY-GATE.md`; the approved design and executable plan are under
-`docs/superpowers/`. The older generic MCP prototype and results documented below are retained as
-historical repository context, not as the current paper claim.
+The canonical direction is `docs/review/BEHAVIORAL-SUBLINK-PLAN.md`; the current evidence and
+claim boundary are in `docs/review/VERIFICATION-2026-08-29.md`; and the executable campaign is
+`docs/review/CAMPAIGN-PLAN.md`. The older generic MCP prototype and results documented below are
+retained as historical repository context, not as the current paper claim.
 
 ---
 

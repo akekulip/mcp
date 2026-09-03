@@ -1,5 +1,9 @@
 # P3 dynamic operating point — measured, 2026-08-29
 
+> Historical simulation record. The statement below that end-to-end feedback was unmeasured was
+> closed for partial loss on 2026-08-30; see `artifacts/HW-CLOSED-LOOP.md`. Restoration and
+> total-blackhole limitations remain current.
+
 Closes audit gap #6 of `docs/review/P2-P3-INDEPENDENT-AUDIT.md`. Pre-registered before any code or
 number existed in `sim/dynamic/PREREG.md`; the emission-rule cross-check was pinned to exact PTF
 values in the same commit. **Three of the six frozen decision rules fail.** They are reported here

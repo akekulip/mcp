@@ -49,9 +49,9 @@ linear estimator of the survival fraction**, which is the property a ratio thres
 ## What this settles about the threshold, and what it does not
 
 **Settles:** `STARVED_RATIO = 8` is not an arbitrary register constant. Because RX/TX estimates
-survival faithfully, the constant states a policy — *"fewer than one arrival per eight
-departures"*, i.e. **survival below 12.5%** — and that is a statement about link behaviour rather
-than about the encoding.
+survival faithfully, the constant states a policy — *"at most one arrival per eight departures"*,
+i.e. **survival at or below 12.5% while RX is unsaturated** — and that is a statement about link
+behaviour rather than about the encoding.
 
 **Does not settle:** where the boundary belongs. The sweep shows the classification is genuinely
 marginal near it: at `k = 15` the measured ratio is **0.133** against a threshold of **0.125** —

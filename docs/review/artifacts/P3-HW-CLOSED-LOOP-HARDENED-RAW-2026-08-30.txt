@@ -1,0 +1,340 @@
+BEGIN mcp_campaign_20260830T062052Z_hardened_rep01.log
+reset: verified 8 gate rows absent for ctx 2
+controller_loop on enp59s0f0np0 -> switch 10.10.54.81 ; h=6.50 ; backup vlink 1 ; 12s
+  GAP EVENT t_switch=34022543321827 sublink=2 (vlink 0 ctx 2) gap=0xFD71 lost=655 obs=40016
+    INSTALL BATCH rows=4 : OK 3250
+    DECISION: QUARANTINE
+  FIRST REROUTED PACKET: vlink=1 ctx=2 spray=-1 t_switch=34022548821212
+
+--- summary ---
+mirror copies parsed : 2
+gap events           : 1
+controller summary   : {'installs': 1, 'coalesced': 0, 'stale_dropped': 0, 'reorder_credits': 0, 'netted_out': 0, 'held': 0, 'probation_packets': 2995, 'quarantined': 1}
+baseline packets fed : 160515 (frozen layer needs ~1e5 to leave warm-up)
+census reads         : 16 ; median 7.8 ms ; errors 0 (capture ran concurrently)
+gate ops             : 1 ; rtt median 4082 us ; agent-side median 3250 us
+END-TO-END (switch clock, both ends): t0=34022543321827 t1=34022548821212  delta=5499385 ns = 5.499 ms
+END mcp_campaign_20260830T062052Z_hardened_rep01.log
+BEGIN mcp_campaign_20260830T062052Z_hardened_rep02.log
+reset: verified 8 gate rows absent for ctx 2
+controller_loop on enp59s0f0np0 -> switch 10.10.54.81 ; h=6.50 ; backup vlink 1 ; 12s
+  GAP EVENT t_switch=34035196115770 sublink=2 (vlink 0 ctx 2) gap=0xFD71 lost=655 obs=40014
+    INSTALL BATCH rows=4 : OK 3154
+    DECISION: QUARANTINE
+  FIRST REROUTED PACKET: vlink=1 ctx=2 spray=-1 t_switch=34035201113381
+
+--- summary ---
+mirror copies parsed : 2
+gap events           : 1
+controller summary   : {'installs': 1, 'coalesced': 0, 'stale_dropped': 0, 'reorder_credits': 0, 'netted_out': 0, 'held': 0, 'probation_packets': 2995, 'quarantined': 1}
+baseline packets fed : 160527 (frozen layer needs ~1e5 to leave warm-up)
+census reads         : 16 ; median 7.7 ms ; errors 0 (capture ran concurrently)
+gate ops             : 1 ; rtt median 3998 us ; agent-side median 3154 us
+END-TO-END (switch clock, both ends): t0=34035196115770 t1=34035201113381  delta=4997611 ns = 4.998 ms
+END mcp_campaign_20260830T062052Z_hardened_rep02.log
+BEGIN mcp_campaign_20260830T062052Z_hardened_rep03.log
+reset: verified 8 gate rows absent for ctx 2
+controller_loop on enp59s0f0np0 -> switch 10.10.54.81 ; h=6.50 ; backup vlink 1 ; 12s
+  GAP EVENT t_switch=34047352513121 sublink=2 (vlink 0 ctx 2) gap=0xFD71 lost=655 obs=40014
+    INSTALL BATCH rows=4 : OK 2749
+    DECISION: QUARANTINE
+  FIRST REROUTED PACKET: vlink=1 ctx=2 spray=-1 t_switch=34047357512040
+
+--- summary ---
+mirror copies parsed : 2
+gap events           : 1
+controller summary   : {'installs': 1, 'coalesced': 0, 'stale_dropped': 0, 'reorder_credits': 0, 'netted_out': 0, 'held': 0, 'probation_packets': 2995, 'quarantined': 1}
+baseline packets fed : 160608 (frozen layer needs ~1e5 to leave warm-up)
+census reads         : 16 ; median 7.9 ms ; errors 0 (capture ran concurrently)
+gate ops             : 1 ; rtt median 3589 us ; agent-side median 2749 us
+END-TO-END (switch clock, both ends): t0=34047352513121 t1=34047357512040  delta=4998919 ns = 4.999 ms
+END mcp_campaign_20260830T062052Z_hardened_rep03.log
+BEGIN mcp_campaign_20260830T062052Z_hardened_rep04.log
+reset: verified 8 gate rows absent for ctx 2
+controller_loop on enp59s0f0np0 -> switch 10.10.54.81 ; h=6.50 ; backup vlink 1 ; 12s
+  GAP EVENT t_switch=34059530523074 sublink=2 (vlink 0 ctx 2) gap=0xFD71 lost=655 obs=40013
+    INSTALL BATCH rows=4 : OK 2463
+    DECISION: QUARANTINE
+  FIRST REROUTED PACKET: vlink=1 ctx=2 spray=-1 t_switch=34059535022762
+
+--- summary ---
+mirror copies parsed : 2
+gap events           : 1
+controller summary   : {'installs': 1, 'coalesced': 0, 'stale_dropped': 0, 'reorder_credits': 0, 'netted_out': 0, 'held': 0, 'probation_packets': 2995, 'quarantined': 1}
+baseline packets fed : 160616 (frozen layer needs ~1e5 to leave warm-up)
+census reads         : 16 ; median 7.8 ms ; errors 0 (capture ran concurrently)
+gate ops             : 1 ; rtt median 3161 us ; agent-side median 2463 us
+END-TO-END (switch clock, both ends): t0=34059530523074 t1=34059535022762  delta=4499688 ns = 4.500 ms
+END mcp_campaign_20260830T062052Z_hardened_rep04.log
+BEGIN mcp_campaign_20260830T062052Z_hardened_rep05.log
+reset: verified 8 gate rows absent for ctx 2
+controller_loop on enp59s0f0np0 -> switch 10.10.54.81 ; h=6.50 ; backup vlink 1 ; 12s
+  GAP EVENT t_switch=34071697214125 sublink=2 (vlink 0 ctx 2) gap=0xFD71 lost=655 obs=40012
+    INSTALL BATCH rows=4 : OK 2700
+    DECISION: QUARANTINE
+  FIRST REROUTED PACKET: vlink=1 ctx=2 spray=-1 t_switch=34071701712813
+
+--- summary ---
+mirror copies parsed : 2
+gap events           : 1
+controller summary   : {'installs': 1, 'coalesced': 0, 'stale_dropped': 0, 'reorder_credits': 0, 'netted_out': 0, 'held': 0, 'probation_packets': 2995, 'quarantined': 1}
+baseline packets fed : 160624 (frozen layer needs ~1e5 to leave warm-up)
+census reads         : 16 ; median 7.7 ms ; errors 0 (capture ran concurrently)
+gate ops             : 1 ; rtt median 3509 us ; agent-side median 2700 us
+END-TO-END (switch clock, both ends): t0=34071697214125 t1=34071701712813  delta=4498688 ns = 4.499 ms
+END mcp_campaign_20260830T062052Z_hardened_rep05.log
+BEGIN mcp_campaign_20260830T062052Z_hardened_rep06.log
+reset: verified 8 gate rows absent for ctx 2
+controller_loop on enp59s0f0np0 -> switch 10.10.54.81 ; h=6.50 ; backup vlink 1 ; 12s
+  GAP EVENT t_switch=34083863131861 sublink=2 (vlink 0 ctx 2) gap=0xFD71 lost=655 obs=40012
+    INSTALL BATCH rows=4 : OK 2747
+    DECISION: QUARANTINE
+  FIRST REROUTED PACKET: vlink=1 ctx=2 spray=-1 t_switch=34083868130544
+
+--- summary ---
+mirror copies parsed : 2
+gap events           : 1
+controller summary   : {'installs': 1, 'coalesced': 0, 'stale_dropped': 0, 'reorder_credits': 0, 'netted_out': 0, 'held': 0, 'probation_packets': 2995, 'quarantined': 1}
+baseline packets fed : 160582 (frozen layer needs ~1e5 to leave warm-up)
+census reads         : 16 ; median 7.8 ms ; errors 0 (capture ran concurrently)
+gate ops             : 1 ; rtt median 3575 us ; agent-side median 2747 us
+END-TO-END (switch clock, both ends): t0=34083863131861 t1=34083868130544  delta=4998683 ns = 4.999 ms
+END mcp_campaign_20260830T062052Z_hardened_rep06.log
+BEGIN mcp_campaign_20260830T062052Z_hardened_rep07.log
+reset: verified 8 gate rows absent for ctx 2
+controller_loop on enp59s0f0np0 -> switch 10.10.54.81 ; h=6.50 ; backup vlink 1 ; 12s
+  GAP EVENT t_switch=34096447644038 sublink=2 (vlink 0 ctx 2) gap=0xFD71 lost=655 obs=40013
+    INSTALL BATCH rows=4 : OK 2770
+    DECISION: QUARANTINE
+  FIRST REROUTED PACKET: vlink=1 ctx=2 spray=-1 t_switch=34096452642233
+
+--- summary ---
+mirror copies parsed : 2
+gap events           : 1
+controller summary   : {'installs': 1, 'coalesced': 0, 'stale_dropped': 0, 'reorder_credits': 0, 'netted_out': 0, 'held': 0, 'probation_packets': 2995, 'quarantined': 1}
+baseline packets fed : 160504 (frozen layer needs ~1e5 to leave warm-up)
+census reads         : 16 ; median 7.7 ms ; errors 0 (capture ran concurrently)
+gate ops             : 1 ; rtt median 3463 us ; agent-side median 2770 us
+END-TO-END (switch clock, both ends): t0=34096447644038 t1=34096452642233  delta=4998195 ns = 4.998 ms
+END mcp_campaign_20260830T062052Z_hardened_rep07.log
+BEGIN mcp_campaign_20260830T062052Z_hardened_rep08.log
+reset: verified 8 gate rows absent for ctx 2
+controller_loop on enp59s0f0np0 -> switch 10.10.54.81 ; h=6.50 ; backup vlink 1 ; 12s
+  GAP EVENT t_switch=34108650294290 sublink=2 (vlink 0 ctx 2) gap=0xFD71 lost=655 obs=40013
+    INSTALL BATCH rows=4 : OK 2691
+    DECISION: QUARANTINE
+  FIRST REROUTED PACKET: vlink=1 ctx=2 spray=-1 t_switch=34108655293249
+
+--- summary ---
+mirror copies parsed : 2
+gap events           : 1
+controller summary   : {'installs': 1, 'coalesced': 0, 'stale_dropped': 0, 'reorder_credits': 0, 'netted_out': 0, 'held': 0, 'probation_packets': 2995, 'quarantined': 1}
+baseline packets fed : 160523 (frozen layer needs ~1e5 to leave warm-up)
+census reads         : 16 ; median 7.7 ms ; errors 0 (capture ran concurrently)
+gate ops             : 1 ; rtt median 3536 us ; agent-side median 2691 us
+END-TO-END (switch clock, both ends): t0=34108650294290 t1=34108655293249  delta=4998959 ns = 4.999 ms
+END mcp_campaign_20260830T062052Z_hardened_rep08.log
+BEGIN mcp_campaign_20260830T062052Z_hardened_rep09.log
+reset: verified 8 gate rows absent for ctx 2
+controller_loop on enp59s0f0np0 -> switch 10.10.54.81 ; h=6.50 ; backup vlink 1 ; 12s
+  GAP EVENT t_switch=34120840103542 sublink=2 (vlink 0 ctx 2) gap=0xFD71 lost=655 obs=40014
+    INSTALL BATCH rows=4 : OK 2672
+    DECISION: QUARANTINE
+  FIRST REROUTED PACKET: vlink=1 ctx=2 spray=-1 t_switch=34120845100882
+
+--- summary ---
+mirror copies parsed : 2
+gap events           : 1
+controller summary   : {'installs': 1, 'coalesced': 0, 'stale_dropped': 0, 'reorder_credits': 0, 'netted_out': 0, 'held': 0, 'probation_packets': 2995, 'quarantined': 1}
+baseline packets fed : 160547 (frozen layer needs ~1e5 to leave warm-up)
+census reads         : 16 ; median 7.6 ms ; errors 0 (capture ran concurrently)
+gate ops             : 1 ; rtt median 3502 us ; agent-side median 2672 us
+END-TO-END (switch clock, both ends): t0=34120840103542 t1=34120845100882  delta=4997340 ns = 4.997 ms
+END mcp_campaign_20260830T062052Z_hardened_rep09.log
+BEGIN mcp_campaign_20260830T062052Z_hardened_rep10.log
+reset: verified 8 gate rows absent for ctx 2
+controller_loop on enp59s0f0np0 -> switch 10.10.54.81 ; h=6.50 ; backup vlink 1 ; 12s
+  GAP EVENT t_switch=34133018651778 sublink=2 (vlink 0 ctx 2) gap=0xFD71 lost=655 obs=40013
+    INSTALL BATCH rows=4 : OK 3072
+    DECISION: QUARANTINE
+  FIRST REROUTED PACKET: vlink=1 ctx=2 spray=-1 t_switch=34133023649753
+
+--- summary ---
+mirror copies parsed : 2
+gap events           : 1
+controller summary   : {'installs': 1, 'coalesced': 0, 'stale_dropped': 0, 'reorder_credits': 0, 'netted_out': 0, 'held': 0, 'probation_packets': 2995, 'quarantined': 1}
+baseline packets fed : 160566 (frozen layer needs ~1e5 to leave warm-up)
+census reads         : 16 ; median 7.6 ms ; errors 0 (capture ran concurrently)
+gate ops             : 1 ; rtt median 3768 us ; agent-side median 3072 us
+END-TO-END (switch clock, both ends): t0=34133018651778 t1=34133023649753  delta=4997975 ns = 4.998 ms
+END mcp_campaign_20260830T062052Z_hardened_rep10.log
+BEGIN mcp_campaign_20260830T062052Z_hardened_rep11.log
+reset: verified 8 gate rows absent for ctx 2
+controller_loop on enp59s0f0np0 -> switch 10.10.54.81 ; h=6.50 ; backup vlink 1 ; 12s
+  GAP EVENT t_switch=34145209016944 sublink=2 (vlink 0 ctx 2) gap=0xFD71 lost=655 obs=40013
+    INSTALL BATCH rows=4 : OK 3076
+    DECISION: QUARANTINE
+  FIRST REROUTED PACKET: vlink=1 ctx=2 spray=-1 t_switch=34145214515639
+
+--- summary ---
+mirror copies parsed : 2
+gap events           : 1
+controller summary   : {'installs': 1, 'coalesced': 0, 'stale_dropped': 0, 'reorder_credits': 0, 'netted_out': 0, 'held': 0, 'probation_packets': 2995, 'quarantined': 1}
+baseline packets fed : 160536 (frozen layer needs ~1e5 to leave warm-up)
+census reads         : 16 ; median 7.7 ms ; errors 0 (capture ran concurrently)
+gate ops             : 1 ; rtt median 4015 us ; agent-side median 3076 us
+END-TO-END (switch clock, both ends): t0=34145209016944 t1=34145214515639  delta=5498695 ns = 5.499 ms
+END mcp_campaign_20260830T062052Z_hardened_rep11.log
+BEGIN mcp_campaign_20260830T062052Z_hardened_rep12.log
+reset: verified 8 gate rows absent for ctx 2
+controller_loop on enp59s0f0np0 -> switch 10.10.54.81 ; h=6.50 ; backup vlink 1 ; 12s
+  GAP EVENT t_switch=34157723150544 sublink=2 (vlink 0 ctx 2) gap=0xFD71 lost=655 obs=40014
+    INSTALL BATCH rows=4 : OK 2441
+    DECISION: QUARANTINE
+  FIRST REROUTED PACKET: vlink=1 ctx=2 spray=-1 t_switch=34157727648705
+
+--- summary ---
+mirror copies parsed : 2
+gap events           : 1
+controller summary   : {'installs': 1, 'coalesced': 0, 'stale_dropped': 0, 'reorder_credits': 0, 'netted_out': 0, 'held': 0, 'probation_packets': 2995, 'quarantined': 1}
+baseline packets fed : 160614 (frozen layer needs ~1e5 to leave warm-up)
+census reads         : 16 ; median 7.8 ms ; errors 0 (capture ran concurrently)
+gate ops             : 1 ; rtt median 3152 us ; agent-side median 2441 us
+END-TO-END (switch clock, both ends): t0=34157723150544 t1=34157727648705  delta=4498161 ns = 4.498 ms
+END mcp_campaign_20260830T062052Z_hardened_rep12.log
+BEGIN mcp_campaign_20260830T062052Z_hardened_rep13.log
+reset: verified 8 gate rows absent for ctx 2
+controller_loop on enp59s0f0np0 -> switch 10.10.54.81 ; h=6.50 ; backup vlink 1 ; 12s
+  GAP EVENT t_switch=34169857270236 sublink=2 (vlink 0 ctx 2) gap=0xFD71 lost=655 obs=40012
+    INSTALL BATCH rows=4 : OK 2767
+    DECISION: QUARANTINE
+  FIRST REROUTED PACKET: vlink=1 ctx=2 spray=-1 t_switch=34169862268656
+
+--- summary ---
+mirror copies parsed : 2
+gap events           : 1
+controller summary   : {'installs': 1, 'coalesced': 0, 'stale_dropped': 0, 'reorder_credits': 0, 'netted_out': 0, 'held': 0, 'probation_packets': 2995, 'quarantined': 1}
+baseline packets fed : 160613 (frozen layer needs ~1e5 to leave warm-up)
+census reads         : 16 ; median 7.6 ms ; errors 0 (capture ran concurrently)
+gate ops             : 1 ; rtt median 3490 us ; agent-side median 2767 us
+END-TO-END (switch clock, both ends): t0=34169857270236 t1=34169862268656  delta=4998420 ns = 4.998 ms
+END mcp_campaign_20260830T062052Z_hardened_rep13.log
+BEGIN mcp_campaign_20260830T062052Z_hardened_rep14.log
+reset: verified 8 gate rows absent for ctx 2
+controller_loop on enp59s0f0np0 -> switch 10.10.54.81 ; h=6.50 ; backup vlink 1 ; 12s
+  GAP EVENT t_switch=34182037184157 sublink=2 (vlink 0 ctx 2) gap=0xFD71 lost=655 obs=40015
+    INSTALL BATCH rows=4 : OK 2720
+    DECISION: QUARANTINE
+  FIRST REROUTED PACKET: vlink=1 ctx=2 spray=-1 t_switch=34182042182764
+
+--- summary ---
+mirror copies parsed : 2
+gap events           : 1
+controller summary   : {'installs': 1, 'coalesced': 0, 'stale_dropped': 0, 'reorder_credits': 0, 'netted_out': 0, 'held': 0, 'probation_packets': 2995, 'quarantined': 1}
+baseline packets fed : 160579 (frozen layer needs ~1e5 to leave warm-up)
+census reads         : 16 ; median 7.6 ms ; errors 0 (capture ran concurrently)
+gate ops             : 1 ; rtt median 3618 us ; agent-side median 2720 us
+END-TO-END (switch clock, both ends): t0=34182037184157 t1=34182042182764  delta=4998607 ns = 4.999 ms
+END mcp_campaign_20260830T062052Z_hardened_rep14.log
+BEGIN mcp_campaign_20260830T062052Z_hardened_rep15.log
+reset: verified 8 gate rows absent for ctx 2
+controller_loop on enp59s0f0np0 -> switch 10.10.54.81 ; h=6.50 ; backup vlink 1 ; 12s
+  GAP EVENT t_switch=34194225053954 sublink=2 (vlink 0 ctx 2) gap=0xFD71 lost=655 obs=40014
+    INSTALL BATCH rows=4 : OK 2827
+    DECISION: QUARANTINE
+  FIRST REROUTED PACKET: vlink=1 ctx=2 spray=-1 t_switch=34194230052156
+
+--- summary ---
+mirror copies parsed : 2
+gap events           : 1
+controller summary   : {'installs': 1, 'coalesced': 0, 'stale_dropped': 0, 'reorder_credits': 0, 'netted_out': 0, 'held': 0, 'probation_packets': 2995, 'quarantined': 1}
+baseline packets fed : 160557 (frozen layer needs ~1e5 to leave warm-up)
+census reads         : 16 ; median 7.7 ms ; errors 0 (capture ran concurrently)
+gate ops             : 1 ; rtt median 3691 us ; agent-side median 2827 us
+END-TO-END (switch clock, both ends): t0=34194225053954 t1=34194230052156  delta=4998202 ns = 4.998 ms
+END mcp_campaign_20260830T062052Z_hardened_rep15.log
+BEGIN mcp_campaign_20260830T062052Z_hardened_rep16.log
+reset: verified 8 gate rows absent for ctx 2
+controller_loop on enp59s0f0np0 -> switch 10.10.54.81 ; h=6.50 ; backup vlink 1 ; 12s
+  GAP EVENT t_switch=34206426476947 sublink=2 (vlink 0 ctx 2) gap=0xFD71 lost=655 obs=40013
+    INSTALL BATCH rows=4 : OK 2672
+    DECISION: QUARANTINE
+  FIRST REROUTED PACKET: vlink=1 ctx=2 spray=-1 t_switch=34206431475520
+
+--- summary ---
+mirror copies parsed : 2
+gap events           : 1
+controller summary   : {'installs': 1, 'coalesced': 0, 'stale_dropped': 0, 'reorder_credits': 0, 'netted_out': 0, 'held': 0, 'probation_packets': 2995, 'quarantined': 1}
+baseline packets fed : 160525 (frozen layer needs ~1e5 to leave warm-up)
+census reads         : 16 ; median 7.5 ms ; errors 0 (capture ran concurrently)
+gate ops             : 1 ; rtt median 3395 us ; agent-side median 2672 us
+END-TO-END (switch clock, both ends): t0=34206426476947 t1=34206431475520  delta=4998573 ns = 4.999 ms
+END mcp_campaign_20260830T062052Z_hardened_rep16.log
+BEGIN mcp_campaign_20260830T062052Z_hardened_rep17.log
+reset: verified 8 gate rows absent for ctx 2
+controller_loop on enp59s0f0np0 -> switch 10.10.54.81 ; h=6.50 ; backup vlink 1 ; 12s
+  GAP EVENT t_switch=34219007153696 sublink=2 (vlink 0 ctx 2) gap=0xFD71 lost=655 obs=40013
+    INSTALL BATCH rows=4 : OK 2926
+    DECISION: QUARANTINE
+  FIRST REROUTED PACKET: vlink=1 ctx=2 spray=-1 t_switch=34219012151454
+
+--- summary ---
+mirror copies parsed : 2
+gap events           : 1
+controller summary   : {'installs': 1, 'coalesced': 0, 'stale_dropped': 0, 'reorder_credits': 0, 'netted_out': 0, 'held': 0, 'probation_packets': 2995, 'quarantined': 1}
+baseline packets fed : 160575 (frozen layer needs ~1e5 to leave warm-up)
+census reads         : 16 ; median 7.7 ms ; errors 0 (capture ran concurrently)
+gate ops             : 1 ; rtt median 3641 us ; agent-side median 2926 us
+END-TO-END (switch clock, both ends): t0=34219007153696 t1=34219012151454  delta=4997758 ns = 4.998 ms
+END mcp_campaign_20260830T062052Z_hardened_rep17.log
+BEGIN mcp_campaign_20260830T062052Z_hardened_rep18.log
+reset: verified 8 gate rows absent for ctx 2
+controller_loop on enp59s0f0np0 -> switch 10.10.54.81 ; h=6.50 ; backup vlink 1 ; 12s
+  GAP EVENT t_switch=34231160894938 sublink=2 (vlink 0 ctx 2) gap=0xFD71 lost=655 obs=40013
+    INSTALL BATCH rows=4 : OK 2862
+    DECISION: QUARANTINE
+  FIRST REROUTED PACKET: vlink=1 ctx=2 spray=-1 t_switch=34231165893711
+
+--- summary ---
+mirror copies parsed : 2
+gap events           : 1
+controller summary   : {'installs': 1, 'coalesced': 0, 'stale_dropped': 0, 'reorder_credits': 0, 'netted_out': 0, 'held': 0, 'probation_packets': 2995, 'quarantined': 1}
+baseline packets fed : 160586 (frozen layer needs ~1e5 to leave warm-up)
+census reads         : 16 ; median 7.7 ms ; errors 0 (capture ran concurrently)
+gate ops             : 1 ; rtt median 3624 us ; agent-side median 2862 us
+END-TO-END (switch clock, both ends): t0=34231160894938 t1=34231165893711  delta=4998773 ns = 4.999 ms
+END mcp_campaign_20260830T062052Z_hardened_rep18.log
+BEGIN mcp_campaign_20260830T062052Z_hardened_rep19.log
+reset: verified 8 gate rows absent for ctx 2
+controller_loop on enp59s0f0np0 -> switch 10.10.54.81 ; h=6.50 ; backup vlink 1 ; 12s
+  GAP EVENT t_switch=34243260828992 sublink=2 (vlink 0 ctx 2) gap=0xFD71 lost=655 obs=40013
+    INSTALL BATCH rows=4 : OK 1985
+    DECISION: QUARANTINE
+  FIRST REROUTED PACKET: vlink=1 ctx=2 spray=-1 t_switch=34243264827456
+
+--- summary ---
+mirror copies parsed : 2
+gap events           : 1
+controller summary   : {'installs': 1, 'coalesced': 0, 'stale_dropped': 0, 'reorder_credits': 0, 'netted_out': 0, 'held': 0, 'probation_packets': 2995, 'quarantined': 1}
+baseline packets fed : 160627 (frozen layer needs ~1e5 to leave warm-up)
+census reads         : 16 ; median 7.6 ms ; errors 0 (capture ran concurrently)
+gate ops             : 1 ; rtt median 2812 us ; agent-side median 1985 us
+END-TO-END (switch clock, both ends): t0=34243260828992 t1=34243264827456  delta=3998464 ns = 3.998 ms
+END mcp_campaign_20260830T062052Z_hardened_rep19.log
+BEGIN mcp_campaign_20260830T062052Z_hardened_rep20.log
+reset: verified 8 gate rows absent for ctx 2
+controller_loop on enp59s0f0np0 -> switch 10.10.54.81 ; h=6.50 ; backup vlink 1 ; 12s
+  GAP EVENT t_switch=34255404272531 sublink=2 (vlink 0 ctx 2) gap=0xFD71 lost=655 obs=40012
+    INSTALL BATCH rows=4 : OK 2760
+    DECISION: QUARANTINE
+  FIRST REROUTED PACKET: vlink=1 ctx=2 spray=-1 t_switch=34255409271407
+
+--- summary ---
+mirror copies parsed : 2
+gap events           : 1
+controller summary   : {'installs': 1, 'coalesced': 0, 'stale_dropped': 0, 'reorder_credits': 0, 'netted_out': 0, 'held': 0, 'probation_packets': 2995, 'quarantined': 1}
+baseline packets fed : 160563 (frozen layer needs ~1e5 to leave warm-up)
+census reads         : 16 ; median 7.8 ms ; errors 0 (capture ran concurrently)
+gate ops             : 1 ; rtt median 3650 us ; agent-side median 2760 us
+END-TO-END (switch clock, both ends): t0=34255404272531 t1=34255409271407  delta=4998876 ns = 4.999 ms
+END mcp_campaign_20260830T062052Z_hardened_rep20.log
