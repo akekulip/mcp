@@ -1,3 +1,12 @@
+> **RESOLVED 2026-09-03 — the make-or-break htsim measurement returned NULL.** The
+> single decisive test (CLEAN vs DO-NOTHING, 1e-3 on a fully-loaded uplink, τ = 40 ms) shows a
+> do-nothing CCT slowdown of only **+1.362 %** — losses are pipeline-hidden even under RTO-dominated
+> recovery, and 40 ms is the worst-case RTO so the NULL is robust across the range. The
+> application-impact top-venue path fails at the informative regime; ship the mechanism/localization
+> contribution to ToN/IMC. Full numbers, realised-parameter cross-check, the "no mitigation actuator
+> in htsim" finding, and the `-mcp_loss_clear_ms` actuator feasibility assessment:
+> `APP-IMPACT-HTSIM-MAKEBREAK-2026-09-03.md`.
+
 # Application-impact gate verdict — 2026-09-02
 
 **Question.** Before spending the 62-min / 21.5 GB htsim collective block, does MCP's faster/exact
