@@ -18,3 +18,8 @@ sim/runs/
 bf_drivers.log*
 zlog-cfg-cur
 *.pcap
+paper/journal_adapt/corpus_ton/*.pdf
+paper/journal_adapt/corpus_ton/*.txt
+paper/journal_adapt/corpus_secondary/*.pdf
+paper/journal_adapt/corpus_secondary/*.txt
+paper/journal_adapt/ton_candidates.json

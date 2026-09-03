@@ -1,0 +1,54 @@
+\documentclass[journal]{IEEEtran}
+\usepackage[T1]{fontenc}
+\usepackage{cite}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\graphicspath{{figures/}}
+
+% ---- macros kept small and repeated verbatim (paper-voice rule 11) ----
+\newcommand{\sys}{MCP}
+\newcommand{\spraycheck}{SprayCheck}
+\newcommand{\flowpulse}{FlowPulse}
+
+\begin{document}
+
+\title{What a Two-Byte Witness Buys on a Sprayed Fabric:\\ A Silicon-Measured Comparison of In-Fabric Grayhole Localization Against Passive Detection}
+
+\author{Philip~Akekulip% <-this % stops a space
+\thanks{P.~Akekulip is with [institution]. E-mail: akekulip@gmail.com.}%
+\thanks{Manuscript received [date].}}
+
+\markboth{IEEE/ACM Transactions on Networking}%
+{Akekulip: What a Two-Byte Witness Buys on a Sprayed Fabric}
+
+\maketitle
+
+\begin{abstract}
+\input{sections/00_abstract}
+\end{abstract}
+
+\begin{IEEEkeywords}
+Data center networks, packet spraying, gray failure, network telemetry, programmable switches.
+\end{IEEEkeywords}
+
+\input{sections/01_introduction}
+\input{sections/02_background}
+\input{sections/03_ledger}
+\input{sections/04_method}
+\input{sections/05_detection}
+\input{sections/06_localization}
+\input{sections/07_silicon}
+\input{sections/08_robustness}
+\input{sections/09_cost}
+\input{sections/10_related}
+\input{sections/11_discussion}
+\input{sections/12_conclusion}
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}

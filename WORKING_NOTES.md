@@ -2339,3 +2339,23 @@ Top-venue is closed (4 gates); the deliverable is a ToN/IMC measurement paper. N
 writeup: systems-paper-writing (structure) -> paper-voice -> academic-humanizer -> checks ->
 remove-ai-marks, section by section per the spine. Nothing on hardware; switch clean; ~21 clean
 Philip-authored commits this session.
+
+## Status (2026-09-03, later) — journal-adapt Phase 1 for IEEE/ACM ToN in progress
+
+Philip's instruction: before writing, fetch papers from the journal and run a full /journal-adapt
+(structure, conventions, voice, page budget, citation style), then apply it. Constraint added
+mid-run: corpus papers must be peer-reviewed/accepted, not bare arXiv preprints.
+- Corpus: 8 papers VERIFIED as ToN via arXiv journal-ref / 10.1109/TNET DOI (author-accepted text,
+  `paper/journal_adapt/corpus_ton/MANIFEST.md`) + 2 NSDI open-access secondary (dShark, NetBouncer).
+  SprayCheck (unreviewed preprint) deliberately excluded from the STYLE corpus (it remains a baseline).
+  PDFs/text gitignored (third-party); manifest + style cards committed.
+- ToN format facts fetched: `paper/journal_adapt/TON_GUIDELINES.md` (16-page typical max, 10 free
+  pages then $220/page, 10pt two-column IEEEtran, abstract 150-250 words one paragraph, 3-4 Index Terms).
+- Style cards: 7/10 written (ton_001-005, nsdi_001-002); ton_006-008 agent resumed after rate-limit
+  and 529 kills. Mechanical metrics in `_style_cards/format_metrics.md`.
+- Paper scaffold: `paper/ton/main.tex` (IEEEtran journal, builds under tectonic), 13 section stubs,
+  `references.bib` with 24 entries all resolved via DOI content negotiation / Crossref / dblp
+  (no memory-authored metadata). NUMBERS.md (provenance sheet) and Fig 2 schematic agents running.
+NEXT: aggregate cards -> `journal_style_card.md` + `dynamic_writing_skill.md` (conflict table vs
+paper-voice contract + cs_engineering base); then draft section by section into paper/ton/sections/
+via systems-paper-writing -> paper-voice (voice_check) -> academic-humanizer -> remove-ai-marks.
