@@ -1,7 +1,14 @@
 \section{Localization (O2)}
 \label{sec:localization}
 
-Detection answers whether something is wrong; localization answers which directed link, which is the question a repair needs. We expect the ledger to name exactly one directed link at every rate, because it holds each link's own count, and we expect the passive arms to degrade to the uplink and downlink pair once corroborating traffic runs short (Section~\ref{sec:limits}). Table~\ref{tab:localization} presents the outcome for a downlink fault and for an uplink fault, over 50 seeds per cell on the two-hop fabric of Section~\ref{sec:method}.
+Detection answers whether something is wrong; localization answers which directed link, which is the question a repair needs. We expect the ledger to name exactly one directed link at every rate, because it holds each link's own count, and we expect the passive arms to degrade to the uplink and downlink pair once corroborating traffic runs short (Section~\ref{sec:limits}). Table~\ref{tab:localization} presents the outcome for a downlink fault and for an uplink fault, over 50 seeds per cell on the two-hop fabric of Section~\ref{sec:method}, and Figure~\ref{fig:localization} plots the exact-localization rates and the size of the named set.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_localization.pdf}
+\caption{Localization under spraying, 50 seeds per cell with 95 percent intervals. (a) Exact-localization rate for a downlink fault. (b) Exact-localization rate for an uplink fault. (c) Mean size of the named set over detections: 1 is the exact directed link, 2 is the uplink and downlink pair; the ledger's set size is 1.00 in every cell, and a missing point means the arm detected nothing.}
+\label{fig:localization}
+\end{figure*}
 
 \begin{table}[t]
 \caption{Localization of a single directed-link grayhole on a 4-leaf, 8-spine fabric, 50 seeds per cell, generous budget of 60 post-onset epochs. Exact: named the true directed link and only it (95 percent Wilson interval). Amb.: named a set containing a healthy link. Miss: named nothing. Size: mean set size over detections. The ledger scored exact 1.00 [0.93, 1.00] with size 1.00 in every cell of both families and is omitted from the rows.}

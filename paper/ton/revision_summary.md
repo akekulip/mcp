@@ -72,6 +72,18 @@ present as author placeholders; 12 pages including references (target 13–14, c
 | eval | reporting FP next to action rate in every table caption pre-empts the "safe but useless" attack | general | pattern (CLAUDE.md cross-check 4) |
 | robustness | a dedicated boundary section that reports where a baseline wins reads as ToN-native (ton_003 candour paragraph, nsdi_002 named false negatives) | journal-only | pattern |
 
+## Figures (added 2026-09-03, second pass; ieee-paper-figures + ToN caption rules)
+One data figure per objective, each generated from the committed sweep JSONs or the silicon cells by a
+script in `figures/` (utils_mpl IEEE sizing, Times, Okabe-Ito palette shared with the scaling curve,
+one marker/hatch per arm for grayscale printing):
+- Fig. 1 `scaling_curve.pdf` (O1 headline), Fig. 3 `fig_action_rate.pdf` (O1 action rate with Wilson
+  intervals, single column), Fig. 4 `fig_localization.pdf` (O2, three panels, double column), Fig. 5
+  `fig_silicon.pdf` (O3, recovery on log axes + per-sublink attribution, double column), Fig. 6
+  `fig_correlated.pdf` (O4, three regimes, double column; the ledger's failure is drawn, not hidden).
+- Captions follow the ToN profile: one sentence for single-result figures, panel-defining multi-sentence
+  captions for multi-panel figures, every encoding named in the caption. Each figure is pointed to from
+  the prose before its result is discussed. Tables are kept beside the figures, as the corpus does.
+
 ## Known gaps left for the author
 - Three datacenter-flavoured ToN style cards (ton_006–008) were lost to API failures; the profile rests
   on five verified ToN papers plus two NSDI papers.

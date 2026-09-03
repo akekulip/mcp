@@ -1,7 +1,7 @@
 \section{Detection Cost (O1)}
 \label{sec:detection}
 
-We expect the ledger's cost to be flat in $p$ and the passive detectors' cost to grow as $1/p$ (Section~\ref{sec:limits}). In Figure~\ref{fig:scaling} and Table~\ref{tab:detection}, we show the packets each arm needed to flag the faulty spine and the fraction of seeds in which it did so, for five loss rates from 1.5 percent to $10^{-4}$.
+We expect the ledger's cost to be flat in $p$ and the passive detectors' cost to grow as $1/p$ (Section~\ref{sec:limits}). In Figure~\ref{fig:scaling} and Table~\ref{tab:detection}, we show the packets each arm needed to flag the faulty spine and the fraction of seeds in which it did so, for five loss rates from 1.5 percent to $10^{-4}$; Figure~\ref{fig:action} shows the action rates with their intervals.
 
 \begin{figure}[t]
 \centering
@@ -29,6 +29,13 @@ $10^{-4}$ & 1.00 & 22.0\,M & 0.00 & -- & 0.00 & -- \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig_action_rate.pdf}
+\caption{Action rate against loss rate with 95 percent Wilson intervals, 50 seeds per cell, within the 160-million-packet budget; the false-positive rate was 0.00 for every arm at every rate.}
+\label{fig:action}
+\end{figure}
 
 \textbf{The ledger's cost is flat.} The ledger flagged the faulty spine in every seed at every rate, with a median of 22.0 million fleet packets and an interquartile range of 22 to 24 million, and it did so on the first epoch after onset in every case. The reason is that the quantity it tests is a loss ratio relative to the fleet floor, and a fault at any $p$ that is far above the floor of $10^{-5}$ clears the test on one epoch's worth of that link's traffic. Its cost is set by the epoch volume, not by $p$. Its false-positive rate was 0.00.
 

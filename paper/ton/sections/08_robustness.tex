@@ -1,7 +1,14 @@
 \section{The Boundary: Correlated Faults (O4)}
 \label{sec:robustness}
 
-Every result so far injects one independent fault. This section asks whether the advantage survives several faults at once and whether it survives a correlated, fleet-wide shift in loss. It is a gate rather than a pass: if the advantage collapses under correlation, that bounds the headline claims to the independent regime, which is the pre-registered scope, and we would rather know. The harness of Section~\ref{sec:method} drives three regimes over the 64 directed links of the two-hop fabric, 50 seeds per cell and 40 post-onset epochs, with the ledger's controller unmodified. Two anchors accompany every cell: a do-nothing arm that never acts, and an oracle that returns the true set. The injected loss was verified in the data of every cell, not in the configuration.
+Every result so far injects one independent fault. This section asks whether the advantage survives several faults at once and whether it survives a correlated, fleet-wide shift in loss. It is a gate rather than a pass: if the advantage collapses under correlation, that bounds the headline claims to the independent regime, which is the pre-registered scope, and we would rather know. The harness of Section~\ref{sec:method} drives three regimes over the 64 directed links of the two-hop fabric, 50 seeds per cell and 40 post-onset epochs, with the ledger's controller unmodified. Two anchors accompany every cell: a do-nothing arm that never acts, and an oracle that returns the true set. The injected loss was verified in the data of every cell, not in the configuration. Figure~\ref{fig:correlated} summarizes the three regimes; Tables~\ref{tab:multi} and~\ref{tab:shock} give the full numbers.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_correlated.pdf}
+\caption{The correlated-fault gate, 50 seeds per cell over 40 post-onset epochs on 64 directed links. (a) Exact-all rate, with 95 percent intervals, for two and three simultaneous independent faults. (b) Healthy links falsely named at the final epoch under a fleet-wide shift with no culprit, where the correct answer is zero and 64 is every link. (c) Exact-all rate for one culprit embedded in a shift. The ledger holds in (a) and fails in (b) and (c), where SprayCheck-Z holds.}
+\label{fig:correlated}
+\end{figure*}
 
 \begin{table}[t]
 \caption{Two or three simultaneous independent faults (R1), 50 seeds per cell. Recall: fraction of true faulty links named. Exact-all: fraction of seeds that named the true set and nothing else. FP: fraction of seeds that named a healthy link, over the whole 40-epoch window / at the final epoch. False: mean healthy links named over the window. FlowPulse-$\theta$ named nothing in these cells (recall 0.00) and is omitted.}
