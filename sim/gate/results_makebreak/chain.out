@@ -1,0 +1,16 @@
+[00:09:27] waiting for CLEAN .finish ...
+[00:34:47] CLEAN done: 3587520645 ps = Maximum finishing time at host 8: 3587520645 (3.58752 s)
+[00:34:47] LAUNCH donothing_rto40: fault=1 loss='AGG:41:1:1e-3' rto=40000
+[00:34:52] FLAGS OK donothing_rto40:
+    Setting min RTO to 40000 us (from -rto_min_us)
+    MCP silent loss p=0.001 on US41->CS1 onset_ms=381.7
+    MCP policy uniform budget 20 of 1024 uplinks, thresh 1e-05
+[01:05:36] DONE donothing_rto40: Maximum finishing time at host 8: 3636376374 (3.63638 s)  [wall_s=1840.12]
+[01:05:36] GAP rto40: CLEAN=3587520645 DO-NOTHING=3636376374 -> slowdown 1.362%
+[01:05:36] gap<=5% -> skipping rto10 bracket (NULL regime)
+=== MAKE-OR-BREAK SUMMARY (2026-09-03T01:05:36-04:00) ===
+fault link: US41->CS1  p=1e-3  onset=381.7ms  seed=1000  (denominator: 4,805,187 pkt healthy)
+CLEAN     rto40  : 3587520645 ps
+DO-NOTHING rto40 : 3636376374 ps  gap=1.362%
+VERDICT: NULL (pipeline-hidden at tau=40ms)
+[01:05:36] CHAIN COMPLETE
