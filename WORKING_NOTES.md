@@ -2213,3 +2213,32 @@ Switch clean, attention at normal (26624/70, 4096/20), nothing armed, regression
 - Git: branch `master`, 26 uncommitted file(s): README.md docs/review/BEHAVIORAL-SUBLINK-PLAN.md docs/review/CAMPAIGN-PLAN.md docs/review/HEALTH-GATE-RESULT.md docs/review/P2-P3-INDEPENDENT-AUDIT.md docs/review/P3-DYNAMIC-RESULT.md docs/review/P3-FEEDBACK-RESULT.md docs/review/artifacts/HW-CLF-FRONTIER-PLACEMENT.md docs/review/artifacts/HW-CLF-STARVED-SWEEP.md docs/review/artifacts/HW-CLF-VS-CW4.md docs/review/artifacts/HW-SELECTIVE-DETECTION.md docs/review/artifacts/P3-EVENT-AUDIT-9.13.1.md 
 - Last verification run recorded: 2026-09-02T16:55:16Z	cd /home/philip/Projects/mcp python3 -c " # Wall-clock time-to-detect, stated assumption explicitly: a 25G link (this # 
 - RESUME: re-read the Task/Status/Next-action sections above; trust this file over recollection.
+
+## Status (2026-09-02, later still) — contribution scoping RESOLVED by two convergent gates
+
+Two gates run in parallel, both committed:
+
+**Framing check (ieee-journal-reviewer, `docs/review/CONTRIBUTION-FRAMING-2026-09-02.md`, commit 4839d35):**
+detection + localization + overhead measurement ALONE = ToN/IMC paper, NOT SIGCOMM'27/NSDI'28 —
+the mechanism is occupied prior art (NetSeer/LinkGuardian/LossRadar/dShark/UEC) and the two headline
+numbers are information-structure consequences (MCP holds per-link TX the passive arms lack), not
+findings. Top venue would need the healing lifecycle reframed as a new observability problem AND a
+non-vacuous result-gate. Reframe guidance: claim a measured characterization not a primitive; lead
+with detection COST-SCALING (flat vs 1/loss-rate), not the partly-definitional localization 1.00.
+
+**Healing result-gate (research-scientist, `HEALING-RESULT-GATE-2026-09-02.md`, commit 1a50fbf): FAIL.**
+Structural, not parametric: absent a recovery-time predictor (spec §10 forbids it), the evidence-lease
+earliest-deadline schedule is byte-identical to round-robin; the lifecycle can't out-schedule five
+lines of round-robin even in principle, and the equal-cost frontier is vacuous. 12/12 tests, proven
+across 30 seeds. Do NOT build the audit-cap P4 / lifecycle policy.
+
+**Net: the top-venue-via-healing path is CLOSED.** The honest, defensible outcome is a ToN/IMC
+measurement paper, reframed per the framing memo. What survives (NOT the lifecycle): (1) steered
+acquisition of witness-validated evidence on a spray-starved directed sublink (a capability), (2) the
+dark-link quantification (unoccupied, unquantified, cheap). Strengthening experiments named: A3
+packets-to-detect scaling curve (data in hand), dark-link quantification (cheap), A4 correlated-fault/
+non-stationary stress (the biggest gap, not in hand — caps the venue even for ToN/IMC).
+
+The gates did their job: killed an unpublishable P4 lifecycle build and a wasted SIGCOMM cycle
+CHEAPLY, in simulation, before any hardware. Awaiting Philip's call on venue/scope. Nothing touching
+hardware; switch idle; frozen localizer untouched (1cc6349a).
