@@ -1,0 +1,181 @@
+# Healing result-gate pilot -- Section 11 stop condition
+# 30 seeds, mean recovery 20 epochs (2.0 s), frac_permanent=0.15, horizon 200 epochs
+# fixed_timer fires at 1.5x mean recovery; capacities heterogeneous {50,100,200} Gbps
+
+
+## Concurrency K = 8  (single upstream port; honest B: 25G~1.5, 100G~6, 400G~24)
+
+### K=8, B=1  (K=8 concurrent links, budget B=1 audits/epoch, 30 seeds)
+| arm | med unsafe | act-rate | med stranded (Gbps*epoch) | med restore delay (epoch) |
+|---|---|---|---|---|
+| oracle | 0.0 | 0.82 | 0 | 0.0 |
+| continuous_probe | 0.0 | 0.82 | 0 | 0.0 |
+| earliest_deadline | 0.0 | 0.82 | 1900 | 2.2 |
+| round_robin | 0.0 | 0.82 | 1900 | 2.2 |
+| capacity_weighted | 0.0 | 0.82 | 1625 | 2.0 |
+| fixed_timer | 3.0 | 1.00 | 10675 | 19.5 |
+| permanent_quarantine | 0.0 | 0.00 | 127875 | n/a |
+    -> earliest_deadline (LIFECYCLE): TIES round_robin exactly
+    -> capacity_weighted: PARETO-BEATS round_robin
+
+### K=8, B=2  (K=8 concurrent links, budget B=2 audits/epoch, 30 seeds)
+| arm | med unsafe | act-rate | med stranded (Gbps*epoch) | med restore delay (epoch) |
+|---|---|---|---|---|
+| oracle | 0.0 | 0.82 | 0 | 0.0 |
+| continuous_probe | 0.0 | 0.82 | 0 | 0.0 |
+| earliest_deadline | 0.0 | 0.82 | 750 | 1.0 |
+| round_robin | 0.0 | 0.82 | 750 | 1.0 |
+| capacity_weighted | 0.0 | 0.82 | 650 | 1.0 |
+| fixed_timer | 3.0 | 1.00 | 10675 | 19.5 |
+| permanent_quarantine | 0.0 | 0.00 | 127875 | n/a |
+    -> earliest_deadline (LIFECYCLE): TIES round_robin exactly
+    -> capacity_weighted: PARETO-BEATS round_robin
+
+### K=8, B=4  (K=8 concurrent links, budget B=4 audits/epoch, 30 seeds)
+| arm | med unsafe | act-rate | med stranded (Gbps*epoch) | med restore delay (epoch) |
+|---|---|---|---|---|
+| oracle | 0.0 | 0.82 | 0 | 0.0 |
+| continuous_probe | 0.0 | 0.82 | 0 | 0.0 |
+| earliest_deadline | 0.0 | 0.82 | 200 | 0.0 |
+| round_robin | 0.0 | 0.82 | 200 | 0.0 |
+| capacity_weighted | 0.0 | 0.82 | 200 | 0.0 |
+| fixed_timer | 3.0 | 1.00 | 10675 | 19.5 |
+| permanent_quarantine | 0.0 | 0.00 | 127875 | n/a |
+    -> earliest_deadline (LIFECYCLE): TIES round_robin exactly
+    -> capacity_weighted: TIES round_robin exactly
+
+### K=8, B=8  (K=8 concurrent links, budget B=8 audits/epoch, 30 seeds)
+| arm | med unsafe | act-rate | med stranded (Gbps*epoch) | med restore delay (epoch) |
+|---|---|---|---|---|
+| oracle | 0.0 | 0.82 | 0 | 0.0 |
+| continuous_probe | 0.0 | 0.82 | 0 | 0.0 |
+| earliest_deadline | 0.0 | 0.82 | 0 | 0.0 |
+| round_robin | 0.0 | 0.82 | 0 | 0.0 |
+| capacity_weighted | 0.0 | 0.82 | 0 | 0.0 |
+| fixed_timer | 3.0 | 1.00 | 10675 | 19.5 |
+| permanent_quarantine | 0.0 | 0.00 | 127875 | n/a |
+    -> earliest_deadline (LIFECYCLE): TIES round_robin exactly
+    -> capacity_weighted: TIES round_robin exactly
+
+
+## Concurrency K = 32  (2% of a ~1600-link fabric; honest B up to ~24 at 400G)
+
+### K=32, B=1  (K=32 concurrent links, budget B=1 audits/epoch, 30 seeds)
+| arm | med unsafe | act-rate | med stranded (Gbps*epoch) | med restore delay (epoch) |
+|---|---|---|---|---|
+| oracle | 0.0 | 0.84 | 0 | 0.0 |
+| continuous_probe | 0.0 | 0.84 | 0 | 0.0 |
+| earliest_deadline | 0.0 | 0.84 | 43675 | 13.0 |
+| round_robin | 0.0 | 0.84 | 43675 | 13.0 |
+| capacity_weighted | 0.0 | 0.84 | 39225 | 12.2 |
+| fixed_timer | 11.0 | 1.00 | 45425 | 20.0 |
+| permanent_quarantine | 0.0 | 0.00 | 569725 | n/a |
+    -> earliest_deadline (LIFECYCLE): TIES round_robin exactly
+    -> capacity_weighted: PARETO-BEATS round_robin
+
+### K=32, B=4  (K=32 concurrent links, budget B=4 audits/epoch, 30 seeds)
+| arm | med unsafe | act-rate | med stranded (Gbps*epoch) | med restore delay (epoch) |
+|---|---|---|---|---|
+| oracle | 0.0 | 0.84 | 0 | 0.0 |
+| continuous_probe | 0.0 | 0.84 | 0 | 0.0 |
+| earliest_deadline | 0.0 | 0.84 | 6350 | 2.0 |
+| round_robin | 0.0 | 0.84 | 6350 | 2.0 |
+| capacity_weighted | 0.0 | 0.84 | 7025 | 2.0 |
+| fixed_timer | 11.0 | 1.00 | 45425 | 20.0 |
+| permanent_quarantine | 0.0 | 0.00 | 569725 | n/a |
+    -> earliest_deadline (LIFECYCLE): TIES round_robin exactly
+    -> capacity_weighted: does NOT Pareto-beat round_robin (better=False, worse=True)
+
+### K=32, B=8  (K=32 concurrent links, budget B=8 audits/epoch, 30 seeds)
+| arm | med unsafe | act-rate | med stranded (Gbps*epoch) | med restore delay (epoch) |
+|---|---|---|---|---|
+| oracle | 0.0 | 0.84 | 0 | 0.0 |
+| continuous_probe | 0.0 | 0.84 | 0 | 0.0 |
+| earliest_deadline | 0.0 | 0.84 | 2525 | 1.0 |
+| round_robin | 0.0 | 0.84 | 2525 | 1.0 |
+| capacity_weighted | 0.0 | 0.84 | 2550 | 1.0 |
+| fixed_timer | 11.0 | 1.00 | 45425 | 20.0 |
+| permanent_quarantine | 0.0 | 0.00 | 569725 | n/a |
+    -> earliest_deadline (LIFECYCLE): TIES round_robin exactly
+    -> capacity_weighted: does NOT Pareto-beat round_robin (better=False, worse=True)
+
+### K=32, B=24  (K=32 concurrent links, budget B=24 audits/epoch, 30 seeds)
+| arm | med unsafe | act-rate | med stranded (Gbps*epoch) | med restore delay (epoch) |
+|---|---|---|---|---|
+| oracle | 0.0 | 0.84 | 0 | 0.0 |
+| continuous_probe | 0.0 | 0.84 | 0 | 0.0 |
+| earliest_deadline | 0.0 | 0.84 | 200 | 0.0 |
+| round_robin | 0.0 | 0.84 | 200 | 0.0 |
+| capacity_weighted | 0.0 | 0.84 | 100 | 0.0 |
+| fixed_timer | 11.0 | 1.00 | 45425 | 20.0 |
+| permanent_quarantine | 0.0 | 0.00 | 569725 | n/a |
+    -> earliest_deadline (LIFECYCLE): TIES round_robin exactly
+    -> capacity_weighted: PARETO-BEATS round_robin
+
+### K=32, B=32  (K=32 concurrent links, budget B=32 audits/epoch, 30 seeds)
+| arm | med unsafe | act-rate | med stranded (Gbps*epoch) | med restore delay (epoch) |
+|---|---|---|---|---|
+| oracle | 0.0 | 0.84 | 0 | 0.0 |
+| continuous_probe | 0.0 | 0.84 | 0 | 0.0 |
+| earliest_deadline | 0.0 | 0.84 | 0 | 0.0 |
+| round_robin | 0.0 | 0.84 | 0 | 0.0 |
+| capacity_weighted | 0.0 | 0.84 | 0 | 0.0 |
+| fixed_timer | 11.0 | 1.00 | 45425 | 20.0 |
+| permanent_quarantine | 0.0 | 0.00 | 569725 | n/a |
+    -> earliest_deadline (LIFECYCLE): TIES round_robin exactly
+    -> capacity_weighted: TIES round_robin exactly
+
+
+## Concurrency K = 128  (8% concurrent; even here 400G sustains ~24-111 audits/epoch)
+
+### K=128, B=4  (K=128 concurrent links, budget B=4 audits/epoch, 30 seeds)
+| arm | med unsafe | act-rate | med stranded (Gbps*epoch) | med restore delay (epoch) |
+|---|---|---|---|---|
+| oracle | 0.0 | 0.85 | 0 | 0.0 |
+| continuous_probe | 0.0 | 0.85 | 0 | 0.0 |
+| earliest_deadline | 0.0 | 0.85 | 164825 | 12.5 |
+| round_robin | 0.0 | 0.85 | 164825 | 12.5 |
+| capacity_weighted | 0.0 | 0.85 | 164050 | 12.2 |
+| fixed_timer | 42.0 | 1.00 | 183850 | 20.0 |
+| permanent_quarantine | 0.0 | 0.00 | 2264400 | n/a |
+    -> earliest_deadline (LIFECYCLE): TIES round_robin exactly
+    -> capacity_weighted: PARETO-BEATS round_robin
+
+### K=128, B=24  (K=128 concurrent links, budget B=24 audits/epoch, 30 seeds)
+| arm | med unsafe | act-rate | med stranded (Gbps*epoch) | med restore delay (epoch) |
+|---|---|---|---|---|
+| oracle | 0.0 | 0.85 | 0 | 0.0 |
+| continuous_probe | 0.0 | 0.85 | 0 | 0.0 |
+| earliest_deadline | 0.0 | 0.85 | 15925 | 1.0 |
+| round_robin | 0.0 | 0.85 | 15925 | 1.0 |
+| capacity_weighted | 0.0 | 0.85 | 15275 | 1.0 |
+| fixed_timer | 42.0 | 1.00 | 183850 | 20.0 |
+| permanent_quarantine | 0.0 | 0.00 | 2264400 | n/a |
+    -> earliest_deadline (LIFECYCLE): TIES round_robin exactly
+    -> capacity_weighted: PARETO-BEATS round_robin
+
+### K=128, B=64  (K=128 concurrent links, budget B=64 audits/epoch, 30 seeds)
+| arm | med unsafe | act-rate | med stranded (Gbps*epoch) | med restore delay (epoch) |
+|---|---|---|---|---|
+| oracle | 0.0 | 0.85 | 0 | 0.0 |
+| continuous_probe | 0.0 | 0.85 | 0 | 0.0 |
+| earliest_deadline | 0.0 | 0.85 | 2500 | 0.0 |
+| round_robin | 0.0 | 0.85 | 2500 | 0.0 |
+| capacity_weighted | 0.0 | 0.85 | 2300 | 0.0 |
+| fixed_timer | 42.0 | 1.00 | 183850 | 20.0 |
+| permanent_quarantine | 0.0 | 0.00 | 2264400 | n/a |
+    -> earliest_deadline (LIFECYCLE): TIES round_robin exactly
+    -> capacity_weighted: PARETO-BEATS round_robin
+
+### K=128, B=128  (K=128 concurrent links, budget B=128 audits/epoch, 30 seeds)
+| arm | med unsafe | act-rate | med stranded (Gbps*epoch) | med restore delay (epoch) |
+|---|---|---|---|---|
+| oracle | 0.0 | 0.85 | 0 | 0.0 |
+| continuous_probe | 0.0 | 0.85 | 0 | 0.0 |
+| earliest_deadline | 0.0 | 0.85 | 0 | 0.0 |
+| round_robin | 0.0 | 0.85 | 0 | 0.0 |
+| capacity_weighted | 0.0 | 0.85 | 0 | 0.0 |
+| fixed_timer | 42.0 | 1.00 | 183850 | 20.0 |
+| permanent_quarantine | 0.0 | 0.00 | 2264400 | n/a |
+    -> earliest_deadline (LIFECYCLE): TIES round_robin exactly
+    -> capacity_weighted: TIES round_robin exactly
