@@ -745,6 +745,7 @@ Every reported number is traceable to (config, seed, commit). The following are 
 | 2026-08-28 | v1.6 — §3.3 warm-up defined in observed evidence; replay determinism and success semantics | The frozen localizer held an element in warm-up for `baseline_warmup_epochs = 10` **update calls**. Warm-up is a statement about how much evidence stands behind the baseline, so counting calls penalised any schedule that reads less often while carrying the same packets per read: the H8 in-band arm collecting every 4th epoch saw 11 drops in 99,704 packets and still reported CUSUM 0.00. Warm-up is now `baseline_warmup_packets = 1e5` observed packets (= 10/δ, so the baseline's own noise ~1/N = 1e-5 is an order below the shift under test) and `baseline_warmup_latency_samples = 10` latency samples. infer.py sha256 `0a989aaf…`; every replay result re-issued under it | see Amendment v1.6 below |
 | 2026-08-28 | v1.7 — **novelty gate tripped**: the coverage bound and the H8 mechanism are both prior art | Three independent reviews (docs/review/NOVELTY-GATE.md) returned DUPLICATE on the §3 coverage proposition — it is the perfect-detection case of Bellman (1957, Ch. III Ex. 3) / Blackwell's index rule, restated for budgeted policy classes by Chaudhuri–Fellouris–Tajer (IEEE TIT 2024, Thm 3.1/4.3) and quantified by Xu–Mei–Moustakides (IEEE TIT 2021, Thm 1) — and DUPLICATE on the H8 order witness, which is NetSeer's inter-switch drop detection (SIGCOMM 2020 §3.3, verbatim: egress-inserted per-neighbour sequence number, downstream ingress treats inconsecutive numbers as drops), with LinkGuardian (SIGCOMM 2023) and UEC 1.0.2 §5.1 LLR as independent occupants. The §4 'spraying collapses the pooled-test design space' argument is REFUTED by SprayCheck, which localizes from passive pooled evidence under spraying. Per PLAN.md's kill/pivot rule the bound is demoted to an attributed lemma and the mechanism is reframed as instantiate-and-cost; H8 is restated below | see Amendment v1.7 below |
 | 2026-08-28 | v1.8 — §3.3 `forget_mode` knob added (frozen default UNCHANGED) | The forgetting factor is applied per observation, so an arm's posterior memory depends on its read cadence (~10 epochs at B = n, ~250 at B = 41) — 'one frozen localizer for every arm' holds for the source but not the dynamics. `infer.py` gains `forget_mode` (`per_observation` = the frozen rule, `per_epoch` = discount by `rho ** elapsed_epochs`) and `replay.py` a `--forget-mode` flag, so the asymmetry is measurable instead of arguable. MEASURED: every result is byte-identical under both modes in all three regimes (single fault, moving fault, F0 background loss), because forgetting discounts only the Beta/Normal-Gamma pseudo-counts and never the CUSUM that `localize` ranks and thresholds. The frozen default therefore stays `per_observation`. infer.py sha256 `0a989aaf…` → `1cc6349a…`; no result is re-issued because none changes. The real successor concern is that the CUSUM has no decay or post-alarm reset at all, which is what produces the moving-fault stale-suspicion alarms | sim/gate/M1-REPLAY.md C7 |
+| 2026-09-02 | v1.9 — grayhole-only scope, per-link-fault headline claim, Q4 deferred as H13, H10/H11 success criteria corrected | Adopts the C1–C3 evidence-ledger / e-process spine of `docs/review/BRAINSTORM-2026-09-01.md` by reference (superseding the retired attention/bandit mechanism of v1.5 item 5 and the withdrawn H8′ order-witness framing of v1.7), renaming its H1/H2/H3 to H10/H11/H12; drops blackhole/STARVED evaluation from the claim set (kept as infrastructure validation only); restricts the headline claim to independent per-link faults, reports common-mode/fleet-wide false-alarm degradation as a disclosed limitation, and defers its fix (the relative-discriminator gate, "Q4") as H13, out of scope for this submission; corrects H10's inherited power figures (fixed-alternatives-grid detector superseded by `FleetRatioEProcess`) and H11's zero-tolerance restoration criterion (now reported with premature-restoration rate alongside action rate) | see Amendment v1.9 below |
 
 Amendments are appended only. An amendment after the corresponding block has started running
 is flagged "post-hoc" in the paper.
@@ -1014,3 +1015,111 @@ the system is built this way. It is not a contribution, is not called a theorem,
 the perfect-detection stationary-target regime, which is why the sampling-control QCD constants do
 not transfer.
 
+### Amendment v1.9 — 2026-09-02 — grayhole-only scope, the per-link-fault claim boundary, Q4 deferred as H13, and two corrected success criteria
+
+**Reason.** `docs/review/BRAINSTORM-2026-09-01.md` (PI panel plus a red-team pass, §9) superseded
+the H8′/H9 novelty-gate framing of v1.7 with a new spine — C1 a receiver ledger (`hi`/`lo` per
+directed sublink), C2 a primary absolute e-process against a fleet-estimated floor with a secondary
+relative/exchangeability discriminator demoted to a congestion-versus-gray role (red-team finding 6,
+§9.6), C3 evidence-weighted spraying with restoration — and that pivot has not yet been logged here:
+no prior amendment mentions the ledger, the e-process, or the brainstorm's own H1
+(attribution)/H2 (restoration)/H3 (context) numbering. This amendment does two things together,
+because the second cannot be stated without the first. First, it adopts C1–C3 into the
+pre-registration by reference, renaming the brainstorm's H1/H2/H3 to **H10/H11/H12** to avoid
+colliding with the existing H1–H9/H8′ namespace, following the precedent set by v1.5 of continuing
+the H-namespace sequentially for a genuinely new mechanism rather than reusing a retired number.
+Second, it records four scoping decisions Philip made today, 2026-09-02, after the PI agent laid
+out the tradeoffs from `docs/review/artifacts/STATS-LAYER-STATUS-2026-09-02.md` and
+`docs/review/artifacts/STATS-LAYER-REDESIGN-PROPOSAL-2026-09-02.md` — four independent review
+rounds of `controller/absolute_eprocess.py`, `controller/floor_estimator.py`,
+`controller/fleet_control.py`, `controller/mitigation_weight.py`, `controller/decision_loop.py`,
+and `controller/relative_eprocess.py`. These four decisions are settled; they are recorded here,
+not re-opened.
+
+**1. Scope narrows to grayhole detection only.** Blackhole (total-loss) detection and the
+STARVED/IMPOSSIBLE classification machinery built against the "C-W4" comparison arm
+(`WORKING_NOTES.md` 2026-08-30 entries; `docs/review/artifacts/HW-CLF-VS-CW4.md`,
+`docs/review/artifacts/HW-CLF-STARVED-SWEEP.md`) are dropped as a headline evaluation axis. This
+work is not deleted: the receiver ledger's handling of the $p \to 1$ trivial case (total loss is the
+degenerate grayhole) stays in the repository as infrastructure validation that C1 does not break at
+that boundary, but it is not claimed or evaluated as a paper result, and no hypothesis introduced in
+this amendment is tested against it.
+
+**2. The headline claim is scoped to independent per-link faults.** As stated by Philip: "grayhole
+detection and restoration under independent per-link faults beats SprayCheck-Z/FlowPulse-θ on
+packets-to-name and CorrOpt/REPS-style/BFD-style on restoration action-rate/time-to-restore." This is
+H10 and H11 below. The common-mode/fleet-wide shock case is explicitly **outside** the headline claim:
+under a shared shock across sibling sublinks, the primary e-process's false-alarm rate degrades by
+2–3 orders of magnitude relative to the discarded fixed-alternatives-grid design in the same scenario
+(`STATS-LAYER-STATUS-2026-09-02.md`, round 4), because the ratio-relative grid's floor-under-estimate
+failure mode is unprotected by construction. It is reported, not suppressed: a stress-test figure
+showing the measured degradation is required in the paper's evaluation, and the relative-discriminator
+gate designed to fix it — the redesign proposal's Q4 — is named explicitly as designed-but-not-built,
+per §3 below.
+
+**3. Q4 is deferred past this submission, entered as H13.** Q4 (gate mitigation actions on the
+relative discriminator's corroborating share-deviation evidence, requiring queue-depth/context
+stratification plumbing that "does not exist anywhere yet") is out of scope for this paper. Following
+the H5 precedent — a hypothesis-shaped entry carried in the numbering with no pass/fail bar and
+outside the Holm family — it is entered as:
+
+> **H13 (fleet-wide false-alarm control under common-mode shock) — DEFERRED, not tested.** No
+> success criterion is pre-registered because no implementation exists to test against
+> (`relative_eprocess.py` is built but unwired into `decision_loop.py`; the stratification key it
+> needs does not exist). The paper states the measured degradation under H10's headline conditions
+> (item 2 above), names the relative-discriminator gate as the designed fix with an owner (the
+> redesign proposal's build-order item 4), and states plainly that closing this gap is future work,
+> not an open TODO with none.
+
+H13 carries no test and sits outside the Holm family {H10, H11, H12}, by the same convention that
+keeps H5 outside {H1, H2, H3, H4, H6, H7}. It exists in the numbering only so the scope boundary is
+citable by number in the paper's limitations section, the way claim (2)'s scope boundary in §0 is
+citable by letter.
+
+**4. Two success-criterion corrections.**
+
+*(a) H10 — attribution/detection (renamed from the brainstorm's H1).* The brainstorm's power figures
+(§6: median packets-to-name within 3× the KL floor; drops-to-decision
+$d^* = \lceil \ln(1/\alpha)/\ln(p/p_0)\rceil$, one drop at $p = 10^{-3}$ and two at $p = 10^{-4}$
+against a $10^{-5}$ floor; 14,000/54,000-packet power estimates at $\delta = 10^{-3}$ with and
+without background loss) were derived under a **fixed absolute-alternatives grid**. Round 3 of the
+stats-layer review found this design can itself manufacture a false-alarm cascade: a newly-degraded
+link's first, correctly-previsible-healthy epoch pollutes its siblings' floor upward, and against an
+inflated floor, clean traffic fits the fixed low alternatives better than the inflated null (measured
+wealth $1.2\times10^{74}$ from clean $10^{-3}$ traffic once the floor rose to 0.1). The implemented
+and independently re-verified detector, `controller/absolute_eprocess.py`'s `FleetRatioEProcess`
+(the redesign proposal's Q1), instead re-parameterizes the grid as fixed multipliers above the
+current floor — a different statistical object, "detect $k\times$ the current floor" rather than
+"detect $2\times10^{-3}$" — and the redesign proposal states plainly that the inherited power numbers
+"need re-derivation, not inheritance." **H10's success criterion is amended accordingly: any
+packets-to-name or power figure reported for H10 must be re-derived against `FleetRatioEProcess` as
+actually implemented; the brainstorm's inherited $d^*$/14k/54k figures are flagged non-authoritative
+and may not be asserted as still valid without a fresh derivation logged in a future amendment.**
+
+*(b) H11 — restoration (renamed from the brainstorm's H2).* The brainstorm's success criterion
+("zero false restorations in $\ge 59$ opportunities... action rate $\ge 0.9$") is amended to drop the
+zero-tolerance framing. Round-4 review of the restoration e-process in
+`controller/mitigation_weight.py` found that at severities very close to the fleet's estimated floor,
+restoration can declare a fault repaired while it is still active, and assessed this as likely an
+inherent property of a bounded-$\alpha$ sequential test rather than something fully eliminable by
+tuning. **H11's success criterion now requires reporting the premature-restoration rate alongside the
+action rate at every evaluated operating point; the action rate may never be reported in isolation.**
+At the design's two target operating points (degraded rates 0.20 and 0.05), checked against the
+`repair_generation` counter rather than a looser weight-threshold proxy: **action rate 8/8,
+premature-restoration rate 0/8** (`STATS-LAYER-STATUS-2026-09-02.md`, round 4). These two numbers are
+reported together at whatever operating point H11 is evaluated at in the final paper; neither is
+asserted without the other, and the general finding that premature restoration can occur near the
+floor is stated even where a specific operating point happens to measure zero.
+
+**Consequences for the record.** The Holm family for the grayhole-scoped claim is {H10, H11, H12};
+H12 is the brainstorm's context hypothesis, renamed for the same collision-avoidance reason as H10
+and H11, carried unchanged pending the §6/H3 physical selectivity bench. H13 sits outside it. Nothing
+under the old H1–H9/H8′ family is edited by this amendment: §1's original hypothesis table, §3's
+baseline set B1–B13, §2.3's five-unit overhead currency, and §7.4's frozen in-switch attention rule
+all still read as last written, and are stale relative to C1–C3 to varying degrees (§7.4's mechanism
+is slated for deletion by the brainstorm's build order step 3; §3's baselines are not the ones H10/H11
+are tested against; §2.3 does not define packets-to-name, attribution entropy, or the exposure metric
+C3 introduces). Per the header note that changes after v1.1 live in §14 only, this document does not
+edit those sections to match; a reader must cross-reference this amendment, v1.5's item 5, and v1.7
+to know which rows of §1 and §3 are still live. That gap is deliberate under the append-only
+convention and is flagged, not resolved, here.
