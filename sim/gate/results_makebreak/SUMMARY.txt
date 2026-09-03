@@ -1,0 +1,5 @@
+=== MAKE-OR-BREAK SUMMARY (2026-09-03T01:05:36-04:00) ===
+fault link: US41->CS1  p=1e-3  onset=381.7ms  seed=1000  (denominator: 4,805,187 pkt healthy)
+CLEAN     rto40  : 3587520645 ps
+DO-NOTHING rto40 : 3636376374 ps  gap=1.362%
+VERDICT: NULL (pipeline-hidden at tau=40ms)
