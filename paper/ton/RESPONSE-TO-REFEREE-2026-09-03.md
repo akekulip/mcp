@@ -87,3 +87,42 @@ Ordered by the addendum's revised checklist.
 `python3 -m pytest sim/baselines/tests -q` → 65 passed (7 new). All figure scripts render; the
 manuscript builds under IEEEtran. Every new number is transcribed in `NUMBERS.md` §"2026-09-03
 revision".
+
+# Round 2 (accept subject to minor revision) and the NSDI conversion review — 2026-09-03
+
+Venue decision: the paper stays with ToN. The NSDI review's own framing section says the ToN
+path stands unless the paper is reframed around a negative headline; that reframing reverses the
+project's gated decision and is recorded here as an option, not taken.
+
+## Round-2 items
+- **§3 synchronized snapshot (required).** New paragraph in Section X and a new row in Table VII:
+  the alternate-marking reply (RFC 9341, now cited), why it holds in principle, the measured cost
+  of the banked scheme this ledger replaced (+2 tables, +3 SRAM blocks, +1 stateful ALU, +2 PHV
+  containers at equal stage count, plus a carried parity byte and the 56 percent false-blackhole
+  defect it produced), the no-coordination asymmetry, and the plain concession that an operator
+  with precision time and a spare bank should prefer the counter pair. The stage cost is stated as
+  an estimate from the built banked scheme; the synchronized variant itself was not built.
+- **§4.1** sentence added in Section IV: the counter pair deliberately uses the ledger's rule to
+  isolate the information difference; a skew-aware, peer-normalized variant is the stronger
+  baseline not built.
+- **§4.2** precondition added to Section II-C: congestion loss negligible on the measurement
+  timescale (lossless PFC fabric or provisioned so queue drops are rare).
+- **§4.3** the read loop limits both arms: sentence added in Section IX with the failure-mode
+  contrast.
+- **§4.4** counter-pair figure caption now says a 1.00/1.00 cell is a failure; §V calls out the
+  σ = 0 column reproducing the ledger's wall at p = f.
+- **§5** "we believe" replaced by two testable claims plus the unavailable discriminating run;
+  abstract says "by construction given per-link counts"; σ axis labelled in ms on the upper axis;
+  `legacy/` renamed `legacy-measurement-control-plane/`; author metadata remains the author's.
+
+## NSDI-review items that apply to ToN
+- Three stale arm counts fixed (introduction roadmap; Section IV twice).
+- `utils_mpl.py` vendored into `paper/ton/figures/` (MPL-2.0), `_common.py` imports it from
+  there and writes outputs next to the scripts; a `Makefile` regenerates every figure from the
+  repository root.
+- Font floor: legend 8, labels 9, ticks 8, annotations 7.5 pt; schematic labels 7 pt.
+- The counter pair has its own colour (Okabe-Ito reddish purple), marker, hatch, and label.
+- `RATES8` promoted to `_common.py`.
+- "Consequently" thinned from 9 to 5.
+- Not applied (venue-specific): USENIX template, double-blind stripping, the 30 percent cut,
+  removal of the O-labels and roadmap paragraphs, the negative-headline reframing.

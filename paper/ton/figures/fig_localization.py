@@ -25,7 +25,7 @@ for ax, fam, lab in ((axes[0], "down", "(a) downlink fault"), (axes[1], "up", "(
         ax.errorbar(x + off, y, yerr=[y - lo, hi - y], color=COLORS[arm], marker=MARKERS[arm], markersize=4.2,
                     linewidth=1.2, capsize=2, elinewidth=0.8, label=LABELS[arm], zorder=3)
     cpy = np.array([raw[key(fam, p)]["counterpair@0.026"]["exact_rate"] for p in RATES])
-    ax.plot(x + 0.14, cpy, color="0.45", marker="D", markersize=3.5, linewidth=1.0, linestyle="-.",
+    ax.plot(x + 0.14, cpy, color=COLORS["counterpair"], marker=MARKERS["counterpair"], markersize=3.5, linewidth=1.0, linestyle="-.",
             label=r"CounterPair-0B, $\sigma$=0.026", zorder=2)
     ax.set_xticks(x); ax.set_xticklabels([fmt_p(p) for p in RATES], rotation=25)
     ax.set_xlabel(r"Link loss rate $p$")
@@ -45,16 +45,16 @@ for fam, ls in (("down", "-"), ("up", "--")):
                     label=f"{LABELS[arm]}, {'downlink' if fam == 'down' else 'uplink'}", zorder=3)
 ax.axhline(1.0, color=COLORS["mcp"], linewidth=1.4, zorder=2, label="Ledger, both (size 1.00)")
 cps = np.array([raw[key("down", p)]["counterpair@0.026"]["mean_cardinality"] for p in RATES])
-ax.plot(x, cps, color="0.45", marker="D", markersize=3.5, linewidth=1.0, linestyle="-.", label=r"CounterPair-0B, $\sigma$=0.026", zorder=2)
+ax.plot(x, cps, color=COLORS["counterpair"], marker=MARKERS["counterpair"], markersize=3.5, linewidth=1.0, linestyle="-.", label=r"CounterPair-0B, $\sigma$=0.026", zorder=2)
 ax.axhline(2.0, color="0.45", linewidth=0.8, linestyle=":", zorder=1)
-ax.text(0.05, 2.06, "uplink+downlink pair", fontsize=7, color="0.35", ha="left", va="bottom")
+ax.text(0.05, 2.06, "uplink+downlink pair", fontsize=ANNOT, color="0.35", ha="left", va="bottom")
 ax.set_xticks(x); ax.set_xticklabels([fmt_p(p) for p in RATES], rotation=25)
 ax.set_xlabel(r"Link loss rate $p$")
 ax.set_ylabel("Mean named-set size")
 utils_mpl.set_y_axis(ax, bnd=[0.8, 5.6])
 ax.set_title("(c) set size over detections", fontsize=8.5, loc="left")
-axes[0].legend(loc="center right", bbox_to_anchor=(1.0, 0.62), framealpha=1.0, fontsize=6.2)
-ax.legend(loc="upper right", framealpha=1.0, fontsize=6.0)
+axes[0].legend(loc="center right", bbox_to_anchor=(1.0, 0.62), framealpha=1.0, fontsize=ANNOT)
+ax.legend(loc="upper right", framealpha=1.0, fontsize=ANNOT)
 for a in axes:
     utils_mpl.set_grid(fig, a)
 fig.savefig("fig_localization.pdf", transparent=False)

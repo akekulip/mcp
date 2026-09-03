@@ -10,7 +10,7 @@ from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
 
 plt.rcParams.update({"font.family": "serif", "font.serif": ["Times New Roman", "Times", "Nimbus Roman", "DejaVu Serif"],
                      "font.size": 8, "pdf.fonttype": 42, "ps.fonttype": 42, "svg.fonttype": "none"})
-W, H = 3.5, 2.35
+W, H = 3.5, 2.6
 fig = plt.figure(figsize=(W, H)); ax = fig.add_axes([0, 0, 1, 1]); ax.set_xlim(0, 100); ax.set_ylim(0, 67); ax.axis("off")
 ink, grey, light = "#111111", "#666666", "#e8e8e8"
 
@@ -23,29 +23,29 @@ def arrow(x0, y0, x1, y1, lw=0.9, color=ink, style="-|>", ls="-"):
 
 # sender leaf
 box(2, 22, 20, 22, "Leaf $L_a$\n(sender)", bold=True)
-box(2, 6, 22, 13, "egress stamp:\n2-byte witness,\nper-directed-link seq", fc=light, fs=6.2)
+box(1, 4, 25, 15, "egress stamp:\n2-byte witness,\nper-directed-link seq", fc=light, fs=7)
 arrow(12, 19, 12, 22, lw=0.7, color=grey)
 # spines
 spine_x = [36, 48, 60]
 for i, sx in enumerate(spine_x):
     box(sx - 5, 36, 10, 9, f"$S_{i+1}$" if i < 2 else "$S_k$", fs=7.5)
 ax.text(54, 40.5, "…", ha="center", va="center", fontsize=9)
-ax.text(48, 48.5, "per-packet spray across $k$ spines", ha="center", va="center", fontsize=6.6, color=grey)
+ax.text(48, 48.5, "per-packet spray across $k$ spines", ha="center", va="center", fontsize=7, color=grey)
 # uplinks / downlinks
 for sx in spine_x:
     arrow(22, 33, sx - 5, 40.5, lw=0.7)
     arrow(sx + 5, 40.5, 76, 33, lw=0.7)
-ax.text(24.5, 27.5, "uplinks", fontsize=6.2, color=grey); ax.text(67, 27.5, "downlinks", fontsize=6.2, color=grey)
+ax.text(24.5, 27.5, "uplinks", fontsize=7, color=grey); ax.text(67, 27.5, "downlinks", fontsize=7, color=grey)
 # receiver leaf + ledger
 box(76, 22, 22, 22, "Leaf $L_b$\n(receiver)", bold=True)
-box(52, 1, 46, 18, "ingress: directed link $\\leftarrow$ port + spray field\n"
-                   "per directed link: reg_wit_seq (16 b),\nreg_wit_observed (32 b)\n"
-                   "loss = $\\Delta$seq $-$ $\\Delta$observed", fc=light, fs=5.8)
+box(44, 1, 54, 18, "ingress: link $\\leftarrow$ port + spray field\n"
+                   "per link: reg_wit_seq (16 b),\nreg_wit_observed (32 b)\n"
+                   "loss = $\\Delta$seq $-$ $\\Delta$observed", fc=light, fs=7)
 arrow(87, 22, 87, 19, lw=0.7, color=grey)
 # controller
-box(27, 54, 46, 11, "controller, once per epoch: read ledger $\\rightarrow$ loss per directed link\n$\\rightarrow$ ratio to fleet floor $\\rightarrow$ e-BH $\\rightarrow$ detection + localization", fs=6.0)
-arrow(79, 19, 79, 54, lw=0.7, color=grey, ls=(0, (2, 2)))
-ax.text(80.5, 47, "epoch read", fontsize=6.0, color=grey, rotation=90, va="center")
+box(22, 52, 56, 14, "controller, once per epoch:\nread ledger $\\rightarrow$ loss per directed link\n$\\rightarrow$ ratio to fleet floor $\\rightarrow$ e-BH\n$\\rightarrow$ detection + localization", fs=7)
+arrow(79, 19, 79, 52, lw=0.7, color=grey, ls=(0, (2, 2)))
+ax.text(80.5, 47, "epoch read", fontsize=7, color=grey, rotation=90, va="center")
 for ext in ("pdf", "png", "svg"):
     fig.savefig(f"fig_system.{ext}", dpi=600 if ext == "png" else None, bbox_inches=None)
 print("wrote fig_system.pdf/.png/.svg at %.2f x %.2f in" % (W, H))

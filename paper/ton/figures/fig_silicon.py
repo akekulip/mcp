@@ -29,14 +29,14 @@ bx = np.array([d for _, d, _ in bern]); by = np.array([r for _, _, r in bern])
 ax.plot(bx, by, linestyle="none", marker="s", markerfacecolor="white", markeredgecolor=COLORS["mcp"],
         markeredgewidth=1.3, markersize=5.5, zorder=4, label="stochastic injector (drop counter)")
 for (lab, d, r), dx, dy in zip(bern, (9, -8, -8), (-3, 4, 4)):
-    ax.annotate(lab, (d, r), textcoords="offset points", xytext=(dx, dy), fontsize=6.5, color="0.25",
+    ax.annotate(lab, (d, r), textcoords="offset points", xytext=(dx, dy), fontsize=ANNOT, color="0.25",
                 ha="left" if dx > 0 else "right")
-ax.annotate("exact: 6 of 60 000 at $p=10^{-4}$", (6, 6), textcoords="offset points", xytext=(4, -13), fontsize=6.5, color="0.25")
+ax.annotate("exact: 6 of 60 000 at $p=10^{-4}$", (6, 6), textcoords="offset points", xytext=(4, -13), fontsize=ANNOT, color="0.25")
 ax.set_xscale("log"); ax.set_yscale("log")
 utils_mpl.set_x_axis(ax, bnd=[3, 120], log=True); utils_mpl.set_y_axis(ax, bnd=[3, 120], log=True)
 ax.set_xlabel("Injected loss (packets)"); ax.set_ylabel("Recovered loss (packets)")
 ax.set_title("(a) recovery, one sublink", fontsize=8.5, loc="left")
-ax.legend(loc="upper left", framealpha=1.0, fontsize=6.5)
+ax.legend(loc="upper left", framealpha=1.0, fontsize=ANNOT)
 
 ax = axes[1]
 x = np.arange(len(subs)); w = 0.38
@@ -44,15 +44,15 @@ ax.bar(x - w / 2, up_cell, w, color=COLORS["mcp"], edgecolor="black", linewidth=
 ax.bar(x + w / 2, down_cell, w, color="white", edgecolor=COLORS["mcp"], hatch="////", linewidth=0.8,
        label="downlink cell: 13 counted on sublink 162")
 for xi, v in zip(x - w / 2, up_cell):
-    ax.text(xi, v + 1.2, str(v), ha="center", va="bottom", fontsize=6.5)
+    ax.text(xi, v + 1.2, str(v), ha="center", va="bottom", fontsize=ANNOT)
 for xi, v in zip(x + w / 2, down_cell):
-    ax.text(xi, v + 1.2, str(v), ha="center", va="bottom", fontsize=6.5)
+    ax.text(xi, v + 1.2, str(v), ha="center", va="bottom", fontsize=ANNOT)
 ax.set_xticks(x); ax.set_xticklabels(subs)
 ax.set_xlabel("Sublink (uplink sublinks 2--14, downlink sublinks 162--174)")
 ax.set_ylabel("Recovered loss (packets)")
 utils_mpl.set_y_axis(ax, bnd=[0, 60])
 ax.set_title("(b) attribution across eight active sublinks", fontsize=8.5, loc="left")
-ax.legend(loc="upper right", framealpha=1.0, fontsize=6.5)
+ax.legend(loc="upper right", framealpha=1.0, fontsize=ANNOT)
 for a in axes:
     utils_mpl.set_grid(fig, a)
 fig.savefig("fig_silicon.pdf", transparent=False)

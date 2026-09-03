@@ -17,17 +17,20 @@ for ax, key, ylabel, title in ((axes[0], "false_positive_rate", "False-positive 
                                (axes[1], "action_rate", "Action rate", "(b) faulty spine flagged")):
     for p, mk, ls in PS:
         ys = [raw[str(p)]["counterpair"][str(s)]["epoch"][key] for s in SKEWS]
-        ax.plot(xs, ys, marker=mk, linestyle=ls, color=COLORS["mcp"], markersize=4.5, linewidth=1.2,
+        ax.plot(xs, ys, marker=mk, linestyle=ls, color=COLORS["counterpair"], markersize=4.5, linewidth=1.2,
                 label=f"$p$ = {fmt_p(p)}", zorder=3)
     ax.axvline(2.6e-2, color="0.45", linewidth=0.9, linestyle="-.")
-    ax.text(2.6e-2 * 1.15, 0.06, "measured\n2.6 ms", fontsize=6.3, color="0.35", ha="left", va="bottom")
+    ax.text(2.6e-2 * 1.15, 0.06, "measured\n2.6 ms", fontsize=ANNOT, color="0.35", ha="left", va="bottom")
     ax.set_xscale("log")
     ax.set_xticks([1e-5, 1e-4, 1e-3, 1e-2, 1e-1])
     ax.set_xticklabels(["0", "$10^{-4}$", "$10^{-3}$", "$10^{-2}$", "$10^{-1}$"])
     ax.set_xlabel(r"Read skew $\sigma$ (fraction of the epoch)")
+    top = ax.secondary_xaxis("top")
+    top.set_xticks([1e-4, 1e-3, 1e-2, 1e-1]); top.set_xticklabels(["10 µs", "0.1 ms", "1 ms", "10 ms"])
+    top.tick_params(labelsize=ANNOT)
     ax.set_ylabel(ylabel); ax.set_title(title, fontsize=8.5, loc="left")
     utils_mpl.set_y_axis(ax, bnd=[-0.03, 1.08])
-axes[0].legend(loc="center left", bbox_to_anchor=(0.0, 0.55), framealpha=1.0, fontsize=6.5)
+axes[0].legend(loc="center left", bbox_to_anchor=(0.0, 0.55), framealpha=1.0, fontsize=ANNOT)
 for a in axes:
     utils_mpl.set_grid(fig, a)
 fig.savefig("fig_counterpair.pdf", transparent=False)

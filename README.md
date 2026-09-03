@@ -4,7 +4,7 @@
 > witness arm `mcp` everywhere (`make_mcp_loop`, `mcp_epoch`, `mcp_packets`, `MCPLocalizer`,
 > the `"mcp"` key in every sweep JSON); the paper calls the same arm **the ledger** (the
 > receiver ledger). The name is inherited from the retired measurement-control-plane project
-> that still lives under `legacy/`; the ledger is `p4/witness/mcp_fabric_ledger.p4` plus
+> that still lives under `legacy-measurement-control-plane/`; the ledger is `p4/witness/mcp_fabric_ledger.p4` plus
 > `controller/`. Every number in the manuscript traces to `paper/ton/NUMBERS.md`.
 
 > **Research direction verified 2026-08-30.** The original generic attention/bandit thesis, the

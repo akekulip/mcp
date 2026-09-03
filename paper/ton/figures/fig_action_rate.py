@@ -19,7 +19,7 @@ for i, arm in enumerate(ARMS):
     ax.errorbar(x + off, y, yerr=[y - lo, hi - y], color=COLORS[arm], marker=MARKERS[arm],
                 markersize=4.5, linewidth=1.3, capsize=2, elinewidth=0.8, label=LABELS[arm], zorder=3)
 ax.set_xticks(x)
-ax.set_xticklabels([fmt_p(p) if p >= 0.005 or p in (1e-3, 1e-4, 1e-5) else f"${p*1e5:g}\\times10^{{-5}}$" for p in RATES], rotation=30, ha="right", fontsize=7)
+ax.set_xticklabels([fmt_p(p) if p >= 0.005 or p in (1e-3, 1e-4, 1e-5) else f"${p*1e5:g}\\times10^{{-5}}$" for p in RATES], rotation=30, ha="right", fontsize=ANNOT)
 ax.set_xlabel(r"Link loss rate $p$ (rarer faults $\rightarrow$)")
 ax.set_ylabel("Action rate (50 seeds)")
 utils_mpl.set_y_axis(ax, bnd=[-0.03, 1.08])
