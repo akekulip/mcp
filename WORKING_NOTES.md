@@ -2295,3 +2295,28 @@ cost-scaling + exact localization where baselines miss/alias at low loss); it do
 a top-venue application-level result, and now we can say that from evidence, not assertion. The
 top-venue push is complete and negative. Awaiting Philip's call to proceed with the ToN/IMC writeup.
 Nothing on hardware; switch idle; 13 clean Philip-authored commits this session.
+
+## Status (2026-09-03) — silicon evaluation captured on the last switch day
+
+Per Philip ("run additional experiments for evaluation/comparison, we only gave the switch today"),
+captured the silicon detection/localization evidence the paper was missing. Committed 35837cb,
+`SILICON-DETECTION-LOCALIZATION-FIDELITY-2026-09-03.md`, script `p4/hw/loop/silicon_detect_sweep.sh`.
+
+- **Detection fidelity across the loss regime**: the ledger recovers the EXACT injected loss at
+  every rate 1e-2 -> 1e-4 (down to 6 drops in 60,000 packets, exact, twice), ZERO false positives on
+  40k+ clean packets. O(1) detection (exact on first read; no packet accumulation) vs the baselines'
+  ~1/p collapse below 1e-3. This is the silicon anchor for "flat detection to 1e-4."
+- **Localization fidelity**: 50 drops on sublink 2 -> sublink 2 recovers exactly 50, all 7 other
+  sublinks recover exactly 0, downstream hop shows fewer arrivals with no manufactured loss. Exact
+  single-directed-link attribution, zero false attribution.
+
+Two mechanical fixes found while running (banked in the script): the 'S' dispersed injector caps its
+window at 254 (use the uncapped 'A' burst); reg_wit_seq is 16-bit and wraps, so Δseq is taken mod
+65536 with sub-65536 cells. Overhead stays compile-gate (0.14% computed, not a throughput
+measurement -- not cleanly measurable on this loopback testbed). Did NOT re-chase the soak anomaly
+(on unmeasured sublinks, doesn't affect the measured results, already documented) -- prioritized the
+clean positive eval the paper needs. Switch left clean, injectors cleared, gate agent healthy.
+
+The paper (ToN/IMC per the framing memo) now has its silicon anchor: MCP's side of the head-to-head
+is MEASURED, not modelled -- exact per-link loss recovery to 1e-4 with FP=0 and exact localization,
+in the regime where the passive baselines fail.
